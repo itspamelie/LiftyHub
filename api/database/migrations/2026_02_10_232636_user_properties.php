@@ -11,7 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+         Schema::create('user_properties', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->unique()->constrained('users');            $table->decimal('weight',5,2);
+            $table->decimal('stature',5,2);
+            $table->decimal('waist',5,2);
+            $table->decimal('chest',5,2);
+            $table->decimal('hips',5,2);
+            $table->decimal('arms',5,2);
+            $table->decimal('shoulders',5,2);
+            $table->decimal('thighs',5,2);
+            $table->string('objective');
+            $table->foreignId('somatotype_id')->constrained('somatotypes');
+            $table->timestamps();
+        });
     }
 
     /**

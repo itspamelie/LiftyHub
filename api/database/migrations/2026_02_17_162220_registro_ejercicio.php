@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-           Schema::create('payment_details', function (Blueprint $table) {
+          Schema::create('exercise_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->string('name');
-            $table->string('bank');
-            $table->string('card_number');
-            $table->date('expiration_date');
+            $table->foreignId('exercise_id')->constrained('exercises');
+            $table->decimal('weight_lifted',8,2);
+            $table->integer('repetitions');
+            $table->integer('sets');
             $table->timestamps();
         });
     }

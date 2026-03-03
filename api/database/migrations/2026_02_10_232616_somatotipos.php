@@ -11,7 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+                Schema::create('somatotypes', function (Blueprint $table) {
+            $table->id();
+            $table->string('type');
+            $table->string('description');
+            $table->string('file');
+            $table->timestamps();
+        });
     }
 
     /**

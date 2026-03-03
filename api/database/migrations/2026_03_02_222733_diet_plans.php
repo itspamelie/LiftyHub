@@ -11,19 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-Schema::create('monthly_progress', function (Blueprint $table) {
+        Schema::create('diet_plans', function (Blueprint $table) {
     $table->id();
+    $table->foreignId('nutritionist_id')
+          ->constrained('users');
     $table->foreignId('user_id')
-          ->constrained('users')
-          ->onDelete('cascade');
-    $table->year('year');
-    $table->tinyInteger('month_number'); // 1-12
-    $table->decimal('initial_weight', 5, 2);
-    $table->decimal('current_weight', 5, 2);
-    $table->string('observations');
-    $table->string('img');
+          ->constrained('users');
+    $table->text('plan_content');
+    $table->enum('status', ['active', 'completed']);
     $table->timestamps();
-    $table->unique(['user_id', 'year', 'month_number']);
 });
     }
 

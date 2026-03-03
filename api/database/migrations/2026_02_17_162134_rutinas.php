@@ -11,19 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-Schema::create('monthly_progress', function (Blueprint $table) {
+Schema::create('routines', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('user_id')
-          ->constrained('users')
-          ->onDelete('cascade');
-    $table->year('year');
-    $table->tinyInteger('month_number'); // 1-12
-    $table->decimal('initial_weight', 5, 2);
-    $table->decimal('current_weight', 5, 2);
-    $table->string('observations');
+    $table->string('name');
+    $table->string('objective');
+    $table->string('level');
     $table->string('img');
+    $table->foreignId('plan_id')->constrained('plans')->onDelete('cascade');
+    $table->foreignId('somatotype_id')->constrained('somatotypes');
     $table->timestamps();
-    $table->unique(['user_id', 'year', 'month_number']);
 });
     }
 

@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-           Schema::create('payment_details', function (Blueprint $table) {
+            Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->string('name');
-            $table->string('bank');
-            $table->string('card_number');
-            $table->date('expiration_date');
-            $table->timestamps();
+            $table->foreignId('plan_id')->constrained('plans');
+            $table->date('start_date');
+            $table->date('end_date');
+$table->enum('status', ['active', 'expired', 'cancelled'])->default('active');            $table->timestamps();
         });
     }
 

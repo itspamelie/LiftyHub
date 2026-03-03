@@ -11,19 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-Schema::create('monthly_progress', function (Blueprint $table) {
+        Schema::create('exercise_files', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('user_id')
-          ->constrained('users')
+    $table->foreignId('exercise_id')
+          ->constrained('exercises')
           ->onDelete('cascade');
-    $table->year('year');
-    $table->tinyInteger('month_number'); // 1-12
-    $table->decimal('initial_weight', 5, 2);
-    $table->decimal('current_weight', 5, 2);
-    $table->string('observations');
-    $table->string('img');
+    $table->string('file_path');
+    $table->enum('type', ['image', 'video', 'pdf']);
     $table->timestamps();
-    $table->unique(['user_id', 'year', 'month_number']);
 });
     }
 
