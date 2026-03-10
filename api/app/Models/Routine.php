@@ -15,5 +15,10 @@ class Routine extends Model
         'plan_id',
         'somatotype_id'
     ];
-
+      public function  plan(){
+        return $this->hasOne(Plan::class,'id','plan_id');
+    }
+     public function  somatotype(){
+        return $this->hasOne(Somatotype::class,'id','somatotype_id');
+    }
 }

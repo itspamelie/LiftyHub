@@ -14,5 +14,10 @@ class ExerciseRoutine extends Model
         'repetitions',
         'seconds_rest'
     ];
-
+     public function  exercise(){
+        return $this->hasOne(Exercise::class,'id','exercise_id');
+    }
+         public function  routine(){
+        return $this->hasOne(Routine::class,'id','routine_id');
+    }
 }

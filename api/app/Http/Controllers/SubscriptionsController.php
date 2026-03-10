@@ -9,7 +9,7 @@ class SubscriptionsController extends Controller
 {
             public function index()
     {
-         $data = UserPropertie::with(['user', 'plan'])->get();
+         $data = Subscription::with(['user', 'plan'])->get();
 
         //Siempre que hagamos una api enviamos un JSON
         return response()->json([
@@ -35,16 +35,16 @@ class SubscriptionsController extends Controller
           $validated = $request->validate([
             'user_id'=>'required',
             'plan_id'=>'required',
-            'start_date'=>'required|string',
-            'end_date'=>'required',
+            'start_date'=>'required|date',
+            'end_date'=>'required|date',
             'status'=>'required'
         ]);
 
         //metodo si los campos se llaman igual que en la base de datos
-        $data = UserPropertie::create($validated);
+        $data = Subscription::create($validated);
           return response()->json([
             "status"=>"ok",
-            "mesage"=>"Tus propiedades han sido guardadas correctamente.",
+            "mesage"=>"Suscripción renovada correctamente.",
             "data"=>$data
 
         ]);
@@ -55,17 +55,17 @@ class SubscriptionsController extends Controller
      */
     public function show(string $id)
     {
-         $data = UserPropertie::find($id);
+         $data = Subscription::find($id);
         if($data){
             return response()->json([
             "status"=>"ok",
-            "mesage"=>"Propiedades encontradas.",
+            "mesage"=>"Suscripción encontrada.",
             "data"=>$data
         ]);
         }
         return response()->json([
             "status"=>"error",
-            "mesage"=>"Propiedades no encontradas."
+            "mesage"=>"Suscripción no encontrada"
         ],400);
     }
 
@@ -83,24 +83,19 @@ class SubscriptionsController extends Controller
     public function update(Request $request, string $id)
     {
          $validated = $request->validate([
-          'user_id'=>'required',
-            'stature'=>'required|numeric',
-            'waist'=>'required|numeric',
-            'chest'=>'required|numeric',
-            'hips'=>'required|numeric',
-            'arms'=>'required|numeric',
-            'shoulders'=>'required|numeric',
-            'thighs'=>'required|numeric',
-            'objective'=>'required|string',
-            'somatotype_id'=>'required',   
+            'user_id'=>'required',
+            'plan_id'=>'required',
+            'start_date'=>'required|date',
+            'end_date'=>'required|date',
+            'status'=>'required'   
          ]);
 
         //metodo si los campos se llaman igual que en la base de datos
-        $data = UserPropertie::findOrFail($id);
+        $data = Subscription::findOrFail($id);
         $data->update($validated);
           return response()->json([
             "status"=>"ok",
-            "mesage"=>"Propiedades actualizadas correctamente.",
+            "mesage"=>"Suscripción actualizada correctamente.",
             "data"=>$data
 
         ]);
@@ -111,13 +106,13 @@ class SubscriptionsController extends Controller
      */
     public function destroy(string $id)
     {
-         $data = UserPropertie::find($id);
+         $data = Subscription::find($id);
         if($data){
             $data->delete();
         }
         return response()->json([
             "status"=>"ok",
-            "mesage"=>"Propiedades eliminadas correctamente."
+            "mesage"=>"Suscripción eliminada correctamente."
         ]);
     }
 }

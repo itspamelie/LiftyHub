@@ -14,5 +14,10 @@ class ExerciseLog extends Model
         'repetitions',
         'sets'
     ];
-
+     public function  user(){
+        return $this->hasOne(User::class,'id','user_id');
+    }
+         public function  exercise(){
+        return $this->hasOne(Exercise::class,'id','exercise_id');
+    }
 }

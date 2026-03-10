@@ -12,4 +12,8 @@ class DietReview extends Model
         'rating',
         'comment'
     ];
+         public function  dietplan(){
+        return $this->hasOne(DietPlan::class,'id','diet_plan_id');
+    }
+    
 }

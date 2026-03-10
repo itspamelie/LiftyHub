@@ -12,5 +12,7 @@ class DietPlan extends Model
         'plan_content',
         'status'
     ];
-
+         public function  nutritionist(){
+        return $this->hasOne(Nutritionist::class,'id','nutritionist_id');
+    }
 }

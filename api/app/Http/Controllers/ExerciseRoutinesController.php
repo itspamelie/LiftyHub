@@ -8,5 +8,112 @@ use App\Models\ExerciseRoutine;
 
 class ExerciseRoutinesController extends Controller
 {
-    //
+                      public function index()
+    {
+         $data = ExerciseRoutine::with('routine','exercise')->get();
+
+        //Siempre que hagamos una api enviamos un JSON
+        return response()->json([
+            "status"=>"ok",
+            "data"=>$data
+
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //ammount,type,description,user_id,category_id,account_id
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+          $validated = $request->validate([
+            'routine_id'=>'required',
+            'exercise_id'=>'required',
+            'sets'=>'required|numeric',
+            'repetitions'=>'required|numeric',
+            'seconds_rest'=>'required|numeric'
+        ]);
+
+        //metodo si los campos se llaman igual que en la base de datos
+        $data = ExerciseRoutine::create($validated);
+          return response()->json([
+            "status"=>"ok",
+            "mesage"=>"Serie agregada correctamente.",
+            "data"=>$data
+
+        ]);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+         $data = ExerciseRoutine::find($id);
+        if($data){
+            return response()->json([
+            "status"=>"ok",
+            "mesage"=>"Serie encontrada",
+            "data"=>$data
+        ]);
+        }
+        return response()->json([
+            "status"=>"error",
+            "mesage"=>"Serie no encontrada"
+        ],400);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+         $validated = $request->validate([
+            'routine_id'=>'required',
+            'exercise_id'=>'required',
+            'sets'=>'required|numeric',
+            'repetitions'=>'required|numeric',
+            'seconds_rest'=>'required|numeric'
+         ]);
+
+        //metodo si los campos se llaman igual que en la base de datos
+        $data = ExerciseRoutine::findOrFail($id);
+        $data->update($validated);
+          return response()->json([
+            "status"=>"ok",
+            "mesage"=>"Serie actualizada correctamente.",
+            "data"=>$data
+
+        ]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+         $data = ExerciseRoutine::find($id);
+        if($data){
+            $data->delete();
+        }
+        return response()->json([
+            "status"=>"ok",
+            "mesage"=>"Serie eliminada correctamente."
+        ]);
+    }
 }

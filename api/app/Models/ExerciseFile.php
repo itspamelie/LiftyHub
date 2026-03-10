@@ -12,5 +12,8 @@ class ExerciseFile extends Model
         'file_path',
         'type'
     ];
+         public function  exercise(){
+        return $this->hasOne(Exercise::class,'id','exercise_id');
+    }
 
 }

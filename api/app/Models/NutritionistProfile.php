@@ -13,5 +13,7 @@ class NutritionistProfile extends Model
         'profile_pic',
         'bio'
     ];
-
+      public function  user(){
+        return $this->hasOne(User::class,'id','user_id');
+    }
 }
