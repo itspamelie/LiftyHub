@@ -30,6 +30,20 @@ Route::post('/login',[AuthController::class,'login']);
 Route::middleware("jwt")->group(function(){
 Route::resource('users',UsersController::class);
 Route::resource('userStreak',UserStreaksController::class);
+Route::resource('userProperties',UserProperties::class);
+Route::resource('subscriptions',Subscriptions::class);
+Route::resource('somatotypes',SomatotypesController::class);
+Route::resource('routines',RoutinesController::class);
+Route::resource('plans',PlansController::class);
+Route::resource('paymentDetails',PaymentDetailsController::class);
+Route::resource('nutritionistProfiles',NutritionistProfilesController::class);
+Route::resource('monthlyProgress',MonthlyProgressController::class);
+Route::resource('exerciseRoutines',ExerciseRoutinesController::class);
+Route::resource('exerciseLogs',ExerciseLogsController::class);
+Route::resource('exerciseFiles',ExerciseFilesController::class);
+Route::resource('exercise',ExerciseController::class);
+Route::resource('dietReviews',DietReviewsController::class);
+Route::resource('dietPlans',DietPlansController::class);
 
 
 
