@@ -19,6 +19,7 @@ DB::table('routines')->insert([
         'objective' => 'Ganar músculo',
         'level' => 'Principiante',
         'img' => 'rutina1.jpg',
+        'duration' => 60,
         'plan_id' => 1,
         'somatotype_id' => 2
     ],

@@ -35,8 +35,8 @@ export default function ProfileScreen() {
               style={styles.avatar}
             />
 
-            <Text style={styles.name}>David Vega</Text>
-            <Text style={styles.subtitle}>Nuevo Casas Grandes</Text>
+            <Text style={styles.name}>David Laid</Text>
+            <Text style={styles.subtitle}>New York City</Text>
 
           </View>
 

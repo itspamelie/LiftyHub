@@ -38,15 +38,7 @@ export default function TabLayout() {
         }}
       />
 
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Perfil",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
-        }}
-      />
+      
 
       <Tabs.Screen
         name="exercises"
@@ -54,6 +46,16 @@ export default function TabLayout() {
           title: "Ejercicios",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="fitness" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Perfil",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
           ),
         }}
       />
