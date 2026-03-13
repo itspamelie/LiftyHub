@@ -1,62 +1,118 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { Card, CardContent, Typography, Box, TextField, Button } from "@mui/material";
 
-function Login() {
-
+const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    console.log("Email:", email);
-    console.log("Password:", password);
-
-    // aquí luego conectarías con tu API
+    console.log({ email, password });
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
-      
-      <div className="card p-4 shadow" style={{width:"400px"}}>
-        
-        <h3 className="text-center mb-4">Login</h3>
+    <Box
+      sx={{
+        height: "100vh",
+        background: "#1a2035",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}
+    >
+      <Card
+        sx={{
+          width: 360,
+          background: "#202940",
+          borderRadius: "16px",
+          color: "white",
+          boxShadow: "0px 10px 30px rgba(0,0,0,0.4)"
+        }}
+      >
+        <CardContent>
+          <Typography
+            variant="h5"
+            fontWeight="bold"
+            sx={{ mb: 1, textAlign: "center" }}
+          >
+            LiftyHub
+          </Typography>
 
-        <form onSubmit={handleSubmit}>
+          <Typography
+            variant="body2"
+            sx={{ color: "#9ca3af", mb: 3, textAlign: "center" }}
+          >
+            Inicia sesión para continuar
+          </Typography>
 
-          <div className="mb-3">
-            <label className="form-label">Correo</label>
-            <input
-              type="email"
-              className="form-control"
-              placeholder="correo@ejemplo.com"
+          <Box component="form" onSubmit={handleSubmit}>
+
+            <TextField
+              fullWidth
+              label="Correo electrónico"
+              variant="outlined"
+              margin="normal"
               value={email}
-              onChange={(e)=>setEmail(e.target.value)}
-              required
+              onChange={(e) => setEmail(e.target.value)}
+              sx={{
+                input: { color: "white" },
+                label: { color: "#9ca3af" },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#3a4563"
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#3b82f6"
+                  }
+                }
+              }}
             />
-          </div>
 
-          <div className="mb-3">
-            <label className="form-label">Contraseña</label>
-            <input
+            <TextField
+              fullWidth
+              label="Contraseña"
               type="password"
-              className="form-control"
-              placeholder="********"
+              variant="outlined"
+              margin="normal"
               value={password}
-              onChange={(e)=>setPassword(e.target.value)}
-              required
+              onChange={(e) => setPassword(e.target.value)}
+              sx={{
+                input: { color: "white" },
+                label: { color: "#9ca3af" },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#3a4563"
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#3b82f6"
+                  }
+                }
+              }}
             />
-          </div>
 
-          <button className="btn btn-primary w-100">
-            Iniciar sesión
-          </button>
+            <Button
+              fullWidth
+              type="submit"
+              sx={{
+                mt: 3,
+                background: "#3b82f6",
+                color: "white",
+                fontWeight: "bold",
+                padding: "10px",
+                borderRadius: "10px",
+                "&:hover": {
+                  background: "#2563eb"
+                }
+              }}
+            >
+              Iniciar sesión
+            </Button>
 
-        </form>
-
-      </div>
-
-    </div>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
   );
-}
+};
 
 export default Login;
