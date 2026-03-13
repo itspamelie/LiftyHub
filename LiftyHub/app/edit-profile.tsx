@@ -38,12 +38,10 @@ export default function EditProfileScreen() {
           />
 
           <TouchableOpacity style={styles.changePhoto}>
-
             <Ionicons name="camera" size={16} color="white" />
             <Text style={styles.changePhotoText}>
               Cambiar foto
             </Text>
-
           </TouchableOpacity>
 
         </View>
@@ -77,9 +75,9 @@ export default function EditProfileScreen() {
 
         <Text style={styles.section}>Información física</Text>
 
-        <View style={styles.card}>
+        {/* ALTURA */}
 
-          {/* ALTURA */}
+        <View style={styles.card}>
 
           <View style={styles.row}>
 
@@ -99,7 +97,11 @@ export default function EditProfileScreen() {
 
           </View>
 
-          {/* SOMATOTIPO */}
+        </View>
+
+        {/* SOMATOTIPO */}
+
+        <View style={styles.card}>
 
           <View style={styles.rowColumn}>
 
@@ -138,7 +140,11 @@ export default function EditProfileScreen() {
 
           </View>
 
-          {/* OBJETIVO */}
+        </View>
+
+        {/* OBJETIVO */}
+
+        <View style={styles.card}>
 
           <View style={styles.rowColumn}>
 
@@ -187,11 +193,9 @@ export default function EditProfileScreen() {
         {/* BOTÓN GUARDAR */}
 
         <TouchableOpacity style={styles.saveButton}>
-
           <Text style={styles.saveText}>
             Guardar cambios
           </Text>
-
         </TouchableOpacity>
 
       </ScrollView>
@@ -209,9 +213,14 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    padding: spacing.screenPadding,
-    paddingBottom: 40
-  },
+  padding: spacing.screenPadding,
+  paddingBottom: 120
+},
+  divider: {
+  height: 1,
+  backgroundColor: "#2A2A2A",
+  marginHorizontal: 18
+},
 
   editButton: {
     position: "absolute",
@@ -233,11 +242,13 @@ const styles = StyleSheet.create({
   },
 
   avatar: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    marginBottom: 12
-  },
+  width: 180,
+  height: 180,
+  borderRadius: 90,
+  borderWidth: 3,
+  borderColor: colors.background,
+  marginBottom: 12
+},
 
   changePhoto: {
     flexDirection: "row",
@@ -249,38 +260,36 @@ const styles = StyleSheet.create({
   },
 
   changePhotoText: {
-    color: "white",
-    marginLeft: 6,
-    fontWeight: "600"
-  },
+  color: "white",
+  marginLeft: 6,
+  fontWeight: "600",
+  fontSize: 14
+},
 
   section: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    marginBottom: 8,
-    marginTop: 20,
-    fontWeight: "600",
-    textTransform: "uppercase"
-  },
+  color: colors.textSecondary,
+  fontSize: 13,
+  marginBottom: 8,
+  marginTop: 20,
+  fontWeight: "600",
+  textTransform: "uppercase"
+},
 
   card: {
     backgroundColor: colors.card,
     borderRadius: spacing.borderRadius,
-    paddingVertical: 10,
-    marginBottom: 24
+    marginBottom: 20
   },
 
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 18
+    padding: 18
   },
 
   rowColumn: {
-    paddingHorizontal: 16,
-    paddingVertical: 18
+    padding: 18
   },
 
   rowLeft: {
@@ -289,17 +298,17 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    color: colors.text,
-    fontSize: 16,
-    marginLeft: 10
-  },
+  color: colors.text,
+  fontSize: 16,
+  marginLeft: 10
+},
 
-  input: {
-    color: colors.text,
-    fontSize: 16,
-    width: 120,
-    textAlign: "right"
-  },
+ input: {
+  color: colors.text,
+  fontSize: 16,
+  width: 120,
+  textAlign: "right"
+},
 
   selectorContainer: {
     flexDirection: "row",
@@ -308,26 +317,28 @@ const styles = StyleSheet.create({
   },
 
   selectorButton: {
-    backgroundColor: colors.card,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: spacing.borderRadius,
-    marginRight: 10,
-    marginBottom: 10
-  },
-
+  backgroundColor: colors.background,
+  paddingVertical: 10,
+  paddingHorizontal: 16,
+  borderRadius: spacing.borderRadius,
+  marginRight: 10,
+  marginBottom: 10
+},
   selectorButtonActive: {
     backgroundColor: colors.primary
   },
 
-  selectorText: {
-    color: colors.textSecondary,
-    fontWeight: "600"
-  },
+selectorText: {
+  color: colors.textSecondary,
+  fontSize: 14,
+  fontWeight: "600"
+},
 
   selectorTextActive: {
-    color: "white"
-  },
+  color: "white",
+  fontSize: 14,
+  fontWeight: "600"
+},
 
   saveButton: {
     backgroundColor: colors.primary,
@@ -338,9 +349,9 @@ const styles = StyleSheet.create({
   },
 
   saveText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold"
-  }
+  color: "white",
+  fontSize: 16,
+  fontWeight: "bold"
+}
 
 });
