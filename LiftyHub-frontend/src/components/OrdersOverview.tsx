@@ -1,98 +1,86 @@
 import React from "react";
 import { Card, CardContent, Typography, Box } from "@mui/material";
 
-interface OrderEvent {
-  title: string;
-  date: string;
-  color: string;
+interface Props{
+ dashboard:any
 }
 
-const events: OrderEvent[] = [
-  {
-    title: "$2400, Design changes",
-    date: "22 DEC 7:20 PM",
-    color: "#4caf50"
-  },
-  {
-    title: "New order #1832412",
-    date: "21 DEC 11 PM",
-    color: "#f44336"
-  },
-  {
-    title: "Server payments for April",
-    date: "21 DEC 9:34 PM",
-    color: "#2196f3"
-  },
-  {
-    title: "New card added for order #4395133",
-    date: "20 DEC 2:20 AM",
-    color: "#ff9800"
-  },
-  {
-    title: "Unlock packages for development",
-    date: "18 DEC 4:54 AM",
-    color: "#9c27b0"
-  }
-];
+const OrdersOverview:React.FC<Props> = ({dashboard}) => {
 
-const OrdersOverview: React.FC = () => {
-  return (
-    <Card
-      sx={{
-        background: "#202940",
-        color: "white",
-        borderRadius: "16px"
-      }}
-    >
-      <CardContent>
+const actividad = dashboard?.actividad || []
 
-        <Typography variant="h6" fontWeight="bold">
-          Orders Overview
-        </Typography>
+return (
 
-        <Typography variant="body2" sx={{ color: "#8f9bb3", mb: 3 }}>
-          +24% this month
-        </Typography>
+<Card
+sx={{
+background:"#202940",
+color:"white",
+borderRadius:"16px"
+}}
+>
 
-        {events.map((event, index) => (
-          <Box
-            key={index}
-            display="flex"
-            alignItems="center"
-            mb={2}
-          >
+<CardContent>
 
-            <Box
-              sx={{
-                width: 10,
-                height: 10,
-                borderRadius: "50%",
-                background: event.color,
-                mr: 2
-              }}
-            />
+<Typography variant="h6" fontWeight="bold">
+Actividad reciente
+</Typography>
 
-            <Box>
+<Typography variant="body2" sx={{color:"#8f9bb3", mb:2}}>
+Últimas suscripciones registradas
+</Typography>
 
-              <Typography variant="body2">
-                {event.title}
-              </Typography>
+{actividad.map((act:any,index:number)=>{
 
-              <Typography
-                variant="caption"
-                sx={{ color: "#8f9bb3" }}
-              >
-                {event.date}
-              </Typography>
+const fecha = new Date(act.created_at)
 
-            </Box>
+return(
 
-          </Box>
-        ))}
+<Box
+key={index}
+sx={{
+display:"flex",
+alignItems:"center",
+mb:2
+}}
+>
 
-      </CardContent>
-    </Card>
-  );
-};
+<Box
+sx={{
+width:10,
+height:10,
+borderRadius:"50%",
+background:"#4caf50",
+mr:2
+}}
+/>
 
-export default OrdersOverview;
+<Box>
+
+<Typography variant="body2">
+{act.usuario} se suscribió a {act.plan}
+</Typography>
+
+<Typography
+variant="caption"
+sx={{color:"#8f9bb3"}}
+>
+{fecha.toLocaleString()}
+</Typography>
+
+</Box>
+
+</Box>
+
+)
+
+})}
+
+</CardContent>
+
+</Card>
+
+)
+
+}
+
+export default OrdersOverview

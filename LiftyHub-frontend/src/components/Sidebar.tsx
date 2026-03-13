@@ -8,14 +8,14 @@ import {
   Typography,
   Button
 } from "@mui/material";
-
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import TableChartIcon from "@mui/icons-material/TableChart";
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import PersonIcon from "@mui/icons-material/Person";
-import LoginIcon from "@mui/icons-material/Login";
-import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
+import GroupIcon from "@mui/icons-material/Group";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+import SportsGymnasticsIcon from "@mui/icons-material/SportsGymnastics";
+import AnalyticsIcon from "@mui/icons-material/Analytics";
+import { Link } from "react-router-dom";
 
 export default function Sidebar() {
   const drawerWidth = 270;
@@ -55,66 +55,74 @@ export default function Sidebar() {
           </Typography>
         </Box>
 
-        <List>
+       <List>
 
-          <ListItemButton
-            sx={{
-              background:
-                "linear-gradient(90deg,#3a8dff,#5da8ff)",
-              borderRadius: "12px",
-              mb: 1
-            }}
-          >
-            <ListItemIcon sx={{ color: "white" }}>
-              <DashboardIcon />
-            </ListItemIcon>
+  {/* Dashboard */}
+  <ListItemButton
+    component={Link}
+    to="/dashboard"
+    sx={{
+      background: "linear-gradient(90deg,#3a8dff,#5da8ff)",
+      borderRadius: "12px",
+      mb: 1
+    }}
+  >
+    <ListItemIcon sx={{ color: "white" }}>
+      <DashboardIcon />
+    </ListItemIcon>
 
-            <ListItemText primary="Dashboard" />
-          </ListItemButton>
+    <ListItemText primary="Dashboard" />
+  </ListItemButton>
 
-          <ListItemButton>
-            <ListItemIcon sx={{ color: "white" }}>
-              <TableChartIcon />
-            </ListItemIcon>
-            <ListItemText primary="Usuarios" />
-          </ListItemButton>
+  {/* Usuarios */}
+  <ListItemButton component={Link} to="/dashboard/users">
+    <ListItemIcon sx={{ color: "white" }}>
+  <GroupIcon />
+</ListItemIcon>
+    <ListItemText primary="Usuarios" />
+  </ListItemButton>
 
-          <ListItemButton>
-            <ListItemIcon sx={{ color: "white" }}>
-              <ReceiptLongIcon />
-            </ListItemIcon>
-            <ListItemText primary="Billing" />
-          </ListItemButton>
+  {/* Planes */}
+  <ListItemButton component={Link} to="/dashboard/plans">
+    <ListItemIcon sx={{ color: "white" }}>
+  <AssignmentIcon />
+</ListItemIcon>
+    <ListItemText primary="Planes" />
+  </ListItemButton>
 
-          <ListItemButton>
-            <ListItemIcon sx={{ color: "white" }}>
-              <NotificationsIcon />
-            </ListItemIcon>
-            <ListItemText primary="Notifications" />
-          </ListItemButton>
+  {/* Nutriólogos */}
+  <ListItemButton component={Link} to="/dashboard/nutritionists">
+    <ListItemIcon sx={{ color: "white" }}>
+  <RestaurantIcon />
+</ListItemIcon>
+    <ListItemText primary="Nutriólogos" />
+  </ListItemButton>
 
-          <ListItemButton>
-            <ListItemIcon sx={{ color: "white" }}>
-              <PersonIcon />
-            </ListItemIcon>
-            <ListItemText primary="Profile" />
-          </ListItemButton>
+  {/* Rutinas */}
+  <ListItemButton component={Link} to="/dashboard/routines">
+    <ListItemIcon sx={{ color: "white" }}>
+  <FitnessCenterIcon />
+</ListItemIcon>
+    <ListItemText primary="Rutinas" />
+  </ListItemButton>
 
-          <ListItemButton>
-            <ListItemIcon sx={{ color: "white" }}>
-              <LoginIcon />
-            </ListItemIcon>
-            <ListItemText primary="Sign In" />
-          </ListItemButton>
+  {/* Ejercicios */}
+  <ListItemButton component={Link} to="/dashboard/exercises">
+    <ListItemIcon sx={{ color: "white" }}>
+  <SportsGymnasticsIcon />
+</ListItemIcon>
+    <ListItemText primary="Ejercicios" />
+  </ListItemButton>
 
-          <ListItemButton>
-            <ListItemIcon sx={{ color: "white" }}>
-              <AppRegistrationIcon />
-            </ListItemIcon>
-            <ListItemText primary="Sign Up" />
-          </ListItemButton>
+  {/* Somatotipos */}
+  <ListItemButton component={Link} to="/dashboard/somatotypes">
+    <ListItemIcon sx={{ color: "white" }}>
+  <AnalyticsIcon />
+</ListItemIcon>
+    <ListItemText primary="Somatotipos" />
+  </ListItemButton>
 
-        </List>
+</List>
       </Box>
 
       {/* Botón inferior */}
@@ -129,7 +137,9 @@ export default function Sidebar() {
             fontWeight: "bold"
           }}
         >
-          ghola
+          <Link className="nav-link text-light" to="/">
+              Ir al Home
+            </Link>
         </Button>
       </Box>
     </Drawer>

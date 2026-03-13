@@ -12,41 +12,21 @@ import {
   LinearProgress
 } from "@mui/material";
 
-interface Project {
+interface Plan {
   name: string;
-  members: number;
-  budget: string;
-  completion: number;
+  usuarios: number;
+  ingresos: number;
+  crecimiento: number;
 }
 
-const projects: Project[] = [
-  {
-    name: "Soft UI XD Version",
-    members: 4,
-    budget: "$14,000",
-    completion: 60
-  },
-  {
-    name: "Add Progress Track",
-    members: 2,
-    budget: "$3,000",
-    completion: 10
-  },
-  {
-    name: "Fix Platform Errors",
-    members: 2,
-    budget: "Not set",
-    completion: 100
-  },
-  {
-    name: "Launch Mobile App",
-    members: 4,
-    budget: "$20,500",
-    completion: 100
-  }
-];
+interface Props {
+  dashboard: any;
+}
 
-const ProjectsTable: React.FC = () => {
+const ProjectsTable: React.FC<Props> = ({ dashboard }) => {
+
+  const planes: Plan[] = dashboard?.planes || [];
+
   return (
     <Card
       sx={{
@@ -58,11 +38,11 @@ const ProjectsTable: React.FC = () => {
       <CardContent>
 
         <Typography variant="h6" fontWeight="bold">
-          Projects
+          Planes
         </Typography>
 
         <Typography variant="body2" sx={{ color: "#8f9bb3", mb: 2 }}>
-          30 done this month
+          Planes disponibles en la plataforma
         </Typography>
 
         <Table>
@@ -71,19 +51,19 @@ const ProjectsTable: React.FC = () => {
             <TableRow>
 
               <TableCell sx={{ color: "#8f9bb3" }}>
-                Companies
+                Nombre
               </TableCell>
 
               <TableCell sx={{ color: "#8f9bb3" }}>
-                Members
+                Usuarios Suscritos
               </TableCell>
 
               <TableCell sx={{ color: "#8f9bb3" }}>
-                Budget
+                Ingresos
               </TableCell>
 
               <TableCell sx={{ color: "#8f9bb3" }}>
-                Completion
+                Crecimiento
               </TableCell>
 
             </TableRow>
@@ -91,48 +71,53 @@ const ProjectsTable: React.FC = () => {
 
           <TableBody>
 
-            {projects.map((project, index) => (
-              <TableRow key={index}>
+            {planes.map((plan, index) => {
 
-                <TableCell sx={{ color: "white" }}>
-                  {project.name}
-                </TableCell>
 
-                <TableCell sx={{ color: "white" }}>
-                  {project.members}
-                </TableCell>
+              return (
+                <TableRow key={index}>
 
-                <TableCell sx={{ color: "white" }}>
-                  {project.budget}
-                </TableCell>
+                  <TableCell sx={{ color: "white" }}>
+                    {plan.name}
+                  </TableCell>
 
-                <TableCell>
+                  <TableCell sx={{ color: "white" }}>
+                    {plan.usuarios}
+                  </TableCell>
 
-                  <Box width="100%">
+                  <TableCell sx={{ color: "white" }}>
+                    ${plan.ingresos.toLocaleString()}
+                  </TableCell>
 
-                    <Typography
-                      variant="body2"
-                      sx={{ color: "#8f9bb3" }}
-                    >
-                      {project.completion}%
-                    </Typography>
+                  <TableCell>
 
-                    <LinearProgress
-                      variant="determinate"
-                      value={project.completion}
-                      sx={{
-                        mt: 1,
-                        height: 6,
-                        borderRadius: 5
-                      }}
-                    />
+                    <Box width="100%">
 
-                  </Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "#8f9bb3" }}
+                      >
+                         {Math.round(plan.crecimiento)}%
+                      </Typography>
 
-                </TableCell>
+                      <LinearProgress
+                        variant="determinate"
+                         value={Math.abs(Math.round(plan.crecimiento))}
+                        sx={{
+                          mt: 1,
+                          height: 6,
+                          borderRadius: 5
+                        }}
+                      />
 
-              </TableRow>
-            ))}
+                    </Box>
+
+                  </TableCell>
+
+                </TableRow>
+              );
+
+            })}
 
           </TableBody>
 

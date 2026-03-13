@@ -1,118 +1,217 @@
-import React, { useState } from "react";
-import { Card, CardContent, Typography, Box, TextField, Button } from "@mui/material";
+import { useState } from "react"
+import React from "react"
+import Swal from "sweetalert2"
+import { Navigate } from "react-router-dom"
 
-const Login: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+function isTokenExpired(token: string) {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]))
+    const now = Date.now() / 1000
+    return payload.exp < now
+  } catch {
+    return true
+  }
+}
+export default function Login(){
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log({ email, password });
-  };
+    
 
-  return (
-    <Box
-      sx={{
-        height: "100vh",
-        background: "#1a2035",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }}
-    >
-      <Card
-        sx={{
-          width: 360,
-          background: "#202940",
-          borderRadius: "16px",
-          color: "white",
-          boxShadow: "0px 10px 30px rgba(0,0,0,0.4)"
-        }}
-      >
-        <CardContent>
-          <Typography
-            variant="h5"
-            fontWeight="bold"
-            sx={{ mb: 1, textAlign: "center" }}
-          >
-            LiftyHub
-          </Typography>
+const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [email, setEmail] = useState<string>("admin@example.com")
+  const [password, setPassword] = useState<string>("123")
+  const token = localStorage.getItem("token")
 
-          <Typography
-            variant="body2"
-            sx={{ color: "#9ca3af", mb: 3, textAlign: "center" }}
-          >
-            Inicia sesión para continuar
-          </Typography>
+  if (token && !isTokenExpired(token)) {
+    return <Navigate to="/dashboard" replace />
+  }
 
-          <Box component="form" onSubmit={handleSubmit}>
+  if (token && isTokenExpired(token)) {
+    localStorage.clear()
+  }
 
-            <TextField
-              fullWidth
-              label="Correo electrónico"
-              variant="outlined"
-              margin="normal"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              sx={{
-                input: { color: "white" },
-                label: { color: "#9ca3af" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#3a4563"
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#3b82f6"
-                  }
-                }
-              }}
-            />
 
-            <TextField
-              fullWidth
-              label="Contraseña"
-              type="password"
-              variant="outlined"
-              margin="normal"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              sx={{
-                input: { color: "white" },
-                label: { color: "#9ca3af" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#3a4563"
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#3b82f6"
-                  }
-                }
-              }}
-            />
 
-            <Button
-              fullWidth
-              type="submit"
-              sx={{
-                mt: 3,
-                background: "#3b82f6",
-                color: "white",
-                fontWeight: "bold",
-                padding: "10px",
-                borderRadius: "10px",
-                "&:hover": {
-                  background: "#2563eb"
-                }
-              }}
-            >
-              Iniciar sesión
-            </Button>
+const submit = async (e: React.FormEvent) => {
+        e.preventDefault()
+    try {
+      const res = await fetch("http://localhost:8000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-          </Box>
-        </CardContent>
-      </Card>
-    </Box>
-  );
-};
+        body: JSON.stringify({
+          email: email,
+          password: password
+        }),
 
-export default Login;
+      });
+
+      const data = await res.json()
+      console.log("RESPUESTA", data);
+
+      if (res.ok && data.token) {
+
+        localStorage.setItem("token", data.token)
+        localStorage.setItem("user", JSON.stringify(data.user))
+
+        if (data.user.role === "user" || data.user.role === "nutritionist") {
+          <Navigate to="/Home" replace />
+        } else {
+          <Navigate to="/Dashboard" replace />
+        }
+
+      } else {
+Swal.fire({
+  icon: "error",
+  title: "Credenciales inválidas",
+  text: "El correo o la contraseña no son correctos",
+  background: "#0f172a",
+  color: "#ffffff",
+  confirmButtonColor: "#2563eb",
+  confirmButtonText: "Intentar de nuevo"
+})
+      }
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+return(
+
+<div className="login-page">
+
+{/* HEADER */}
+
+<header className="login-header">
+
+<div className="logo">
+
+<span className="logo-icon">🟦</span>
+<span className="logo-text">LiftyHub</span>
+
+</div>
+
+</header>
+
+
+{/* LOGIN CARD */}
+
+<div className="login-container">
+<div className="login-card">
+
+<h2 className="text-center title">
+Iniciar Sesión
+</h2>
+
+<p className="text-center subtitle">
+¡Bienvenido de nuevo! Te hemos extrañado.
+</p>
+
+
+{/* BOTONES */}
+<div className="social-buttons">
+
+<button className="btn social-btn text-white w-100 d-flex align-items-center justify-content-center gap-2">
+
+<i className="bi bi-google text-white"></i>
+
+Iniciar con Google
+
+</button>
+
+<button className="btn social-btn w-100  text-white d-flex align-items-center justify-content-center gap-2">
+
+<i className="bi bi-apple text-white"></i>
+
+Iniciar con Apple
+
+</button>
+</div>
+
+{/* DIVIDER */}
+    <form onSubmit={submit}>
+
+<div className="divider">
+<span>O</span>
+</div>
+
+
+{/* EMAIL */}
+
+<input
+type="email"
+className="login-input"
+placeholder="correo@ejemplo.com"
+value={email}
+onChange={(e)=>setEmail(e.target.value)}
+/>
+
+
+{/* PASSWORD */}
+
+<div className="password-box">
+
+<input
+type={showPassword ? "text":"password"}
+className="login-input"
+placeholder="Contraseña"
+value={password}
+onChange={(e)=>setPassword(e.target.value)}
+/>
+
+<span
+className="eye"
+onClick={()=>setShowPassword(!showPassword)}
+>
+👁
+</span>
+
+
+</div>
+
+
+{/* OPCIONES */}
+
+<div className="login-options">
+
+<div className="form-check">
+
+<input
+className="form-check-input cursor-pointer"
+type="checkbox"
+id="recordarme"
+/>
+
+<label
+className="form-check-label text-secondary "
+htmlFor="recordarme"
+>
+Recordarme
+</label>
+
+</div>
+
+<a className="text-primary small cursor-pointer">
+¿Olvidaste tu contraseña?
+</a>
+
+</div>
+
+
+<button className="login-button"  type="submit">
+Iniciar Sesión
+</button>
+</form>
+
+
+</div>
+
+</div>
+
+</div>
+
+)
+
+}
