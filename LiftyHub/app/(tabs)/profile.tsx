@@ -3,16 +3,40 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import ProgressCard from "@/src/components/ProgressCard";
 import InfoStatCard from "@/src/components/InfoStatCard";
+import { router } from "expo-router";
 
 export default function ProfileScreen() {
+// Simula datos que vendrán del backend
+// Simula datos que vendrán del backend
+// Simula datos que vendrán del backend
+  const profile = {
+  name: "David Vega",
+  age: 24,
+  avatar: require("@/src/assets/defaultd.png"),
+
+  routinesCount: 24,
+  weight: 78,
+  streak: 12,
+
+  height: 1.78,
+  somatotype: "Mesomorfo",
+  goal: "Ganar músculo"
+};
+// Simula datos que vendrán del backend
+// Simula datos que vendrán del backend
+// Simula datos que vendrán del backend
+
   return (
 
     <View style={styles.container}>
 
       {/* BOTÓN EDITAR */}
-      <TouchableOpacity style={styles.editButton}>
-        <Ionicons name="pencil" size={20} color="white" />
-      </TouchableOpacity>
+     <TouchableOpacity
+  style={styles.editButton}
+  onPress={() => router.push("/edit-profile")}
+>
+  <Ionicons name="pencil" size={20} color="white" />
+</TouchableOpacity>
 
       <ScrollView>
 
@@ -31,12 +55,12 @@ export default function ProfileScreen() {
           <View style={styles.header}>
 
             <Image
-              source={require("@/src/assets/defaultd.png")}
+              source={profile.avatar}
               style={styles.avatar}
             />
 
-            <Text style={styles.name}>David Laid</Text>
-            <Text style={styles.subtitle}>New York City</Text>
+            <Text style={styles.name}>{profile.name}</Text>
+            <Text style={styles.subtitle}>{profile.age} años</Text>
 
           </View>
 
@@ -45,19 +69,19 @@ export default function ProfileScreen() {
 
             <View style={styles.stat}>
               <Ionicons name="barbell" size={24} color={colors.text} />
-              <Text style={styles.statNumber}>24</Text>
+              <Text style={styles.statNumber}>{profile.routinesCount}</Text>
               <Text style={styles.statLabel}>Rutinas</Text>
             </View>
 
             <View style={styles.stat}>
               <Ionicons name="scale" size={24} color={colors.text} />
-              <Text style={styles.statNumber}>80 kg</Text>
+              <Text style={styles.statNumber}>{profile.weight} kg</Text>
               <Text style={styles.statLabel}>Peso</Text>
             </View>
 
             <View style={styles.stat}>
               <Ionicons name="flame" size={24} color={colors.text} />
-              <Text style={styles.statNumber}>12</Text>
+              <Text style={styles.statNumber}>{profile.streak}</Text>
               <Text style={styles.statLabel}>Racha</Text>
             </View>
 
@@ -79,25 +103,25 @@ export default function ProfileScreen() {
             <InfoStatCard
               icon="resize"
               label="Altura"
-              value="1.78 m"
+              value={`${profile.height} m`}
             />
 
             <InfoStatCard
               icon="scale"
               label="Peso"
-              value="80 kg"
+              value={`${profile.weight} kg`}
             />
 
             <InfoStatCard
               icon="body"
               label="Somatotipo"
-              value="Mesomorfo"
+              value={profile.somatotype}
             />
 
             <InfoStatCard
               icon="flag"
               label="Objetivo"
-              value="Ganar músculo"
+              value={profile.goal}
             />
 
           </View>
@@ -109,6 +133,10 @@ export default function ProfileScreen() {
     </View>
   );
 }
+
+// -------- ESTILOS ---------
+// -------- ESTILOS ---------
+// -------- ESTILOS ---------
 
 const styles = StyleSheet.create({
 
@@ -158,12 +186,13 @@ const styles = StyleSheet.create({
 
   name: {
     color: colors.text,
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold"
   },
 
   subtitle: {
     color: colors.textSecondary,
+    fontSize: 14,
     marginTop: 4
   },
 
@@ -172,30 +201,32 @@ const styles = StyleSheet.create({
     borderRadius: spacing.borderRadius,
     padding: 20,
     flexDirection: "row",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    marginTop: 15
   },
 
   stat: {
-    alignItems: "center"
+    alignItems: "center",
+    gap: 4
   },
 
   statNumber: {
     color: colors.text,
     fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 6
+    fontWeight: "bold"
   },
 
   statLabel: {
     color: colors.textSecondary,
-    marginTop: 4
+    fontSize: 13
   },
 
   title: {
     color: colors.text,
     fontSize: 20,
     fontWeight: "bold",
-    marginTop: 20
+    marginTop: 20,
+    marginBottom: 5
   },
 
   infoGrid: {
@@ -206,3 +237,7 @@ const styles = StyleSheet.create({
   }
 
 });
+
+// -------- ESTILOS ---------
+// -------- ESTILOS ---------
+// -------- ESTILOS ---------

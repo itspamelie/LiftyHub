@@ -47,7 +47,6 @@ export default function ProgressCard({
     </View>
   );
 }
-
 const styles = StyleSheet.create({
 
   card: {
@@ -59,7 +58,8 @@ const styles = StyleSheet.create({
 
   title: {
     color: colors.text,
-    fontWeight: "600",
+    fontSize: 20,
+    fontWeight: "bold",
     marginBottom: 16
   },
 
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
 
   week: {
     color: colors.textSecondary,
-    fontSize: 12
+    fontSize: 13
   },
 
   stats: {
@@ -92,17 +92,19 @@ const styles = StyleSheet.create({
   },
 
   stat: {
-    alignItems: "center"
+    alignItems: "center",
+    gap: 2
   },
 
   number: {
     color: colors.text,
+    fontSize: 18,
     fontWeight: "bold"
   },
 
   label: {
     color: colors.textSecondary,
-    fontSize: 12
+    fontSize: 13
   }
 
 });
