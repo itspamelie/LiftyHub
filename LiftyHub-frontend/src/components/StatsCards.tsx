@@ -3,9 +3,13 @@ import React from "react";
 
 interface StatCardProps {
   title: string;
-  value: string;
+  value: number | string;
   subtitle: string;
   color: string;
+}
+
+interface StatsCardsProps {
+  dashboard: any;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -59,7 +63,8 @@ const StatCard: React.FC<StatCardProps> = ({
   );
 };
 
-const StatsCards: React.FC = () => {
+const StatsCards: React.FC<StatsCardsProps> = ({ dashboard }) => {
+
   return (
     <Box
       sx={{
@@ -70,32 +75,33 @@ const StatsCards: React.FC = () => {
       }}
     >
       <StatCard
-        title="Bookings"
-        value="281"
-        subtitle="+55% than last week"
+        title="Suscripciones"
+        value={dashboard?.stats?.suscripciones ?? 0}
+        subtitle="Suscripciones activas"
         color="linear-gradient(45deg,#1a73e8,#64b5f6)"
       />
 
       <StatCard
-        title="Today's Users"
-        value="2,300"
-        subtitle="+3% than last month"
+        title="Usuarios"
+        value={dashboard?.stats?.usuarios ?? 0}
+        subtitle="Registrados en la app"
         color="linear-gradient(45deg,#1a73e8,#64b5f6)"
       />
 
       <StatCard
-        title="Revenue"
-        value="34k"
-        subtitle="+1% than yesterday"
+        title="Ingresos"
+value={`$${dashboard?.stats?.ingresos ?? 0}`}
+        subtitle="De las suscripciones"
         color="linear-gradient(45deg,#43a047,#66bb6a)"
       />
 
       <StatCard
-        title="Followers"
-        value="+91"
-        subtitle="Just updated"
+        title="Rutinas"
+        value={dashboard?.stats?.rutinas ?? 0}
+        subtitle="Registrados"
         color="linear-gradient(45deg,#e91e63,#ff6090)"
       />
+
     </Box>
   );
 };

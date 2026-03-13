@@ -21,6 +21,7 @@ use App\Http\Controllers\SubscriptionsController;
 use App\Http\Controllers\UserPropertiesController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\UserStreaksController;
+use App\Http\Controllers\DashboardController;
 
 
 //RUTA DEL LOGIN
@@ -44,7 +45,7 @@ Route::resource('exerciseFiles',ExerciseFilesController::class);
 Route::resource('exercise',ExerciseController::class);
 Route::resource('dietReviews',DietReviewsController::class);
 Route::resource('dietPlans',DietPlansController::class);
-
+Route::get('/dashboard', [DashboardController::class, 'stats']);
 
 
 });

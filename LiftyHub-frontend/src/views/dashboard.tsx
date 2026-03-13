@@ -1,11 +1,27 @@
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavbar";
-import StatsCards from "../components/StatsCards";
-import ChartsRow from "../components/ChartsRow";
-import ProjectsTable from "../components/ProjectsTable";
-import OrdersOverview from "../components/OrdersOverview";
 import { Box } from "@mui/material";
+import { Outlet, Navigate } from "react-router-dom";
+
+function isTokenExpired(token: string) {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]))
+    const now = Date.now() / 1000
+    return payload.exp < now
+  } catch {
+    return true
+  }
+}
 export default function Dashboard() {
+
+
+  const token = localStorage.getItem("token")
+  const user = localStorage.getItem("user")
+
+  if (!token || !user || isTokenExpired(token)) {
+    localStorage.clear()
+    return <Navigate to="/login" replace />
+  }
+  
   return (
     <Box
       sx={{
@@ -14,41 +30,27 @@ export default function Dashboard() {
         backgroundColor: "#1a2035"
       }}
     >
+      <Sidebar />
+      <Outlet />
+    </Box>
+  );
+
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        backgroundColor: "#1a2035"
+      }}
+    >
+
       {/* Sidebar */}
       <Sidebar />
 
-      {/* Contenido */}
-      <Box
-        sx={{
-          flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          backgroundColor: "#1a2035"
-        }}
-      >
-        <TopNavbar />
+      {/* Aquí se renderiza MainDashboard */}
+      <Outlet />
 
-        <Box sx={{ p: 3 }}>
-          <StatsCards />
-
-          <ChartsRow />
-
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "2fr 1fr",
-              gap: 3,
-              mt: 3
-            }}
-          >
-            <ProjectsTable />
-            <OrdersOverview />
-          </Box>
-        </Box>
-      </Box>
     </Box>
-
-
-
   );
 }
