@@ -3,10 +3,19 @@ import RoutineCard from "@/src/components/RoutineCard";
 import FilterButton from "@/src/components/FilterButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import { Picker } from '@react-native-picker/picker';
+import { useState, useRef } from "react";
+import { Keyboard } from "react-native";
 
-
+const defaultImages = [
+  "https://images.unsplash.com/photo-1599058917765-a780eda07a3e",
+  "https://images.unsplash.com/photo-1517836357463-d25dfeac3438",
+  "https://images.unsplash.com/photo-1574680178050-55c6a6a96e0a",
+  "https://images.unsplash.com/photo-1546483875-ad9014c88eba",
+  "https://images.unsplash.com/photo-1518611012118-696072aa579a"
+];
+const getRandomImage = () => {
+  return defaultImages[Math.floor(Math.random() * defaultImages.length)];
+};
 
 // ---------------------- TIPO ----------------------
 type Routine = {
@@ -21,8 +30,11 @@ type Routine = {
   somatotype_id: number;
 };
 
+// ---------------------- CATEGORÍAS ----------------------
+const categories = ["Fuerza", "Movilidad", "Cardio", "HIIT", "Full Body"];
+
 // ---------------------- FILTROS ----------------------
-const filters = ["Todo", "Fuerza", "Movilidad", "Cardio", "HIIT", "Core"];
+const filters = ["Todo", ...categories];
 const routinesData: Routine[] = [
   {
     id: 1,
@@ -37,34 +49,34 @@ const routinesData: Routine[] = [
   },
   {
     id: 2,
-    name: "Deltoides",
-    category: "Fuerza",
-    objective: "Aumentar fuerza hombros",
-    duration: 60,
-    level: "Moderado",
-    img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61",
+    name: "HIIT explosivo",
+    category: "HIIT",
+    objective: "Quemar grasa",
+    duration: 25,
+    level: "Intermedio",
+    img: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438",
     plan_id: 1,
     somatotype_id: 1
   },
   {
     id: 3,
-    name: "Espalda",
-    category: "Fuerza",
-    objective: "Fortalecer espalda",
-    duration: 50,
-    level: "Intermedio",
-    img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1",
+    name: "Movilidad cadera",
+    category: "Movilidad",
+    objective: "Mejorar movilidad",
+    duration: 15,
+    level: "Principiante",
+    img: "https://images.unsplash.com/photo-1574680178050-55c6a6a96e0a",
     plan_id: 1,
     somatotype_id: 3
   },
   {
     id: 4,
-    name: "Pecho",
-    category: "Fuerza",
-    objective: "Aumentar fuerza pecho",
-    duration: 45,
+    name: "Cardio ligero",
+    category: "Cardio",
+    objective: "Resistencia",
+    duration: 30,
     level: "Principiante",
-    img: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438",
+    img: "https://images.unsplash.com/photo-1546483875-ad9014c88eba",
     plan_id: 1,
     somatotype_id: 2
   }
@@ -73,9 +85,11 @@ const routinesData: Routine[] = [
 // ---------------------- COMPONENTE ----------------------
 export default function RoutinesScreen() {
 
+  const listRef = useRef<FlatList>(null);
   const [routines, setRoutines] = useState<Routine[]>(routinesData);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("Todo");
+  const [search, setSearch] = useState("");
   const [newRoutine, setNewRoutine] = useState<Omit<Routine, "id">>({
   name: "",
   category: "",
@@ -87,20 +101,36 @@ export default function RoutinesScreen() {
   somatotype_id: 0
 });
 
-const filteredRoutines =
-  selectedFilter === "Todo"
-    ? routines
-    : routines.filter((routine) => routine.category === selectedFilter);
+const filteredRoutines = routines.filter((routine) => {
+
+  const matchCategory =
+    selectedFilter === "Todo" || routine.category === selectedFilter;
+
+  const matchSearch =
+    routine.name.toLowerCase().includes(search.toLowerCase());
+
+  return matchCategory && matchSearch;
+
+});
 
   return (
     <View style={{ flex: 1 }}>
       {/* FLATLIST PRINCIPAL */}
       <FlatList
-        style={styles.container}
-        data={filteredRoutines}
-        keyboardShouldPersistTaps="handled"
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.content}
+      ref={listRef}
+  style={styles.container}
+  data={filteredRoutines}
+  keyExtractor={(item) => item.id.toString()}
+  contentContainerStyle={styles.content}
+  ListEmptyComponent={
+  <View style={styles.emptyContainer}>
+    <Ionicons name="barbell-outline" size={60} color={colors.textSecondary} />
+    <Text style={styles.emptyTitle}>No tienes rutinas aún</Text>
+    <Text style={styles.emptyText}>
+      Crea tu primera rutina tocando el botón +
+    </Text>
+  </View>
+}
         ListHeaderComponent={
           <>
             {/* HEADER */}
@@ -109,10 +139,12 @@ const filteredRoutines =
               <Text style={styles.subtitle}>Enfocadas en tu progreso</Text>
 
               <TextInput
-                placeholder="Buscar rutinas..."
-                placeholderTextColor={colors.textSecondary}
-                style={styles.search}
-              />
+  placeholder="Buscar rutinas..."
+  placeholderTextColor={colors.textSecondary}
+  style={styles.search}
+  value={search}
+  onChangeText={setSearch}
+/>
 
               {/* BOTÓN PARA ABRIR MODAL */}
               <TouchableOpacity
@@ -128,7 +160,7 @@ const filteredRoutines =
               data={filters}
               horizontal
               showsHorizontalScrollIndicator={false}
-              keyExtractor={(item, index) => index.toString()}
+              keyExtractor={(item) => item}
               style={styles.filters}
 
               renderItem={({ item }) => (
@@ -144,9 +176,13 @@ const filteredRoutines =
         renderItem={({ item }) => (
           <RoutineCard
             title={item.name}
-            duration={`${item.duration} min`}
-            level={item.level}
-            image={item.img}
+  duration={`${item.duration} min`}
+  level={item.level}
+  category={item.category}
+            image={
+  item.img ||
+  "https://images.unsplash.com/photo-1517836357463-d25dfeac3438"
+}
           />
         )}
       />
@@ -244,7 +280,7 @@ const filteredRoutines =
           </Text>
 
           <View style={styles.categoryContainer}>
-            {["Fuerza", "Cardio", "Movilidad", "HIIT", "Full Body"].map((category) => (
+            {categories.map((category) => (
               <TouchableOpacity
                 key={category}
                 style={[
@@ -305,21 +341,29 @@ const filteredRoutines =
           style={styles.addRoutineButton}
           onPress={() => {
 
-            if (!newRoutine.name || !newRoutine.objective || !newRoutine.level || !newRoutine.duration) {
-              alert("Completa todos los campos antes de agregar la rutina");
-              return;
-            }
+            if (
+  !newRoutine.name ||
+  !newRoutine.objective ||
+  !newRoutine.level ||
+  !newRoutine.duration ||
+  !newRoutine.category
+) {
+  alert("Completa todos los campos antes de agregar la rutina");
+  return;
+}
 
-            setRoutines([
-              ...routines,
-              {
-                id: Date.now(),
-                ...newRoutine,
-                name: newRoutine.name.trim(),
-                objective: newRoutine.objective.trim()
-              }
-            ]);
-
+          setRoutines([
+  {
+    id: Date.now(),
+    ...newRoutine,
+    img: newRoutine.img || getRandomImage(),
+    name: newRoutine.name.trim(),
+    objective: newRoutine.objective.trim()
+  },
+  ...routines
+]);
+listRef.current?.scrollToOffset({ offset: 0, animated: true });
+            Keyboard.dismiss();  
             setModalVisible(false);
 
             setNewRoutine({
@@ -359,6 +403,23 @@ const filteredRoutines =
 // ---------------------- ESTILOS ----------------------
 
 const styles = StyleSheet.create({
+  emptyContainer: {
+  alignItems: "center",
+  marginTop: 60
+},
+
+emptyTitle: {
+  color: colors.text,
+  fontSize: 18,
+  fontWeight: "600",
+  marginTop: 10
+},
+
+emptyText: {
+  color: colors.textSecondary,
+  marginTop: 5,
+  textAlign: "center"
+},
 
   categoryContainer: {
   flexDirection: "row",

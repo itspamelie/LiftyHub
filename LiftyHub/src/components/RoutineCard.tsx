@@ -4,16 +4,29 @@ type Props = {
   title: string;
   duration: string;
   level: string;
+  category: string;
   image: string;
 };
 
-export default function RoutineCard({ title, duration, level, image }: Props) {
+export default function RoutineCard({ title, duration, level, category, image }: Props) {
   return (
     <View style={styles.card}>
 
-      <Image source={{ uri: image }} style={styles.image} />
+      {/* CONTENEDOR DE IMAGEN */}
+      <View style={styles.imageContainer}>
 
+        <Image source={{ uri: image }} style={styles.image} />
+
+        {/* BADGE DE CATEGORÍA */}
+        <View style={styles.categoryBadge}>
+          <Text style={styles.categoryText}>{category}</Text>
+        </View>
+
+      </View>
+
+      {/* CONTENIDO */}
       <View style={styles.content}>
+
         <View>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.meta}>
@@ -24,6 +37,7 @@ export default function RoutineCard({ title, duration, level, image }: Props) {
         <TouchableOpacity style={styles.playButton}>
           <Text style={styles.playText}>▶</Text>
         </TouchableOpacity>
+
       </View>
 
     </View>
@@ -39,9 +53,29 @@ const styles = StyleSheet.create({
     marginBottom: 16
   },
 
+  imageContainer: {
+    position: "relative"
+  },
+
   image: {
     width: "100%",
     height: 150
+  },
+
+  categoryBadge: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    backgroundColor: "#3a3a3b",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8
+  },
+
+  categoryText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "600"
   },
 
   content: {

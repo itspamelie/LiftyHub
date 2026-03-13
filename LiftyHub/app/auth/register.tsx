@@ -1,4 +1,15 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform
+} from "react-native";
+
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -12,98 +23,162 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const handleRegister = () => {
-    router.replace("/(tabs)" as any);
+
+    if (!name || !email || !password || !confirmPassword) {
+      alert("Completa todos los campos");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert("Las contraseñas no coinciden");
+      return;
+    }
+
+    router.replace("/(tabs)");
   };
 
   return (
-    <View style={styles.container}>
 
-      {/* Header */}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 
-      <View style={styles.header}>
-        <Ionicons name="barbell" size={60} color="#3B82F6" />
-        <Text style={styles.title}>LiftyHub</Text>
-        <Text style={styles.subtitle}>Crea tu cuenta</Text>
-      </View>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
 
-      {/* Card */}
+        {/* Header */}
 
-      <View style={styles.card}>
-
-        <Text style={styles.cardTitle}>Registrarse</Text>
-
-        {/* Nombre */}
-
-        <View style={styles.inputContainer}>
-          <Ionicons name="person-outline" size={20} color="#A1A1A1" />
-          <TextInput
-            placeholder="Nombre"
-            placeholderTextColor="#A1A1A1"
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-          />
+        <View style={styles.header}>
+          <Ionicons name="barbell" size={60} color="#3B82F6" />
+          <Text style={styles.title}>LiftyHub</Text>
+          <Text style={styles.subtitle}>Crea tu cuenta</Text>
         </View>
 
-        {/* Email */}
+        {/* Card */}
 
-        <View style={styles.inputContainer}>
-          <Ionicons name="mail-outline" size={20} color="#A1A1A1" />
-          <TextInput
-            placeholder="Correo electrónico"
-            placeholderTextColor="#A1A1A1"
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-          />
+        <View style={styles.card}>
+
+          <Text style={styles.cardTitle}>Registrarse</Text>
+
+          {/* Nombre */}
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="person-outline" size={20} color="#A1A1A1" />
+
+            <TextInput
+              placeholder="Nombre"
+              placeholderTextColor="#A1A1A1"
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+              autoFocus
+            />
+
+          </View>
+
+          {/* Email */}
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="mail-outline" size={20} color="#A1A1A1" />
+
+            <TextInput
+              placeholder="Correo electrónico"
+              placeholderTextColor="#A1A1A1"
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
+          </View>
+
+          {/* Password */}
+
+          <View style={styles.inputContainer}>
+
+            <Ionicons name="lock-closed-outline" size={20} color="#A1A1A1" />
+
+            <TextInput
+              placeholder="Contraseña"
+              placeholderTextColor="#A1A1A1"
+              secureTextEntry={!showPassword}
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+            />
+
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"}
+                size={20}
+                color="#A1A1A1"
+              />
+            </TouchableOpacity>
+
+          </View>
+
+          {/* Confirm Password */}
+
+          <View style={styles.inputContainer}>
+
+            <Ionicons name="lock-closed-outline" size={20} color="#A1A1A1" />
+
+            <TextInput
+              placeholder="Confirmar contraseña"
+              placeholderTextColor="#A1A1A1"
+              secureTextEntry={!showConfirm}
+              style={styles.input}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
+
+            <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+              <Ionicons
+                name={showConfirm ? "eye-off" : "eye"}
+                size={20}
+                color="#A1A1A1"
+              />
+            </TouchableOpacity>
+
+          </View>
+
+          {/* Register Button */}
+
+          <TouchableOpacity
+            style={[
+              styles.loginButton,
+              (!name || !email || !password || !confirmPassword) && styles.disabled
+            ]}
+            onPress={handleRegister}
+            disabled={!name || !email || !password || !confirmPassword}
+          >
+
+            <Text style={styles.loginText}>
+              Crear cuenta
+            </Text>
+
+          </TouchableOpacity>
+
+          {/* Back to Login */}
+
+          <TouchableOpacity onPress={() => router.push("/(auth)/login" as any)}>
+            <Text style={styles.register}>
+              ¿Ya tienes cuenta? <Text style={styles.registerHighlight}>Inicia sesión</Text>
+            </Text>
+          </TouchableOpacity>
+
         </View>
 
-        {/* Password */}
+      </KeyboardAvoidingView>
 
-        <View style={styles.inputContainer}>
-          <Ionicons name="lock-closed-outline" size={20} color="#A1A1A1" />
-          <TextInput
-            placeholder="Contraseña"
-            placeholderTextColor="#A1A1A1"
-            secureTextEntry
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-          />
-        </View>
+    </TouchableWithoutFeedback>
 
-        {/* Confirm Password */}
-
-        <View style={styles.inputContainer}>
-          <Ionicons name="lock-closed-outline" size={20} color="#A1A1A1" />
-          <TextInput
-            placeholder="Confirmar contraseña"
-            placeholderTextColor="#A1A1A1"
-            secureTextEntry
-            style={styles.input}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-          />
-        </View>
-
-        {/* Register Button */}
-
-        <TouchableOpacity style={styles.loginButton} onPress={handleRegister}>
-          <Text style={styles.loginText}>Crear cuenta</Text>
-        </TouchableOpacity>
-
-        {/* Back to Login */}
-
-        <TouchableOpacity onPress={() => router.push("/(auth)/login" as any)}>
-          <Text style={styles.register}>
-            ¿Ya tienes cuenta? <Text style={styles.registerHighlight}>Inicia sesión</Text>
-          </Text>
-        </TouchableOpacity>
-
-      </View>
-
-    </View>
   );
 }
 
@@ -169,6 +244,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 10
+  },
+
+  disabled: {
+    opacity: 0.5
   },
 
   loginText: {

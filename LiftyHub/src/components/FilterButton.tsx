@@ -7,10 +7,11 @@ type Props = {
   onPress: () => void;
 };
 
-export default function FilterButton({ label, active }: Props) {
+export default function FilterButton({ label, active, onPress }: Props) {
   return (
     <TouchableOpacity
       style={[styles.button, active && styles.activeButton]}
+      onPress={onPress}
     >
       <Text style={[styles.text, active && styles.activeText]}>
         {label}
@@ -20,7 +21,6 @@ export default function FilterButton({ label, active }: Props) {
 }
 
 const styles = StyleSheet.create({
-
   button: {
     backgroundColor: colors.card,
     paddingHorizontal: 16,
@@ -41,5 +41,4 @@ const styles = StyleSheet.create({
   activeText: {
     color: colors.text
   }
-
 });
