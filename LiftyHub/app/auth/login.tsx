@@ -1,16 +1,5 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard
-} from "react-native";
-
-import { useRouter } from "expo-router";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { useRouter, Stack } from "expo-router";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -20,109 +9,75 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = () => {
-
-    if (!email || !password) {
-      alert("Completa todos los campos");
-      return;
-    }
-
-    router.replace("/(tabs)");
+    router.replace("/(tabs)" as any);
   };
 
   return (
+    <View style={styles.container}>
 
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      {/* QUITA HEADER BLANCO */}
+      <Stack.Screen options={{ headerShown: false }} />
 
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
+      {/* Logo / Branding */}
 
+      <View style={styles.header}>
+        <Ionicons name="barbell" size={60} color="#3B82F6" />
         <Text style={styles.title}>LiftyHub</Text>
+        <Text style={styles.subtitle}>Entrena. Progresa. Mejora.</Text>
+      </View>
 
-        <Text style={styles.subtitle}>
-          Bienvenido de nuevo
-        </Text>
+      {/* Card */}
 
-        <View style={styles.card}>
+      <View style={styles.card}>
 
-          <Text style={styles.cardTitle}>Iniciar sesión</Text>
+        <Text style={styles.cardTitle}>Iniciar sesión</Text>
 
-          {/* EMAIL */}
+        {/* Email */}
 
+        <View style={styles.inputContainer}>
+          <Ionicons name="mail-outline" size={20} color="#A1A1A1" />
           <TextInput
             placeholder="Correo electrónico"
             placeholderTextColor="#A1A1A1"
             style={styles.input}
             value={email}
             onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoFocus
           />
-
-          {/* PASSWORD */}
-
-          <View style={styles.passwordContainer}>
-
-            <TextInput
-              placeholder="Contraseña"
-              placeholderTextColor="#A1A1A1"
-              secureTextEntry={!showPassword}
-              style={styles.passwordInput}
-              value={password}
-              onChangeText={setPassword}
-            />
-
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              <Ionicons
-                name={showPassword ? "eye-off" : "eye"}
-                size={20}
-                color="#A1A1A1"
-              />
-            </TouchableOpacity>
-
-          </View>
-
-          {/* BOTÓN LOGIN */}
-
-          <TouchableOpacity
-            style={[
-              styles.loginButton,
-              (!email || !password) && styles.loginDisabled
-            ]}
-            onPress={handleLogin}
-            disabled={!email || !password}
-          >
-
-            <Text style={styles.loginText}>
-              Entrar
-            </Text>
-
-          </TouchableOpacity>
-
-          {/* REGISTER */}
-
-          <TouchableOpacity
-            onPress={() => router.push("./register")}
-          >
-            <Text style={styles.register}>
-              Crear cuenta
-            </Text>
-          </TouchableOpacity>
-
         </View>
 
-      </KeyboardAvoidingView>
+        {/* Password */}
 
-    </TouchableWithoutFeedback>
+        <View style={styles.inputContainer}>
+          <Ionicons name="lock-closed-outline" size={20} color="#A1A1A1" />
+          <TextInput
+            placeholder="Contraseña"
+            placeholderTextColor="#A1A1A1"
+            secureTextEntry
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+          />
+        </View>
 
+        {/* Login Button */}
+
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <Text style={styles.loginText}>Entrar</Text>
+        </TouchableOpacity>
+
+        {/* Register */}
+
+        <TouchableOpacity>
+          <Text style={styles.register}>
+            ¿No tienes cuenta? <Text style={styles.registerHighlight}>Crear cuenta</Text>
+          </Text>
+        </TouchableOpacity>
+
+      </View>
+
+    </View>
   );
 }
 
@@ -130,72 +85,64 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0F0F10",
     justifyContent: "center",
-    padding: 20
+    padding: 24
+  },
+
+  header: {
+    alignItems: "center",
+    marginBottom: 40
   },
 
   title: {
     color: "white",
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: "700",
-    textAlign: "center"
+    marginTop: 10
   },
 
   subtitle: {
     color: "#A1A1A1",
-    textAlign: "center",
-    marginBottom: 30,
-    marginTop: 5
+    marginTop: 4
   },
 
   card: {
     backgroundColor: "#1C1C1E",
-    borderRadius: 16,
-    padding: 20
+    borderRadius: 20,
+    padding: 24
   },
 
   cardTitle: {
     color: "white",
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "600",
     marginBottom: 20
   },
 
-  input: {
-    backgroundColor: "#2C2C2E",
-    color: "white",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 12
-  },
-
-  passwordContainer: {
+  inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#2C2C2E",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    marginBottom: 12
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    marginBottom: 14
   },
 
-  passwordInput: {
+  input: {
     flex: 1,
     color: "white",
-    paddingVertical: 14
+    padding: 14,
+    marginLeft: 6
   },
 
   loginButton: {
     backgroundColor: "#3B82F6",
-    borderRadius: 20,
-    height: 45,
+    borderRadius: 30,
+    height: 50,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 10
-  },
-
-  loginDisabled: {
-    opacity: 0.5
   },
 
   loginText: {
@@ -207,7 +154,12 @@ const styles = StyleSheet.create({
   register: {
     color: "#A1A1A1",
     textAlign: "center",
-    marginTop: 16
+    marginTop: 18
+  },
+
+  registerHighlight: {
+    color: "#3B82F6",
+    fontWeight: "600"
   }
 
 });

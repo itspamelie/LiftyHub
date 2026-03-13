@@ -1,17 +1,82 @@
-import { View, Text, StyleSheet, TouchableOpacity, Switch } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, StyleSheet, Switch, ScrollView, Alert } from "react-native";
 import { useState } from "react";
+import { router } from "expo-router";
+import SettingsItem from "@/src/components/SettingsItem";
+import SettingsSwitchItem from "@/src/components/SettingsSwitchItem";
 
 export default function Settings() {
 
-  const [darkMode, setDarkMode] = useState(true);
   const [notifications, setNotifications] = useState(false);
+
+  const logout = () => {
+    router.replace("/auth/login");
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Cerrar sesión",
+      "¿Estás seguro de que deseas cerrar sesión?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel"
+        },
+        {
+          text: "Cerrar sesión",
+          style: "destructive",
+          onPress: logout
+        }
+      ]
+    );
+  };
+
+  const handleDeleteAccount = () => {
+  Alert.alert(
+    "Eliminar cuenta",
+    "Esta acción es permanente. ¿Deseas continuar?",
+    [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar",
+        style: "destructive",
+        onPress: () => console.log("Eliminar cuenta")
+      }
+    ]
+  );
+};
 
   return (
 
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
 
       <Text style={styles.title}>Configuración</Text>
+
+      {/* PLAN */}
+
+      <Text style={styles.section}>Plan</Text>
+
+      <View style={styles.card}>
+
+        <SettingsItem
+          icon="diamond-outline"
+          label="Mi plan"
+          value="Gratis"
+        />
+
+        <View style={styles.divider} />
+
+        <SettingsItem
+          icon="sparkles-outline"
+          label="Ver planes"
+          showArrow
+          onPress={() => router.push("/settings/plans")}
+        />
+
+      </View>
 
       {/* PREFERENCIAS */}
 
@@ -19,31 +84,19 @@ export default function Settings() {
 
       <View style={styles.card}>
 
-        <View style={styles.row}>
+        <SettingsItem
+          icon="moon-outline"
+          label="Tema"
+          value="Oscuro"
+        />
 
-          <View style={styles.rowLeft}>
-            <Ionicons name="moon-outline" size={20} color="white" />
-            <Text style={styles.itemText}>Tema oscuro</Text>
-          </View>
+        <View style={styles.divider} />
 
-          <Switch
-            value={darkMode}
-            onValueChange={setDarkMode}
-            trackColor={{ false: "#767577", true: "#3B82F6" }}
-          />
-
-        </View>
-
-        <TouchableOpacity style={styles.row}>
-
-          <View style={styles.rowLeft}>
-            <Ionicons name="barbell-outline" size={20} color="white" />
-            <Text style={styles.itemText}>Unidades</Text>
-          </View>
-
-          <Text style={styles.value}>kg</Text>
-
-        </TouchableOpacity>
+        <SettingsItem
+          icon="barbell-outline"
+          label="Unidades"
+          value="kg"
+        />
 
       </View>
 
@@ -53,29 +106,19 @@ export default function Settings() {
 
       <View style={styles.card}>
 
-        <View style={styles.row}>
+        <SettingsSwitchItem
+  icon="notifications-outline"
+  label="Recordatorios"
+  value={notifications}
+  onChange={setNotifications}
+/>
 
-          <View style={styles.rowLeft}>
-            <Ionicons name="notifications-outline" size={20} color="white" />
-            <Text style={styles.itemText}>Recordatorios</Text>
-          </View>
+        <View style={styles.divider} />
 
-          <Switch
-            value={notifications}
-            onValueChange={setNotifications}
-            trackColor={{ false: "#767577", true: "#3B82F6" }}
-          />
-
-        </View>
-
-        <TouchableOpacity style={styles.row}>
-
-          <View style={styles.rowLeft}>
-            <Ionicons name="volume-high-outline" size={20} color="white" />
-            <Text style={styles.itemText}>Sonidos de entrenamiento</Text>
-          </View>
-
-        </TouchableOpacity>
+        <SettingsItem
+          icon="volume-high-outline"
+          label="Sonidos de entrenamiento"
+        />
 
       </View>
 
@@ -85,23 +128,29 @@ export default function Settings() {
 
       <View style={styles.card}>
 
-        <TouchableOpacity style={styles.row}>
+        <SettingsItem
+          icon="information-circle-outline"
+          label="Sobre LiftyHub"
+          showArrow
+          onPress={() => router.push("/settings/about")}
+        />
 
-          <View style={styles.rowLeft}>
-            <Ionicons name="information-circle-outline" size={20} color="white" />
-            <Text style={styles.itemText}>Sobre LiftyHub</Text>
-          </View>
+        <View style={styles.divider} />
 
-        </TouchableOpacity>
+        <SettingsItem
+          icon="document-text-outline"
+          label="Política de privacidad"
+          showArrow
+          onPress={() => router.push("/settings/privacy")}
+        />
 
-        <TouchableOpacity style={styles.row}>
+        <View style={styles.divider} />
 
-          <View style={styles.rowLeft}>
-            <Ionicons name="document-text-outline" size={20} color="white" />
-            <Text style={styles.itemText}>Política de privacidad</Text>
-          </View>
-
-        </TouchableOpacity>
+        <SettingsItem
+          icon="code-outline"
+          label="Versión"
+          value="1.0.0"
+        />
 
       </View>
 
@@ -111,20 +160,23 @@ export default function Settings() {
 
       <View style={styles.card}>
 
-        <TouchableOpacity style={styles.row}>
-
-          <View style={styles.rowLeft}>
-            <Ionicons name="log-out-outline" size={20} color="#EF4444" />
-            <Text style={[styles.itemText, { color: "#EF4444" }]}>
-              Cerrar sesión
-            </Text>
-          </View>
-
-        </TouchableOpacity>
+        <SettingsItem
+          icon="log-out-outline"
+          label="Cerrar sesión"
+          danger
+          onPress={handleLogout}
+        />
+<View style={styles.divider} />
+        <SettingsItem
+  icon="trash-outline"
+  label="Eliminar cuenta"
+  danger
+  onPress={handleDeleteAccount}
+/>
 
       </View>
 
-    </View>
+    </ScrollView>
 
   );
 }
@@ -133,8 +185,12 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: "#0F0F10",
+    backgroundColor: "#0F0F10"
+  },
+
+  content: {
     padding: 20,
+    paddingBottom: 80
   },
 
   title: {
@@ -157,26 +213,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6
   },
 
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16
+  divider: {
+    height: 1,
+    backgroundColor: "#2A2A2A",
+    marginHorizontal: 16
   },
-
-  rowLeft: {
-    flexDirection: "row",
-    alignItems: "center"
-  },
-
-  itemText: {
-    color: "white",
-    fontSize: 16,
-    marginLeft: 12
-  },
-
-  value: {
-    color: "#A1A1A1"
-  }
 
 });
