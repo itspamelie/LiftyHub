@@ -4,6 +4,7 @@ import { colors } from "@/src/styles/globalstyles";
 type Props = {
   label: string;
   active?: boolean;
+  onPress: () => void;
 };
 
 export default function FilterButton({ label, active }: Props) {
