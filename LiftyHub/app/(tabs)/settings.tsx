@@ -1,16 +1,48 @@
 import { View, Text, StyleSheet, Switch, ScrollView, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState } from "react";
 import { router } from "expo-router";
 import SettingsItem from "@/src/components/SettingsItem";
 import SettingsSwitchItem from "@/src/components/SettingsSwitchItem";
+import { useEffect } from "react";
 
 export default function Settings() {
 
   const [notifications, setNotifications] = useState(false);
+  const [units, setUnits] = useState("kg");
 
   const logout = () => {
     router.replace("/auth/login");
   };
+
+ const handleUnits = () => {
+
+  Alert.alert(
+    "Unidades",
+    "Selecciona el sistema de unidades",
+    [
+      {
+        text: "Kilogramos (kg)",
+        onPress: async () => {
+          setUnits("kg");
+          await AsyncStorage.setItem("units", "kg");
+        }
+      },
+      {
+        text: "Libras (lb)",
+        onPress: async () => {
+          setUnits("lb");
+          await AsyncStorage.setItem("units", "lb");
+        }
+      },
+      {
+        text: "Cancelar",
+        style: "cancel"
+      }
+    ]
+  );
+
+};
 
   const handleLogout = () => {
     Alert.alert(
@@ -44,6 +76,25 @@ export default function Settings() {
     ]
   );
 };
+
+useEffect(() => {
+
+  const loadUnits = async () => {
+    try {
+      const savedUnits = await AsyncStorage.getItem("units");
+
+      if (savedUnits !== null) {
+        setUnits(savedUnits);
+      }
+
+    } catch (error) {
+      console.log("Error loading units", error);
+    }
+  };
+
+  loadUnits();
+
+}, []);
 
   return (
 
@@ -93,10 +144,11 @@ export default function Settings() {
         <View style={styles.divider} />
 
         <SettingsItem
-          icon="barbell-outline"
-          label="Unidades"
-          value="kg"
-        />
+  icon="barbell-outline"
+  label="Unidades"
+  value={units}
+  onPress={handleUnits}
+/>
 
       </View>
 
