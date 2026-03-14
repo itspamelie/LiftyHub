@@ -1,5 +1,4 @@
-import { Box, Typography, TextField, IconButton } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import { Box, Typography, IconButton } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -30,24 +29,7 @@ const TopNavbar: React.FC = () => {
 
       <Box display="flex" alignItems="center" gap={2}>
         
-        <TextField
-          size="small"
-          placeholder="Buscar..."
-          variant="outlined"
-          sx={{
-            input: { color: "white" },
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "12px",
-              color: "white",
-              "& fieldset": {
-                borderColor: "#2d3561"
-              }
-            }
-          }}
-          InputProps={{
-            startAdornment: <SearchIcon sx={{ mr: 1 }} />
-          }}
-        />
+
 
         <IconButton sx={{ color: "white" }}>
           <AccountCircleIcon />

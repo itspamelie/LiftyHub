@@ -1,7 +1,7 @@
 import { useState } from "react"
 import React from "react"
 import Swal from "sweetalert2"
-import { Navigate } from "react-router-dom"
+import { Navigate, useNavigate } from "react-router-dom"
 
 function isTokenExpired(token: string) {
   try {
@@ -17,6 +17,7 @@ export default function Login(){
     
 
 const [showPassword, setShowPassword] = useState<boolean>(false)
+const navigate = useNavigate()
   const [email, setEmail] = useState<string>("admin@example.com")
   const [password, setPassword] = useState<string>("123")
   const token = localStorage.getItem("token")
@@ -56,9 +57,9 @@ const submit = async (e: React.FormEvent) => {
         localStorage.setItem("user", JSON.stringify(data.user))
 
         if (data.user.role === "user" || data.user.role === "nutritionist") {
-          <Navigate to="/Home" replace />
+  navigate("/home")
         } else {
-          <Navigate to="/Dashboard" replace />
+  navigate("/dashboard")
         }
 
       } else {

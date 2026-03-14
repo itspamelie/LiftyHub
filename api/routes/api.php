@@ -29,6 +29,7 @@ Route::post('/login',[AuthController::class,'login']);
 //Proteger vistas. Si hay una ruta fuera del grupo, cualquier persona puede hacerle peticion
 //para enviar token
 Route::middleware("jwt")->group(function(){
+Route::get('/users/stats', [UsersController::class,'statsuser']);
 Route::resource('users',UsersController::class);
 Route::resource('userStreak',UserStreaksController::class);
 Route::resource('userProperties',UserProperties::class);
@@ -46,6 +47,5 @@ Route::resource('exercise',ExerciseController::class);
 Route::resource('dietReviews',DietReviewsController::class);
 Route::resource('dietPlans',DietPlansController::class);
 Route::get('/dashboard', [DashboardController::class, 'stats']);
-
 
 });

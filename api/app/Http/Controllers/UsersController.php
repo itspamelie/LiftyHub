@@ -4,6 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Subscription;
+use App\Models\MonthlyProgress;
+use App\Models\ExerciseLog;
+use App\Models\UserPropertie;
+use App\Models\Somatotypes;
+use Illuminate\Support\Facades\DB;
+
 
 class UsersController extends Controller
 {
@@ -120,4 +127,65 @@ class UsersController extends Controller
         ]);
 
     }
+
+public function statsuser()
+{
+    return response()->json([
+
+        // estadísticas generales
+        'total_users' => User::where('role','user')->count(),
+
+'new_users_this_month' => User::whereMonth('created_at', now()->month)
+    ->whereYear('created_at', now()->year)
+    ->count(),
+
+        'active_subscriptions' => Subscription::where('status','active')->count(),
+
+        'users_with_progress' => MonthlyProgress::distinct()->count('user_id'),
+
+        'average_weight' => round(UserPropertie::avg('weight'),2),
+
+        'trained_today' => ExerciseLog::whereDate('created_at', today())
+            ->distinct()
+            ->count('user_id'),
+
+        'expiring_subscriptions' => Subscription::whereDate('end_date','<=',now()->addDays(7))->count(),
+
+        // progreso promedio por mes
+        'monthly_progress' => MonthlyProgress::select(
+                'month_number',
+                DB::raw('AVG(current_weight) as average_weight')
+            )
+            ->groupBy('month_number')
+            ->orderBy('month_number')
+            ->get(),
+
+        // distribución de somatotipos
+        'somatotypes' => DB::table('user_properties as up')
+            ->join('somatotypes as s', 'up.somatotype_id', '=', 's.id')
+            ->select('s.type', DB::raw('COUNT(*) as total'))
+            ->groupBy('s.type')
+            ->get(),
+
+             // distribución de genero
+        'genre' => DB::table('users')
+    ->select('gender', DB::raw('COUNT(*) as total'))
+    ->where('role', 'user')
+    ->groupBy('gender')
+    ->get(),
+
+
+        // usuarios con mejor racha
+        'top_streaks' => DB::table('exercise_logs as el')
+            ->join('users as u','el.user_id','=','u.id')
+            ->select(
+                'u.name',
+                DB::raw('COUNT(DISTINCT DATE(el.created_at)) as streak')
+            )
+            ->groupBy('u.name')
+            ->orderByDesc('streak')
+            ->limit(5)
+            ->get()
+    ]);
+}
 }
