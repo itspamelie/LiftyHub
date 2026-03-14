@@ -1,24 +1,126 @@
 import { ScrollView, View, Text, StyleSheet, TextInput } from "react-native";
+import { useState } from "react";
 import ExerciseCard from "@/src/components/ExerciseCard";
 import FilterButton from "@/src/components/FilterButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
 
+type ExerciseFile = {
+  file_path: string;
+  type: "image" | "video" | "pdf";
+};
+
+type Exercise = {
+  id: number;
+  name: string;
+  muscle: string;
+  technique: string;
+  files?: ExerciseFile[];
+};
+
 export default function ExercisesScreen() {
+
+  const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState("Todo");
+
+  // MOCK DATA simulando backend
+  const exercises: Exercise[] = [
+    {
+      id: 1,
+      name: "Sentadilla",
+      muscle: "Pierna",
+      technique: "Mantén la espalda recta",
+      files: [
+        {
+          file_path: "https://images.unsplash.com/photo-1599058917765-a780eda07a3e",
+          type: "image"
+        }
+      ]
+    },
+    {
+      id: 2,
+      name: "Pull Ups",
+      muscle: "Espalda",
+      technique: "Sube controlado",
+      files: [
+        {
+          file_path: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438",
+          type: "image"
+        }
+      ]
+    },
+    {
+      id: 3,
+      name: "Press banca",
+      muscle: "Pecho",
+      technique: "Baja la barra controladamente",
+      files: [
+        {
+          file_path: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61",
+          type: "image"
+        }
+      ]
+    },
+    {
+      id: 4,
+      name: "Crunch abdominal",
+      muscle: "Abdomen",
+      technique: "Contrae el abdomen al subir",
+      files: [
+        {
+          file_path: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1",
+          type: "image"
+        }
+      ]
+    }
+  ];
+
+  const filters = [
+  "Todo",
+  "Pecho",
+  "Espalda",
+  "Pierna",
+  "Glúteos",
+  "Hombro",
+  "Bíceps",
+  "Tríceps",
+  "Antebrazo",
+  "Abdomen",
+  "Core",
+  "Pantorrilla",
+  "Cardio"
+];
+
+  const filteredExercises = exercises.filter((exercise) => {
+
+    const matchesSearch =
+      exercise.name.toLowerCase().includes(search.toLowerCase());
+
+    const matchesFilter =
+      activeFilter === "Todo" ||
+      exercise.muscle === activeFilter;
+
+    return matchesSearch && matchesFilter;
+  });
+
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
     >
-      
+
       {/* HEADER */}
       <View style={styles.header}>
         <Text style={styles.title}>Ejercicios</Text>
-        <Text style={styles.subtitle}>Técnica, músculo a trabajar y más.</Text>
+        <Text style={styles.subtitle}>
+          Técnica, músculo a trabajar y más.
+        </Text>
 
         <TextInput
           placeholder="Buscar ejercicios..."
           placeholderTextColor={colors.textSecondary}
           style={styles.search}
+          value={search}
+          onChangeText={setSearch}
         />
       </View>
 
@@ -28,42 +130,27 @@ export default function ExercisesScreen() {
         showsHorizontalScrollIndicator={false}
         style={styles.filters}
       >
-        <FilterButton label="Todo" active />
-        <FilterButton label="Pierna" />
-        <FilterButton label="Espalda" />
-        <FilterButton label="Abdomen" />
-        <FilterButton label="Pecho" />
-        <FilterButton label="Hombro" />
-        <FilterButton label="Tríceps" />
-        <FilterButton label="Bíceps" />
+
+        {filters.map((filter) => (
+          <FilterButton
+            key={filter}
+            label={filter}
+            active={activeFilter === filter}
+            onPress={() => setActiveFilter(filter)}
+          />
+        ))}
+
       </ScrollView>
 
       {/* LISTA */}
       <View style={styles.list}>
 
-        <ExerciseCard
-          title="Sentadilla"
-          muscle="Músculo: Pierna, glúteo, pantorrilla"
-          image="https://images.unsplash.com/photo-1599058917765-a780eda07a3e"
-        />
-
-        <ExerciseCard
-          title="Pull Ups"
-          muscle="Músculo: Espalda, bíceps"
-          image="https://images.unsplash.com/photo-1517836357463-d25dfeac3438"
-        />
-
-        <ExerciseCard
-          title="Press banca"
-          muscle="Músculo: Pecho, tríceps"
-          image="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61"
-        />
-
-        <ExerciseCard
-          title="Crunch abdominal"
-          muscle="Músculo: Abdomen"
-          image="https://images.unsplash.com/photo-1605296867304-46d5465a13f1"
-        />
+        {filteredExercises.map((exercise) => (
+          <ExerciseCard
+            key={exercise.id}
+            exercise={exercise}
+          />
+        ))}
 
       </View>
 

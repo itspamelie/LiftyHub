@@ -1,20 +1,27 @@
 import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import AnimatedStatNumber from "@/src/components/Animations/AnimatedStatNumber";
 
 type Props = {
   icon: string;
   label: string;
-  value: string;
+  value: number;
+  trigger?: number;
 };
 
-export default function StatSummaryCard({ icon, label, value }: Props) {
+export default function StatSummaryCard({ icon, label, value, trigger = 0 }: Props) {
+
   return (
     <View style={styles.card}>
 
       <Ionicons name={icon as any} size={22} color={colors.primary} />
 
-      <Text style={styles.value}>{value}</Text>
+      <AnimatedStatNumber
+        value={value}
+        trigger={trigger}
+        style={styles.value}
+      />
 
       <Text style={styles.label}>{label}</Text>
 
@@ -23,25 +30,22 @@ export default function StatSummaryCard({ icon, label, value }: Props) {
 }
 
 const styles = StyleSheet.create({
-
   card: {
+    width: "48%",
     backgroundColor: colors.card,
     borderRadius: spacing.borderRadius,
-    padding: 18,
-    width: "48%",
-    alignItems: "center"
+    padding: 16,
+    gap: 8
   },
 
   value: {
     color: colors.text,
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 8
+    fontSize: 22,
+    fontWeight: "bold"
   },
 
   label: {
     color: colors.textSecondary,
-    marginTop: 4
+    fontSize: 12
   }
-
 });

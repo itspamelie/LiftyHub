@@ -1,10 +1,9 @@
+import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Switch, ScrollView, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState } from "react";
 import { router } from "expo-router";
 import SettingsItem from "@/src/components/SettingsItem";
 import SettingsSwitchItem from "@/src/components/SettingsSwitchItem";
-import { useEffect } from "react";
 
 export default function Settings() {
 
@@ -15,34 +14,36 @@ export default function Settings() {
     router.replace("/auth/login");
   };
 
- const handleUnits = () => {
+  const saveUnits = async (value: string) => {
+    try {
+      setUnits(value);
+      await AsyncStorage.setItem("units", value);
+    } catch (error) {
+      console.log("Error saving units", error);
+    }
+  };
+  const handleUnits = () => {
 
-  Alert.alert(
-    "Unidades",
-    "Selecciona el sistema de unidades",
-    [
-      {
-        text: "Kilogramos (kg)",
-        onPress: async () => {
-          setUnits("kg");
-          await AsyncStorage.setItem("units", "kg");
+    Alert.alert(
+      "Unidades",
+      "Selecciona el sistema de unidades",
+      [
+        {
+          text: "Kilogramos (kg)",
+          onPress: () => saveUnits("kg")
+        },
+        {
+          text: "Libras (lb)",
+          onPress: () => saveUnits("lb")
+        },
+        {
+          text: "Cancelar",
+          style: "cancel"
         }
-      },
-      {
-        text: "Libras (lb)",
-        onPress: async () => {
-          setUnits("lb");
-          await AsyncStorage.setItem("units", "lb");
-        }
-      },
-      {
-        text: "Cancelar",
-        style: "cancel"
-      }
-    ]
-  );
+      ]
+    );
 
-};
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -63,38 +64,38 @@ export default function Settings() {
   };
 
   const handleDeleteAccount = () => {
-  Alert.alert(
-    "Eliminar cuenta",
-    "Esta acción es permanente. ¿Deseas continuar?",
-    [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Eliminar",
-        style: "destructive",
-        onPress: () => console.log("Eliminar cuenta")
-      }
-    ]
-  );
-};
-
-useEffect(() => {
-
-  const loadUnits = async () => {
-    try {
-      const savedUnits = await AsyncStorage.getItem("units");
-
-      if (savedUnits !== null) {
-        setUnits(savedUnits);
-      }
-
-    } catch (error) {
-      console.log("Error loading units", error);
-    }
+    Alert.alert(
+      "Eliminar cuenta",
+      "Esta acción es permanente. ¿Deseas continuar?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: () => console.log("Eliminar cuenta")
+        }
+      ]
+    );
   };
 
-  loadUnits();
+  useEffect(() => {
 
-}, []);
+    const loadUnits = async () => {
+      try {
+        const savedUnits = await AsyncStorage.getItem("@liftyhub_units")
+
+        if (savedUnits !== null) {
+          setUnits(savedUnits);
+        }
+
+      } catch (error) {
+        console.log("Error loading units", error);
+      }
+    };
+
+    loadUnits();
+
+  }, []);
 
   return (
 
@@ -144,11 +145,11 @@ useEffect(() => {
         <View style={styles.divider} />
 
         <SettingsItem
-  icon="barbell-outline"
-  label="Unidades"
-  value={units}
-  onPress={handleUnits}
-/>
+          icon="barbell-outline"
+          label="Unidades"
+          value={units}
+          onPress={handleUnits}
+        />
 
       </View>
 
@@ -159,11 +160,11 @@ useEffect(() => {
       <View style={styles.card}>
 
         <SettingsSwitchItem
-  icon="notifications-outline"
-  label="Recordatorios"
-  value={notifications}
-  onChange={setNotifications}
-/>
+          icon="notifications-outline"
+          label="Recordatorios"
+          value={notifications}
+          onChange={setNotifications}
+        />
 
         <View style={styles.divider} />
 
@@ -218,13 +219,13 @@ useEffect(() => {
           danger
           onPress={handleLogout}
         />
-<View style={styles.divider} />
+        <View style={styles.divider} />
         <SettingsItem
-  icon="trash-outline"
-  label="Eliminar cuenta"
-  danger
-  onPress={handleDeleteAccount}
-/>
+          icon="trash-outline"
+          label="Eliminar cuenta"
+          danger
+          onPress={handleDeleteAccount}
+        />
 
       </View>
 

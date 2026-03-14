@@ -1,4 +1,7 @@
-import { ScrollView, Text, StyleSheet } from "react-native";
+import { ScrollView, Text, StyleSheet, View, ActivityIndicator, RefreshControl } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useState, useEffect, useCallback } from "react";
+
 import { colors, spacing } from "@/src/styles/globalstyles";
 
 import StatsSummaryGrid from "@/src/components/stats/StatsSummaryGrid";
@@ -6,19 +9,82 @@ import WeeklyActivityChart from "@/src/components/stats/WeeklyActivityChart";
 import PersonalRecords from "@/src/components/stats/PersonalRecords";
 
 export default function StatsScreen() {
+
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [animationTrigger, setAnimationTrigger] = useState(0);
+
+  const fetchStats = async () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          workouts: 24,
+          streak: 5,
+          totalTime: 18,
+          totalWeight: 12450
+        });
+      }, 800);
+    });
+  };
+
+  const loadStats = async () => {
+    const data: any = await fetchStats();
+    setStats(data);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+
+    const data: any = await fetchStats();
+    setStats(data);
+
+    setAnimationTrigger(prev => prev + 1);
+
+    setRefreshing(false);
+  }, []);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <SafeAreaView style={styles.container}>
 
-      <Text style={styles.title}>Estadísticas</Text>
-      <Text style={styles.subtitle}>Resumen de tu entrenamiento</Text>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+          />
+        }
+      >
 
-      <StatsSummaryGrid />
+        <Text style={styles.title}>Estadísticas</Text>
+        <Text style={styles.subtitle}>Resumen de tu entrenamiento</Text>
 
-      <WeeklyActivityChart />
+        <StatsSummaryGrid stats={stats} trigger={animationTrigger} />
 
-      <PersonalRecords />
+        <WeeklyActivityChart />
+        <PersonalRecords />
 
-    </ScrollView>
+      </ScrollView>
+
+    </SafeAreaView>
   );
 }
 
@@ -38,12 +104,18 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 28,
     fontWeight: "bold",
-    marginTop: 40
+    marginTop: 10
   },
 
   subtitle: {
     color: colors.textSecondary,
     marginBottom: 20
+  },
+
+  loading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center"
   }
 
 });

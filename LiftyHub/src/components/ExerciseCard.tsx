@@ -2,23 +2,40 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
 
-type Props = {
-  title: string;
-  muscle: string;
-  image: string;
+type ExerciseFile = {
+  file_path: string;
+  type: "image" | "video" | "pdf";
 };
 
-export default function ExerciseCard({ title, muscle, image }: Props) {
+type Exercise = {
+  id: number;
+  name: string;
+  muscle: string;
+  technique: string;
+  files?: ExerciseFile[];
+};
+
+type Props = {
+  exercise: Exercise;
+};
+
+export default function ExerciseCard({ exercise }: Props) {
+
+  const getImage = () => {
+    const imageFile = exercise.files?.find(file => file.type === "image");
+    return imageFile?.file_path ?? "https://via.placeholder.com/100";
+  };
+
   return (
     <View style={styles.card}>
 
       {/* IMAGEN */}
-      <Image source={{ uri: image }} style={styles.image} />
+      <Image source={{ uri: getImage() }} style={styles.image} />
 
       {/* CONTENIDO */}
       <View style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.muscle}>{muscle}</Text>
+        <Text style={styles.title}>{exercise.name}</Text>
+        <Text style={styles.muscle}>{exercise.muscle}</Text>
 
         <TouchableOpacity style={styles.previewButton}>
           <Text style={styles.previewText}>Vista previa</Text>
