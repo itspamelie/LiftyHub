@@ -1,4 +1,4 @@
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/dashboard/Sidebar";
 import { Box } from "@mui/material";
 import { Outlet, Navigate } from "react-router-dom";
 

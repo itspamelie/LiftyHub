@@ -47,5 +47,6 @@ Route::resource('exercise',ExerciseController::class);
 Route::resource('dietReviews',DietReviewsController::class);
 Route::resource('dietPlans',DietPlansController::class);
 Route::get('/dashboard', [DashboardController::class, 'stats']);
+Route::get('/search-users', [UsersController::class, 'searchUsers']);
 
 });
