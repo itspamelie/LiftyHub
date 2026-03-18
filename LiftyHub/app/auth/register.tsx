@@ -7,12 +7,15 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
-  Platform
+  Platform,
+  ScrollView
 } from "react-native";
 
-import { useRouter } from "expo-router";
+import { useRouter, Stack } from "expo-router";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import BackButton from "@/src/components/buttons/backButton";
+import { colors, spacing } from "@/src/styles/globalstyles";
 
 export default function Register() {
 
@@ -38,7 +41,7 @@ export default function Register() {
       return;
     }
 
-    router.replace("/(tabs)");
+    router.replace("/onboarding/objectives");
   };
 
   return (
@@ -50,130 +53,114 @@ export default function Register() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
 
-        {/* Header */}
+        <Stack.Screen options={{ headerShown: false }} />
 
-        <View style={styles.header}>
-          <Ionicons name="barbell" size={60} color="#3B82F6" />
-          <Text style={styles.title}>LiftyHub</Text>
-          <Text style={styles.subtitle}>Crea tu cuenta</Text>
-        </View>
+        {/* 🔙 BOTÓN BACK (COMPONENTE REUTILIZABLE) */}
+        <BackButton />
 
-        {/* Card */}
+        <ScrollView contentContainerStyle={styles.content}>
 
-        <View style={styles.card}>
-
-          <Text style={styles.cardTitle}>Registrarse</Text>
-
-          {/* Nombre */}
-
-          <View style={styles.inputContainer}>
-            <Ionicons name="person-outline" size={20} color="#A1A1A1" />
-
-            <TextInput
-              placeholder="Nombre"
-              placeholderTextColor="#A1A1A1"
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              autoFocus
-            />
-
+          {/* 🔥 HEADER CON LOGO (MEJORADO) */}
+          <View style={styles.header}>
+            <Ionicons name="barbell" size={50} color={colors.primary} />
+            <Text style={styles.title}>LiftyHub</Text>
+            <Text style={styles.subtitle}>Crea tu cuenta</Text>
           </View>
 
-          {/* Email */}
+          {/* 🧾 CARD */}
+          <View style={styles.card}>
 
-          <View style={styles.inputContainer}>
-            <Ionicons name="mail-outline" size={20} color="#A1A1A1" />
+            <Text style={styles.cardTitle}>Registrarse</Text>
 
-            <TextInput
-              placeholder="Correo electrónico"
-              placeholderTextColor="#A1A1A1"
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-
-          </View>
-
-          {/* Password */}
-
-          <View style={styles.inputContainer}>
-
-            <Ionicons name="lock-closed-outline" size={20} color="#A1A1A1" />
-
-            <TextInput
-              placeholder="Contraseña"
-              placeholderTextColor="#A1A1A1"
-              secureTextEntry={!showPassword}
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-            />
-
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              <Ionicons
-                name={showPassword ? "eye-off" : "eye"}
-                size={20}
-                color="#A1A1A1"
+            {/* Nombre */}
+            <View style={styles.inputContainer}>
+              <Ionicons name="person-outline" size={20} color={colors.textSecondary} />
+              <TextInput
+                placeholder="Nombre"
+                placeholderTextColor={colors.textSecondary}
+                style={styles.input}
+                value={name}
+                onChangeText={setName}
               />
+            </View>
+
+            {/* Email */}
+            <View style={styles.inputContainer}>
+              <Ionicons name="mail-outline" size={20} color={colors.textSecondary} />
+              <TextInput
+                placeholder="Correo electrónico"
+                placeholderTextColor={colors.textSecondary}
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+
+            {/* Password */}
+            <View style={styles.inputContainer}>
+              <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />
+              <TextInput
+                placeholder="Contraseña"
+                placeholderTextColor={colors.textSecondary}
+                secureTextEntry={!showPassword}
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color={colors.textSecondary}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* Confirm Password */}
+            <View style={styles.inputContainer}>
+              <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />
+              <TextInput
+                placeholder="Confirmar contraseña"
+                placeholderTextColor={colors.textSecondary}
+                secureTextEntry={!showConfirm}
+                style={styles.input}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+              />
+              <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+                <Ionicons
+                  name={showConfirm ? "eye-off" : "eye"}
+                  size={20}
+                  color={colors.textSecondary}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* BOTÓN */}
+            <TouchableOpacity
+              style={[
+                styles.loginButton,
+                (!name || !email || !password || !confirmPassword) && styles.disabled
+              ]}
+              onPress={handleRegister}
+              disabled={!name || !email || !password || !confirmPassword}
+            >
+              <Text style={styles.loginText}>Crear cuenta</Text>
+            </TouchableOpacity>
+
+            {/* LOGIN */}
+            <TouchableOpacity onPress={() => router.push("/auth/login" as any)}>
+              <Text style={styles.register}>
+                ¿Ya tienes cuenta?{" "}
+                <Text style={styles.registerHighlight}>Inicia sesión</Text>
+              </Text>
             </TouchableOpacity>
 
           </View>
 
-          {/* Confirm Password */}
-
-          <View style={styles.inputContainer}>
-
-            <Ionicons name="lock-closed-outline" size={20} color="#A1A1A1" />
-
-            <TextInput
-              placeholder="Confirmar contraseña"
-              placeholderTextColor="#A1A1A1"
-              secureTextEntry={!showConfirm}
-              style={styles.input}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
-
-            <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
-              <Ionicons
-                name={showConfirm ? "eye-off" : "eye"}
-                size={20}
-                color="#A1A1A1"
-              />
-            </TouchableOpacity>
-
-          </View>
-
-          {/* Register Button */}
-
-          <TouchableOpacity
-            style={[
-              styles.loginButton,
-              (!name || !email || !password || !confirmPassword) && styles.disabled
-            ]}
-            onPress={handleRegister}
-            disabled={!name || !email || !password || !confirmPassword}
-          >
-
-            <Text style={styles.loginText}>
-              Crear cuenta
-            </Text>
-
-          </TouchableOpacity>
-
-          {/* Back to Login */}
-
-          <TouchableOpacity onPress={() => router.push("/(auth)/login" as any)}>
-            <Text style={styles.register}>
-              ¿Ya tienes cuenta? <Text style={styles.registerHighlight}>Inicia sesión</Text>
-            </Text>
-          </TouchableOpacity>
-
-        </View>
+        </ScrollView>
 
       </KeyboardAvoidingView>
 
@@ -186,36 +173,40 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: "#0F0F10",
+    backgroundColor: colors.background
+  },
+
+  content: {
+    padding: spacing.screenPadding,
+    paddingTop: 100,
     justifyContent: "center",
-    padding: 24
   },
 
   header: {
     alignItems: "center",
-    marginBottom: 40
+    marginBottom: 30
   },
 
   title: {
-    color: "white",
-    fontSize: 34,
+    color: colors.text,
+    fontSize: 32,
     fontWeight: "700",
-    marginTop: 10
+    marginTop: 8
   },
 
   subtitle: {
-    color: "#A1A1A1",
+    color: colors.textSecondary,
     marginTop: 4
   },
 
   card: {
-    backgroundColor: "#1C1C1E",
-    borderRadius: 20,
-    padding: 24
+    backgroundColor: colors.card,
+    borderRadius: spacing.borderRadius,
+    padding: 20
   },
 
   cardTitle: {
-    color: "white",
+    color: colors.text,
     fontSize: 22,
     fontWeight: "600",
     marginBottom: 20
@@ -232,13 +223,13 @@ const styles = StyleSheet.create({
 
   input: {
     flex: 1,
-    color: "white",
+    color: colors.text,
     padding: 14,
     marginLeft: 6
   },
 
   loginButton: {
-    backgroundColor: "#3B82F6",
+    backgroundColor: colors.primary,
     borderRadius: 30,
     height: 50,
     justifyContent: "center",
@@ -251,19 +242,19 @@ const styles = StyleSheet.create({
   },
 
   loginText: {
-    color: "white",
+    color: colors.text,
     fontSize: 16,
     fontWeight: "600"
   },
 
   register: {
-    color: "#A1A1A1",
+    color: colors.textSecondary,
     textAlign: "center",
     marginTop: 18
   },
 
   registerHighlight: {
-    color: "#3B82F6",
+    color: colors.primary,
     fontWeight: "600"
   }
 

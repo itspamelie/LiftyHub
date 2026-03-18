@@ -4,39 +4,101 @@ import { colors, spacing } from "@/src/styles/globalstyles";
 import ProgressCard from "@/src/components/ProgressCard";
 import InfoStatCard from "@/src/components/InfoStatCard";
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+
+// función para calcular la edad
+const calculateAge = (birthdate: string) => {
+  const today = new Date();
+  const birth = new Date(birthdate);
+
+  let age = today.getFullYear() - birth.getFullYear();
+
+  const monthDiff = today.getMonth() - birth.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+
+  return age;
+};
+
 
 export default function ProfileScreen() {
-// Simula datos que vendrán del backend
-// Simula datos que vendrán del backend
-// Simula datos que vendrán del backend
-  const profile = {
-  name: "David Vega",
-  age: 24,
-  avatar: require("@/src/assets/defaultd.png"),
 
-  routinesCount: 24,
-  weight: 78,
-  streak: 12,
+  const [profile, setProfile] = useState<any>(null);
 
-  height: 1.78,
-  somatotype: "Mesomorfo",
-  goal: "Ganar músculo"
+  useEffect(() => {
+
+    const loadUser = async () => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+
+    // 👇 AQUÍ
+    console.log("TOKEN:", token);
+
+    if (!token) {
+      console.log("NO TOKEN");
+      return;
+    }
+
+    const res = await fetch("http://192.168.137.154:8000/api/users/1", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json"
+      },
+    });
+
+    console.log("STATUS:", res.status);
+
+    const response = await res.json();
+    console.log("RAW RESPONSE:", response);
+
+    const user = response.data ?? response;
+
+    setProfile({
+      name: user.name,
+      age: user.birthdate ? calculateAge(user.birthdate) : "N/A",
+      avatar: require("@/src/assets/defaultd.png"),
+      routinesCount: 24,
+      weight: 78,
+      streak: 12,
+      height: 1.78,
+      somatotype: "Mesomorfo",
+      goal: "Ganar músculo"
+    });
+
+  } catch (error) {
+    console.log("ERROR FETCH:", error);
+  }
 };
-// Simula datos que vendrán del backend
-// Simula datos que vendrán del backend
-// Simula datos que vendrán del backend
 
+    loadUser();
+
+  }, []);
+
+
+  if (!profile) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text style={{ color: "white" }}>Cargando perfil...</Text>
+      </View>
+    );
+  }
   return (
 
     <View style={styles.container}>
 
+
+
       {/* BOTÓN EDITAR */}
-     <TouchableOpacity
-  style={styles.editButton}
-  onPress={() => router.push("/edit-profile")}
->
-  <Ionicons name="pencil" size={20} color="white" />
-</TouchableOpacity>
+      <TouchableOpacity
+        style={styles.editButton}
+        onPress={() => router.push("/edit-profile")}
+      >
+        <Ionicons name="pencil" size={20} color="white" />
+      </TouchableOpacity>
 
       <ScrollView>
 

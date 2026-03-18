@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { useRouter, Stack } from "expo-router";
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Login() {
 
@@ -10,9 +11,58 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    router.replace("/(tabs)" as any);
+  useEffect(() => {
+
+  const checkLogin = async () => {
+
+    const token = await AsyncStorage.getItem("token");
+
+    if (token) {
+      console.log("Usuario ya logueado");
+      router.replace("/(tabs)" as any);
+    }
+
   };
+
+  checkLogin();
+
+}, []);
+
+  const handleLogin = async () => {
+
+  try {
+
+    const res = await fetch("http://192.168.137.154:8000/api/login",{
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
+    });
+
+    const data = await res.json();
+
+    console.log("RESPUESTA DEL BACKEND:", data);
+
+    if (data.token) {
+
+      await AsyncStorage.setItem("token", data.token);
+      await AsyncStorage.setItem("user", JSON.stringify(data.user));
+
+      console.log("TOKEN GUARDADO");
+
+      router.replace("/(tabs)" as any);
+
+    }
+
+  } catch (error) {
+    console.log("Error conectando al backend:", error);
+  }
+
+};
 
   return (
     <View style={styles.container}>
@@ -69,11 +119,11 @@ export default function Login() {
 
         {/* Register */}
 
-        <TouchableOpacity>
-          <Text style={styles.register}>
-            ¿No tienes cuenta? <Text style={styles.registerHighlight}>Crear cuenta</Text>
-          </Text>
-        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/auth/register" as any)}>
+  <Text style={styles.register}>
+    ¿No tienes cuenta? <Text style={styles.registerHighlight}>Crear cuenta</Text>
+  </Text>
+</TouchableOpacity>
 
       </View>
 

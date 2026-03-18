@@ -10,9 +10,17 @@ export default function Settings() {
   const [notifications, setNotifications] = useState(false);
   const [units, setUnits] = useState("kg");
 
-  const logout = () => {
+  const logout = async () => {
+  try {
+    await AsyncStorage.removeItem("token");
+    console.log("Sesión cerrada correctamente");
+
     router.replace("/auth/login");
-  };
+  } catch (error) {
+    console.log("Error al cerrar sesión:", error);
+  }
+};
+
 
   const saveUnits = async (value: string) => {
     try {
