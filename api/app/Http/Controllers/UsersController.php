@@ -10,6 +10,8 @@ use App\Models\ExerciseLog;
 use App\Models\UserPropertie;
 use App\Models\Somatotypes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 
 class UsersController extends Controller
@@ -36,27 +38,37 @@ class UsersController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-         $validated = $request->validate([
-            'name'=>'required|string|min:2',
-            'email'=>'required|string|min:6',
-            'password'=>'required',
-            'gender'=>'required|string',
-            'img'=>'required|string',
-            'birthdate'=>'required|date',
-            'role'=>'required|string'
-        ]);
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'name'=>'required|string|min:2',
+        'email'=>'required|email|unique:users,email',
+        'password'=>'required|min:6',
+        'gender'=>'required|string',
+        'img'=>'nullable|image',
+        'birthdate'=>'required|date',
+        'role'=>'required|string'
+    ]);
 
-        //metodo si los campos se llaman igual que en la base de datos
-        $data = User::create($validated);
-          return response()->json([
-            "status"=>"ok",
-            "mesage"=>"Usuario insertado correctamente.",
-            "data"=>$data
+    if($request->hasFile('img')){
 
-        ]);
+        $file = $request->file('img');
+
+        $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
+
+        $path = $file->storeAs('users',$filename,'public');
+
+        $validated['img'] = $path;
     }
+
+    $data = User::create($validated);
+
+    return response()->json([
+        "status"=>"ok",
+        "message"=>"Usuario insertado correctamente.",
+        "data"=>$data
+    ]);
+}
 
     /**
      * Display the specified resource.
@@ -95,7 +107,7 @@ class UsersController extends Controller
             'email'=>'required|string|min:6',
             'password'=>'required',
             'gender'=>'required|string',
-            'img'=>'required|string',
+            'img'=>'nullable|image',
             'birthdate'=>'required|date',
             'role'=>'required|string'
         ]);
@@ -115,18 +127,35 @@ class UsersController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        $data = User::find($id);
-        if($data){
-            $data->delete();
-        }
+public function destroy(string $id)
+{
+    $user = User::find($id);
+
+    if(!$user){
         return response()->json([
-            "status"=>"ok",
-            "mesage"=>"Usuario eliminado correctamente."
+            "status"=>"error",
+            "message"=>"Usuario no encontrado"
         ]);
+    }
+
+    // eliminar imagen de perfil
+    if($user->profilepic){
+
+        $path = public_path($user->img);
+
+        if(file_exists($path)){
+            unlink($path);
+        }
 
     }
+
+    $user->delete();
+
+    return response()->json([
+        "status"=>"ok",
+        "message"=>"Usuario eliminado correctamente."
+    ]);
+}
 
 public function statsuser()
 {
@@ -186,6 +215,32 @@ public function statsuser()
             ->orderByDesc('streak')
             ->limit(5)
             ->get()
+    ]);
+}
+
+public function searchUsers(Request $request)
+{
+    $search = $request->input('search');
+
+    // Si no hay búsqueda, no consultar la BD
+    if(!$search){
+        return response()->json([
+            "status"=>"ok",
+            "data"=>[]
+        ]);
+    }
+
+    $users = User::select('id','name','email','gender','birthdate','role','img','created_at')
+        ->where(function($query) use ($search){
+            $query->where('name','LIKE',"%{$search}%")
+                  ->orWhere('email','LIKE',"%{$search}%")
+                  ->orWhere('role','LIKE',"%{$search}%");
+        })
+        ->get();
+
+    return response()->json([
+        "status" => "ok",
+        "data" => $users
     ]);
 }
 }

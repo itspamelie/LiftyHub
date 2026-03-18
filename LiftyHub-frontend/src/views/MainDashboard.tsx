@@ -1,9 +1,9 @@
 import { Box } from "@mui/material";
-import TopNavbar from "../components/TopNavbar";
-import StatsCards from "../components/StatsCards";
-import ChartsRow from "../components/ChartsRow";
-import ProjectsTable from "../components/ProjectsTable";
-import OrdersOverview from "../components/OrdersOverview";
+import TopNavbar from "../components/dashboard/TopNavbar";
+import StatsCards from "../components/dashboard/StatsCards";
+import ChartsRow from "../components/dashboard/ChartsRow";
+import ProjectsTable from "../components/dashboard/ProjectsTable";
+import OrdersOverview from "../components/dashboard/OrdersOverview";
 import Swal from "sweetalert2";
 
 import { useState, useEffect } from "react";
@@ -43,7 +43,7 @@ useEffect(() => {
 
   const token = localStorage.getItem("token")
 
-  fetch("http://localhost:8000/api/dashboard", {
+  fetch(`${import.meta.env.VITE_API_URL}/dashboard`, {
     headers:{
       Authorization:`Bearer ${token}`,
       Accept:"application/json"
