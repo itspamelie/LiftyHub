@@ -3,6 +3,7 @@ import { useRouter, Stack } from "expo-router";
 import { useState, useEffect} from "react";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { loginRequest } from "@/src/services/api";
 
 export default function Login() {
 
@@ -10,6 +11,7 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
 
@@ -32,18 +34,9 @@ export default function Login() {
 
   try {
 
-    const res = await fetch("http://192.168.137.154:8000/api/login",{
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: email,
-        password: password
-      })
-    });
+    const data = await loginRequest(email, password);
 
-    const data = await res.json();
+    console.log("API:", API_URL);
 
     console.log("RESPUESTA DEL BACKEND:", data);
 

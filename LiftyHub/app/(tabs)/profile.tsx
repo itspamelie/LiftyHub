@@ -6,6 +6,7 @@ import InfoStatCard from "@/src/components/InfoStatCard";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUser, getUserProperties } from "@/src/services/api";
 
 
 // función para calcular la edad
@@ -29,54 +30,57 @@ export default function ProfileScreen() {
 
   const [profile, setProfile] = useState<any>(null);
 
-  useEffect(() => {
+ useEffect(() => {
 
-    const loadUser = async () => {
-  try {
-    const token = await AsyncStorage.getItem("token");
+  const loadUser = async () => {
+    try {
 
-    // 👇 AQUÍ
-    console.log("TOKEN:", token);
+      const token = await AsyncStorage.getItem("token");
+      const userStorage = await AsyncStorage.getItem("user");
 
-    if (!token) {
-      console.log("NO TOKEN");
-      return;
+      console.log("TOKEN:", token);
+      console.log("USER STORAGE:", userStorage);
+
+      if (!token || !userStorage) {
+        console.log("NO TOKEN O USER");
+        return;
+      }
+
+      const userParsed = JSON.parse(userStorage);
+
+      // 🔥 LLAMADAS A API
+      const userData = await getUser(userParsed.id, token);
+      const propsData = await getUserProperties(userParsed.id, token);
+
+      console.log("USER API:", userData);
+      console.log("PROPS API:", propsData);
+
+      const user = userData.data ?? userData;
+      const props = propsData.data ?? propsData;
+
+      // 🔥 SET REAL
+      setProfile({
+        name: user.name,
+        age: user.birthdate ? calculateAge(user.birthdate) : "N/A",
+        avatar: require("@/src/assets/defaultd.png"),
+
+        routinesCount: 24,
+        streak: 12,
+
+        weight: props?.weight ?? 0,
+        height: props?.stature ?? 0,
+        somatotype: props?.somatotype_id ?? "N/A",
+        goal: props?.objective ?? "N/A",
+      });
+
+    } catch (error) {
+      console.log("ERROR:", error);
     }
+  };
 
-    const res = await fetch("http://192.168.137.154:8000/api/users/1", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json"
-      },
-    });
+  loadUser();
 
-    console.log("STATUS:", res.status);
-
-    const response = await res.json();
-    console.log("RAW RESPONSE:", response);
-
-    const user = response.data ?? response;
-
-    setProfile({
-      name: user.name,
-      age: user.birthdate ? calculateAge(user.birthdate) : "N/A",
-      avatar: require("@/src/assets/defaultd.png"),
-      routinesCount: 24,
-      weight: 78,
-      streak: 12,
-      height: 1.78,
-      somatotype: "Mesomorfo",
-      goal: "Ganar músculo"
-    });
-
-  } catch (error) {
-    console.log("ERROR FETCH:", error);
-  }
-};
-
-    loadUser();
-
-  }, []);
+}, []);
 
 
   if (!profile) {
