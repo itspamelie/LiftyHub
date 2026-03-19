@@ -38,37 +38,30 @@ class UsersController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'name'=>'required|string|min:2',
+
+    public function store(Request $request) { 
+        $validated = $request->validate([ 'name'=>'required|string|min:2', 
         'email'=>'required|email|unique:users,email',
-        'password'=>'required|min:6',
-        'gender'=>'required|string',
-        'img'=>'nullable|image',
-        'birthdate'=>'required|date',
-        'role'=>'required|string'
-    ]);
-
-    if($request->hasFile('img')){
-
-        $file = $request->file('img');
-
-        $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
-
-        $path = $file->storeAs('users',$filename,'public');
-
-        $validated['img'] = $path;
-    }
-
-    $data = User::create($validated);
-
-    return response()->json([
-        "status"=>"ok",
-        "message"=>"Usuario insertado correctamente.",
-        "data"=>$data
-    ]);
-}
+         'password'=>'required|min:6', 
+         'gender'=>'required|string',
+          'img'=>'nullable|image', 
+          'birthdate'=>'required|date', 
+          'role'=>'required|string' ]);
+           if($request->hasFile('img')){
+             $file = $request->file('img');
+              $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension(); 
+              // ruta a public/users 
+              $destinationPath = public_path('users'); 
+              // mover archivo 
+              $file->move($destinationPath, $filename); 
+              // guardar solo la ruta pública 
+              $validated['img'] = $filename; 
+              }else{ 
+                $validated['img'] = 'users/default.jpg';
+                 } 
+                 $data = User::create($validated);
+                  return response()->json([ "status"=>"ok", "message"=>"Usuario insertado correctamente.", "data"=>$data ]); 
+                  }
 
     /**
      * Display the specified resource.

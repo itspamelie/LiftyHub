@@ -5,21 +5,24 @@ import {
 } from "@mui/material"
 import { apiFetch } from "../../services/api"
 import Swal from "sweetalert2"
-
-
 import EditIcon from "@mui/icons-material/Edit"
 import DeleteIcon from "@mui/icons-material/Delete"
 import { Card, CardContent, Typography } from "@mui/material"
-
+import EditUserModal from "./EditUserModal"
 export default function UserTable({ users = [], onUserDeleted }: any){
 const [page, setPage] = useState(0)
 const rowsPerPage = 6
 const [localUsers, setLocalUsers] = useState(users)
-
+const [editOpen,setEditOpen] = useState(false)
+const [selectedUser,setSelectedUser] = useState(null)
 const handleChangePage = (event: unknown, newPage: number) => {
   setPage(newPage)
 }
 
+const openEdit = (user:any)=>{
+setSelectedUser(user)
+setEditOpen(true)
+}
 const handleDelete = async (id:number) => {
 
 const result = await Swal.fire({
@@ -112,7 +115,10 @@ borderBottom: "1px solid rgba(255,255,255,0.08)",
 <TableCell sx={{color:"white"}}>{user?.role}</TableCell>
 
 <TableCell>
-<IconButton sx={{color:"#60a5fa"}}>
+<IconButton
+sx={{color:"#60a5fa"}}
+onClick={()=>openEdit(user)}
+>
 <EditIcon/>
 </IconButton>
 
@@ -143,7 +149,15 @@ color:"white",
 }}
 />
 
+
+<EditUserModal
+open={editOpen}
+user={selectedUser}
+onClose={()=>setEditOpen(false)}
+onUpdated={onUserDeleted}
+/>
 </CardContent>
 </Card>
+
 )
 }
