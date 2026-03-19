@@ -87,6 +87,66 @@ export const createUserProperties = async (
   });
 };
 
+// 🔑 VERIFICAR CONTRASEÑA ACTUAL
+export const checkPassword = async (currentPassword: string, token: string) => {
+  return apiFetch(`${API_URL}/check-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ current_password: currentPassword }),
+  });
+};
+
+// 🗑️ ELIMINAR CUENTA
+export const deleteAccount = async (id: number, token: string) => {
+  return apiFetch(`${API_URL}/users/${id}`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+// ✏️ ACTUALIZAR USUARIO
+export const updateUser = async (id: number, data: { name?: string; email?: string }, token: string) => {
+  return apiFetch(`${API_URL}/users/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+};
+
+// ✏️ ACTUALIZAR PROPIEDADES DEL USUARIO
+export const updateUserProperties = async (
+  propertiesId: number,
+  data: {
+    user_id: number;
+    stature?: number;
+    weight?: number;
+    objective?: string;
+    somatotype_id?: number;
+  },
+  token: string
+) => {
+  return apiFetch(`${API_URL}/userProperties/${propertiesId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+};
+
 // 👤 OBTENER USUARIO
 export const getUser = async (id: number, token: string) => {
   return apiFetch(`${API_URL}/users/${id}`, {

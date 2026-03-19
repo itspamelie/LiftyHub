@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { Stack } from "expo-router";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Stack, router } from "expo-router";
 import { colors, spacing } from "@/src/styles/globalstyles";
-import BackButton from "@/src/components/buttons/backButton";
 
 export default function PrivacyScreen() {
 
@@ -10,11 +10,15 @@ export default function PrivacyScreen() {
 
       <Stack.Screen options={{ headerShown: false }} />
 
-      <BackButton />
+      {/* HEADER ESTÁTICO */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={20} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Política de privacidad</Text>
+      </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
-
-        <Text style={styles.title}>Política de privacidad</Text>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <Text style={styles.date}>Última actualización: marzo 2026</Text>
 
         <Text style={styles.section}>1. Introducción</Text>
@@ -106,9 +110,38 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background
   },
 
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    backgroundColor: colors.background,
+    gap: 14
+  },
+
+  backBtn: {
+    width: 45,
+    height: 45,
+    borderRadius: 25,
+    backgroundColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+
+  headerTitle: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: "700"
+  },
+
+  scroll: {
+    flex: 1
+  },
+
   content: {
     padding: spacing.screenPadding,
-    paddingTop: 120,
+    paddingTop: 10,
     paddingBottom: 40
   },
 

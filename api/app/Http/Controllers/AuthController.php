@@ -39,6 +39,21 @@ class AuthController extends Controller
         ]);
     }
 
+    // VERIFICAR CONTRASEÑA ACTUAL (requiere JWT)
+    public function checkPassword(Request $request) {
+        $request->validate([
+            'current_password' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['valid' => false], 200);
+        }
+
+        return response()->json(['valid' => true], 200);
+    }
+
     //PARA HACER EL LOGIN DE LA API
     public function login(Request $request){
         $credentials = $request->only("email","password");

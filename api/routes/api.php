@@ -28,6 +28,7 @@ use App\Http\Controllers\DashboardController;
 //RUTA DEL LOGIN
 Route::post('/login',[AuthController::class,'login']);
 Route::post('/register',[AuthController::class,'register']);
+Route::middleware("jwt")->post('/check-password',[AuthController::class,'checkPassword']);
 //Proteger vistas. Si hay una ruta fuera del grupo, cualquier persona puede hacerle peticion
 //para enviar token
 Route::middleware("jwt")->group(function(){

@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import SettingsItem from "@/src/components/settings/SettingsItem";
 import SettingsSwitchItem from "@/src/components/settings/SettingsSwitchItem";
+import { deleteAccount } from "@/src/services/api";
 
 export default function Settings() {
 
@@ -75,13 +76,28 @@ export default function Settings() {
   const handleDeleteAccount = () => {
     Alert.alert(
       "Eliminar cuenta",
-      "Esta acción es permanente. ¿Deseas continuar?",
+      "Esta acción es permanente y no se puede deshacer. ¿Deseas continuar?",
       [
         { text: "Cancelar", style: "cancel" },
         {
           text: "Eliminar",
           style: "destructive",
-          onPress: () => console.log("Eliminar cuenta")
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem("token");
+              const userRaw = await AsyncStorage.getItem("user");
+              if (!token || !userRaw) return;
+
+              const user = JSON.parse(userRaw);
+              await deleteAccount(user.id, token);
+
+              await AsyncStorage.removeItem("token");
+              await AsyncStorage.removeItem("user");
+              router.replace("/auth/login");
+            } catch (error) {
+              Alert.alert("Error", "No se pudo eliminar la cuenta");
+            }
+          }
         }
       ]
     );

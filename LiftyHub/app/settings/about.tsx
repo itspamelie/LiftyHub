@@ -1,8 +1,7 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import { colors, spacing } from "@/src/styles/globalstyles";
-import BackButton from "@/src/components/buttons/backButton";
 
 export default function AboutScreen() {
 
@@ -12,13 +11,15 @@ export default function AboutScreen() {
 
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* BOTÓN BACK */}
+      {/* HEADER ESTÁTICO */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={20} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Sobre LiftyHub</Text>
+      </View>
 
-      <BackButton />
-
-      <ScrollView contentContainerStyle={styles.content}>
-
-        <Text style={styles.title}>Sobre LiftyHub</Text>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
 
         <Text style={styles.section}>Nuestra misión</Text>
         <Text style={styles.text}>
@@ -73,9 +74,38 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background
   },
 
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    backgroundColor: colors.background,
+    gap: 14
+  },
+
+  backBtn: {
+    width: 45,
+    height: 45,
+    borderRadius: 25,
+    backgroundColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+
+  headerTitle: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: "700"
+  },
+
+  scroll: {
+    flex: 1
+  },
+
   content: {
     padding: spacing.screenPadding,
-    paddingTop: 120
+    paddingTop: 10
   },
 
   title: {

@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import ProgressCard from "@/src/components/profile/ProgressCard";
@@ -29,62 +29,50 @@ const calculateAge = (birthdate: string) => {
 export default function ProfileScreen() {
 
   const [profile, setProfile] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
- useEffect(() => {
-
-  const loadUser = async () => {
+  const loadUser = async (isRefresh = false) => {
     try {
-
       const token = await AsyncStorage.getItem("token");
       const userStorage = await AsyncStorage.getItem("user");
 
-      console.log("TOKEN:", token);
-      console.log("USER STORAGE:", userStorage);
-
-      if (!token || !userStorage) {
-        console.log("NO TOKEN O USER");
-        return;
-      }
+      if (!token || !userStorage) return;
 
       const userParsed = JSON.parse(userStorage);
 
-      // 🔥 LLAMADAS A API
-      const userData = await getUser(userParsed.id, token);
-      const propsData = await getUserProperties(userParsed.id, token);
-      const streakData = await getUserStreak(userParsed.id, token);
+      const userData         = await getUser(userParsed.id, token);
+      const propsData        = await getUserProperties(userParsed.id, token);
+      const streakData       = await getUserStreak(userParsed.id, token);
       const routinesCountData = await getUserRoutinesCount(userParsed.id, token);
 
-      console.log("USER API:", userData);
-      console.log("PROPS API:", propsData);
-      console.log("STREAK API:", streakData);
-
-      const user = userData.data ?? userData;
-      const props = propsData.data ?? propsData;
+      const user   = userData.data ?? userData;
+      const props  = propsData.data ?? propsData;
       const streak = streakData.data ?? streakData;
 
-      // 🔥 SET REAL
       setProfile({
-        name: user.name,
-        age: user.birthdate ? calculateAge(user.birthdate) : "N/A",
-        avatar: require("@/src/assets/defaultd.png"),
-
+        name:          user.name,
+        age:           user.birthdate ? calculateAge(user.birthdate) : "N/A",
+        avatar:        require("@/src/assets/defaultd.png"),
         routinesCount: routinesCountData?.count ?? 0,
-        streak: streak?.current_streak ?? 0,
-
-        weight: props?.weight ?? 0,
-        height: props?.stature ?? 0,
-        somatotype: props?.somatotype?.type ?? "N/A",
-        goal: props?.objective ?? "N/A",
+        streak:        streak?.current_streak ?? 0,
+        weight:        props?.weight ?? 0,
+        height:        props?.stature ?? 0,
+        somatotype:    props?.somatotype?.type ?? "N/A",
+        goal:          props?.objective ?? "N/A",
       });
-
     } catch (error) {
       console.log("ERROR:", error);
+    } finally {
+      if (isRefresh) setRefreshing(false);
     }
   };
 
-  loadUser();
+  useEffect(() => { loadUser(); }, []);
 
-}, []);
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadUser(true);
+  };
 
 
   if (!profile) {
@@ -108,7 +96,11 @@ export default function ProfileScreen() {
         <Ionicons name="pencil" size={20} color="white" />
       </TouchableOpacity>
 
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary} />
+        }
+      >
 
         {/* PORTADA */}
         <ImageBackground
@@ -173,7 +165,7 @@ export default function ProfileScreen() {
             <InfoStatCard
               icon="resize"
               label="Altura"
-              value={`${profile.height} m`}
+              value={`${profile.height} cm`}
             />
 
             <InfoStatCard

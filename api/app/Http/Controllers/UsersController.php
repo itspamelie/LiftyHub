@@ -9,6 +9,10 @@ use App\Models\MonthlyProgress;
 use App\Models\ExerciseLog;
 use App\Models\UserPropertie;
 use App\Models\Somatotypes;
+use App\Models\UserStreak;
+use App\Models\UserRoutineExercise;
+use App\Models\UserRoutine;
+use App\Models\PaymentDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -103,25 +107,27 @@ public function store(Request $request)
     public function update(Request $request, string $id)
     {
         $validated = $request->validate([
-            'name'=>'required|string|min:2',
-            'email'=>'required|string|min:6',
-            'password'=>'required',
-            'gender'=>'required|string',
-            'img'=>'nullable|image',
-            'birthdate'=>'required|date',
-            'role'=>'required|string'
+            'name'      => 'sometimes|string|min:2',
+            'email'     => 'sometimes|email|unique:users,email,' . $id,
+            'password'  => 'sometimes|min:6',
+            'gender'    => 'sometimes|string',
+            'img'       => 'nullable|image',
+            'birthdate' => 'sometimes|date',
         ]);
 
-        //metodo si los campos se llaman igual que en la base de datos
         $data = User::findOrFail($id);
+
+        if (isset($validated['password'])) {
+            $validated['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        }
+
         $data->update($validated);
-          return response()->json([
-            "status"=>"ok",
-            "mesage"=>"Datos del usuario actualizados correctamente.",
-            "data"=>$data
 
+        return response()->json([
+            "status" => "ok",
+            "mesage" => "Datos del usuario actualizados correctamente.",
+            "data"   => $data
         ]);
-
     }
 
     /**
@@ -138,16 +144,16 @@ public function destroy(string $id)
         ]);
     }
 
-    // eliminar imagen de perfil
-    if($user->profilepic){
-
-        $path = public_path($user->img);
-
-        if(file_exists($path)){
-            unlink($path);
-        }
-
-    }
+    // eliminar registros relacionados antes de borrar el usuario
+    $routineIds = UserRoutine::where('user_id', $id)->pluck('id');
+    UserRoutineExercise::whereIn('user_routine_id', $routineIds)->delete();
+    UserRoutine::where('user_id', $id)->delete();
+    UserPropertie::where('user_id', $id)->delete();
+    UserStreak::where('user_id', $id)->delete();
+    MonthlyProgress::where('user_id', $id)->delete();
+    ExerciseLog::where('user_id', $id)->delete();
+    Subscription::where('user_id', $id)->delete();
+    PaymentDetail::where('user_id', $id)->delete();
 
     $user->delete();
 
