@@ -18,6 +18,20 @@ const res = await fetch(`${API_URL}${endpoint}`,{
 headers
 })
 
-return res.json()
+const data = await res.json()
+
+if(!res.ok){
+throw data
+}
+
+return data
+
+}
+
+export const getImageUrl = (path:string) => {
+
+const serverURL = API_URL.replace("/api","")
+
+return `${serverURL}/users/${path}`
 
 }

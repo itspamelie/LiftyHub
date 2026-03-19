@@ -16,6 +16,7 @@ use App\Models\PaymentDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 
 class UsersController extends Controller
@@ -42,37 +43,31 @@ class UsersController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'name'=>'required|string|min:2',
+
+    public function store(Request $request) { 
+        $validated = $request->validate([ 'name'=>'required|string|min:2', 
         'email'=>'required|email|unique:users,email',
-        'password'=>'required|min:6',
-        'gender'=>'required|string',
-        'img'=>'nullable|image',
-        'birthdate'=>'required|date',
-        'role'=>'required|string'
-    ]);
-
-    if($request->hasFile('img')){
-
-        $file = $request->file('img');
-
-        $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
-
-        $path = $file->storeAs('users',$filename,'public');
-
-        $validated['img'] = $path;
-    }
-
-    $data = User::create($validated);
-
-    return response()->json([
-        "status"=>"ok",
-        "message"=>"Usuario insertado correctamente.",
-        "data"=>$data
-    ]);
-}
+         'password'=>'required|min:6', 
+         'gender'=>'required|string',
+          'img'=>'nullable|image', 
+          'birthdate'=>'required|date', 
+          'role'=>'required|string' ]);
+           if($request->hasFile('img')){
+             $file = $request->file('img');
+              $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension(); 
+              // ruta a public/users 
+              $destinationPath = public_path('users'); 
+              // mover archivo 
+              $file->move($destinationPath, $filename); 
+              // guardar solo la ruta pública 
+              $validated['img'] = $filename; 
+              }else{ 
+                $validated['img'] = 'users/default.jpg';
+                 } 
+                 $validated['password'] = Hash::make($validated['password']);
+                 $data = User::create($validated);
+                  return response()->json([ "status"=>"ok", "message"=>"Usuario insertado correctamente.", "data"=>$data ]); 
+                  }
 
     /**
      * Display the specified resource.
@@ -104,31 +99,69 @@ public function store(Request $request)
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        $validated = $request->validate([
-            'name'      => 'sometimes|string|min:2',
-            'email'     => 'sometimes|email|unique:users,email,' . $id,
-            'password'  => 'sometimes|min:6',
-            'gender'    => 'sometimes|string',
-            'img'       => 'nullable|image',
-            'birthdate' => 'sometimes|date',
-        ]);
+public function update(Request $request, string $id)
+{
+    $user = User::findOrFail($id);
 
-        $data = User::findOrFail($id);
+    $validated = $request->validate([
+        'name'      => 'required|string|min:2',
+        'email'     => 'required|email|unique:users,email,'.$id,
+        'password'  => 'nullable|min:6',
+        'gender'    => 'required|string',
+        'img'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        'birthdate' => 'required|date',
+        'role'      => 'required|string',
+    ]);
 
-        if (isset($validated['password'])) {
-            $validated['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
+    /*
+    =========================
+    PASSWORD
+    =========================
+    */
+
+    if(!empty($validated['password'])){
+        $validated['password'] = Hash::make($validated['password']);
+    }else{
+        unset($validated['password']);
+    }
+
+    /*
+    =========================
+    IMAGEN
+    =========================
+    */
+
+    if($request->hasFile('img')){
+
+        // eliminar imagen anterior si no es default
+        if($user->img && $user->img !== 'default.jpg'){
+
+            $oldImagePath = public_path('users/'.$user->img);
+
+            if(file_exists($oldImagePath)){
+                unlink($oldImagePath);
+            }
         }
 
-        $data->update($validated);
+        $file = $request->file('img');
 
-        return response()->json([
-            "status" => "ok",
-            "mesage" => "Datos del usuario actualizados correctamente.",
-            "data"   => $data
-        ]);
+        $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
+
+        $destinationPath = public_path('users');
+
+        $file->move($destinationPath, $filename);
+
+        $validated['img'] = $filename;
     }
+
+    $user->update($validated);
+
+    return response()->json([
+        "status" => "ok",
+        "message" => "Usuario actualizado correctamente",
+        "data" => $user
+    ]);
+}
 
     /**
      * Remove the specified resource from storage.
@@ -144,16 +177,15 @@ public function destroy(string $id)
         ]);
     }
 
-    // eliminar registros relacionados antes de borrar el usuario
-    $routineIds = UserRoutine::where('user_id', $id)->pluck('id');
-    UserRoutineExercise::whereIn('user_routine_id', $routineIds)->delete();
-    UserRoutine::where('user_id', $id)->delete();
-    UserPropertie::where('user_id', $id)->delete();
-    UserStreak::where('user_id', $id)->delete();
-    MonthlyProgress::where('user_id', $id)->delete();
-    ExerciseLog::where('user_id', $id)->delete();
-    Subscription::where('user_id', $id)->delete();
-    PaymentDetail::where('user_id', $id)->delete();
+    // eliminar imagen de perfil (si no es default)
+    if($user->img && $user->img !== 'default.jpg'){
+
+        $path = public_path('users/'.$user->img);
+
+        if(file_exists($path)){
+            unlink($path);
+        }
+    }
 
     $user->delete();
 

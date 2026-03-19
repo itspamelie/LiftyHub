@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Plan;
+use Illuminate\Support\Facades\DB;
+
+
 
 class PlansController extends Controller
 {
@@ -111,4 +114,28 @@ class PlansController extends Controller
             "mesage"=>"Plan eliminado correctamente."
         ]);
     }
+
+    public function searchPlans(Request $request)
+{
+    $search = $request->input('search');
+
+    // si no hay búsqueda devolver todos los planes
+    if(!$search){
+        return response()->json([
+            "status" => "ok",
+            "data" => Plan::all()
+        ]);
+    }
+
+    $plans = Plan::where(function($query) use ($search){
+        $query->where('name','LIKE',"%{$search}%")
+              ->orWhere('description','LIKE',"%{$search}%")
+              ->orWhere('price','LIKE',"%{$search}%");
+    })->get();
+
+    return response()->json([
+        "status" => "ok",
+        "data" => $plans
+    ]);
+}
 }

@@ -77,6 +77,7 @@ icon:"success",
 title:"Usuario creado",
 text:"El usuario se registró correctamente",
       background:"#0f172a",
+      confirmButtonColor:"#60a5fa",
       color:"#fff",
 })
 
