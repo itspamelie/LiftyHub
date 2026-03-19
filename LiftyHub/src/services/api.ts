@@ -65,6 +65,28 @@ export const registerRequest = async (data: {
   }
 };
 
+// 🏷️ CREAR PROPIEDADES DEL USUARIO (tras registro)
+export const createUserProperties = async (
+  data: {
+    user_id: number;
+    stature?: number;
+    weight?: number;
+    objective: string;
+    somatotype_id: number;
+  },
+  token: string
+) => {
+  return apiFetch(`${API_URL}/userProperties`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+};
+
 // 👤 OBTENER USUARIO
 export const getUser = async (id: number, token: string) => {
   return apiFetch(`${API_URL}/users/${id}`, {

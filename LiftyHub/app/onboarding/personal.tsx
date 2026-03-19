@@ -18,7 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import BackButton from "@/src/components/buttons/backButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
-import { registerRequest } from "@/src/services/api";
+import { registerRequest, createUserProperties } from "@/src/services/api";
 
 export default function Personal() {
 
@@ -63,6 +63,12 @@ const [showPicker, setShowPicker] = useState(false);
 
       const birthdateStr = birthdate.toISOString().split("T")[0];
 
+      const somatotypeMap: Record<string, number> = {
+        "Ectomorfo": 1,
+        "Mesomorfo": 2,
+        "Endomorfo": 3,
+      };
+
       const data = await registerRequest({
         name,
         email,
@@ -74,6 +80,18 @@ const [showPicker, setShowPicker] = useState(false);
       if (data?.token) {
         await AsyncStorage.setItem("token", data.token);
         await AsyncStorage.setItem("user", JSON.stringify(data.user));
+
+        await createUserProperties(
+          {
+            user_id: data.user.id,
+            stature: parseFloat(height),
+            weight: parseFloat(weight),
+            objective,
+            somatotype_id: somatotypeMap[somatotype!],
+          },
+          data.token
+        );
+
         await AsyncStorage.removeItem("@register_data");
         await AsyncStorage.removeItem("@register_objective");
 

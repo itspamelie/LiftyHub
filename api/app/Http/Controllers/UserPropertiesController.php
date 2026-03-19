@@ -33,16 +33,17 @@ class UserPropertiesController extends Controller
     public function store(Request $request)
     {
           $validated = $request->validate([
-            'user_id'=>'required',
-            'stature'=>'required|numeric',
-            'waist'=>'required|numeric',
-            'chest'=>'required|numeric',
-            'hips'=>'required|numeric',
-            'arms'=>'required|numeric',
-            'shoulders'=>'required|numeric',
-            'thighs'=>'required|numeric',
-            'objective'=>'required|string',
-            'somatotype_id'=>'required'
+            'user_id'      => 'required',
+            'stature'      => 'nullable|numeric',
+            'weight'       => 'nullable|numeric',
+            'waist'        => 'nullable|numeric',
+            'chest'        => 'nullable|numeric',
+            'hips'         => 'nullable|numeric',
+            'arms'         => 'nullable|numeric',
+            'shoulders'    => 'nullable|numeric',
+            'thighs'       => 'nullable|numeric',
+            'objective'    => 'required|string',
+            'somatotype_id'=> 'required'
         ]);
 
         //metodo si los campos se llaman igual que en la base de datos
