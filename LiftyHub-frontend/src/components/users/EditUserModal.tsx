@@ -90,8 +90,9 @@ body:formData
 Swal.fire({
 icon:"success",
 title:"Usuario actualizado",
- background:"#0f172a",
 timer:1500,
+background:"#0f172a",
+color:"#fff",
 showConfirmButton:false
 })
 
@@ -103,7 +104,6 @@ onClose()
 Swal.fire({
 icon:"error",
 title:"Error",
-background:"#0f172a",
 text:"No se pudo actualizar el usuario"
 })
 

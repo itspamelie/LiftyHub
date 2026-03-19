@@ -12,6 +12,7 @@ use App\Models\Somatotypes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 
 class UsersController extends Controller
@@ -59,6 +60,7 @@ class UsersController extends Controller
               }else{ 
                 $validated['img'] = 'users/default.jpg';
                  } 
+                 $validated['password'] = Hash::make($validated['password']);
                  $data = User::create($validated);
                   return response()->json([ "status"=>"ok", "message"=>"Usuario insertado correctamente.", "data"=>$data ]); 
                   }
@@ -93,29 +95,69 @@ class UsersController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        $validated = $request->validate([
-            'name'=>'required|string|min:2',
-            'email'=>'required|string|min:6',
-            'password'=>'required',
-            'gender'=>'required|string',
-            'img'=>'nullable|image',
-            'birthdate'=>'required|date',
-            'role'=>'required|string'
-        ]);
+public function update(Request $request, string $id)
+{
+    $user = User::findOrFail($id);
 
-        //metodo si los campos se llaman igual que en la base de datos
-        $data = User::findOrFail($id);
-        $data->update($validated);
-          return response()->json([
-            "status"=>"ok",
-            "mesage"=>"Datos del usuario actualizados correctamente.",
-            "data"=>$data
+    $validated = $request->validate([
+        'name' => 'required|string|min:2',
+        'email' => 'required|email|unique:users,email,'.$id,
+        'password' => 'nullable|min:6',
+        'gender' => 'required|string',
+        'img' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        'birthdate' => 'required|date',
+        'role' => 'required|string'
+    ]);
 
-        ]);
+    /*
+    =========================
+    PASSWORD
+    =========================
+    */
 
+    if(!empty($validated['password'])){
+        $validated['password'] = Hash::make($validated['password']);
+    }else{
+        unset($validated['password']);
     }
+
+    /*
+    =========================
+    IMAGEN
+    =========================
+    */
+
+    if($request->hasFile('img')){
+
+        // eliminar imagen anterior si no es default
+        if($user->img && $user->img !== 'default.jpg'){
+
+            $oldImagePath = public_path('users/'.$user->img);
+
+            if(file_exists($oldImagePath)){
+                unlink($oldImagePath);
+            }
+        }
+
+        $file = $request->file('img');
+
+        $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
+
+        $destinationPath = public_path('users');
+
+        $file->move($destinationPath, $filename);
+
+        $validated['img'] = $filename;
+    }
+
+    $user->update($validated);
+
+    return response()->json([
+        "status" => "ok",
+        "message" => "Usuario actualizado correctamente",
+        "data" => $user
+    ]);
+}
 
     /**
      * Remove the specified resource from storage.
@@ -131,15 +173,14 @@ public function destroy(string $id)
         ]);
     }
 
-    // eliminar imagen de perfil
-    if($user->profilepic){
+    // eliminar imagen de perfil (si no es default)
+    if($user->img && $user->img !== 'default.jpg'){
 
-        $path = public_path($user->img);
+        $path = public_path('users/'.$user->img);
 
         if(file_exists($path)){
             unlink($path);
         }
-
     }
 
     $user->delete();

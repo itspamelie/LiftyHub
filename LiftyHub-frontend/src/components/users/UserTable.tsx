@@ -32,8 +32,8 @@ icon:"warning",
 showCancelButton:true,
 confirmButtonText:"Eliminar",
 cancelButtonText:"Cancelar",
-confirmButtonColor:"#3b82f6",
-cancelButtonColor:"#3b82f6",
+confirmButtonColor:"#ed2d2d",
+cancelButtonColor:"#989a9e",
 background:"#202940",
 color:"#fff"
 })
@@ -51,7 +51,7 @@ await onUserDeleted()
 Swal.fire({
 icon:"success",
 title:"Usuario eliminado",
-confirmButtonColor:"#3b82f6",
+confirmButtonColor:"#60a5fa",
 background:"#202940",
 color:"#fff"
 })

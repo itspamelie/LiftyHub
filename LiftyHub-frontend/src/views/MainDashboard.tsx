@@ -5,7 +5,7 @@ import ChartsRow from "../components/dashboard/ChartsRow";
 import ProjectsTable from "../components/dashboard/ProjectsTable";
 import OrdersOverview from "../components/dashboard/OrdersOverview";
 import Swal from "sweetalert2";
-
+import { apiFetch } from "../services/api"
 import { useState, useEffect } from "react";
 
 interface Stats {
@@ -41,28 +41,21 @@ export default function MainDashboard() {
 const [loading, setLoading] = useState(true)
 useEffect(() => {
 
-  const token = localStorage.getItem("token")
-
-  fetch(`${import.meta.env.VITE_API_URL}/dashboard`, {
-    headers:{
-      Authorization:`Bearer ${token}`,
-      Accept:"application/json"
+  const loadDashboard = async () => {
+    try{
+      const data = await apiFetch("/dashboard")
+      setDashboard(data)
+    }catch(err){
+      console.error(err)
+    }finally{
+      setLoading(false)
+      Swal.close()
     }
-  })
-  .then(res => res.json())
-  .then(data => {
-    setDashboard(data)
-    setLoading(false)
-    Swal.close()
-  })
-  .catch(err => {
-    console.error(err)
-    setLoading(false)
-    Swal.close()
-  })
+  }
+
+  loadDashboard()
 
 }, [])
-
 useEffect(() => {
 
   if(loading){
