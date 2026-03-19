@@ -54,7 +54,7 @@ class UserStreaksController extends Controller
      */
     public function show(string $id)
     {
-         $data = UserStreak::find($id);
+         $data = UserStreak::where('user_id', $id)->first();
         if($data){
             return response()->json([
             "status"=>"ok",

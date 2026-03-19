@@ -16,6 +16,12 @@ class userStreaksSeeder extends Seeder
     {
               DB::table('user_streaks')->insert([
     [
+        'user_id' => 1,
+        'current_streak' => 7,
+        'longest_streak' => 15,
+        'last_training_date' => '2026-03-17'
+    ],
+    [
         'user_id' => 2,
         'current_streak' => 5,
         'longest_streak' => 10,

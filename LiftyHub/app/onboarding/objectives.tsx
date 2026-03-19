@@ -9,6 +9,7 @@ import {
 import { useRouter, Stack } from "expo-router";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import BackButton from "@/src/components/buttons/backButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
 
@@ -25,8 +26,9 @@ export default function Objectives() {
     { label: "Mejorar fuerza", icon: "fitness-outline" }
   ];
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!selected) return;
+    await AsyncStorage.setItem("@register_objective", selected);
     router.push("/onboarding/personal" as any);
   };
 

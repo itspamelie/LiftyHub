@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
     monthlyProgressSeeder::class,
     exerciseLogsSeeder::class,
     userStreaksSeeder::class,
+    userRoutinesSeeder::class,
     nutritionistProfiles::class,
 ]);
     }

@@ -1,12 +1,12 @@
 import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
-import ProgressCard from "@/src/components/ProgressCard";
-import InfoStatCard from "@/src/components/InfoStatCard";
+import ProgressCard from "@/src/components/profile/ProgressCard";
+import InfoStatCard from "@/src/components/profile/InfoStatCard";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getUser, getUserProperties } from "@/src/services/api";
+import { getUser, getUserProperties, getUserStreak, getUserRoutinesCount } from "@/src/services/api";
 
 
 // función para calcular la edad
@@ -51,12 +51,16 @@ export default function ProfileScreen() {
       // 🔥 LLAMADAS A API
       const userData = await getUser(userParsed.id, token);
       const propsData = await getUserProperties(userParsed.id, token);
+      const streakData = await getUserStreak(userParsed.id, token);
+      const routinesCountData = await getUserRoutinesCount(userParsed.id, token);
 
       console.log("USER API:", userData);
       console.log("PROPS API:", propsData);
+      console.log("STREAK API:", streakData);
 
       const user = userData.data ?? userData;
       const props = propsData.data ?? propsData;
+      const streak = streakData.data ?? streakData;
 
       // 🔥 SET REAL
       setProfile({
@@ -64,12 +68,12 @@ export default function ProfileScreen() {
         age: user.birthdate ? calculateAge(user.birthdate) : "N/A",
         avatar: require("@/src/assets/defaultd.png"),
 
-        routinesCount: 24,
-        streak: 12,
+        routinesCount: routinesCountData?.count ?? 0,
+        streak: streak?.current_streak ?? 0,
 
         weight: props?.weight ?? 0,
         height: props?.stature ?? 0,
-        somatotype: props?.somatotype_id ?? "N/A",
+        somatotype: props?.somatotype?.type ?? "N/A",
         goal: props?.objective ?? "N/A",
       });
 

@@ -1,6 +1,6 @@
 import { FlatList, View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, ScrollView, TouchableWithoutFeedback} from "react-native";
-import RoutineCard from "@/src/components/RoutineCard";
-import FilterButton from "@/src/components/FilterButton";
+import RoutineCard from "@/src/components/routines/RoutineCard";
+import FilterButton from "@/src/components/exercises/FilterButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useRef } from "react";

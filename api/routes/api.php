@@ -20,20 +20,24 @@ use App\Http\Controllers\SomatotypesController;
 use App\Http\Controllers\SubscriptionsController;
 use App\Http\Controllers\UserPropertiesController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\UserRoutinesController;
 use App\Http\Controllers\UserStreaksController;
 use App\Http\Controllers\DashboardController;
 
 
 //RUTA DEL LOGIN
 Route::post('/login',[AuthController::class,'login']);
+Route::post('/register',[AuthController::class,'register']);
 //Proteger vistas. Si hay una ruta fuera del grupo, cualquier persona puede hacerle peticion
 //para enviar token
 Route::middleware("jwt")->group(function(){
 Route::get('/users/stats', [UsersController::class,'statsuser']);
 Route::resource('users',UsersController::class);
 Route::resource('userStreak',UserStreaksController::class);
-Route::resource('userProperties',UserProperties::class);
-Route::resource('subscriptions',Subscriptions::class);
+Route::get('/userRoutines/{id}/count', [UserRoutinesController::class, 'count']);
+Route::resource('userRoutines',UserRoutinesController::class);
+Route::resource('userProperties',UserPropertiesController::class);
+Route::resource('subscriptions',SubscriptionsController::class);
 Route::resource('somatotypes',SomatotypesController::class);
 Route::resource('routines',RoutinesController::class);
 Route::resource('plans',PlansController::class);

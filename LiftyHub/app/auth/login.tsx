@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from "react-native";
 import { useRouter, Stack } from "expo-router";
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loginRequest } from "@/src/services/api";
@@ -14,113 +14,90 @@ export default function Login() {
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
-
-  const checkLogin = async () => {
-
-    const token = await AsyncStorage.getItem("token");
-
-    if (token) {
-      console.log("Usuario ya logueado");
-      router.replace("/(tabs)" as any);
-    }
-
-  };
-
-  checkLogin();
-
-}, []);
+    const checkLogin = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (token) {
+        router.replace("/(tabs)" as any);
+      }
+    };
+    checkLogin();
+  }, []);
 
   const handleLogin = async () => {
+    try {
+      const data = await loginRequest(email, password);
+      console.log("API:", API_URL);
+      console.log("RESPUESTA DEL BACKEND:", data);
 
-  try {
-
-    const data = await loginRequest(email, password);
-
-    console.log("API:", API_URL);
-
-    console.log("RESPUESTA DEL BACKEND:", data);
-
-    if (data.token) {
-
-      await AsyncStorage.setItem("token", data.token);
-      await AsyncStorage.setItem("user", JSON.stringify(data.user));
-
-      console.log("TOKEN GUARDADO");
-
-      router.replace("/(tabs)" as any);
-
+      if (data.token) {
+        await AsyncStorage.setItem("token", data.token);
+        await AsyncStorage.setItem("user", JSON.stringify(data.user));
+        console.log("TOKEN GUARDADO");
+        router.replace("/(tabs)" as any);
+      }
+    } catch (error) {
+      console.log("Error conectando al backend:", error);
     }
-
-  } catch (error) {
-    console.log("Error conectando al backend:", error);
-  }
-
-};
+  };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
 
-      {/* QUITA HEADER BLANCO */}
-      <Stack.Screen options={{ headerShown: false }} />
+          <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Logo / Branding */}
+          <View style={styles.header}>
+            <Ionicons name="barbell" size={60} color="#3B82F6" />
+            <Text style={styles.title}>LiftyHub</Text>
+            <Text style={styles.subtitle}>Entrena. Progresa. Mejora.</Text>
+          </View>
 
-      <View style={styles.header}>
-        <Ionicons name="barbell" size={60} color="#3B82F6" />
-        <Text style={styles.title}>LiftyHub</Text>
-        <Text style={styles.subtitle}>Entrena. Progresa. Mejora.</Text>
-      </View>
+          <View style={styles.card}>
 
-      {/* Card */}
+            <Text style={styles.cardTitle}>Iniciar sesión</Text>
 
-      <View style={styles.card}>
+            <View style={styles.inputContainer}>
+              <Ionicons name="mail-outline" size={20} color="#A1A1A1" />
+              <TextInput
+                placeholder="Correo electrónico"
+                placeholderTextColor="#A1A1A1"
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
 
-        <Text style={styles.cardTitle}>Iniciar sesión</Text>
+            <View style={styles.inputContainer}>
+              <Ionicons name="lock-closed-outline" size={20} color="#A1A1A1" />
+              <TextInput
+                placeholder="Contraseña"
+                placeholderTextColor="#A1A1A1"
+                secureTextEntry
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+                autoCapitalize="none"
+              />
+            </View>
 
-        {/* Email */}
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+              <Text style={styles.loginText}>Entrar</Text>
+            </TouchableOpacity>
 
-        <View style={styles.inputContainer}>
-          <Ionicons name="mail-outline" size={20} color="#A1A1A1" />
-          <TextInput
-            placeholder="Correo electrónico"
-            placeholderTextColor="#A1A1A1"
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-          />
+            <TouchableOpacity onPress={() => router.push("/auth/register" as any)}>
+              <Text style={styles.register}>
+                ¿No tienes cuenta? <Text style={styles.registerHighlight}>Crear cuenta</Text>
+              </Text>
+            </TouchableOpacity>
+
+          </View>
+
         </View>
-
-        {/* Password */}
-
-        <View style={styles.inputContainer}>
-          <Ionicons name="lock-closed-outline" size={20} color="#A1A1A1" />
-          <TextInput
-            placeholder="Contraseña"
-            placeholderTextColor="#A1A1A1"
-            secureTextEntry
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-          />
-        </View>
-
-        {/* Login Button */}
-
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginText}>Entrar</Text>
-        </TouchableOpacity>
-
-        {/* Register */}
-
-        <TouchableOpacity onPress={() => router.push("/auth/register" as any)}>
-  <Text style={styles.register}>
-    ¿No tienes cuenta? <Text style={styles.registerHighlight}>Crear cuenta</Text>
-  </Text>
-</TouchableOpacity>
-
-      </View>
-
-    </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 

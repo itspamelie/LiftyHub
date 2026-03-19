@@ -9,6 +9,7 @@ class UserPropertie extends Model
      protected $table = 'user_properties';
     protected $fillable = [
         'user_id',
+        'weight',
         'stature',
         'waist',
         'chest',

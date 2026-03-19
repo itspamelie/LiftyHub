@@ -14,6 +14,7 @@ import {
 import { useRouter, Stack } from "expo-router";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import BackButton from "@/src/components/buttons/backButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
 
@@ -29,10 +30,15 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
 
     if (!name || !email || !password || !confirmPassword) {
       alert("Completa todos los campos");
+      return;
+    }
+
+    if (password.length < 6) {
+      alert("La contraseña debe tener al menos 6 caracteres");
       return;
     }
 
@@ -41,7 +47,8 @@ export default function Register() {
       return;
     }
 
-    router.replace("/onboarding/objectives");
+    await AsyncStorage.setItem("@register_data", JSON.stringify({ name, email, password }));
+    router.push("/onboarding/objectives" as any);
   };
 
   return (

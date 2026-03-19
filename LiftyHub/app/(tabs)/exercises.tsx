@@ -1,7 +1,7 @@
 import { ScrollView, View, Text, StyleSheet, TextInput } from "react-native";
 import { useState } from "react";
-import ExerciseCard from "@/src/components/ExerciseCard";
-import FilterButton from "@/src/components/FilterButton";
+import ExerciseCard from "@/src/components/exercises/ExerciseCard";
+import FilterButton from "@/src/components/exercises/FilterButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
 
 type ExerciseFile = {

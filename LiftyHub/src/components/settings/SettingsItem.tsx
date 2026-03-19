@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { colors } from "@/src/styles/globalstyles";
 
 type Props = {
   icon: any;
@@ -30,13 +31,13 @@ export default function SettingsItem({
         <Ionicons
           name={icon}
           size={20}
-          color={danger ? "#EF4444" : "white"}
+          color={danger ? colors.danger : colors.text}
         />
 
         <Text
           style={[
             styles.label,
-            danger && { color: "#EF4444" }
+            danger && { color: colors.danger }
           ]}
         >
           {label}

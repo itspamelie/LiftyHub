@@ -60,7 +60,7 @@ class UserPropertiesController extends Controller
      */
     public function show(string $id)
     {
-         $data = UserPropertie::find($id);
+         $data = UserPropertie::with('somatotype')->where('user_id', $id)->first();
         if($data){
             return response()->json([
             "status"=>"ok",

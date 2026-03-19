@@ -1,9 +1,15 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 
 export default function TabLayout() {
   return (
     <Tabs
+      screenListeners={{
+        tabPress: () => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+      }}
       screenOptions={{
         headerShown: false,
 

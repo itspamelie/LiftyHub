@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Stack } from "expo-router";
-import PlanCard from "@/src/components/PlanCard";
+import PlanCard from "@/src/components/plans/PlanCard";
 import BackButton from "@/src/components/buttons/backButton";
 
 export default function Plans() {

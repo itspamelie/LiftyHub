@@ -15,6 +15,19 @@ class userPropertiesSeeder extends Seeder
     {
        DB::table('user_properties')->insert([
     [
+        'user_id' => 1,
+        'weight' => 80.00,
+        'stature' => 175.00,
+        'waist' => 85.00,
+        'chest' => 100.00,
+        'hips' => 95.00,
+        'arms' => 35.00,
+        'shoulders' => 110.00,
+        'thighs' => 55.00,
+        'objective' => 'Ganar músculo',
+        'somatotype_id' => 1
+    ],
+    [
         'user_id' => 2,
         'weight' => 60.50,
         'stature' => 165.00,

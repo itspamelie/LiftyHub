@@ -1,4 +1,22 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+// Función centralizada — si el token es inválido, limpia y manda al login
+const apiFetch = async (url: string, options: RequestInit = {}) => {
+  const res = await fetch(url, options);
+  const data = await res.json();
+
+  if (data.error === "Unauthorized" || res.status === 401) {
+    await AsyncStorage.removeItem("token");
+    await AsyncStorage.removeItem("user");
+    router.replace("/auth/login");
+    return null;
+  }
+
+  return data;
+};
 
 // 🔐 LOGIN
 export const loginRequest = async (email: string, password: string) => {
@@ -12,9 +30,7 @@ export const loginRequest = async (email: string, password: string) => {
     });
 
     const data = await res.json();
-
     console.log("RESPUESTA DEL BACKEND:", data);
-
     return data;
 
   } catch (error) {
@@ -23,26 +39,68 @@ export const loginRequest = async (email: string, password: string) => {
   }
 };
 
+// 📝 REGISTRO
+export const registerRequest = async (data: {
+  name: string;
+  email: string;
+  password: string;
+  gender: string;
+  birthdate: string;
+}) => {
+  try {
+    const res = await fetch(`${API_URL}/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    const text = await res.text();
+    console.log("REGISTER RESPONSE:", text);
+    return JSON.parse(text);
+  } catch (error) {
+    console.log("Error en registerRequest:", error);
+    throw error;
+  }
+};
+
 // 👤 OBTENER USUARIO
 export const getUser = async (id: number, token: string) => {
-  const res = await fetch(`${API_URL}/users/${id}`, {
+  return apiFetch(`${API_URL}/users/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json"
     }
   });
+};
 
-  return res.json();
+// 🏋️ OBTENER CONTEO DE RUTINAS DEL USUARIO
+export const getUserRoutinesCount = async (id: number, token: string) => {
+  return apiFetch(`${API_URL}/userRoutines/${id}/count`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json"
+    }
+  });
+};
+
+// 🔥 OBTENER RACHA DEL USUARIO
+export const getUserStreak = async (id: number, token: string) => {
+  return apiFetch(`${API_URL}/userStreak/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json"
+    }
+  });
 };
 
 // 📊 OBTENER PROPIEDADES DEL USUARIO
 export const getUserProperties = async (id: number, token: string) => {
-  const res = await fetch(`${API_URL}/userProperties/${id}`, {
+  return apiFetch(`${API_URL}/userProperties/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json"
     }
   });
-
-  return res.json();
 };

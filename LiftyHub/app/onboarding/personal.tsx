@@ -14,9 +14,11 @@ import { Modal } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import BackButton from "@/src/components/buttons/backButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { registerRequest } from "@/src/services/api";
 
 export default function Personal() {
 
@@ -42,22 +44,53 @@ const [showPicker, setShowPicker] = useState(false);
     });
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!birthdate || !height || !weight || !gender || !somatotype) {
       Alert.alert("Error", "Completa todos los campos");
       return;
     }
 
-    Alert.alert(
-      "Cuenta creada 🎉",
-      "Tu cuenta se ha creado correctamente",
-      [
-        {
-          text: "OK",
-          onPress: () => router.replace("/(tabs)")
-        }
-      ]
-    );
+    try {
+      const registerDataRaw = await AsyncStorage.getItem("@register_data");
+      const objective = await AsyncStorage.getItem("@register_objective");
+
+      if (!registerDataRaw || !objective) {
+        Alert.alert("Error", "Datos incompletos, vuelve a intentarlo");
+        return;
+      }
+
+      const { name, email, password } = JSON.parse(registerDataRaw);
+
+      const birthdateStr = birthdate.toISOString().split("T")[0];
+
+      const data = await registerRequest({
+        name,
+        email,
+        password,
+        gender,
+        birthdate: birthdateStr,
+      });
+
+      if (data?.token) {
+        await AsyncStorage.setItem("token", data.token);
+        await AsyncStorage.setItem("user", JSON.stringify(data.user));
+        await AsyncStorage.removeItem("@register_data");
+        await AsyncStorage.removeItem("@register_objective");
+
+        Alert.alert("Cuenta creada", "Tu cuenta se ha creado correctamente", [
+          { text: "OK", onPress: () => router.replace("/(tabs)" as any) }
+        ]);
+      } else {
+        const mensaje = data?.errors?.email?.[0] ?? data?.message ?? "No se pudo crear la cuenta";
+        Alert.alert("Error", mensaje, [
+          { text: "OK", onPress: () => router.replace("/auth/register" as any) }
+        ]);
+      }
+
+    } catch (error) {
+      console.log("Error en registro:", error);
+      Alert.alert("Error", "Ocurrió un problema, intenta de nuevo");
+    }
   };
 
   return (
@@ -192,9 +225,7 @@ const [showPicker, setShowPicker] = useState(false);
                     styles.selectorButton,
                     isActive && styles.selectorButtonActive
                   ]}
-                  onPress={() => {
-  setShowPicker(true);
-}}
+                  onPress={() => setGender(item)}
                 >
                   <Text style={[
                     styles.selectorText,

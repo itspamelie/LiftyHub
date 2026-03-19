@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Switch, ScrollView, Alert } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import SettingsItem from "@/src/components/SettingsItem";
-import SettingsSwitchItem from "@/src/components/SettingsSwitchItem";
+import SettingsItem from "@/src/components/settings/SettingsItem";
+import SettingsSwitchItem from "@/src/components/settings/SettingsSwitchItem";
 
 export default function Settings() {
 
@@ -13,6 +13,7 @@ export default function Settings() {
   const logout = async () => {
   try {
     await AsyncStorage.removeItem("token");
+    await AsyncStorage.removeItem("user");
     console.log("Sesión cerrada correctamente");
 
     router.replace("/auth/login");
@@ -25,7 +26,7 @@ export default function Settings() {
   const saveUnits = async (value: string) => {
     try {
       setUnits(value);
-      await AsyncStorage.setItem("units", value);
+      await AsyncStorage.setItem("@liftyhub_units", value);
     } catch (error) {
       console.log("Error saving units", error);
     }
