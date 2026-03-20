@@ -3,6 +3,7 @@ import { useState } from "react";
 import ExerciseCard from "@/src/components/exercises/ExerciseCard";
 import FilterButton from "@/src/components/exercises/FilterButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 type ExerciseFile = {
   file_path: string;
@@ -19,6 +20,7 @@ type Exercise = {
 
 export default function ExercisesScreen() {
 
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("Todo");
 
@@ -110,13 +112,11 @@ export default function ExercisesScreen() {
 
       {/* HEADER */}
       <View style={styles.header}>
-        <Text style={styles.title}>Ejercicios</Text>
-        <Text style={styles.subtitle}>
-          Técnica, músculo a trabajar y más.
-        </Text>
+        <Text style={styles.title}>{t("exercises.title")}</Text>
+        <Text style={styles.subtitle}>{t("exercises.subtitle")}</Text>
 
         <TextInput
-          placeholder="Buscar ejercicios..."
+          placeholder={t("exercises.search")}
           placeholderTextColor={colors.textSecondary}
           style={styles.search}
           value={search}

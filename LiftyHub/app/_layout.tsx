@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { LanguageProvider } from '@/src/context/LanguageContext';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -23,6 +24,7 @@ export default function RootLayout() {
   }, []);
 
   return (
+    <LanguageProvider>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -36,5 +38,6 @@ export default function RootLayout() {
       </Stack>
       <StatusBar style="light" />
     </ThemeProvider>
+    </LanguageProvider>
   );
 }

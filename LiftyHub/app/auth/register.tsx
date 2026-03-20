@@ -17,10 +17,12 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import BackButton from "@/src/components/buttons/backButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 export default function Register() {
 
   const router = useRouter();
+  const { t } = useLanguage();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -33,17 +35,17 @@ export default function Register() {
   const handleRegister = async () => {
 
     if (!name || !email || !password || !confirmPassword) {
-      alert("Completa todos los campos");
+      alert(t("register.errorEmpty"));
       return;
     }
 
     if (password.length < 6) {
-      alert("La contraseña debe tener al menos 6 caracteres");
+      alert(t("register.errorPasswordLength"));
       return;
     }
 
     if (password !== confirmPassword) {
-      alert("Las contraseñas no coinciden");
+      alert(t("register.errorPasswordMatch"));
       return;
     }
 
@@ -71,19 +73,19 @@ export default function Register() {
           <View style={styles.header}>
             <Ionicons name="barbell" size={50} color={colors.primary} />
             <Text style={styles.title}>LiftyHub</Text>
-            <Text style={styles.subtitle}>Crea tu cuenta</Text>
+            <Text style={styles.subtitle}>{t("register.subtitle")}</Text>
           </View>
 
           {/* 🧾 CARD */}
           <View style={styles.card}>
 
-            <Text style={styles.cardTitle}>Registrarse</Text>
+            <Text style={styles.cardTitle}>{t("register.title")}</Text>
 
             {/* Nombre */}
             <View style={styles.inputContainer}>
               <Ionicons name="person-outline" size={20} color={colors.textSecondary} />
               <TextInput
-                placeholder="Nombre"
+                placeholder={t("register.name")}
                 placeholderTextColor={colors.textSecondary}
                 style={styles.input}
                 value={name}
@@ -95,7 +97,7 @@ export default function Register() {
             <View style={styles.inputContainer}>
               <Ionicons name="mail-outline" size={20} color={colors.textSecondary} />
               <TextInput
-                placeholder="Correo electrónico"
+                placeholder={t("register.email")}
                 placeholderTextColor={colors.textSecondary}
                 style={styles.input}
                 value={email}
@@ -109,7 +111,7 @@ export default function Register() {
             <View style={styles.inputContainer}>
               <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />
               <TextInput
-                placeholder="Contraseña"
+                placeholder={t("register.password")}
                 placeholderTextColor={colors.textSecondary}
                 secureTextEntry={!showPassword}
                 style={styles.input}
@@ -129,7 +131,7 @@ export default function Register() {
             <View style={styles.inputContainer}>
               <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />
               <TextInput
-                placeholder="Confirmar contraseña"
+                placeholder={t("register.confirmPassword")}
                 placeholderTextColor={colors.textSecondary}
                 secureTextEntry={!showConfirm}
                 style={styles.input}
@@ -154,14 +156,14 @@ export default function Register() {
               onPress={handleRegister}
               disabled={!name || !email || !password || !confirmPassword}
             >
-              <Text style={styles.loginText}>Crear cuenta</Text>
+              <Text style={styles.loginText}>{t("register.button")}</Text>
             </TouchableOpacity>
 
             {/* LOGIN */}
             <TouchableOpacity onPress={() => router.push("/auth/login" as any)}>
               <Text style={styles.register}>
-                ¿Ya tienes cuenta?{" "}
-                <Text style={styles.registerHighlight}>Inicia sesión</Text>
+                {t("register.hasAccount")}{" "}
+                <Text style={styles.registerHighlight}>{t("register.login")}</Text>
               </Text>
             </TouchableOpacity>
 

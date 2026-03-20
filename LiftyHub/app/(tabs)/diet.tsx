@@ -1,5 +1,6 @@
 import { Text, StyleSheet, ScrollView, RefreshControl } from "react-native";
 import { useState } from "react";
+import { useLanguage } from "@/src/context/LanguageContext";
 import NutritionistCard from "@/src/components/diet/NutritionistCard";
 import DietMealCard from "@/src/components/diet/DietMealCard";
 import DietTipCard from "@/src/components/diet/DietTipCard";
@@ -93,6 +94,7 @@ const TIPS = [
 
 export default function DietScreen() {
 
+  const { t } = useLanguage();
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = () => {
@@ -110,21 +112,21 @@ export default function DietScreen() {
       }
     >
 
-      <Text style={styles.title}>Mi Dieta</Text>
+      <Text style={styles.title}>{t("diet.title")}</Text>
 
       <NutritionistCard {...NUTRITIONIST} />
 
-      <Text style={styles.section}>Plan alimenticio</Text>
+      <Text style={styles.section}>{t("diet.mealPlan")}</Text>
       {MEALS.map((meal, index) => (
         <DietMealCard key={index} meal={meal} />
       ))}
 
-      <Text style={styles.section}>Suplementos</Text>
+      <Text style={styles.section}>{t("diet.supplements")}</Text>
       {SUPPLEMENTS.map((supplement, index) => (
         <SupplementCard key={index} supplement={supplement} />
       ))}
 
-      <Text style={styles.section}>Recomendaciones</Text>
+      <Text style={styles.section}>{t("diet.tips")}</Text>
       <DietTipCard tips={TIPS} />
 
     </ScrollView>

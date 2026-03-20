@@ -5,6 +5,7 @@ import { colors, spacing } from "@/src/styles/globalstyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useRef } from "react";
 import { Keyboard } from "react-native";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 const defaultImages = [
   "https://images.unsplash.com/photo-1599058917765-a780eda07a3e",
@@ -85,6 +86,7 @@ const routinesData: Routine[] = [
 // ---------------------- COMPONENTE ----------------------
 export default function RoutinesScreen() {
 
+  const { t } = useLanguage();
   const listRef = useRef<FlatList>(null);
   const [routines, setRoutines] = useState<Routine[]>(routinesData);
   const [modalVisible, setModalVisible] = useState(false);
@@ -125,21 +127,19 @@ const filteredRoutines = routines.filter((routine) => {
   ListEmptyComponent={
   <View style={styles.emptyContainer}>
     <Ionicons name="barbell-outline" size={60} color={colors.textSecondary} />
-    <Text style={styles.emptyTitle}>No tienes rutinas aún</Text>
-    <Text style={styles.emptyText}>
-      Crea tu primera rutina tocando el botón +
-    </Text>
+    <Text style={styles.emptyTitle}>{t("routines.empty")}</Text>
+    <Text style={styles.emptyText}>{t("routines.emptyHint")}</Text>
   </View>
 }
         ListHeaderComponent={
           <>
             {/* HEADER */}
             <View style={styles.header}>
-              <Text style={styles.title}>Rutinas</Text>
-              <Text style={styles.subtitle}>Enfocadas en tu progreso</Text>
+              <Text style={styles.title}>{t("routines.title")}</Text>
+              <Text style={styles.subtitle}>{t("routines.subtitle")}</Text>
 
               <TextInput
-  placeholder="Buscar rutinas..."
+  placeholder={t("routines.search")}
   placeholderTextColor={colors.textSecondary}
   style={styles.search}
   value={search}
@@ -210,7 +210,7 @@ const filteredRoutines = routines.filter((routine) => {
         </TouchableOpacity>
 
         <Text style={[styles.modalTitle, { color: colors.text }]}>
-          Nueva Rutina
+          {t("routines.modal.title")}
         </Text>
 
         <ScrollView
@@ -220,12 +220,12 @@ const filteredRoutines = routines.filter((routine) => {
 
           {/* DATOS PRINCIPALES */}
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Datos principales
+            {t("routines.modal.section")}
           </Text>
 
           {/* NOMBRE */}
           <TextInput
-            placeholder="Nombre de la rutina"
+            placeholder={t("routines.modal.name")}
             placeholderTextColor={colors.textSecondary}
             value={newRoutine.name}
             onChangeText={(text) =>
@@ -236,7 +236,7 @@ const filteredRoutines = routines.filter((routine) => {
 
           {/* OBJETIVO */}
           <TextInput
-            placeholder="Objetivo de la rutina"
+            placeholder={t("routines.modal.objective")}
             placeholderTextColor={colors.textSecondary}
             value={newRoutine.objective}
             onChangeText={(text) =>
@@ -247,7 +247,7 @@ const filteredRoutines = routines.filter((routine) => {
 
           {/* NIVEL */}
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Nivel de la rutina
+            {t("routines.modal.level")}
           </Text>
 
           <View style={styles.levelContainer}>
@@ -276,7 +276,7 @@ const filteredRoutines = routines.filter((routine) => {
 
           {/* CATEGORÍA */}
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Tipo de rutina
+            {t("routines.modal.type")}
           </Text>
 
           <View style={styles.categoryContainer}>
@@ -305,11 +305,11 @@ const filteredRoutines = routines.filter((routine) => {
 
           {/* DURACIÓN */}
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Duración
+            {t("routines.modal.duration")}
           </Text>
 
           <TextInput
-            placeholder="Duración en minutos"
+            placeholder={t("routines.modal.durationPlaceholder")}
             keyboardType="numeric"
             placeholderTextColor={colors.textSecondary}
             value={newRoutine.duration ? newRoutine.duration.toString() : ""}
@@ -321,11 +321,11 @@ const filteredRoutines = routines.filter((routine) => {
 
           {/* IMAGEN */}
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Imagen
+            {t("routines.modal.image")}
           </Text>
 
           <TextInput
-            placeholder="URL de la imagen"
+            placeholder={t("routines.modal.imagePlaceholder")}
             placeholderTextColor={colors.textSecondary}
             value={newRoutine.img}
             onChangeText={(text) =>
@@ -348,7 +348,7 @@ const filteredRoutines = routines.filter((routine) => {
   !newRoutine.duration ||
   !newRoutine.category
 ) {
-  alert("Completa todos los campos antes de agregar la rutina");
+  alert(t("routines.modal.errorEmpty"));
   return;
 }
 
@@ -380,7 +380,7 @@ listRef.current?.scrollToOffset({ offset: 0, animated: true });
           }}
         >
           <Text style={styles.modalButtonText}>
-            Agregar Rutina
+            {t("routines.modal.button")}
           </Text>
         </TouchableOpacity>
 

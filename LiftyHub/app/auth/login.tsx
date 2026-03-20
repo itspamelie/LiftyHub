@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loginRequest } from "@/src/services/api";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 export default function Login() {
 
   const router = useRouter();
+  const { t } = useLanguage();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,17 +52,17 @@ export default function Login() {
           <View style={styles.header}>
             <Ionicons name="barbell" size={60} color="#3B82F6" />
             <Text style={styles.title}>LiftyHub</Text>
-            <Text style={styles.subtitle}>Entrena. Progresa. Mejora.</Text>
+            <Text style={styles.subtitle}>{t("login.subtitle")}</Text>
           </View>
 
           <View style={styles.card}>
 
-            <Text style={styles.cardTitle}>Iniciar sesión</Text>
+            <Text style={styles.cardTitle}>{t("login.title")}</Text>
 
             <View style={styles.inputContainer}>
               <Ionicons name="mail-outline" size={20} color="#A1A1A1" />
               <TextInput
-                placeholder="Correo electrónico"
+                placeholder={t("login.email")}
                 placeholderTextColor="#A1A1A1"
                 style={styles.input}
                 value={email}
@@ -73,7 +75,7 @@ export default function Login() {
             <View style={styles.inputContainer}>
               <Ionicons name="lock-closed-outline" size={20} color="#A1A1A1" />
               <TextInput
-                placeholder="Contraseña"
+                placeholder={t("login.password")}
                 placeholderTextColor="#A1A1A1"
                 secureTextEntry
                 style={styles.input}
@@ -84,12 +86,12 @@ export default function Login() {
             </View>
 
             <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-              <Text style={styles.loginText}>Entrar</Text>
+              <Text style={styles.loginText}>{t("login.button")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => router.push("/auth/register" as any)}>
               <Text style={styles.register}>
-                ¿No tienes cuenta? <Text style={styles.registerHighlight}>Crear cuenta</Text>
+                {t("login.noAccount")} <Text style={styles.registerHighlight}>{t("login.createAccount")}</Text>
               </Text>
             </TouchableOpacity>
 

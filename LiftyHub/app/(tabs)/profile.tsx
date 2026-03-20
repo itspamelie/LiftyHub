@@ -10,6 +10,7 @@ import { router } from "expo-router";
 import { useEffect, useState, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getUser, getUserProperties, getUserStreak, getUserRoutinesCount } from "@/src/services/api";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 
 // función para calcular la edad
@@ -31,6 +32,7 @@ const calculateAge = (birthdate: string) => {
 
 export default function ProfileScreen() {
 
+  const { t } = useLanguage();
   const [profile, setProfile] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"perfil" | "stats">("perfil");
@@ -92,7 +94,7 @@ export default function ProfileScreen() {
   if (!profile) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ color: "white" }}>Cargando perfil...</Text>
+        <Text style={{ color: "white" }}>{t("profile.loading")}</Text>
       </View>
     );
   }
@@ -136,7 +138,7 @@ export default function ProfileScreen() {
             />
 
             <Text style={styles.name}>{profile.name}</Text>
-            <Text style={styles.subtitle}>{profile.age} años</Text>
+            <Text style={styles.subtitle}>{profile.age} {t("profile.years")}</Text>
 
           </View>
 
@@ -146,13 +148,13 @@ export default function ProfileScreen() {
               style={[styles.tabBtn, activeTab === "perfil" && styles.tabBtnActive]}
               onPress={() => setActiveTab("perfil")}
             >
-              <Text style={[styles.tabBtnText, activeTab === "perfil" && styles.tabBtnTextActive]}>Perfil</Text>
+              <Text style={[styles.tabBtnText, activeTab === "perfil" && styles.tabBtnTextActive]}>{t("profile.tabProfile")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.tabBtn, activeTab === "stats" && styles.tabBtnActive]}
               onPress={() => setActiveTab("stats")}
             >
-              <Text style={[styles.tabBtnText, activeTab === "stats" && styles.tabBtnTextActive]}>Estadísticas</Text>
+              <Text style={[styles.tabBtnText, activeTab === "stats" && styles.tabBtnTextActive]}>{t("profile.tabStats")}</Text>
             </TouchableOpacity>
           </View>
 
@@ -169,17 +171,17 @@ export default function ProfileScreen() {
                 <View style={styles.stat}>
                   <Ionicons name="barbell" size={24} color={colors.text} />
                   <Text style={styles.statNumber}>{profile.routinesCount}</Text>
-                  <Text style={styles.statLabel}>Rutinas</Text>
+                  <Text style={styles.statLabel}>{t("profile.routines")}</Text>
                 </View>
                 <View style={styles.stat}>
                   <Ionicons name="scale" size={24} color={colors.text} />
                   <Text style={styles.statNumber}>{profile.weight} kg</Text>
-                  <Text style={styles.statLabel}>Peso</Text>
+                  <Text style={styles.statLabel}>{t("profile.weight")}</Text>
                 </View>
                 <View style={styles.stat}>
                   <Ionicons name="flame" size={24} color={colors.text} />
                   <Text style={styles.statNumber}>{profile.streak}</Text>
-                  <Text style={styles.statLabel}>Racha</Text>
+                  <Text style={styles.statLabel}>{t("profile.streak")}</Text>
                 </View>
               </View>
 
@@ -187,12 +189,12 @@ export default function ProfileScreen() {
               <ProgressCard progress={75} workouts={6} reps={420} sets={45} />
 
               {/* INFORMACIÓN FÍSICA */}
-              <Text style={styles.title}>Información física</Text>
+              <Text style={styles.title}>{t("profile.physicalInfo")}</Text>
               <View style={styles.infoGrid}>
-                <InfoStatCard icon="resize" label="Altura" value={`${profile.height} cm`} />
-                <InfoStatCard icon="scale" label="Peso" value={`${profile.weight} kg`} />
-                <InfoStatCard icon="body" label="Somatotipo" value={profile.somatotype} />
-                <InfoStatCard icon="flag" label="Objetivo" value={profile.goal} />
+                <InfoStatCard icon="resize" label={t("profile.height")} value={`${profile.height} cm`} />
+                <InfoStatCard icon="scale" label={t("profile.weight")} value={`${profile.weight} kg`} />
+                <InfoStatCard icon="body" label={t("profile.somatotype")} value={profile.somatotype} />
+                <InfoStatCard icon="flag" label={t("profile.goal")} value={profile.goal} />
               </View>
             </>
           )}
