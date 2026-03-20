@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 type Props = {
   name: string;
@@ -34,7 +35,7 @@ export default function NutritionistCard({ name, specialty, imageUrl, status, up
           <Ionicons name="time-outline" size={14} color="#666" />
           <Text style={styles.updated}>Última actualización: {updatedAt}</Text>
         </View>
-        <TouchableOpacity style={styles.detailBtn}>
+        <TouchableOpacity style={styles.detailBtn} onPress={() => router.push("/nutritionist-profile")}>
           <Text style={styles.detailBtnText}>Ver perfil</Text>
           <Ionicons name="arrow-forward" size={14} color="#3B82F6" />
         </TouchableOpacity>

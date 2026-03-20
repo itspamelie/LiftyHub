@@ -159,11 +159,11 @@ export default function ProfileScreen() {
           </View>
 
           {activeTab === "stats" ? (
-            <>
+            <View style={{ marginTop: 20 }}>
               {stats && <StatsSummaryGrid stats={stats} trigger={animationTrigger} />}
               <WeeklyActivityChart />
               <PersonalRecords />
-            </>
+            </View>
           ) : (
             <>
               {/* TARJETA DE ESTADÍSTICAS */}
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     padding: 20,
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 15
+    marginTop: 20
   },
 
   stat: {

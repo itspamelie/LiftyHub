@@ -23,7 +23,7 @@ export default function SettingsItem({
   return (
     <TouchableOpacity
       style={styles.row}
-      activeOpacity={0.7}
+      activeOpacity={onPress ? 0.7 : 1}
       onPress={onPress}
     >
 
@@ -34,25 +34,22 @@ export default function SettingsItem({
           color={danger ? colors.danger : colors.text}
         />
 
-        <Text
-          style={[
-            styles.label,
-            danger && { color: colors.danger }
-          ]}
-        >
+        <Text style={[styles.label, danger && { color: colors.danger }]}>
           {label}
         </Text>
       </View>
 
-      {value && (
-        <Text style={styles.value}>
-          {value}
-        </Text>
-      )}
+      <View style={styles.rowRight}>
+        {value && (
+          <Text style={[styles.value, onPress && styles.valueInteractive]}>
+            {value}
+          </Text>
+        )}
 
-      {showArrow && (
-        <Ionicons name="chevron-forward" size={18} color="#A1A1A1" />
-      )}
+        {showArrow && (
+          <Ionicons name="chevron-forward" size={18} color="#A1A1A1" />
+        )}
+      </View>
 
     </TouchableOpacity>
   );
@@ -72,14 +69,33 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
 
+  rowRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6
+  },
+
   label: {
     color: "white",
     fontSize: 16,
     marginLeft: 12
   },
 
+  labelStatic: {
+    color: "#555"
+  },
+
   value: {
     color: "#A1A1A1"
+  },
+
+  valueStatic: {
+    color: "#444"
+  },
+
+  valueInteractive: {
+    color: colors.primary,
+    fontWeight: "600"
   }
 
 });

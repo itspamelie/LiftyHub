@@ -35,6 +35,7 @@ export default function RootLayout() {
         <Stack.Screen name="settings/about" options={{ headerShown: false }} />
         <Stack.Screen name="settings/privacy" options={{ headerShown: false }} />
         <Stack.Screen name="settings/plans" options={{ headerShown: false }} />
+        <Stack.Screen name="nutritionist-profile" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="light" />
     </ThemeProvider>

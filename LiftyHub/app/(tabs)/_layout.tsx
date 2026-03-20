@@ -4,9 +4,11 @@ import * as Haptics from "expo-haptics";
 import { useLanguage } from "@/src/context/LanguageContext";
 
 export default function TabLayout() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
   return (
     <Tabs
+      key={language}
       screenListeners={{
         tabPress: () => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -14,13 +16,11 @@ export default function TabLayout() {
       }}
       screenOptions={{
         headerShown: false,
-
         tabBarStyle: {
           backgroundColor: "#131313",
           borderTopWidth: 0,
           height: 70
         },
-
         tabBarActiveTintColor: "#ffffff",
         tabBarInactiveTintColor: "#6B7280"
       }}
@@ -30,28 +30,17 @@ export default function TabLayout() {
         name="index"
         options={{
           title: t("tabs.routines"),
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="barbell" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={color} />,
         }}
       />
 
-      <Tabs.Screen
-        name="stats"
-        options={{
-          href: null
-        }}
-      />
-
-      
+      <Tabs.Screen name="stats" options={{ href: null }} />
 
       <Tabs.Screen
         name="exercises"
         options={{
           title: t("tabs.exercises"),
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="fitness" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="fitness" size={size} color={color} />,
         }}
       />
 
@@ -59,9 +48,7 @@ export default function TabLayout() {
         name="diet"
         options={{
           title: t("tabs.diet"),
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="nutrition" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="nutrition" size={size} color={color} />,
         }}
       />
 
@@ -69,21 +56,17 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: t("tabs.profile"),
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
         }}
       />
 
       <Tabs.Screen
-  name="settings"
-  options={{
-    title: t("tabs.settings"),
-    tabBarIcon: ({ color, size }) => (
-      <Ionicons name="settings-outline" size={size} color={color} />
-    ),
-  }}
-/>
+        name="settings"
+        options={{
+          title: t("tabs.settings"),
+          tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
+        }}
+      />
 
     </Tabs>
   );

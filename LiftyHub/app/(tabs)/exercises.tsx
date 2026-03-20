@@ -24,6 +24,24 @@ export default function ExercisesScreen() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("Todo");
 
+  // key = valor interno para filtrar (viene del backend en español)
+  // labelKey = clave de traducción para mostrar
+  const filters = [
+    { key: "Todo",       labelKey: "exercises.muscleGroups.all" },
+    { key: "Pecho",      labelKey: "exercises.muscleGroups.chest" },
+    { key: "Espalda",    labelKey: "exercises.muscleGroups.back" },
+    { key: "Pierna",     labelKey: "exercises.muscleGroups.leg" },
+    { key: "Glúteos",    labelKey: "exercises.muscleGroups.glutes" },
+    { key: "Hombro",     labelKey: "exercises.muscleGroups.shoulder" },
+    { key: "Bíceps",     labelKey: "exercises.muscleGroups.bicep" },
+    { key: "Tríceps",    labelKey: "exercises.muscleGroups.tricep" },
+    { key: "Antebrazo",  labelKey: "exercises.muscleGroups.forearm" },
+    { key: "Abdomen",    labelKey: "exercises.muscleGroups.abdomen" },
+    { key: "Core",       labelKey: "exercises.muscleGroups.core" },
+    { key: "Pantorrilla",labelKey: "exercises.muscleGroups.calf" },
+    { key: "Cardio",     labelKey: "exercises.muscleGroups.cardio" },
+  ];
+
   // MOCK DATA simulando backend
   const exercises: Exercise[] = [
     {
@@ -76,21 +94,6 @@ export default function ExercisesScreen() {
     }
   ];
 
-  const filters = [
-  "Todo",
-  "Pecho",
-  "Espalda",
-  "Pierna",
-  "Glúteos",
-  "Hombro",
-  "Bíceps",
-  "Tríceps",
-  "Antebrazo",
-  "Abdomen",
-  "Core",
-  "Pantorrilla",
-  "Cardio"
-];
 
   const filteredExercises = exercises.filter((exercise) => {
 
@@ -133,10 +136,10 @@ export default function ExercisesScreen() {
 
         {filters.map((filter) => (
           <FilterButton
-            key={filter}
-            label={filter}
-            active={activeFilter === filter}
-            onPress={() => setActiveFilter(filter)}
+            key={filter.key}
+            label={t(filter.labelKey)}
+            active={activeFilter === filter.key}
+            onPress={() => setActiveFilter(filter.key)}
           />
         ))}
 

@@ -31,11 +31,6 @@ type Routine = {
   somatotype_id: number;
 };
 
-// ---------------------- CATEGORÍAS ----------------------
-const categories = ["Fuerza", "Movilidad", "Cardio", "HIIT", "Full Body"];
-
-// ---------------------- FILTROS ----------------------
-const filters = ["Todo", ...categories];
 const routinesData: Routine[] = [
   {
     id: 1,
@@ -88,6 +83,21 @@ export default function RoutinesScreen() {
 
   const { t } = useLanguage();
   const listRef = useRef<FlatList>(null);
+
+  const filters = [
+    { key: "Todo",     label: t("routines.categories.all") },
+    { key: "Fuerza",   label: t("routines.categories.strength") },
+    { key: "Movilidad",label: t("routines.categories.mobility") },
+    { key: "Cardio",   label: t("routines.categories.cardio") },
+    { key: "HIIT",     label: t("routines.categories.hiit") },
+    { key: "Full Body",label: t("routines.categories.fullBody") },
+  ];
+
+  const levels = [
+    { key: "Principiante", label: t("routines.levels.beginner") },
+    { key: "Intermedio",   label: t("routines.levels.intermediate") },
+    { key: "Avanzado",     label: t("routines.levels.advanced") },
+  ];
   const [routines, setRoutines] = useState<Routine[]>(routinesData);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("Todo");
@@ -160,14 +170,14 @@ const filteredRoutines = routines.filter((routine) => {
               data={filters}
               horizontal
               showsHorizontalScrollIndicator={false}
-              keyExtractor={(item) => item}
+              keyExtractor={(item) => item.key}
               style={styles.filters}
 
               renderItem={({ item }) => (
   <FilterButton
-    label={item}
-    active={selectedFilter === item}
-    onPress={() => setSelectedFilter(item)}
+    label={item.label}
+    active={selectedFilter === item.key}
+    onPress={() => setSelectedFilter(item.key)}
   />
 )}
             />
@@ -251,24 +261,24 @@ const filteredRoutines = routines.filter((routine) => {
           </Text>
 
           <View style={styles.levelContainer}>
-            {["Principiante", "Intermedio", "Avanzado"].map((nivel) => (
+            {levels.map((nivel) => (
               <TouchableOpacity
-                key={nivel}
+                key={nivel.key}
                 style={[
                   styles.levelButton,
-                  newRoutine.level === nivel && styles.levelButtonActive
+                  newRoutine.level === nivel.key && styles.levelButtonActive
                 ]}
                 onPress={() =>
-                  setNewRoutine({ ...newRoutine, level: nivel })
+                  setNewRoutine({ ...newRoutine, level: nivel.key })
                 }
               >
                 <Text
                   style={[
                     styles.levelText,
-                    newRoutine.level === nivel && styles.levelTextActive
+                    newRoutine.level === nivel.key && styles.levelTextActive
                   ]}
                 >
-                  {nivel}
+                  {nivel.label}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -280,24 +290,24 @@ const filteredRoutines = routines.filter((routine) => {
           </Text>
 
           <View style={styles.categoryContainer}>
-            {categories.map((category) => (
+            {filters.slice(1).map((cat) => (
               <TouchableOpacity
-                key={category}
+                key={cat.key}
                 style={[
                   styles.categoryButton,
-                  newRoutine.category === category && styles.levelButtonActive
+                  newRoutine.category === cat.key && styles.levelButtonActive
                 ]}
                 onPress={() =>
-                  setNewRoutine({ ...newRoutine, category })
+                  setNewRoutine({ ...newRoutine, category: cat.key })
                 }
               >
                 <Text
                   style={[
                     styles.levelText,
-                    newRoutine.category === category && styles.levelTextActive
+                    newRoutine.category === cat.key && styles.levelTextActive
                   ]}
                 >
-                  {category}
+                  {cat.label}
                 </Text>
               </TouchableOpacity>
             ))}

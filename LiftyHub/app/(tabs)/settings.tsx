@@ -149,6 +149,7 @@ export default function Settings() {
           label={t("settings.units")}
           value={units}
           onPress={handleUnits}
+          showArrow
         />
         <View style={styles.divider} />
         <SettingsItem
@@ -156,6 +157,7 @@ export default function Settings() {
           label={t("settings.language")}
           value={language === "es" ? t("settings.langEs") : t("settings.langEn")}
           onPress={handleLanguage}
+          showArrow
         />
       </View>
 
