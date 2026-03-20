@@ -89,16 +89,17 @@ class UserPropertiesController extends Controller
     public function update(Request $request, string $id)
     {
          $validated = $request->validate([
-          'user_id'=>'required',
-            'stature'=>'required|numeric',
-            'waist'=>'required|numeric',
-            'chest'=>'required|numeric',
-            'hips'=>'required|numeric',
-            'arms'=>'required|numeric',
-            'shoulders'=>'required|numeric',
-            'thighs'=>'required|numeric',
-            'objective'=>'required|string',
-            'somatotype_id'=>'required',   
+          'user_id'      => 'required',
+            'stature'      => 'sometimes|nullable|numeric',
+            'weight'       => 'sometimes|nullable|numeric',
+            'waist'        => 'sometimes|nullable|numeric',
+            'chest'        => 'sometimes|nullable|numeric',
+            'hips'         => 'sometimes|nullable|numeric',
+            'arms'         => 'sometimes|nullable|numeric',
+            'shoulders'    => 'sometimes|nullable|numeric',
+            'thighs'       => 'sometimes|nullable|numeric',
+            'objective'    => 'sometimes|string',
+            'somatotype_id'=> 'sometimes',
          ]);
 
         //metodo si los campos se llaman igual que en la base de datos

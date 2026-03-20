@@ -104,13 +104,13 @@ public function update(Request $request, string $id)
     $user = User::findOrFail($id);
 
     $validated = $request->validate([
-        'name'      => 'required|string|min:2',
-        'email'     => 'required|email|unique:users,email,'.$id,
+        'name'      => 'sometimes|string|min:2',
+        'email'     => 'sometimes|email|unique:users,email,'.$id,
         'password'  => 'nullable|min:6',
-        'gender'    => 'required|string',
+        'gender'    => 'sometimes|string',
         'img'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        'birthdate' => 'required|date',
-        'role'      => 'required|string',
+        'birthdate' => 'sometimes|date',
+        'role'      => 'sometimes|string',
     ]);
 
     /*
@@ -186,6 +186,17 @@ public function destroy(string $id)
             unlink($path);
         }
     }
+
+    // eliminar registros relacionados antes de borrar el usuario
+    $routineIds = UserRoutine::where('user_id', $id)->pluck('id');
+    UserRoutineExercise::whereIn('user_routine_id', $routineIds)->delete();
+    UserRoutine::where('user_id', $id)->delete();
+    UserPropertie::where('user_id', $id)->delete();
+    UserStreak::where('user_id', $id)->delete();
+    MonthlyProgress::where('user_id', $id)->delete();
+    ExerciseLog::where('user_id', $id)->delete();
+    Subscription::where('user_id', $id)->delete();
+    PaymentDetail::where('user_id', $id)->delete();
 
     $user->delete();
 
