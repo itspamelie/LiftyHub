@@ -15,7 +15,7 @@ export default function NutritionistDashboard() {
 useEffect(() => {
   const getNutritionists = async () => {
     try {
-      const data = await apiFetch("/nutritionists");
+      const data = await apiFetch("/nutritionistsprofiles");
       setNutritionists(data.data || []);
     } catch (err) {
       console.error(err);
@@ -50,7 +50,7 @@ const searchNutritionists = async (value: string) => {
   setSearch(value);
 
   try {
-    let endpoint = "/nutritionists";
+    let endpoint = "/nutritionistsprofiles";
 
     if (value.trim() !== "") {
       endpoint = `/nutritionists?search=${value}`;
