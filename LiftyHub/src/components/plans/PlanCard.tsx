@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 type Props = {
   title: string;
@@ -37,7 +38,10 @@ export default function PlanCard({
         </View>
       ))}
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push({ pathname: "/settings/payment", params: { title, price } })}
+      >
         <Text style={styles.buttonText}>Suscribirse por {price}</Text>
       </TouchableOpacity>
 

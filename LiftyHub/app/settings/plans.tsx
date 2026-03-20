@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { Stack } from "expo-router";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { Stack, router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import PlanCard from "@/src/components/plans/PlanCard";
-import BackButton from "@/src/components/buttons/backButton";
+
 
 export default function Plans() {
 
@@ -11,10 +12,15 @@ export default function Plans() {
 
       <Stack.Screen options={{ headerShown: false }} />
 
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={20} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Planes LiftyHub</Text>
+      </View>
+
       <ScrollView contentContainerStyle={styles.content}>
 
-        <Text style={styles.title}>Planes LiftyHub</Text>
-<BackButton />
         <Text style={styles.subtitle}>
           Mejora tu entrenamiento con funciones premium
         </Text>
@@ -62,6 +68,31 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 80,
     paddingBottom: 80
+  },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    backgroundColor: "#0F0F10",
+    gap: 14
+  },
+
+  backBtn: {
+    width: 45,
+    height: 45,
+    borderRadius: 25,
+    backgroundColor: "#3B82F6",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+
+  headerTitle: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "700"
   },
 
   title: {

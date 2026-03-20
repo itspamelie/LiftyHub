@@ -37,10 +37,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="stats"
         options={{
-          title: "Estadísticas",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="stats-chart" size={size} color={color} />
-          ),
+          href: null
         }}
       />
 
@@ -52,6 +49,16 @@ export default function TabLayout() {
           title: "Ejercicios",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="fitness" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="diet"
+        options={{
+          title: "Dieta",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="nutrition" size={size} color={color} />
           ),
         }}
       />

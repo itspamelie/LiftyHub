@@ -3,8 +3,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import ProgressCard from "@/src/components/profile/ProgressCard";
 import InfoStatCard from "@/src/components/profile/InfoStatCard";
+import StatsSummaryGrid from "@/src/components/stats/StatsSummaryGrid";
+import WeeklyActivityChart from "@/src/components/stats/WeeklyActivityChart";
+import PersonalRecords from "@/src/components/stats/PersonalRecords";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getUser, getUserProperties, getUserStreak, getUserRoutinesCount } from "@/src/services/api";
 
@@ -30,6 +33,9 @@ export default function ProfileScreen() {
 
   const [profile, setProfile] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<"perfil" | "stats">("perfil");
+  const [stats, setStats] = useState<any>(null);
+  const [animationTrigger, setAnimationTrigger] = useState(0);
 
   const loadUser = async (isRefresh = false) => {
     try {
@@ -55,8 +61,8 @@ export default function ProfileScreen() {
         avatar:        require("@/src/assets/defaultd.png"),
         routinesCount: routinesCountData?.count ?? 0,
         streak:        streak?.current_streak ?? 0,
-        weight:        props?.weight ?? 0,
-        height:        props?.stature ?? 0,
+        weight:        props?.weight ? parseFloat(props.weight).toString() : "0",
+        height:        props?.stature ? parseFloat(props.stature).toString() : "0",
         somatotype:    props?.somatotype?.type ?? "N/A",
         goal:          props?.objective ?? "N/A",
       });
@@ -69,10 +75,18 @@ export default function ProfileScreen() {
 
   useEffect(() => { loadUser(); }, []);
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    loadUser(true);
+  const loadStats = async () => {
+    setStats({ workouts: 24, streak: 5, totalTime: 18, totalWeight: 12450 });
   };
+
+  useEffect(() => { loadStats(); }, []);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    setAnimationTrigger(prev => prev + 1);
+    loadUser(true);
+    loadStats();
+  }, []);
 
 
   if (!profile) {
@@ -126,67 +140,62 @@ export default function ProfileScreen() {
 
           </View>
 
-          {/* TARJETA DE ESTADÍSTICAS */}
-          <View style={styles.statsCard}>
-
-            <View style={styles.stat}>
-              <Ionicons name="barbell" size={24} color={colors.text} />
-              <Text style={styles.statNumber}>{profile.routinesCount}</Text>
-              <Text style={styles.statLabel}>Rutinas</Text>
-            </View>
-
-            <View style={styles.stat}>
-              <Ionicons name="scale" size={24} color={colors.text} />
-              <Text style={styles.statNumber}>{profile.weight} kg</Text>
-              <Text style={styles.statLabel}>Peso</Text>
-            </View>
-
-            <View style={styles.stat}>
-              <Ionicons name="flame" size={24} color={colors.text} />
-              <Text style={styles.statNumber}>{profile.streak}</Text>
-              <Text style={styles.statLabel}>Racha</Text>
-            </View>
-
+          {/* TABS INTERNOS */}
+          <View style={styles.tabRow}>
+            <TouchableOpacity
+              style={[styles.tabBtn, activeTab === "perfil" && styles.tabBtnActive]}
+              onPress={() => setActiveTab("perfil")}
+            >
+              <Text style={[styles.tabBtnText, activeTab === "perfil" && styles.tabBtnTextActive]}>Perfil</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tabBtn, activeTab === "stats" && styles.tabBtnActive]}
+              onPress={() => setActiveTab("stats")}
+            >
+              <Text style={[styles.tabBtnText, activeTab === "stats" && styles.tabBtnTextActive]}>Estadísticas</Text>
+            </TouchableOpacity>
           </View>
 
-          {/* PROGRESO */}
-          <ProgressCard
-            progress={75}
-            workouts={6}
-            reps={420}
-            sets={45}
-          />
+          {activeTab === "stats" ? (
+            <>
+              {stats && <StatsSummaryGrid stats={stats} trigger={animationTrigger} />}
+              <WeeklyActivityChart />
+              <PersonalRecords />
+            </>
+          ) : (
+            <>
+              {/* TARJETA DE ESTADÍSTICAS */}
+              <View style={styles.statsCard}>
+                <View style={styles.stat}>
+                  <Ionicons name="barbell" size={24} color={colors.text} />
+                  <Text style={styles.statNumber}>{profile.routinesCount}</Text>
+                  <Text style={styles.statLabel}>Rutinas</Text>
+                </View>
+                <View style={styles.stat}>
+                  <Ionicons name="scale" size={24} color={colors.text} />
+                  <Text style={styles.statNumber}>{profile.weight} kg</Text>
+                  <Text style={styles.statLabel}>Peso</Text>
+                </View>
+                <View style={styles.stat}>
+                  <Ionicons name="flame" size={24} color={colors.text} />
+                  <Text style={styles.statNumber}>{profile.streak}</Text>
+                  <Text style={styles.statLabel}>Racha</Text>
+                </View>
+              </View>
 
-          {/* INFORMACIÓN FÍSICA */}
-          <Text style={styles.title}>Información física</Text>
+              {/* PROGRESO */}
+              <ProgressCard progress={75} workouts={6} reps={420} sets={45} />
 
-          <View style={styles.infoGrid}>
-
-            <InfoStatCard
-              icon="resize"
-              label="Altura"
-              value={`${profile.height} cm`}
-            />
-
-            <InfoStatCard
-              icon="scale"
-              label="Peso"
-              value={`${profile.weight} kg`}
-            />
-
-            <InfoStatCard
-              icon="body"
-              label="Somatotipo"
-              value={profile.somatotype}
-            />
-
-            <InfoStatCard
-              icon="flag"
-              label="Objetivo"
-              value={profile.goal}
-            />
-
-          </View>
+              {/* INFORMACIÓN FÍSICA */}
+              <Text style={styles.title}>Información física</Text>
+              <View style={styles.infoGrid}>
+                <InfoStatCard icon="resize" label="Altura" value={`${profile.height} cm`} />
+                <InfoStatCard icon="scale" label="Peso" value={`${profile.weight} kg`} />
+                <InfoStatCard icon="body" label="Somatotipo" value={profile.somatotype} />
+                <InfoStatCard icon="flag" label="Objetivo" value={profile.goal} />
+              </View>
+            </>
+          )}
 
         </View>
 
@@ -296,6 +305,36 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-between",
     marginTop: 10
+  },
+
+  tabRow: {
+    flexDirection: "row",
+    backgroundColor: "#1C1C1E",
+    borderRadius: 12,
+    padding: 4,
+    marginTop: 16,
+    marginBottom: 8
+  },
+
+  tabBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: "center",
+    borderRadius: 10
+  },
+
+  tabBtnActive: {
+    backgroundColor: "#3B82F6"
+  },
+
+  tabBtnText: {
+    color: "#A1A1A1",
+    fontSize: 14,
+    fontWeight: "600"
+  },
+
+  tabBtnTextActive: {
+    color: "white"
   }
 
 });
