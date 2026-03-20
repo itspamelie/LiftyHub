@@ -1,5 +1,5 @@
 import {
-  Box,
+  Box, TextField
 } from "@mui/material";
 import PlansTable from "../components/plans/PlansTable"
 import CreatePlanForm from "../components/plans/CreatePlanForm"
@@ -8,26 +8,8 @@ import Swal from "sweetalert2";
 import { apiFetch } from "../services/api";
 import EditPlanModal from "../components/plans/EditPlanModal"
 import TopNavbar from "../components/dashboard/TopNavbar";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  ArcElement,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend
-} from "chart.js";
+import SearchIcon from "@mui/icons-material/Search";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  ArcElement,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend
-);
 
 export default function PlansDashboard() {
   // STATES
@@ -246,6 +228,31 @@ background:"#1a2035"
 >
 
 <TopNavbar />
+<TextField
+  size="medium"
+  placeholder="Buscar Plan..."
+  variant="outlined"
+  value={search}
+  onChange={(e) => searchPlans(e.target.value)}
+  sx={{
+    width: "300px", // 👈 tamaño fijo
+    mb: 1,
+    mt: 4,
+    pl:5,
+    input: { color: "white" },
+    "& .MuiOutlinedInput-root": {
+      borderRadius: "12px",
+      color: "white",
+      "& fieldset": {
+        borderColor: "#2d3561"
+      }
+    }
+  }}
+  InputProps={{
+    startAdornment: <SearchIcon sx={{ mr: 3 }} />
+  }}
+/>
+
 
 <Box
 sx={{
@@ -253,9 +260,11 @@ flexGrow:1,
 display:"grid",
 gridTemplateColumns:"2fr 1fr",
 gap:3,
-p:3
+p:5
 }}
 >
+
+
 
 <PlansTable
 plans={plans}
