@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { apiFetch } from "../services/api";
 import EditPlanModal from "../components/plans/EditPlanModal"
-import TopNavbar from "../components/dashboard/TopNavbar";
+import TopNavbar from "../components/plans/TopNavbar";
 import SearchIcon from "@mui/icons-material/Search";
 
 
