@@ -16,22 +16,49 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-     $this->call([
-    somatotypesSeeder::class,
-    usersSeeder::class,
-    plansSeeder::class,
-    routinesSeeder::class,
-    exercisesSeeder::class,
-    exerciseFiles::class,
-    exerciseRoutinesSeeder::class,
-    suscriptionsSeeder::class,
-    userPropertiesSeeder::class,
-    paymentDetailsSeeder::class,
-    monthlyProgressSeeder::class,
-    exerciseLogsSeeder::class,
-    userStreaksSeeder::class,
-    userRoutinesSeeder::class,
-    nutritionistProfiles::class,
-]);
-    }
+
+    $this->call([
+        UsersSeeder::class,
+        SomatotypesSeeder::class,
+        PlansSeeder::class,
+
+        UserPropertiesSeeder::class,
+        PaymentDetailsSeeder::class,
+        MonthlyProgressSeeder::class,
+
+        SubscriptionSeeder::class,
+
+        ExercisesSeeder::class,
+        ExerciseFilesSeeder::class,
+
+        RoutinesSeeder::class,
+        ExerciseRoutinesSeeder::class,
+
+        UserRoutinesSeeder::class,
+        UserRoutineExercisesSeeder::class,
+
+        UserSavedRoutinesSeeder::class,
+        UserScheduleSeeder::class,
+        UserRoutineSessionsSeeder::class,
+
+        ExerciseLogsSeeder::class,
+        UserStreaksSeeder::class,
+
+        NutritionistProfilesSeeder::class,
+        NutritionistExperiencesSeeder::class,
+        NutritionistEducationsSeeder::class,
+
+        SpecialtiesSeeder::class,
+        NutritionistSpecialtiesSeeder::class,
+        NutritionistReviewsSeeder::class,
+
+        DietPlansSeeder::class,
+        PlanDaysSeeder::class,
+        MealsSeeder::class,
+        SupplementsSeeder::class,
+        RecommendationsSeeder::class,
+        DietReviewsSeeder::class,
+    ]);
 }
+    }
+
