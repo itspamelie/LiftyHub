@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('repetitions');
             $table->integer('seconds_rest');
             $table->timestamps();
+            
         });
     }
 

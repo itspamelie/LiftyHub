@@ -13,10 +13,10 @@ class somatotypesSeeder extends Seeder
      */
     public function run(): void
     {
-          DB::table('somatotypes')->insert([
-    ['type' => 'Ectomorfo', 'description' => 'Delgado, metabolismo rápido','file' => 'default.jpg'],
-    ['type' => 'Mesomorfo', 'description' => 'Atlético, gana músculo fácilmente', 'file' => 'default.jpg'],
-    ['type' => 'Endomorfo', 'description' => 'Mayor tendencia a almacenar grasa', 'file' => 'default.jpg'],
+Somatotype::insert([
+    ['type' => 'Ectomorfo', 'description' => 'Delgado', 'file' => 'ecto.png'],
+    ['type' => 'Mesomorfo', 'description' => 'Atlético', 'file' => 'meso.png'],
+    ['type' => 'Endomorfo', 'description' => 'Mayor grasa', 'file' => 'endo.png'],
 ]);
     }
 }

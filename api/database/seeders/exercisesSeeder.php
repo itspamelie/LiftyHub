@@ -13,17 +13,14 @@ class exercisesSeeder extends Seeder
      */
     public function run(): void
     {
-      DB::table('exercises')->insert([
-    [
-        'name' => 'Sentadilla',
-        'muscle' => 'Piernas',
-        'technique' => 'Espalda recta, bajar a 90 grados'
-    ],
-    [
-        'name' => 'Press de banca',
-        'muscle' => 'Pecho',
-        'technique' => 'Bajar la barra controladamente'
-    ],
+    Exercise::insert([
+    ['name'=>'Press banca','muscle'=>'Pecho','technique'=>'Empujar barra'],
+    ['name'=>'Sentadilla','muscle'=>'Pierna','technique'=>'Flexión de rodillas'],
+    ['name'=>'Peso muerto','muscle'=>'Espalda','technique'=>'Levantar barra'],
+    ['name'=>'Curl bíceps','muscle'=>'Bíceps','technique'=>'Flexión de codo'],
+    ['name'=>'Tríceps polea','muscle'=>'Tríceps','technique'=>'Extensión'],
+    ['name'=>'Press militar','muscle'=>'Hombro','technique'=>'Empuje vertical'],
+    ['name'=>'Abdominales','muscle'=>'Core','technique'=>'Flexión abdominal'],
 ]);
     }
 }

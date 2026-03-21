@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('diet_plans', function (Blueprint $table) {
+       Schema::create('plan_days', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('nutritionist_id')
-          ->constrained('users');
-    $table->foreignId('user_id')
-          ->constrained('users');
-     $table->boolean('is_monodiet')->default(false);     
-    $table->enum('status', ['active', 'completed']);
+    $table->foreignId('diet_plan_id')->constrained()->onDelete('cascade');
+
+    $table->enum('day', [
+        'monday','tuesday','wednesday','thursday','friday','saturday','sunday'
+    ]);
+
     $table->timestamps();
 });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('plan_days');
     }
 };

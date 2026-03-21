@@ -13,17 +13,35 @@ class plansSeeder extends Seeder
      */
     public function run(): void
     {
-         DB::table('plans')->insert([
+       Plan::insert([
     [
-        'name' => 'Plan Básico',
-        'description' => 'Acceso a rutinas estándar',
-        'price' => 199.00
+        'name' => 'Free',
+        'description' => 'Acceso básico',
+        'price' => 0,
+        'level' => 0,
+        'max_routines' => 7
     ],
     [
-        'name' => 'Plan Premium',
-        'description' => 'Incluye rutinas avanzadas + Dietas',
-        'price' => 299.00
+        'name' => 'Básico',
+        'description' => 'Rutinas intermedias',
+        'price' => 99,
+        'level' => 1,
+        'max_routines' => 15
     ],
+    [
+        'name' => 'Pro',
+        'description' => 'Rutinas avanzadas',
+        'price' => 199,
+        'level' => 2,
+        'max_routines' => 30
+    ],
+    [
+        'name' => 'Nutriólogo',
+        'description' => 'Incluye dietas',
+        'price' => 299,
+        'level' => 3,
+        'max_routines' => 50
+    ]
 ]);
     }
 }

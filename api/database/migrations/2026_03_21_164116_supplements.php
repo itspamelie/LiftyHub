@@ -11,16 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('nutritionist_specialties', function (Blueprint $table) {
+        Schema::create('supplements', function (Blueprint $table) {
     $table->id();
 
-    $table->foreignId('nutritionist_profile_id')
+    $table->foreignId('plan_day_id') // 🔥 CAMBIO IMPORTANTE
           ->constrained()
           ->onDelete('cascade');
 
-    $table->foreignId('specialty_id')
-          ->constrained()
-          ->onDelete('cascade');
+    $table->string('name'); // Whey, Creatina
+    $table->string('amount'); // 30g
+    $table->string('instructions'); // después de entrenar
+    $table->string('image')->nullable();
+    $table->string('color')->nullable();
+    $table->integer('order')->nullable();
+    $table->timestamps();
 });
     }
 

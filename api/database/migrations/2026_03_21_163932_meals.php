@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('diet_plans', function (Blueprint $table) {
+        Schema::create('meals', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('nutritionist_id')
-          ->constrained('users');
-    $table->foreignId('user_id')
-          ->constrained('users');
-     $table->boolean('is_monodiet')->default(false);     
-    $table->enum('status', ['active', 'completed']);
+    $table->foreignId('plan_day_id')->constrained()->onDelete('cascade');
+
+    $table->string('name'); // Desayuno
+    $table->integer('calories');
+    $table->string('image')->nullable();
+$table->integer('order');
     $table->timestamps();
 });
     }

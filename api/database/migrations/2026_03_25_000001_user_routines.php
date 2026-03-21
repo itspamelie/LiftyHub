@@ -17,6 +17,8 @@ return new class extends Migration
             $table->integer('duration');
             $table->string('img')->nullable();
             $table->timestamps();
+            $table->string('category')->nullable();
+
         });
     }
 
