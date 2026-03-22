@@ -1,6 +1,6 @@
 export default function Navbar() {
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top border-bottom border-secondary">
+    <nav className="navbar navbar-expand-lg navbar-dark fixed-top navbar-custom">
       <div className="container">
 
         <a className="navbar-brand fw-bold d-flex align-items-center gap-2">
@@ -10,12 +10,12 @@ export default function Navbar() {
 
         <div className="ms-auto d-flex align-items-center gap-4">
 
-          <a className="nav-link text-light">Features</a>
-          <a className="nav-link text-light">Training</a>
-          <a className="nav-link text-light">App Preview</a>
+          <a className="nav-link-custom" href="#funciones">Funciones</a>
+          <a className="nav-link-custom" href="#entrenamientos">Entrenamientos</a>
+          <a className="nav-link-custom" href="#la-app">La App</a>
 
-          <button className="btn btn-primary px-4">
-            Download App
+          <button className="hero-btn-primary" style={{padding:"10px 24px", fontSize:"14px"}}>
+            Descargar App
           </button>
 
         </div>

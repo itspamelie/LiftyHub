@@ -7,6 +7,7 @@
 html, body, #root {
   height: 100%;
   background-color: #000000;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -14,6 +15,104 @@ body {
 }
 .features-section{
 background:#0B0B0B;
+}
+
+/* === SHARED BADGE === */
+.section-badge{
+background:rgba(59,130,246,0.12);
+color:#3B82F6;
+border:1px solid rgba(59,130,246,0.3);
+padding:6px 18px;
+border-radius:100px;
+font-size:11px;
+font-weight:700;
+letter-spacing:2px;
+}
+
+/* === NAVBAR === */
+.navbar-custom{
+background:#0B0B0B !important;
+border-bottom:1px solid rgba(59,130,246,0.2);
+}
+
+.nav-link-custom{
+color:#94a3b8;
+font-size:14px;
+font-weight:500;
+cursor:pointer;
+transition:color .2s;
+text-decoration:none;
+}
+
+.nav-link-custom:hover{
+color:#ffffff;
+}
+
+/* === HERO BUTTONS === */
+.hero-btn-primary{
+background:#3B82F6;
+color:white;
+border:none;
+padding:14px 32px;
+border-radius:12px;
+font-weight:600;
+font-size:15px;
+cursor:pointer;
+transition:all .2s;
+}
+
+.hero-btn-primary:hover{
+background:#2563eb;
+transform:translateY(-1px);
+}
+
+.hero-btn-ghost{
+background:transparent;
+color:white;
+border:1px solid rgba(255,255,255,0.3);
+padding:14px 32px;
+border-radius:12px;
+font-weight:600;
+font-size:15px;
+cursor:pointer;
+transition:all .2s;
+}
+
+.hero-btn-ghost:hover{
+background:rgba(255,255,255,0.08);
+border-color:rgba(255,255,255,0.5);
+transform:translateY(-1px);
+}
+
+/* === HERO STATS === */
+.hero-stats{
+display:flex;
+align-items:center;
+gap:32px;
+}
+
+.hero-stat{
+display:flex;
+flex-direction:column;
+gap:2px;
+}
+
+.hero-stat-number{
+font-size:1.4rem;
+font-weight:700;
+color:#3B82F6;
+text-shadow:0 0 20px rgba(59,130,246,0.5);
+}
+
+.hero-stat-label{
+font-size:12px;
+color:#94a3b8;
+}
+
+.hero-stat-divider{
+width:1px;
+height:32px;
+background:rgba(255,255,255,0.15);
 }
 
 .small-title{
@@ -85,10 +184,26 @@ border-radius:40px;
 
 border:8px solid #2C2C2E;
 
+box-shadow:0 0 60px rgba(59,130,246,0.15);
+
 }
 
 .phone-img{
 border-radius:30px;
+}
+
+.phone-carousel .carousel-indicators [data-bs-target]{
+background-color:#3B82F6;
+border-radius:100px;
+width:6px;
+height:6px;
+opacity:0.4;
+border:none;
+}
+
+.phone-carousel .carousel-indicators .active{
+opacity:1;
+width:18px;
 }
 
 .feature-list{
@@ -97,11 +212,10 @@ padding:0;
 }
 
 .feature-list li{
-
-margin-bottom:12px;
-
+display:flex;
+align-items:center;
+margin-bottom:14px;
 color:#cbd5e1;
-
 }
 .training-section{
 background:#0B0B0B;
@@ -143,20 +257,81 @@ background:#0B0B0B;
 }
 
 .cta-box{
-background:#3B82F6;
-padding:70px;
-border-radius:16px;
+background:linear-gradient(135deg,#0f1729 0%,#0B0B0B 100%);
+border:1px solid rgba(59,130,246,0.25);
+padding:80px 60px;
+border-radius:24px;
+box-shadow:0 0 80px rgba(59,130,246,0.08);
 }
 
-.store-btn{
-background:black;
-border:none;
-padding:12px 18px;
-border-radius:8px;
+.cta-badge{
+background:rgba(59,130,246,0.12);
+color:#3B82F6;
+border:1px solid rgba(59,130,246,0.3);
+padding:6px 18px;
+border-radius:100px;
+font-size:11px;
+font-weight:700;
+letter-spacing:2px;
 }
 
-.store-btn img{
-height:30px;
+.cta-stats{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:48px;
+}
+
+.cta-stat{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:4px;
+}
+
+.cta-stat-number{
+font-size:2rem;
+font-weight:700;
+color:#3B82F6;
+}
+
+.cta-stat-label{
+font-size:13px;
+color:#6b7280;
+}
+
+.cta-stat-divider{
+width:1px;
+height:40px;
+background:#2C2C2E;
+}
+
+.cta-store-btn{
+background:#1C1C1E;
+border:1px solid #2C2C2E;
+color:white;
+padding:14px 24px;
+border-radius:12px;
+display:flex;
+align-items:center;
+gap:12px;
+transition:all .2s;
+cursor:pointer;
+}
+
+.cta-store-btn:hover{
+border-color:#3B82F6;
+background:#12203a;
+}
+
+.cta-store-small{
+font-size:11px;
+color:#6b7280;
+}
+
+.cta-store-name{
+font-size:16px;
+font-weight:600;
 }
 
 .login-page{
@@ -499,4 +674,41 @@ cursor:pointer;
 }
 .cursor-pointer {
   cursor: pointer !important;
+}
+
+/* === FOOTER === */
+.footer-section{
+background:#0B0B0B;
+border-top:1px solid rgba(59,130,246,0.2);
+box-shadow:0 -1px 40px rgba(59,130,246,0.05);
+}
+
+.footer-links{
+list-style:none;
+padding:0;
+}
+
+.footer-links li{
+color:#6b7280;
+margin-bottom:10px;
+cursor:pointer;
+transition:color .2s;
+font-size:14px;
+}
+
+.footer-links li:hover{
+color:#3B82F6;
+}
+
+.footer-line{
+border-color:#2C2C2E;
+}
+
+.social-icons svg{
+cursor:pointer;
+transition:color .2s;
+}
+
+.social-icons svg:hover{
+color:#3B82F6 !important;
 }
