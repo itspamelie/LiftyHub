@@ -6,29 +6,28 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-
-class DietPlansSeeder extends Seeder
+class DietRequestsSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-
-DB::table('diet_plans')->insert([
+        
+DB::table('diet_requests')->insert([
+    // Usuario 3 con nutriólogo 2 (Marzo)
     [
         'id' => 1,
-        'diet_request_id' => 1,
-        'nutritionist_id' => 2,
         'user_id' => 3,
-        'is_monodiet' => false,
-        'status' => 'active',
-        'goal' => 'definición',
-        'duration_days' => 30,
-        'notes' => 'Reducir azúcares',
+        'nutritionist_id' => 2,
+        'year' => 2026,
+        'month' => 3,
+        'status' => 'paid',
         'created_at' => now(),
         'updated_at' => now(),
     ],
+
+
 ]);
     }
 }

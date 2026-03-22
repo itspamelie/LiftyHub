@@ -53,12 +53,14 @@ class DatabaseSeeder extends Seeder
         NutritionistSpecialtiesSeeder::class,
         NutritionistReviewsSeeder::class,
 
+        DietRequestsSeeder::class,
         DietPlansSeeder::class,
         PlanDaysSeeder::class,
         MealsSeeder::class,
         SupplementsSeeder::class,
         RecommendationsSeeder::class,
         DietReviewsSeeder::class,
+        DietPaymentsSeeder::class
     ]);
 }
     }

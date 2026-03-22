@@ -22,6 +22,10 @@ return new class extends Migration
     $table->string('goal')->nullable(); // volumen, definición
 $table->integer('duration_days')->nullable();
 $table->text('notes')->nullable();
+$table->foreignId('diet_request_id')
+      ->constrained()
+      ->onDelete('cascade')
+      ->unique();
     $table->timestamps();
 });
     }

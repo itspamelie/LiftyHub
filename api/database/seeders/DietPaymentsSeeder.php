@@ -6,26 +6,19 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-
-class DietPlansSeeder extends Seeder
+class DietPaymentsSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-
-DB::table('diet_plans')->insert([
+        DB::table('diet_payments')->insert([
     [
-        'id' => 1,
         'diet_request_id' => 1,
-        'nutritionist_id' => 2,
-        'user_id' => 3,
-        'is_monodiet' => false,
-        'status' => 'active',
-        'goal' => 'definición',
-        'duration_days' => 30,
-        'notes' => 'Reducir azúcares',
+        'amount' => 500.00,
+        'status' => 'paid',
+        'payment_method' => 'card',
         'created_at' => now(),
         'updated_at' => now(),
     ],

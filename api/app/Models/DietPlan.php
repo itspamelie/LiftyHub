@@ -14,7 +14,8 @@ class DietPlan extends Model
         'status',
         'goal',
         'duration_days',
-        'notes'
+        'notes',
+        'diet_request_id'
     ];
          public function  nutritionist(){
         return $this->hasOne(User::class,'id','nutritionist_id');
@@ -22,4 +23,8 @@ class DietPlan extends Model
             public function  user(){
         return $this->hasOne(User::class,'id','user_id');
     }
+    public function request()
+{
+    return $this->belongsTo(DietRequest::class, 'diet_request_id');
+}
 }
