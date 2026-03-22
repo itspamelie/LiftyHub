@@ -1,39 +1,69 @@
-export default function CTA(){
+import AppleIcon from "@mui/icons-material/Apple";
+import AndroidIcon from "@mui/icons-material/Android";
 
+export default function CTA(){
 return(
 
 <section className="cta-section py-5">
-
 <div className="container">
-
 <div className="cta-box text-center">
 
-<h2 className="fw-bold text-white">
-Start your fitness journey today
-</h2>
+  <span className="cta-badge">DISPONIBLE PRÓXIMAMENTE</span>
 
-<p className="text-light mt-3">
-Join over 100,000+ athletes using LiftyHub
-</p>
+  <h2 className="fw-bold text-white display-5 mt-4 mb-3">
+    Empieza tu transformación hoy
+  </h2>
 
-<div className="d-flex justify-content-center gap-3 mt-4">
+  <p className="text-secondary fs-5 mx-auto mb-5" style={{maxWidth:"500px"}}>
+    Únete a miles de atletas que ya usan LiftyHub para alcanzar sus metas
+  </p>
 
-<button className="store-btn">
-<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6iZXS6MLUXXch-u0pG7SqxapH8zMEk1sMVUChnmgRNXIKQQB5RU2ry-i_5W_EqRA--jbh7hKT-fAEiJIXRxvAkdutVtGTnRDQlf7-OD145SlOFi4FVYIJogUZY9-1msAEneH3oaRKr79a5v_vYoAIUr-bNQEw8zC3pakmA2caJKgZqF79xheAaWBWXcKoy9-fm27VeGUPVGZFUDzyTn2kg1ezNx5WQ0CSG538tN0DBl9uflxRe1PrpkLQ3ffGnHlrq1uAXfSq364"/>
-</button>
+  <div className="cta-stats mb-5">
 
-<button className="store-btn">
-<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnBTqktKauzndK2XxBtOxiy6xsLKELfpqE5pxDqmio2xOuZ1xpbju3eyAGNRypS9_iebDJygLZFBzGV6OD1U4jaAQ6GwcMMw6jcW2mkrvJs34fV189WS9W35gfVQNt1VcsvDN_FH9Y4ICHHoZTuL1vopdq6z-XPtrKKwPa-_lsudjaHNOGmCrrf-IS0cydzbboMqYo3tzme0WhSdZRCWey--51UR8dLqFGDOOFgEr2ntYq65zRHuDudUQnI8cVV04dr1XgeZRRDI4"/>
-</button>
+    <div className="cta-stat">
+      <span className="cta-stat-number">+10K</span>
+      <span className="cta-stat-label">Usuarios activos</span>
+    </div>
+
+    <div className="cta-stat-divider"/>
+
+    <div className="cta-stat">
+      <span className="cta-stat-number">+500</span>
+      <span className="cta-stat-label">Rutinas creadas</span>
+    </div>
+
+    <div className="cta-stat-divider"/>
+
+    <div className="cta-stat">
+      <span className="cta-stat-number">+100</span>
+      <span className="cta-stat-label">Ejercicios</span>
+    </div>
+
+  </div>
+
+  <div className="d-flex justify-content-center gap-3 flex-wrap">
+
+    <button className="cta-store-btn">
+      <AppleIcon sx={{fontSize:26}}/>
+      <div className="text-start">
+        <div className="cta-store-small">Disponible en</div>
+        <div className="cta-store-name">App Store</div>
+      </div>
+    </button>
+
+    <button className="cta-store-btn">
+      <AndroidIcon sx={{fontSize:26}}/>
+      <div className="text-start">
+        <div className="cta-store-small">Disponible en</div>
+        <div className="cta-store-name">Google Play</div>
+      </div>
+    </button>
+
+  </div>
 
 </div>
-
 </div>
-
-</div>
-
 </section>
 
 )
-
 }

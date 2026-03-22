@@ -1,3 +1,7 @@
+import LanguageIcon from "@mui/icons-material/Language";
+import SearchIcon from "@mui/icons-material/Search";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+
 export default function Footer(){
 
 return(
@@ -18,16 +22,16 @@ return(
 
 <p className="text-secondary mt-3">
 
-Building the world's most intuitive fitness
-tracking experience for dedicated athletes.
+La app de fitness definitiva para atletas
+que quieren entrenar con inteligencia y constancia.
 
 </p>
 
 <div className="d-flex gap-3 mt-3 social-icons">
 
-<span>🌐</span>
-<span>🔍</span>
-<span>▶</span>
+<LanguageIcon sx={{ fontSize: 20, color: "#6b7280" }} />
+<SearchIcon sx={{ fontSize: 20, color: "#6b7280" }} />
+<PlayArrowIcon sx={{ fontSize: 20, color: "#6b7280" }} />
 
 </div>
 
@@ -39,15 +43,15 @@ tracking experience for dedicated athletes.
 <div className="col-lg-3">
 
 <h6 className="text-light fw-bold mb-3">
-Product
+Producto
 </h6>
 
 <ul className="footer-links">
 
-<li>Features</li>
-<li>Workouts</li>
-<li>Nutrition</li>
-<li>Pricing</li>
+<li>Funciones</li>
+<li>Rutinas</li>
+<li>Dieta</li>
+<li>Planes</li>
 
 </ul>
 
@@ -59,15 +63,15 @@ Product
 <div className="col-lg-3">
 
 <h6 className="text-light fw-bold mb-3">
-Company
+Empresa
 </h6>
 
 <ul className="footer-links">
 
-<li>About Us</li>
-<li>Careers</li>
+<li>Sobre nosotros</li>
+<li>Trabaja con nosotros</li>
 <li>Blog</li>
-<li>Press Kit</li>
+<li>Prensa</li>
 
 </ul>
 
@@ -79,14 +83,14 @@ Company
 <div className="col-lg-3">
 
 <h6 className="text-light fw-bold mb-3">
-Support
+Soporte
 </h6>
 
 <ul className="footer-links">
 
-<li>Help Center</li>
-<li>Contact Support</li>
-<li>Community</li>
+<li>Centro de ayuda</li>
+<li>Contacto</li>
+<li>Comunidad</li>
 
 </ul>
 
@@ -103,14 +107,14 @@ Support
 
 <p className="text-secondary small">
 
-© 2024 LiftyHub. All rights reserved.
+© 2026 LiftyHub. Todos los derechos reservados.
 
 </p>
 
 <div className="d-flex gap-4 small text-secondary">
 
-<span>Privacy Policy</span>
-<span>Terms of Service</span>
+<span>Política de privacidad</span>
+<span>Términos de servicio</span>
 <span>Cookies</span>
 
 </div>

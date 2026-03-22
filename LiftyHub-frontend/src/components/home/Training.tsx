@@ -1,43 +1,59 @@
-export default function Training(){
-
 const items = [
-{
-title:"Strength",
-desc:"Build muscle mass",
-img:"https://lh3.googleusercontent.com/aida-public/AB6AXuBzKN6hnABGOGYqFgmyoI_bivlw5kXO9tQue1X8vEIWQ7u2jpmcrhGcfrAGK4_IGO63EEg1fnvtrYlhD_jalCw2Miql5WxeXF3DgtjVy0o9Uc1dVyZXpH4iRWgJgjFWvRva8Spu0knTfRbQ37fAN5IlKd1We_0pB74rP9yy4IXFszpV_kCX7IupnQsmUZc_XL2kqGwa1c3AfNB8BQCcY3MzmmY5L5OwFnUv8KrhgGrKNHVZw6mrg4ATkN8E0FUgKpAij1D6OSnN4JA"
-},
-{
-title:"Mobility",
-desc:"Improve range of motion",
-img:"https://lh3.googleusercontent.com/aida-public/AB6AXuCyMaMmzKFtGPQOCJmKamQJMF6Wv_t2LCCE4_MSzjXiJwG_DyBRQMuCucWstYJe9kuL4zWUqIuFziJ31rFlYWoGfIJJ0JuKtBFzjdLhOqI7Ra44Co9D9bKOfj7257iWXxKo-WUjtZfPy8323J4DtqyNj51rr35SHAPJ2GLwETkAbaY03UDEEjNGgZm_u6ECT6to6IjYTmgXZqN731aR4w3GqOUesLblDOI-2WBBf13q48FhmwoXgCiAhbFJnI3qv7tB7LIhhCJLA6w"
-},
-{
-title:"Cardio",
-desc:"Boost endurance",
-img:"https://lh3.googleusercontent.com/aida-public/AB6AXuAB2KNwi6G5UhFLQlZlFSykQe9V111S3d9PE2x0yVf1uh4ijbMbliGO6dDZTDvhydGZWpXp9wynGZuNTg8ZS93lx_zy_eI8yxIg9GKcEHwFfx6nqGU7bemWFFJWcIckLr3u7Zu1wUoBaat0Dtr5vNN31nEwf2i3NL8-a04eVVEH7QKqiturD8gegXw3Qa3TioLgZNbRIuy76BuK7lpc6rRlnkU1jKViDWLUlImn1hmoqX58_rlG_m2sc7YbNY7B0t2nOfpb7TaGzqo"
-},
-{
-title:"Full Body",
-desc:"Total athletic conditioning",
-img:"https://lh3.googleusercontent.com/aida-public/AB6AXuDsb0dftgEWXzonoKwBx9mPj71IqLSCLl-3UqJBvPsKzdkRJYGiQzovJhJync_dflcy4MdSeUEBykCp5xpf9-uYOp3fDzBK1cof-vYml7XfrMK0s-aAxn8mivffhRjEPpOQC17PjZoiQe22cqzYfGScFLGM5i7QkK0tMKsgTdW0BSC2yXGvGLbGcLvWOjT556HA26QRZwxaEmydF3KNXNgX90udAVwhdx9PG5H2TeXLP4M7_cyzTOMcWl5Xeef53cxHFJA3U5k88NY"
-}
+  {
+    title: "Fuerza",
+    desc: "Gana masa muscular",
+    img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80"
+  },
+  {
+    title: "Movilidad",
+    desc: "Mejora tu rango de movimiento",
+    img: "https://images.unsplash.com/photo-1574680178050-55c6a6a96e0a?w=600&q=80"
+  },
+  {
+    title: "Cardio",
+    desc: "Aumenta tu resistencia",
+    img: "https://images.unsplash.com/photo-1546483875-ad9014c88eba?w=600&q=80"
+  },
+  {
+    title: "HIIT",
+    desc: "Quema grasa en menos tiempo",
+    img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80"
+  },
+  {
+    title: "Full Body",
+    desc: "Condicionamiento atlético total",
+    img: "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=600&q=80"
+  }
 ]
 
+export default function Training(){
 return(
 
-<section className="training-section py-5">
+<section className="training-section py-5" id="entrenamientos">
 
 <div className="container">
 
-<h2 className="text-center text-light fw-bold mb-5">
-Train Your Way
-</h2>
+<div className="text-center mb-5">
+
+  <span className="section-badge mb-3 d-inline-block">
+    CATEGORÍAS
+  </span>
+
+  <h2 className="text-light fw-bold mt-2">
+    Entrena a tu manera
+  </h2>
+
+  <p className="text-secondary">
+    Filtra rutinas por categoría y encuentra el estilo que más se adapta a ti
+  </p>
+
+</div>
 
 <div className="row g-4">
 
-{items.map((item,index)=>(
+{items.map((item, index) => (
 
-<div className="col-md-3" key={index}>
+<div className={index < 2 ? "col-md-6" : "col-md-4"} key={index}>
 
 <div className="training-card">
 
