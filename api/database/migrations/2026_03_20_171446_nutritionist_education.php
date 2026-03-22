@@ -16,11 +16,9 @@ return new class extends Migration
     $table->foreignId('nutritionist_profile_id')
           ->constrained('nutritionist_profiles')
           ->onDelete('cascade');
-
     $table->string('degree'); // Maestría
     $table->string('institution'); // Universidad
     $table->year('year');
-
     $table->timestamps();
 });
     }
