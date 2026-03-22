@@ -19,6 +19,7 @@ return new class extends Migration
     $table->integer('calories');
     $table->string('image')->nullable();
 $table->integer('order');
+$table->text('description'); // qué incluye la comida
     $table->timestamps();
 });
     }

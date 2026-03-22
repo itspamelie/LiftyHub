@@ -19,6 +19,9 @@ return new class extends Migration
           ->constrained('users');
      $table->boolean('is_monodiet')->default(false);     
     $table->enum('status', ['active', 'completed']);
+    $table->string('goal')->nullable(); // volumen, definición
+$table->integer('duration_days')->nullable();
+$table->text('notes')->nullable();
     $table->timestamps();
 });
     }

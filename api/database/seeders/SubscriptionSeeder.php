@@ -16,7 +16,7 @@ class SubscriptionSeeder extends Seeder
           DB::table('subscriptions')->insert([
             [
                 'user_id' => 3,
-                'plan_id' => 2, // plan PRO
+                'plan_id' => 3, // plan PRO
                 'start_date' => now(),
                 'end_date' => now()->addMonth(),
                 'status' => 'active',

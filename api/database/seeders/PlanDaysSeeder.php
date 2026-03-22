@@ -13,18 +13,17 @@ class PlanDaysSeeder extends Seeder
      */
     public function run(): void
     {
-         $days = [
-            'monday','tuesday','wednesday','thursday','friday','saturday','sunday'
-        ];
+$days = ['monday','tuesday','wednesday','thursday','friday'];
 
-        foreach ($days as $index => $day) {
-            DB::table('plan_days')->insert([
-                'id' => $index + 1,
-                'diet_plan_id' => 1,
-                'day' => $day,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+foreach ($days as $index => $dayName) {
+    DB::table('plan_days')->insert([
+        'id' => $index + 1,
+        'diet_plan_id' => 1,
+        'day' => $dayName,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
         }
     }
 }

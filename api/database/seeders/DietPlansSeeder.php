@@ -14,16 +14,19 @@ class DietPlansSeeder extends Seeder
      */
     public function run(): void
     {
-         DB::table('diet_plans')->insert([
-            [
-                'id' => 1,
-                'nutritionist_id' => 2,
-                'user_id' => 3,
-                'is_monodiet' => false,
-                'status' => 'active',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+       DB::table('diet_plans')->insert([
+    [
+        'id' => 1,
+        'nutritionist_id' => 2,
+        'user_id' => 3,
+        'is_monodiet' => false,
+        'status' => 'active',
+        'goal' => 'Hipertrofia',
+        'duration_days' => 30,
+        'notes' => 'Plan enfocado en aumento de masa muscular',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ],
+]);
     }
 }

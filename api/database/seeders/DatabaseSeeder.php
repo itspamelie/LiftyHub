@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
 
     $this->call([
         UsersSeeder::class,
+        NutritionProfilesSeeder::class,
         SomatotypesSeeder::class,
         PlansSeeder::class,
 
