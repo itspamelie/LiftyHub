@@ -13,7 +13,8 @@ class MealsSeeder extends Seeder
      */
     public function run(): void
     {
-    $planDays = DB::table('plan_days')->where('diet_plan_id', 1)->get();
+
+        $planDays = DB::table('plan_days')->get();
 
 foreach ($planDays as $day) {
 
@@ -64,7 +65,6 @@ foreach ($planDays as $day) {
             'updated_at' => now(),
         ],
     ]);
-
-        }
+}
     }
 }

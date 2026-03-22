@@ -14,19 +14,20 @@ class DietPlansSeeder extends Seeder
      */
     public function run(): void
     {
-       DB::table('diet_plans')->insert([
-    [
-        'id' => 1,
-        'nutritionist_id' => 2,
-        'user_id' => 3,
-        'is_monodiet' => false,
-        'status' => 'active',
-        'goal' => 'Hipertrofia',
-        'duration_days' => 30,
-        'notes' => 'Plan enfocado en aumento de masa muscular',
-        'created_at' => now(),
-        'updated_at' => now(),
-    ],
+
+$dietPlanId = DB::table('diet_plans')->insertGetId([
+    'nutritionist_id' => DB::table('users')->where('role', 'nutritionist')->first()->id,
+    'user_id' => DB::table('users')->where('email', 'juan@test.com')->first()->id,
+    'is_monodiet' => false,
+    'status' => 'active',
+    'goal' => 'Hipertrofia',
+    'duration_days' => 30,
+    'notes' => 'Plan para aumento de masa muscular',
+    'created_at' => now(),
+    'updated_at' => now(),
 ]);
+
+// Guardamos el ID para usarlo en otros seeders (opcional si lo separas)
+cache(['diet_plan_id' => $dietPlanId]);
     }
 }
