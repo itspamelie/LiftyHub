@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('muscle');
             $table->string('technique');
+            $table->string('categorie');
             $table->timestamps();
         });
     }

@@ -10,7 +10,8 @@ class Exercise extends Model
     protected $fillable = [
         'name',
         'muscle',
-        'technique'
+        'technique',
+        'categorie'
     ];
 
 }

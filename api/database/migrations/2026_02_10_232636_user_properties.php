@@ -13,8 +13,9 @@ return new class extends Migration
     {
          Schema::create('user_properties', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->unique()->constrained('users');            $table->decimal('weight',5,2);
+            $table->foreignId('user_id')->unique()->constrained('users');           
             $table->decimal('stature',5,2);
+            $table->decimal('weight',5,2);
             $table->decimal('waist',5,2);
             $table->decimal('chest',5,2);
             $table->decimal('hips',5,2);

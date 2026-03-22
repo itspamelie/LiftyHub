@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 class UserRoutineExercise extends Model
 {
     protected $table = 'user_routine_exercises';
@@ -13,16 +12,16 @@ class UserRoutineExercise extends Model
         'exercise_id',
         'sets',
         'repetitions',
-        'seconds_rest',
+        'seconds_rest'
     ];
 
-    public function routine()
+    public function userRoutine()
     {
         return $this->belongsTo(UserRoutine::class, 'user_routine_id');
     }
 
     public function exercise()
     {
-        return $this->belongsTo(Exercise::class);
+        return $this->belongsTo(Exercise::class, 'exercise_id');
     }
 }

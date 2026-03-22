@@ -11,20 +11,30 @@ class UserRoutine extends Model
     protected $fillable = [
         'user_id',
         'name',
-        'category',
         'objective',
         'level',
         'duration',
         'img',
+        'category'
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function exercises()
     {
-        return $this->hasMany(UserRoutineExercise::class);
+        return $this->hasMany(UserRoutineExercise::class, 'user_routine_id');
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(UserSchedule::class, 'user_routine_id');
+    }
+
+    public function sessions()
+    {
+        return $this->hasMany(UserRoutineSession::class, 'user_routine_id');
     }
 }

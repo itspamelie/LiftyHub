@@ -17,8 +17,15 @@ return new class extends Migration
           ->constrained('users');
     $table->foreignId('user_id')
           ->constrained('users');
-    $table->text('plan_content');
+     $table->boolean('is_monodiet')->default(false);     
     $table->enum('status', ['active', 'completed']);
+    $table->string('goal')->nullable(); // volumen, definición
+$table->integer('duration_days')->nullable();
+$table->text('notes')->nullable();
+$table->foreignId('diet_request_id')
+      ->constrained()
+      ->onDelete('cascade')
+      ->unique();
     $table->timestamps();
 });
     }

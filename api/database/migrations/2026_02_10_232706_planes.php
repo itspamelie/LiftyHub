@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('description');
             $table->decimal('price',8,2);
             $table->timestamps();
+            $table->integer('level'); // 0 free, 1 básico, 2 pro, etc.
+$table->integer('max_routines')->nullable();
         });
     }
 

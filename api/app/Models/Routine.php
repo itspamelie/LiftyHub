@@ -22,4 +22,8 @@ class Routine extends Model
      public function  somatotype(){
         return $this->hasOne(Somatotype::class,'id','somatotype_id');
     }
+    public function savedUsers()
+{
+    return $this->hasMany(UserSavedRoutine::class, 'routine_id');
+}
 }
