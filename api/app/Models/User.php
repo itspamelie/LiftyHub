@@ -69,4 +69,8 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+    public function savedRoutines()
+{
+    return $this->hasMany(UserSavedRoutine::class, 'user_id');
+}
 }
