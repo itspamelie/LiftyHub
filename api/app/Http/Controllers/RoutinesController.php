@@ -35,6 +35,7 @@ class RoutinesController extends Controller
           $validated = $request->validate([
             'name'=>'required|string',
             'objective'=>'required|string',
+            'duration'=>'required|numeric',
             'level'=>'required|string',
             'img'=>'required|string',
             'plan_id'=>'required',
@@ -86,6 +87,7 @@ class RoutinesController extends Controller
          $validated = $request->validate([
             'name'=>'required|string',
             'objective'=>'required|string',
+            'duration'=>'required|numeric',
             'level'=>'required|string',
             'img'=>'required|string',
             'plan_id'=>'required',

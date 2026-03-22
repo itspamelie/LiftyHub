@@ -11,7 +11,8 @@ class Plan extends Model
         'name',
         'description',
         'price',
-        'level'
+        'level',
+        'max_routines'
     ];
 
 }

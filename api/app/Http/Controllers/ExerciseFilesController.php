@@ -8,7 +8,7 @@ use App\Models\ExerciseFile;
 
 class ExerciseFilesController extends Controller
 {
-                      public function index()
+    public function index()
     {
          $data = ExerciseFile::with('exercise')->get();
 
@@ -36,7 +36,7 @@ class ExerciseFilesController extends Controller
           $validated = $request->validate([
             'exercise_id'=>'required',
             'file_path'=>'required',
-            'type'=>'required|numeric'
+            'type'=>'required|string'
         ]);
 
         //metodo si los campos se llaman igual que en la base de datos
@@ -84,7 +84,7 @@ class ExerciseFilesController extends Controller
          $validated = $request->validate([
             'exercise_id'=>'required',
             'file_path'=>'required',
-            'type'=>'required|numeric'
+            'type'=>'required|string'
          ]);
 
         //metodo si los campos se llaman igual que en la base de datos

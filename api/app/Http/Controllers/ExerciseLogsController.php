@@ -10,7 +10,7 @@ class ExerciseLogsController extends Controller
 {
                   public function index()
     {
-         $data = ExerciseLog::with('user','exercise')->get();
+         $data = ExerciseLog::with('user','exercise','exerciseRoutine','session')->get();
 
         //Siempre que hagamos una api enviamos un JSON
         return response()->json([
@@ -38,8 +38,11 @@ class ExerciseLogsController extends Controller
             'exercise_id'=>'required',
             'weight_lifted'=>'required|numeric',
             'repetitions'=>'required|numeric',
-            'sets'=>'required|numeric'
-        ]);
+            'sets'=>'required|numeric',
+            'exercise_routine_id'=>'required',
+            'user_routine_session_id'=>'required',
+            'workout_date'=>'required|date'        
+            ]);
 
         //metodo si los campos se llaman igual que en la base de datos
         $data = ExerciseLog::create($validated);
@@ -88,7 +91,10 @@ class ExerciseLogsController extends Controller
             'exercise_id'=>'required',
             'weight_lifted'=>'required|numeric',
             'repetitions'=>'required|numeric',
-            'sets'=>'required|numeric'
+            'sets'=>'required|numeric',
+            'exercise_routine_id'=>'required',
+            'user_routine_session_id'=>'required',
+            'workout_date'=>'required|date'
          ]);
 
         //metodo si los campos se llaman igual que en la base de datos

@@ -35,7 +35,8 @@ class ExerciseController extends Controller
           $validated = $request->validate([
             'name'=>'required|string',
             'muscle'=>'required|string',
-            'technique'=>'required|string'
+            'technique'=>'required|string',
+            'categorie'=>'required|string'
         ]);
 
         //metodo si los campos se llaman igual que en la base de datos
@@ -83,7 +84,9 @@ class ExerciseController extends Controller
          $validated = $request->validate([
             'name'=>'required|string',
             'muscle'=>'required|string',
-            'technique'=>'required|string'
+            'technique'=>'required|string',
+            'categorie'=>'required|string'
+
          ]);
 
         //metodo si los campos se llaman igual que en la base de datos

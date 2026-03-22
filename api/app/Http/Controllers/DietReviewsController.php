@@ -8,7 +8,7 @@ use App\Models\DietReview;
 
 class DietReviewsController extends Controller
 {
-                              public function index()
+    public function index()
     {
          $data = DietReview::with('dietplan')->get();
 

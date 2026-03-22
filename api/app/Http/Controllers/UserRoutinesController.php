@@ -9,7 +9,7 @@ class UserRoutinesController extends Controller
 {
     public function index()
     {
-        $data = UserRoutine::with(['exercises.exercise'])->get();
+        $data = UserRoutine::with(['user','exercises','schedules','sessions'])->get();
 
         return response()->json([
             "status" => "ok",
@@ -63,6 +63,7 @@ class UserRoutinesController extends Controller
     public function update(Request $request, string $id)
     {
         $validated = $request->validate([
+            'user_id'   => 'required|exists:users,id',
             'name'      => 'required|string',
             'category'  => 'nullable|string',
             'objective' => 'required|string',

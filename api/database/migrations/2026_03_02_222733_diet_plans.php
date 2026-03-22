@@ -13,16 +13,14 @@ return new class extends Migration
     {
         Schema::create('diet_plans', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('nutritionist_id')
-          ->constrained('users');
-    $table->foreignId('user_id')
-          ->constrained('users');
-     $table->boolean('is_monodiet')->default(false);     
+    $table->foreignId('nutritionist_id') ->constrained('users');
+    $table->foreignId('user_id')->constrained('users');
+    $table->boolean('is_monodiet')->default(false);     
     $table->enum('status', ['active', 'completed']);
     $table->string('goal')->nullable(); // volumen, definición
-$table->integer('duration_days')->nullable();
-$table->text('notes')->nullable();
-$table->foreignId('diet_request_id')
+    $table->integer('duration_days')->nullable();
+    $table->text('notes')->nullable();
+    $table->foreignId('diet_request_id')
       ->constrained()
       ->onDelete('cascade')
       ->unique();

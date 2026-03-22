@@ -36,15 +36,19 @@ class DietPlansController extends Controller
           $validated = $request->validate([
             'nutritionist_id'=>'required',
             'user_id'=>'required',
-            'plan_content'=>'required|string',
-            'status'=>'required|string'
+            'is_monodiet'=>'required',
+            'status'=>'required|string',
+            'goal'=>'required|string',
+            'duration_days'=>'required|numeric',
+            'notes'=>'required|string',
+            'diet_request_id'=>'required'
         ]);
 
         //metodo si los campos se llaman igual que en la base de datos
         $data = DietPlan::create($validated);
           return response()->json([
             "status"=>"ok",
-            "mesage"=>"Dieta agregada correctamente.",
+            "mesage"=>"Plan de dieta agregado correctamente.",
             "data"=>$data
 
         ]);
@@ -59,13 +63,13 @@ class DietPlansController extends Controller
         if($data){
             return response()->json([
             "status"=>"ok",
-            "mesage"=>"Dieta encontrada",
+            "mesage"=>"Plan de dieta encontrado",
             "data"=>$data
         ]);
         }
         return response()->json([
             "status"=>"error",
-            "mesage"=>"Dieta no encontrada"
+            "mesage"=>"Plan de dieta no encontrado"
         ],400);
     }
 
@@ -85,8 +89,12 @@ class DietPlansController extends Controller
          $validated = $request->validate([
             'nutritionist_id'=>'required',
             'user_id'=>'required',
-            'plan_content'=>'required|string',
-            'status'=>'required|string'
+            'is_monodiet'=>'required',
+            'status'=>'required|string',
+            'goal'=>'required|string',
+            'duration_days'=>'required|numeric',
+            'notes'=>'required|string',
+            'diet_request_id'=>'required',
          ]);
 
         //metodo si los campos se llaman igual que en la base de datos
@@ -94,7 +102,7 @@ class DietPlansController extends Controller
         $data->update($validated);
           return response()->json([
             "status"=>"ok",
-            "mesage"=>"Dieta actualizada correctamente.",
+            "mesage"=>"Plan de dieta actualizado correctamente.",
             "data"=>$data
 
         ]);
@@ -111,7 +119,7 @@ class DietPlansController extends Controller
         }
         return response()->json([
             "status"=>"ok",
-            "mesage"=>"Dieta eliminada correctamente."
+            "mesage"=>"Plan de Dieta eliminado correctamente."
         ]);
     }
 }

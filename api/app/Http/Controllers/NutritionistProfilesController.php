@@ -36,7 +36,11 @@ class NutritionistProfilesController extends Controller
             'user_id'=>'required',
             'license_number'=>'required|string',
             'profile_pic'=>'required|string',
+            'specialty'=>'required|string',
+            'location'=>'required|string',
             'bio'=>'required|string',
+            'rating'=>'required|numeric',
+            'is_active'=>'required'
         ]);
 
         //metodo si los campos se llaman igual que en la base de datos
@@ -82,10 +86,14 @@ class NutritionistProfilesController extends Controller
     public function update(Request $request, string $id)
     {
          $validated = $request->validate([
-          'user_id'=>'required',
+            'user_id'=>'required',
             'license_number'=>'required|string',
             'profile_pic'=>'required|string',
-            'bio'=>'required|string',   
+            'specialty'=>'required|string',
+            'location'=>'required|string',
+            'bio'=>'required|string',
+            'rating'=>'required|numeric',
+            'is_active'=>'required'
          ]);
 
         //metodo si los campos se llaman igual que en la base de datos

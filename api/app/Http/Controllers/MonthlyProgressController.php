@@ -8,7 +8,7 @@ use App\Models\MonthlyProgress;
 
 class MonthlyProgressController extends Controller
 {
-                  public function index()
+    public function index()
     {
          $data = MonthlyProgress::with('user')->get();
 
@@ -36,6 +36,7 @@ class MonthlyProgressController extends Controller
           $validated = $request->validate([
             'user_id'=>'required',
             'month_number'=>'required|numeric',
+            'year'=>'required',
             'initial_weight'=>'required|numeric',
             'current_weight'=>'required|numeric',
             'observations'=>'required|string',
@@ -87,10 +88,11 @@ class MonthlyProgressController extends Controller
          $validated = $request->validate([
             'user_id'=>'required',
             'month_number'=>'required|numeric',
+            'year'=>'required',
             'initial_weight'=>'required|numeric',
             'current_weight'=>'required|numeric',
             'observations'=>'required|string',
-            'img'=>'required|string' 
+            'img'=>'required|string'
          ]);
 
         //metodo si los campos se llaman igual que en la base de datos

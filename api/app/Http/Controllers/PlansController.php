@@ -38,7 +38,9 @@ class PlansController extends Controller
           $validated = $request->validate([
             'name'=>'required|string',
             'description'=>'required|string',
-            'price'=>'required|numeric'
+            'price'=>'required|numeric',
+            'level'=>'required|numeric',
+            'max_routines'=>'required|numeric'
         ]);
 
         //metodo si los campos se llaman igual que en la base de datos
@@ -84,9 +86,11 @@ class PlansController extends Controller
     public function update(Request $request, string $id)
     {
          $validated = $request->validate([
-          'name'=>'required|string',
+            'name'=>'required|string',
             'description'=>'required|string',
-            'price'=>'required|numeric'   
+            'price'=>'required|numeric',
+            'level'=>'required|numeric',
+            'max_routines'=>'required|numeric'  
          ]);
 
         //metodo si los campos se llaman igual que en la base de datos
