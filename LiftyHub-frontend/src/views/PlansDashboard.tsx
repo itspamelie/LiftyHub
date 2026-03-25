@@ -20,6 +20,8 @@ export default function PlansDashboard() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [level, setLevel] = useState("");
+  const [max_routines, setMax_routines] = useState("");
 
   const [openEdit, setOpenEdit] = useState(false)
 const [editPlan, setEditPlan] = useState<any>(null)
@@ -103,7 +105,9 @@ setEditPlan({
         body: JSON.stringify({
           name,
           description,
-          price
+          price,
+          level,
+          max_routines
         })
       });
 
@@ -273,13 +277,17 @@ onDelete={deletePlan}
 />
 
 <CreatePlanForm
-name={name}
-description={description}
-price={price}
-setName={setName}
-setDescription={setDescription}
-setPrice={setPrice}
-onSubmit={createPlan}
+  name={name}
+  description={description}
+  price={price}
+  level={level}
+  max_routines={max_routines}
+  setName={setName}
+  setDescription={setDescription}
+  setPrice={setPrice}
+  setLevel={setLevel}
+  setMax_routines={setMax_routines}
+  onSubmit={createPlan}
 />
 
 </Box>

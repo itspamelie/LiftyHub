@@ -114,4 +114,30 @@ class ExerciseController extends Controller
             "mesage"=>"Ejercicio eliminado correctamente."
         ]);
     }
+
+
+        public function searchExercises(Request $request)
+{
+    $search = $request->input('search');
+
+    // Si no hay búsqueda, no consultar la BD
+    if(!$search){
+        return response()->json([
+            "status"=>"No se encontraron coincidencias.",
+            "data"=>[]
+        ]);
+    }
+
+    $somatotypes = Somatotype::select('id','type','description','file')
+        ->where(function($query) use ($search){
+            $query->where('type','LIKE',"%{$search}%")
+                  ->orWhere('description','LIKE',"%{$search}%");
+        })
+        ->get();
+
+    return response()->json([
+        "status" => "ok",
+        "data" => $somatotypes
+    ]);
+}
 }

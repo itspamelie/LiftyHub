@@ -28,10 +28,7 @@ return data
 
 }
 
-export const getImageUrl = (path:string) => {
-
-const serverURL = API_URL.replace("/api","")
-
-return `${serverURL}/users/${path}`
-
+export const getImageUrl = (path: string, folder: string = "users") => {
+  const serverURL = API_URL.replace("/api", "")
+  return `${serverURL}/${folder}/${path}`
 }

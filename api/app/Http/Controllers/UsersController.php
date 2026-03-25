@@ -62,7 +62,7 @@ class UsersController extends Controller
               // guardar solo la ruta pública 
               $validated['img'] = $filename; 
               }else{ 
-                $validated['img'] = 'users/default.jpg';
+                $validated['img'] = 'default.jpg';
                  } 
                  $validated['password'] = Hash::make($validated['password']);
                  $data = User::create($validated);

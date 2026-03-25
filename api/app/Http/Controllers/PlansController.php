@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class PlansController extends Controller
 {
-              public function index()
+   public function index()
     {
          $data = Plan::all();
 

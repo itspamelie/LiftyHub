@@ -48,10 +48,13 @@ Route::resource('monthlyProgress',MonthlyProgressController::class);
 Route::resource('exerciseRoutines',ExerciseRoutinesController::class);
 Route::resource('exerciseLogs',ExerciseLogsController::class);
 Route::resource('exerciseFiles',ExerciseFilesController::class);
-Route::resource('exercise',ExerciseController::class);
+Route::resource('exercises',ExerciseController::class);
 Route::resource('dietReviews',DietReviewsController::class);
 Route::resource('dietPlans',DietPlansController::class);
 Route::get('/dashboard', [DashboardController::class, 'stats']);
 Route::get('/search-users', [UsersController::class, 'searchUsers']);
 Route::get('/search-plans', [PlansController::class, 'searchPlans']);
+Route::get('/search-somatotypes', [SomatotypesController::class, 'searchSomatotypes']);
+Route::get('/search-exercises', [ExerciseController::class, 'searchExercises']);
+
 });

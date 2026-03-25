@@ -4,9 +4,13 @@ export default function CreatePlanForm({
 name,
 description,
 price,
+level,
+max_routines,
 setName,
 setDescription,
 setPrice,
+setLevel,
+setMax_routines,
 onSubmit
 }: any) {
 
@@ -56,6 +60,33 @@ placeholder="Precio"
 type="number"
 value={price}
 onChange={(e)=>setPrice(e.target.value)}
+sx={{
+mb:3,
+background:"white",
+borderRadius:"10px"
+}}
+/>
+
+
+<TextField
+fullWidth
+placeholder="Nivel"
+type="number"
+value={level}
+onChange={(e)=>setLevel(e.target.value)}
+sx={{
+mb:3,
+background:"white",
+borderRadius:"10px"
+}}
+/>
+
+<TextField
+fullWidth
+placeholder="# Rutinas"
+type="number"
+value={max_routines}
+onChange={(e)=>setMax_routines(e.target.value)}
 sx={{
 mb:3,
 background:"white",

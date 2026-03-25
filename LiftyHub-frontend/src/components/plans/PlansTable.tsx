@@ -20,17 +20,19 @@ Todos los planes
 </Typography>
 
 <Box
-sx={{
-display:"grid",
-gridTemplateColumns:"1fr 2fr 1fr 1fr",
-fontWeight:"bold",
-borderBottom:"1px solid #2d3561",
-pb:1
-}}
+  sx={{
+    display:"grid",
+    gridTemplateColumns:"1fr 2fr 1fr 1fr 1fr 1fr",
+    fontWeight:"bold",
+    borderBottom:"1px solid #2d3561",
+    pb:1
+  }}
 >
 <Typography>Nombre</Typography>
 <Typography>Descripción</Typography>
 <Typography>Precio</Typography>
+<Typography>Nivel</Typography>
+<Typography># Rutinas</Typography>
 <Typography>Acciones</Typography>
 </Box>
 
@@ -40,7 +42,7 @@ pb:1
 key={plan.id}
 sx={{
 display:"grid",
-gridTemplateColumns:"1fr 2fr 1fr 1fr",
+    gridTemplateColumns:"1fr 2fr 1fr 1fr 1fr 1fr",
 py:2,
 borderBottom:"1px solid #2d3561",
 alignItems:"center"
@@ -50,6 +52,8 @@ alignItems:"center"
 <Typography>{plan.name}</Typography>
 <Typography>{plan.description}</Typography>
 <Typography>${plan.price}</Typography>
+<Typography>{plan.level}</Typography>
+<Typography>{plan.max_routines}</Typography>
 
 <Box display="flex" gap={2}>
 
