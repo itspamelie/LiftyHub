@@ -16,14 +16,14 @@ class ExerciseFilesSeeder extends Seeder
          DB::table('exercise_files')->insert([
             [
                 'exercise_id' => 1,
-                'file_path' => 'press_banca.mp4',
+                'file_path' => 'press_banca.jpg',
                 'type' => 'video',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'exercise_id' => 2,
-                'file_path' => 'sentadilla.mp4',
+                'file_path' => 'sentadilla.jpg',
                 'type' => 'video',
                 'created_at' => now(),
                 'updated_at' => now(),

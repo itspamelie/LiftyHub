@@ -10,7 +10,8 @@ import PlansDashboard from "./views/PlansDashboard";
 import NutritionistDashboard from "./views/NutritionistDashboard";
 import ExercisesDashboard from "./views/ExercisesDashboard";
 
-function PrivateRoute({ children }: { children: JSX.Element }) {
+
+function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
 }

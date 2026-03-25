@@ -116,4 +116,6 @@ class ExerciseRoutinesController extends Controller
             "mesage"=>"Serie eliminada correctamente."
         ]);
     }
+
+    
 }

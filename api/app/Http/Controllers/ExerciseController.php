@@ -128,16 +128,17 @@ class ExerciseController extends Controller
         ]);
     }
 
-    $somatotypes = Somatotype::select('id','type','description','file')
+    $exercise = Exercise::select('id','name','muscle','categorie','technique')
         ->where(function($query) use ($search){
-            $query->where('type','LIKE',"%{$search}%")
-                  ->orWhere('description','LIKE',"%{$search}%");
+            $query->where('name','LIKE',"%{$search}%")
+                  ->orWhere('muscle','LIKE',"%{$search}%")
+                  ->orWhere('categorie','LIKE',"%{$search}%");
         })
         ->get();
 
     return response()->json([
         "status" => "ok",
-        "data" => $somatotypes
+        "data" => $exercise
     ]);
 }
 }

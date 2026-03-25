@@ -51,10 +51,13 @@ Route::resource('exerciseFiles',ExerciseFilesController::class);
 Route::resource('exercises',ExerciseController::class);
 Route::resource('dietReviews',DietReviewsController::class);
 Route::resource('dietPlans',DietPlansController::class);
+Route::resource('exerciseRoutines',ExerciseRoutinesController::class);
+Route::resource('routines',RoutinesController::class);
 Route::get('/dashboard', [DashboardController::class, 'stats']);
 Route::get('/search-users', [UsersController::class, 'searchUsers']);
 Route::get('/search-plans', [PlansController::class, 'searchPlans']);
 Route::get('/search-somatotypes', [SomatotypesController::class, 'searchSomatotypes']);
 Route::get('/search-exercises', [ExerciseController::class, 'searchExercises']);
-
+Route::get('/search-routines', [RoutinesController::class, 'searchRoutines']);
+Route::get('/exercise-files/{id}', [ExerciseFilesController::class, 'getByExercise']);
 });

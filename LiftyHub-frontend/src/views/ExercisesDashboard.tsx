@@ -7,38 +7,38 @@ import { apiFetch } from "../services/api";
 import TopNavbar from "../components/exercises/TopNavbar";
 import SearchIcon from "@mui/icons-material/Search";
 import ExercisesCard from "../components/exercises/ExercisesCard"
-import CreateSomatotypeModal from "../components/somatotypes/CreateSomatotypeModal"
-import EditSomatotypeModal from "../components/somatotypes/EditSomatotypeModal"
+import CreateExerciseModal from "../components/exercises/CreateExerciseModal"
+import EditExerciseModal from "../components/exercises/EditExerciseModal";
 
-export default function SomatotypesDashboard() {
+export default function ExercisesDashboard() {
 
   // STATES
-  const [somatotypes, setSomatotypes] = useState<any[]>([]);
+  const [exercises, setExercises] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   const [openCreate, setOpenCreate] = useState(false)
 
   const [openEdit, setOpenEdit] = useState(false)
-  const [editSomatotype, setEditSomatotype] = useState<any>(null)
+  const [editExercise, setEditExercise] = useState<any>(null)
 
-  const openEditModal = (somatotype:any) => {
-    setEditSomatotype(somatotype)
+  const openEditModal = (exercise:any) => {
+    setEditExercise(exercise)
     setOpenEdit(true)
   }
 
   const closeEditModal = () => {
     setOpenEdit(false)
-    setEditSomatotype(null)
+    setEditExercise(null)
   }
 
 
 
-  // GET SOMATOTYPES
+  // GET 
   useEffect(() => {
     apiFetch("/exercises")
       .then((data) => {
-        setSomatotypes(data.data || []);
+        setExercises(data.data || []);
         setLoading(false);
         Swal.close();
       })
@@ -68,25 +68,25 @@ export default function SomatotypesDashboard() {
   if (loading) return null;
 
   // SEARCH
-  const searchSomatotypes = async (value: string) => {
+  const searchExercises = async (value: string) => {
     setSearch(value);
 
     try {
       if (value.trim() === "") {
         const data = await apiFetch("/exercises");
-        setSomatotypes(data.data || []);
+        setExercises(data.data || []);
         return;
       }
 
       const data = await apiFetch(`/search-exercises?search=${value}`);
-      setSomatotypes(data.data || []);
+      setExercises(data.data || []);
     } catch (error) {
       console.error("Error buscando ejercicios", error);
     }
   };
 
   // DELETE
-  const deleteSomatotype = async (id:number) => {
+  const deleteExercise = async (id:number) => {
 
     const result = await Swal.fire({
       title: "¿Eliminar ejercicio?",
@@ -107,11 +107,11 @@ export default function SomatotypesDashboard() {
         method:"DELETE"
       })
 
-      setSomatotypes(somatotypes.filter(s => s.id !== id))
+      setExercises(exercises.filter(s => s.id !== id))
 
       Swal.fire({
         icon:"success",
-        title:"Somatotipo eliminado",
+        title:"Ejercicio eliminado",
         background:"#0f172a",
         confirmButtonColor:"#60a5fa",
         color:"#fff"
@@ -159,7 +159,7 @@ export default function SomatotypesDashboard() {
     placeholder="Buscar Ejercicio..."
     variant="outlined"
     value={search}
-    onChange={(e) => searchSomatotypes(e.target.value)}
+    onChange={(e) => searchExercises(e.target.value)}
     sx={{
       width: "300px",
       input: { color: "white" },
@@ -210,12 +210,12 @@ gridTemplateColumns: "repeat(4, minmax(280px, 1fr))",
     p: 4
   }}
 >
-  {somatotypes.map((s) => (
+  {exercises.map((s) => (
 <ExercisesCard
   key={s.id}
   data={s}
   onEdit={openEditModal}
-  onDelete={deleteSomatotype}
+  onDelete={deleteExercise}
 />
   ))}
 </Box>
@@ -223,20 +223,20 @@ gridTemplateColumns: "repeat(4, minmax(280px, 1fr))",
       </Box>
 
 
-<CreateSomatotypeModal
+<CreateExerciseModal
   open={openCreate}
   onClose={() => setOpenCreate(false)}
-  onCreated={(newSomatotype:any) =>
-    setSomatotypes([...somatotypes, newSomatotype])
+  onCreated={(newExercise:any) =>
+    setExercises([...exercises, newExercise])
   }
 />
 
-<EditSomatotypeModal
+<EditExerciseModal
   open={openEdit}
   onClose={closeEditModal}
-  somatotype={editSomatotype}
+  exercise={editExercise}
   onUpdated={(updated:any) =>
-    setSomatotypes(prev =>
+    setExercises(prev =>
       prev.map(s => s.id === updated.id ? updated : s)
     )
   }

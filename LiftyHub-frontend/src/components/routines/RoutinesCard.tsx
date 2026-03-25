@@ -1,21 +1,17 @@
 import { Box, Typography, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import VisibilityIcon from "@mui/icons-material/Visibility"
-import UploadFileIcon from "@mui/icons-material/UploadFile"
-import ExerciseViewerModal from "./ExerciseViewerModal";
-import { useState } from "react"
-import CreateExerciseFileModal from "./CreateExerciseFileModal"
+import { getImageUrl } from "../../services/api";
 
-export default function ExercisesCard({ data, onDelete, onEdit }: any){
-const [openViewer, setOpenViewer] = useState(false)
-const [selectedExercise, setSelectedExercise] = useState<any>(null)
-const [openUpload, setOpenUpload] = useState(false)
+
+export default function RoutinesCard({ data, onDelete, onEdit }: any){
+
   return (
     <Box
       sx={{
         width: "100%",
 maxWidth: 400,
+        height:500,
         maxHeight:500,
         borderRadius: "20px",
         overflow: "hidden",
@@ -28,7 +24,22 @@ maxWidth: 400,
         justifyContent: "space-between"
       }}
     >
-   
+      {/* IMAGEN + GRADIENT */}
+      <Box
+        sx={{
+          height: 300,
+          backgroundImage: `
+            linear-gradient(
+              to bottom,
+              rgba(168, 85, 247, 0.7),
+              rgba(59, 130, 246, 0.7)
+            ),
+  url(${getImageUrl(data.img, "routines")})
+            `,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
 
       {/* CONTENIDO */}
       <Box sx={{ p: 3 }}>
@@ -40,22 +51,40 @@ maxWidth: 400,
           variant="body2"
           sx={{ color: "#cbd5e1", lineHeight: 1.6, mb:2 }}
         >
-           Musculo: {data.muscle}
+           Objetivo: {data.objective}
         </Typography>
 
-         <Typography
+        <Typography
           variant="body2"
           sx={{ color: "#cbd5e1", lineHeight: 1.6, mb:2 }}
         >
-           Tecnica: {data.technique}
+           Nivel: {data.level}
         </Typography>
-         <Typography
+
+        <Typography
           variant="body2"
           sx={{ color: "#cbd5e1", lineHeight: 1.6, mb:2 }}
         >
-          Categoria: {data.categorie}
+           Duracion: {data.duration} minutos
         </Typography>
+
+        <Typography
+          variant="body2"
+          sx={{ color: "#cbd5e1", lineHeight: 1.6, mb:2 }}
+        >
+           Plan: {data.plan.name}
+        </Typography>
+
+        <Typography
+          variant="body2"
+          sx={{ color: "#cbd5e1", lineHeight: 1.6, mb:2 }}
+        >
+           Somatotipo: {data.somatotype.type}
+        </Typography>
+
+         
       </Box>
+      
 
       {/* ACCIONES */}
       <Box
@@ -73,34 +102,6 @@ maxWidth: 400,
         </Typography>
 
         <Box>
-
-             {/* VISUALIZAR */}
-<IconButton
-  onClick={() => {
-    setSelectedExercise(data)
-    setOpenViewer(true)
-  }}
-  sx={{
-    color: "#34d399",
-    "&:hover": { backgroundColor: "rgba(52,211,153,0.1)" }
-  }}
->
-  <VisibilityIcon />
-</IconButton>
-
-    {/* SUBIR ARCHIVO */}
-    <IconButton
-  onClick={() => {
-    setSelectedExercise(data)
-    setOpenUpload(true)
-  }}
-  sx={{
-    color: "#fbbf24",
-    "&:hover": { backgroundColor: "rgba(251,191,36,0.1)" }
-  }}
->
-  <UploadFileIcon />
-</IconButton>
           <IconButton
   onClick={() => onEdit(data)}
   sx={{
@@ -119,24 +120,9 @@ maxWidth: 400,
           >
             <DeleteIcon />
           </IconButton>
-
-
         </Box>
       </Box>
 
-<ExerciseViewerModal
-  open={openViewer}
-  onClose={() => setOpenViewer(false)}
-  exercise={selectedExercise}
-/>
-<CreateExerciseFileModal
-  open={openUpload}
-  onClose={() => setOpenUpload(false)}
-  exercise={selectedExercise}
-  onCreated={() => {
-    setOpenUpload(false)
-  }}
-/>
     </Box>
   );
 }

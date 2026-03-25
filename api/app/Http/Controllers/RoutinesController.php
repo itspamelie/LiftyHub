@@ -119,4 +119,29 @@ class RoutinesController extends Controller
             "mesage"=>"Rutinas eliminadas correctamente."
         ]);
     }
+
+public function searchRoutines(Request $request){
+    $search = $request->input('search');
+
+    // Si no hay búsqueda, no consultar la BD
+    if(!$search){
+        return response()->json([
+            "status"=>"No se encontraron coincidencias.",
+            "data"=>[]
+        ]);
+    }
+
+    $routine = Routine::select('id','name','objective','duration','level','img','plan_id','somatotype_id')
+        ->where(function($query) use ($search){
+            $query->where('name','LIKE',"%{$search}%")
+                  ->orWhere('objective','LIKE',"%{$search}%")
+                  ->orWhere('level','LIKE',"%{$search}%");
+        })
+        ->get();
+
+    return response()->json([
+        "status" => "ok",
+        "data" => $routine
+    ]);
+}
 }
