@@ -1,5 +1,5 @@
 import {
-  Box, TextField,Button
+  Box, TextField, Button
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
@@ -7,38 +7,36 @@ import { apiFetch } from "../services/api";
 import TopNavbar from "../components/routines/TopNavbar";
 import SearchIcon from "@mui/icons-material/Search";
 import RoutinesCard from "../components/routines/RoutinesCard"
-import CreateExerciseModal from "../components/exercises/CreateExerciseModal"
-import EditExerciseModal from "../components/exercises/EditExerciseModal";
+import CreateRoutineModal from "../components/routines/CreateRoutineModal"
+import EditRoutinesModal from "../components/routines/EditRoutinesModal"; 
 
 export default function RoutinesDashboard() {
 
   // STATES
-  const [exercises, setExercises] = useState<any[]>([]);
+  const [routines, setRoutines] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   const [openCreate, setOpenCreate] = useState(false)
 
   const [openEdit, setOpenEdit] = useState(false)
-  const [editExercise, setEditExercise] = useState<any>(null)
+  const [editRoutine, setEditRoutine] = useState<any>(null)
 
-  const openEditModal = (exercise:any) => {
-    setEditExercise(exercise)
+  const openEditModal = (routine: any) => {
+    setEditRoutine(routine)
     setOpenEdit(true)
   }
 
   const closeEditModal = () => {
     setOpenEdit(false)
-    setEditExercise(null)
+    setEditRoutine(null)
   }
-
-
 
   // GET 
   useEffect(() => {
     apiFetch("/routines")
       .then((data) => {
-        setExercises(data.data || []);
+        setRoutines(data.data || []);
         setLoading(false);
         Swal.close();
       })
@@ -68,25 +66,25 @@ export default function RoutinesDashboard() {
   if (loading) return null;
 
   // SEARCH
-  const searchExercises = async (value: string) => {
+  const searchRoutines = async (value: string) => {
     setSearch(value);
 
     try {
       if (value.trim() === "") {
         const data = await apiFetch("/routines");
-        setExercises(data.data || []);
+        setRoutines(data.data || []);
         return;
       }
 
       const data = await apiFetch(`/search-routines?search=${value}`);
-      setExercises(data.data || []);
+      setRoutines(data.data || []);
     } catch (error) {
       console.error("Error buscando rutinas", error);
     }
   };
 
   // DELETE
-  const deleteExercise = async (id:number) => {
+  const deleteRoutine = async (id: number) => {
 
     const result = await Swal.fire({
       title: "¿Eliminar rutina?",
@@ -95,37 +93,37 @@ export default function RoutinesDashboard() {
       showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-      confirmButtonColor:"#e71d1d",
-      background:"#0f172a",
-      color:"#fff"
+      confirmButtonColor: "#e71d1d",
+      background: "#0f172a",
+      color: "#fff"
     })
 
-    if(!result.isConfirmed) return
+    if (!result.isConfirmed) return
 
-    try{
-      await apiFetch(`/exercises/${id}`,{
-        method:"DELETE"
+    try {
+      await apiFetch(`/routines/${id}`, {
+        method: "DELETE"
       })
 
-      setExercises(exercises.filter(s => s.id !== id))
+      setRoutines(routines.filter(r => r.id !== id))
 
       Swal.fire({
-        icon:"success",
-        title:"Rutina eliminada",
-        background:"#0f172a",
-        confirmButtonColor:"#60a5fa",
-        color:"#fff"
+        icon: "success",
+        title: "Rutina eliminada",
+        background: "#0f172a",
+        confirmButtonColor: "#60a5fa",
+        color: "#fff"
       })
 
-    }catch(error){
+    } catch (error) {
       console.error(error)
 
       Swal.fire({
-        icon:"error",
-        title:"Error al eliminar",
-        background:"#0f172a",
-        confirmButtonColor:"#60a5fa",
-        color:"#fff"
+        icon: "error",
+        title: "Error al eliminar",
+        background: "#0f172a",
+        confirmButtonColor: "#60a5fa",
+        color: "#fff"
       })
     }
   }
@@ -136,113 +134,109 @@ export default function RoutinesDashboard() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        background:"#1a2035",
-        width: "100%" 
-
+        background: "#1a2035",
+        width: "100%"
       }}
     >
 
       <TopNavbar />
 
- <Box
-  sx={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    px: 5,
-    mt: 4
-  }}
->
-  {/* BUSCADOR */}
-  <TextField
-    size="medium"
-    placeholder="Buscar Rutina..."
-    variant="outlined"
-    value={search}
-    onChange={(e) => searchExercises(e.target.value)}
-    sx={{
-      width: "300px",
-      input: { color: "white" },
-      "& .MuiOutlinedInput-root": {
-        borderRadius: "12px",
-        color: "white",
-        "& fieldset": {
-          borderColor: "#2d3561"
-        }
-      }
-    }}
-    InputProps={{
-      startAdornment: <SearchIcon sx={{ mr: 2 }} />
-    }}
-  />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: 5,
+          mt: 4
+        }}
+      >
+        {/* BUSCADOR */}
+        <TextField
+          size="medium"
+          placeholder="Buscar Rutina..."
+          variant="outlined"
+          value={search}
+          onChange={(e) => searchRoutines(e.target.value)}
+          sx={{
+            width: "300px",
+            input: { color: "white" },
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "12px",
+              color: "white",
+              "& fieldset": {
+                borderColor: "#2d3561"
+              }
+            }
+          }}
+          InputProps={{
+            startAdornment: <SearchIcon sx={{ mr: 2 }} />
+          }}
+        />
 
-  {/* BOTÓN */}
-<Button
-  variant="contained"
-  onClick={() => setOpenCreate(true)}
-  sx={{
-    borderRadius: "12px",
-    textTransform: "none",
-    fontWeight: "bold",
-    background: "linear-gradient(135deg, #6366f1, #8b5cf6)"
-  }}
->
-  + Agregar
-</Button>
-</Box>
+        {/* BOTÓN */}
+        <Button
+          variant="contained"
+          onClick={() => setOpenCreate(true)}
+          sx={{
+            borderRadius: "12px",
+            textTransform: "none",
+            fontWeight: "bold",
+            background: "linear-gradient(135deg, #6366f1, #8b5cf6)"
+          }}
+        >
+          + Agregar
+        </Button>
+      </Box>
 
       <Box
         sx={{
-          flexGrow:1,
-          display:"grid",
-          gridTemplateColumns:"2fr 1fr",
-          gap:3,
-          p:5
+          flexGrow: 1,
+          display: "grid",
+          gridTemplateColumns: "2fr 1fr",
+          gap: 3,
+          p: 5
         }}
       >
 
-
-<Box
-  sx={{
-    display: "grid",
-gridTemplateColumns: "repeat(4, minmax(280px, 1fr))",
-    gap: 2,
-    p: 4
-  }}
->
-  {exercises.map((s) => (
-<RoutinesCard
-  key={s.id}
-  data={s}
-  onEdit={openEditModal}
-  onDelete={deleteExercise}
-/>
-  ))}
-</Box>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, minmax(280px, 1fr))",
+            gap: 2,
+            p: 4
+          }}
+        >
+          {routines.map((r) => (
+            <RoutinesCard
+              key={r.id}
+              data={r}
+              onEdit={openEditModal}
+              onDelete={deleteRoutine}
+            />
+          ))}
+        </Box>
 
       </Box>
 
+      <CreateRoutineModal
+        open={openCreate}
+        onClose={() => setOpenCreate(false)}
+       onCreated={async () => {
+  const data = await apiFetch("/routines")
+  setRoutines(data.data || [])
+}}
+      />
 
-<CreateExerciseModal
-  open={openCreate}
-  onClose={() => setOpenCreate(false)}
-  onCreated={(newExercise:any) =>
-    setExercises([...exercises, newExercise])
-  }
-/>
-
-<EditExerciseModal
+      <EditRoutinesModal
   open={openEdit}
   onClose={closeEditModal}
-  exercise={editExercise}
-  onUpdated={(updated:any) =>
-    setExercises(prev =>
-      prev.map(s => s.id === updated.id ? updated : s)
-    )
-  }
+  routine={editRoutine}
+  onUpdated={async () => {
+    const data = await apiFetch("/routines")
+    setRoutines(data.data || [])
+  }}
 />
 
     </Box>
-    
   );
 }

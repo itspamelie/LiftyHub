@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Routine;
+use App\Models\ExerciseRoutine;
+use Illuminate\Support\Str;
+
 
 class RoutinesController extends Controller
 {
@@ -24,7 +27,7 @@ class RoutinesController extends Controller
      */
     public function create()
     {
-        //ammount,type,description,user_id,category_id,account_id
+        //ammount,type,description,routine_id,category_id,account_id
     }
 
     /**
@@ -37,19 +40,25 @@ class RoutinesController extends Controller
             'objective'=>'required|string',
             'duration'=>'required|numeric',
             'level'=>'required|string',
-            'img'=>'required|string',
+            'img'=>'nullable|image',
             'plan_id'=>'required',
             'somatotype_id'=>'required',
         ]);
-
-        //metodo si los campos se llaman igual que en la base de datos
-        $data = Routine::create($validated);
-          return response()->json([
-            "status"=>"ok",
-            "mesage"=>"Rutina guardada correctamente.",
-            "data"=>$data
-
-        ]);
+                 if($request->hasFile('img')){
+             $file = $request->file('img');
+              $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension(); 
+              // ruta a public/routines 
+              $destinationPath = public_path('routines'); 
+              // mover archivo 
+              $file->move($destinationPath, $filename); 
+              // guardar solo la ruta pública 
+              $validated['img'] = $filename; 
+              }else{ 
+                $validated['img'] = 'default.jpg';
+                 } 
+                 $data = Routine::create($validated);
+                  return response()->json([ "status"=>"ok", "message"=>"Rutina creada correctamente.", "data"=>$data ]); 
+                
     }
 
     /**
@@ -84,41 +93,85 @@ class RoutinesController extends Controller
      */
     public function update(Request $request, string $id)
     {
+            $routine = Routine::findOrFail($id);
+
          $validated = $request->validate([
             'name'=>'required|string',
             'objective'=>'required|string',
             'duration'=>'required|numeric',
             'level'=>'required|string',
-            'img'=>'required|string',
+            'img'=>'nullable|image',
             'plan_id'=>'required',
             'somatotype_id'=>'required',
          ]);
 
-        //metodo si los campos se llaman igual que en la base de datos
-        $data = Routine::findOrFail($id);
-        $data->update($validated);
-          return response()->json([
-            "status"=>"ok",
-            "mesage"=>"Rutinas actualizadas correctamente.",
-            "data"=>$data
+    /*
+    IMAGEN
+    */
+    if($request->hasFile('img')){
 
-        ]);
+        // eliminar imagen anterior si no es default
+        if($routine->img && $routine->img !== 'default.jpg'){
+
+            $oldImagePath = public_path('routines/'.$routine->img);
+
+            if(file_exists($oldImagePath)){
+                unlink($oldImagePath);
+            }
+        }
+
+        $file = $request->file('img');
+
+        $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
+
+        $destinationPath = public_path('routines');
+
+        $file->move($destinationPath, $filename);
+
+        $validated['img'] = $filename;
+    }
+
+    $routine->update($validated);
+    $routine = Routine::with(['plan','somatotype'])->find($id);
+
+    return response()->json([
+        "status" => "ok",
+        "message" => "Rutina actualizada correctamente",
+        "data" => $routine
+    ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
-    {
-         $data = Routines::find($id);
-        if($data){
-            $data->delete();
-        }
+{
+    $routine = Routine::find($id);
+
+    if(!$routine){
         return response()->json([
-            "status"=>"ok",
-            "mesage"=>"Rutinas eliminadas correctamente."
-        ]);
+            "status"=>"error",
+            "message"=>"Rutina no encontrada"
+        ], 404);
     }
+
+    // eliminar imagen
+    if($routine->img && $routine->img !== 'default.jpg'){
+        $path = public_path('routines/'.$routine->img);
+
+        if(file_exists($path)){
+            unlink($path);
+        }
+    }
+
+    // eliminar rutina
+    $routine->delete();
+
+    return response()->json([
+        "status"=>"ok",
+        "message"=>"Rutina eliminada correctamente."
+    ]);
+}
 
 public function searchRoutines(Request $request){
     $search = $request->input('search');
@@ -131,7 +184,7 @@ public function searchRoutines(Request $request){
         ]);
     }
 
-    $routine = Routine::select('id','name','objective','duration','level','img','plan_id','somatotype_id')
+    $routine = Routine::with(['plan', 'somatotype'])
         ->where(function($query) use ($search){
             $query->where('name','LIKE',"%{$search}%")
                   ->orWhere('objective','LIKE',"%{$search}%")

@@ -38,7 +38,6 @@ const handleSubmit = async () => {
       formData.append("file", file)
     }
 
-    // 🔥 ESTO ES LA CLAVE
     formData.append("_method", "PUT")
 
     const res = await apiFetch(`/somatotypes/${somatotype.id}`, {
