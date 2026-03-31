@@ -32,7 +32,7 @@ export default function ExercisesScreen() {
     { key: "Todo",       labelKey: "exercises.muscleGroups.all" },
     { key: "Pecho",      labelKey: "exercises.muscleGroups.chest" },
     { key: "Espalda",    labelKey: "exercises.muscleGroups.back" },
-    { key: "Pierna",     labelKey: "exercises.muscleGroups.leg" },
+    { key: "Piernas",    labelKey: "exercises.muscleGroups.leg" },
     { key: "Glúteos",    labelKey: "exercises.muscleGroups.glutes" },
     { key: "Hombro",     labelKey: "exercises.muscleGroups.shoulder" },
     { key: "Bíceps",     labelKey: "exercises.muscleGroups.bicep" },
