@@ -12,6 +12,7 @@ class Routine extends Model
         'objective',
         'level',
         'img',
+        'category',
         'duration',
         'plan_id',
         'somatotype_id'
