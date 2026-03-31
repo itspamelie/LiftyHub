@@ -9,6 +9,7 @@ import RoutinesDashboard from "./views/RoutinesDashboard";
 import PlansDashboard from "./views/PlansDashboard";
 import NutritionistDashboard from "./views/NutritionistDashboard";
 import ExercisesDashboard from "./views/ExercisesDashboard";
+import ExerciseDetail from './components/exercises/ExerciseDetail';
 
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -33,6 +34,7 @@ function App() {
           <Route path="plans" element={<PlansDashboard/>} />
           <Route path="routines" element={<RoutinesDashboard/>} />
           <Route path="exercises" element={<ExercisesDashboard/>} />
+<Route path="exercise/:id" element={<ExerciseDetail />} />
         </Route>
 
       </Routes>
