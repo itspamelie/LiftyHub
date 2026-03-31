@@ -24,10 +24,10 @@ export default function EditRoutinesModal({ open, onClose, routine, onUpdated }:
   const [somatotypeId, setSomatotypeId] = useState("")
   const [file, setFile] = useState<any>(null)
 
-  const [plans, setPlans] = useState<any[]>([]) // ✅ nunca undefined
+  const [plans, setPlans] = useState<any[]>([]) //nunca undefined
   const [somatotypes, setSomatotypes] = useState<any[]>([])
 
-  // 🔹 Cargar datos al abrir modal
+  //Cargar datos al abrir modal
   useEffect(() => {
     if (routine) {
       setName(routine.name || "")
@@ -40,7 +40,7 @@ export default function EditRoutinesModal({ open, onClose, routine, onUpdated }:
     }
   }, [routine])
 
-  // 🔹 Cargar selects
+  // Cargar selects
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -57,12 +57,12 @@ export default function EditRoutinesModal({ open, onClose, routine, onUpdated }:
     fetchData()
   }, [])
 
-  // 🔹 Submit
+  //Submit
   const handleSubmit = async () => {
     try {
       const formData = new FormData()
 
-      formData.append("_method", "PUT") // 🔥 Laravel fix
+      formData.append("_method", "PUT") 
 
       formData.append("name", name)
       formData.append("objective", objective)
@@ -80,15 +80,17 @@ export default function EditRoutinesModal({ open, onClose, routine, onUpdated }:
         body: formData
       })
 
-      onUpdated(res.data.data) // 🔥 importante
+      onUpdated(res.data.data) 
 
       onClose()
 
       Swal.fire({
         icon: "success",
         title: "Rutina actualizada",
-        background: "#0f172a",
-        color: "#fff"
+        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        color: "#fff",
+        confirmButtonColor:"#60a5fa",
+
       })
 
     } catch (error) {
@@ -97,8 +99,9 @@ export default function EditRoutinesModal({ open, onClose, routine, onUpdated }:
       Swal.fire({
         icon: "error",
         title: "Error al actualizar",
-        background: "#0f172a",
-        color: "#fff"
+        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        color: "#fff",
+        confirmButtonColor:"#60a5fa",
       })
     }
   }
@@ -109,14 +112,14 @@ export default function EditRoutinesModal({ open, onClose, routine, onUpdated }:
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogContent
         sx={{
-          background: "#1a2035",
+          background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
           color: "white",
           p: 4,
           position: "relative",
         }}
       >
 
-        {/* ❌ Cerrar */}
+        {/* Cerrar */}
         <IconButton
           onClick={onClose}
           sx={{
@@ -277,7 +280,7 @@ export default function EditRoutinesModal({ open, onClose, routine, onUpdated }:
               borderRadius: "10px",
               textTransform: "none",
               fontWeight: "bold",
-              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+              background: "#60a5fa",
               py: 1.2
             }}
           >

@@ -15,10 +15,10 @@ class ExercisesSeeder extends Seeder
     public function run(): void
     {
          DB::table('exercises')->insert([
-            ['id'=>1,'name'=>'Press banca','muscle'=>'Pecho','technique'=>'Controlar bajada','categorie'=>'tren superior','created_at'=>now(),'updated_at'=>now()],
-            ['id'=>2,'name'=>'Sentadilla','muscle'=>'Piernas','technique'=>'Espalda recta','categorie'=>'tren superior','created_at'=>now(),'updated_at'=>now()],
-            ['id'=>3,'name'=>'Peso muerto','muscle'=>'Espalda','technique'=>'No encorvar','categorie'=>'tren superior','created_at'=>now(),'updated_at'=>now()],
-            ['id'=>4,'name'=>'Curl bíceps','muscle'=>'Bíceps','technique'=>'Movimiento controlado','categorie'=>'tren superior','created_at'=>now(),'updated_at'=>now()],
+            ['id'=>1,'name'=>'Press banca','muscle'=>'Hombro','technique'=>'Controlar bajada','categorie'=>'Hipertrofia','created_at'=>now(),'updated_at'=>now()],
+            ['id'=>2,'name'=>'Sentadilla','muscle'=>'Cuádriceps','technique'=>'Espalda recta','categorie'=>'Resistencia','created_at'=>now(),'updated_at'=>now()],
+            ['id'=>3,'name'=>'Peso muerto','muscle'=>'Espalda','technique'=>'No encorvar','categorie'=>'Fuerza','created_at'=>now(),'updated_at'=>now()],
+            ['id'=>4,'name'=>'Curl bíceps','muscle'=>'Bíceps','technique'=>'Movimiento controlado','categorie'=>'Hipertrofia','created_at'=>now(),'updated_at'=>now()],
             ['id'=>5,'name'=>'Tríceps polea','muscle'=>'Tríceps','technique'=>'Codos fijos','categorie'=>'tren superior','created_at'=>now(),'updated_at'=>now()],
         ]);
     }

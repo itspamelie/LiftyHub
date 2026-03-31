@@ -23,7 +23,7 @@ export default function CreateRoutineModal({ open, onClose, onCreated }: any) {
   const [somatotype, setSomatotype] = useState("")
   const [img, setImg] = useState("")
 
-  // 🔥 NUEVOS STATES
+  // NUEVOS STATES
   const [plans, setPlans] = useState<any[]>([])
   const [somatotypes, setSomatotypes] = useState<any[]>([])
   const [file, setFile] = useState<File | null>(null)
@@ -37,7 +37,7 @@ const handleFileChange = (e: any) => {
   }
 }
 
-  // 🔥 GET PLANS Y SOMATOTYPES
+  // GET PLANS Y SOMATOTYPES
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -62,14 +62,13 @@ const handleFileChange = (e: any) => {
       formData.append("level", level)
       formData.append("duration", duration)
 
-      // 👇 IMPORTANTE (ids)
       formData.append("plan_id", plan)
       formData.append("somatotype_id", somatotype)
 
 if (file) {
   formData.append("img", file)
 }
-      const res = await apiFetch("/routines", { // 🔥 CAMBIO AQUÍ
+      const res = await apiFetch("/routines", { 
         method: "POST",
         body: formData
       })
@@ -88,7 +87,7 @@ if (file) {
       Swal.fire({
         icon: "success",
         title: "Rutina creada",
-        background: "#0f172a",
+        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
         confirmButtonColor: "#60a5fa",
         color: "#fff"
       });
@@ -98,8 +97,10 @@ if (file) {
       Swal.fire({
         icon: "error",
         title: "Error al crear la rutina",
-        background: "#0f172a",
-        color: "#fff"
+        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        color: "#fff",
+              confirmButtonColor:"#60a5fa",
+
       });
     }
   }
@@ -108,7 +109,7 @@ if (file) {
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogContent
         sx={{
-          background: "#1a2035",
+          background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
           color: "white",
           p: 4,
           position: "relative",
@@ -198,7 +199,7 @@ if (file) {
             }}
           />
 
-          {/* SOMATOTIPO 🔥 DINÁMICO */}
+          {/* SOMATOTIPO  */}
           <TextField
             select
             value={somatotype}
@@ -296,11 +297,8 @@ if (file) {
               borderRadius: "10px",
               textTransform: "none",
               fontWeight: "bold",
-              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-              py: 1.2,
-              "&:hover": {
-                background: "linear-gradient(135deg, #4f46e5, #7c3aed)"
-              }
+              background: "#60a5fa",
+              py: 1.2
             }}
           >
             Guardar

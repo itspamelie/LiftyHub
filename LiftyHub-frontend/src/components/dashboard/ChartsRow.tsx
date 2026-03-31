@@ -87,7 +87,7 @@ const ChartsRow: React.FC<ChartsRowProps> = ({ dashboard }) => {
 
       {/* 📊 Usuarios */}
 
-      <Card sx={{ background: "#202940", color: "white" }}>
+      <Card sx={{ background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)", color: "white",  borderRadius: "16px" }}>
         <CardContent>
 
           <Bar data={barData} />
@@ -106,7 +106,7 @@ const ChartsRow: React.FC<ChartsRowProps> = ({ dashboard }) => {
 
       {/* 📈 Suscripciones por plan */}
 
-      <Card sx={{ background: "#202940", color: "white" }}>
+      <Card sx={{ background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)", color: "white", borderRadius:"16px" }}>
         <CardContent>
 
           <Line data={lineData} />
@@ -125,7 +125,7 @@ const ChartsRow: React.FC<ChartsRowProps> = ({ dashboard }) => {
 
       {/* 🥧 Usuarios con / sin suscripción */}
 
-      <Card sx={{ background: "#202940", color: "white" }}>
+      <Card sx={{ background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)", color: "white", borderRadius:"16px" }}>
         <CardContent>
 
           <Box

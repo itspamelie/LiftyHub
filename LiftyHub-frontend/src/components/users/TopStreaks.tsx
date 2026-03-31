@@ -4,7 +4,7 @@ export default function TopStreaks({ topStreaks = [] }: any){
 
 return(
 
-<Card sx={{gridColumn:"span 2",background:"#202940",color:"white",borderRadius:"16px"}}>
+<Card sx={{gridColumn:"span 2",background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",color:"white",borderRadius:"16px"}}>
 <CardContent>
 
 <Typography variant="h6">

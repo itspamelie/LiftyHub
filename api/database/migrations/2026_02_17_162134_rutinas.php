@@ -17,6 +17,7 @@ Schema::create('routines', function (Blueprint $table) {
     $table->string('objective');
     $table->string('level');
     $table->integer('duration');
+    $table->string('category');
     $table->string('img');
     $table->foreignId('plan_id')->constrained('plans')->onDelete('cascade');
     $table->foreignId('somatotype_id')->constrained('somatotypes');

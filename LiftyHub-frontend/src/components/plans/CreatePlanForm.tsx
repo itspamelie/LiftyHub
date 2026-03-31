@@ -18,7 +18,7 @@ return (
 
 <Box
 sx={{
-background:"#202940",
+background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
 borderRadius:"16px",
 p:3
 }}

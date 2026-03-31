@@ -16,11 +16,13 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import SportsGymnasticsIcon from "@mui/icons-material/SportsGymnastics";
 import AnalyticsIcon from "@mui/icons-material/Analytics";
 import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 export default function Sidebar() {
   const drawerWidth = 270;
-
-  return (
+const location = useLocation();
+const isActive = (path: string) => location.pathname === path;
+return (
     <Drawer
       variant="permanent"
       sx={{
@@ -38,7 +40,7 @@ export default function Sidebar() {
           justifyContent: "space-between",
 
           background:
-            "linear-gradient(180deg, #3a3a45 0%, #1e1e24 100%)",
+            "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
 
           color: "white",
           padding: "20px",
@@ -49,24 +51,26 @@ export default function Sidebar() {
     >
       <Box>
         {/* Logo */}
-        <Box mb={3}>
-          <Typography variant="h6" fontWeight="bold">
-            LiftyHub
-          </Typography>
-        </Box>
+        <Box mb={3} sx={{ textAlign: "center" }}>
+  <Typography variant="h4" fontWeight="bold">
+    LiftyHub
+  </Typography>
+</Box>
 
        <List>
 
   {/* Dashboard */}
   <ListItemButton
-    component={Link}
-    to="/dashboard"
-    sx={{
-      background: "linear-gradient(90deg,#3a8dff,#5da8ff)",
-      borderRadius: "12px",
-      mb: 1
-    }}
-  >
+  component={Link}
+  to="/dashboard"
+  sx={{
+    background: isActive("/dashboard")
+      ? "linear-gradient(90deg,#3a8dff,#5da8ff)"
+      : "transparent",
+    borderRadius: "12px",
+    mb: 1
+  }}
+>
     <ListItemIcon sx={{ color: "white" }}>
       <DashboardIcon />
     </ListItemIcon>
@@ -75,16 +79,34 @@ export default function Sidebar() {
   </ListItemButton>
 
   {/* Usuarios */}
-  <ListItemButton component={Link} to="/dashboard/users">
-    <ListItemIcon sx={{ color: "white" }}>
+<ListItemButton
+  component={Link}
+  to="/dashboard/users"
+  sx={{
+    background: isActive("/dashboard/users")
+      ? "linear-gradient(90deg,#3a8dff,#5da8ff)"
+      : "transparent",
+    borderRadius: "12px",
+    mb: 1
+  }}
+>    <ListItemIcon sx={{ color: "white" }}>
   <GroupIcon />
 </ListItemIcon>
     <ListItemText primary="Usuarios" />
   </ListItemButton>
 
   {/* Planes */}
-  <ListItemButton component={Link} to="/dashboard/plans">
-    <ListItemIcon sx={{ color: "white" }}>
+<ListItemButton
+  component={Link}
+  to="/dashboard/plans"
+  sx={{
+    background: isActive("/dashboard/plans")
+      ? "linear-gradient(90deg,#3a8dff,#5da8ff)"
+      : "transparent",
+    borderRadius: "12px",
+    mb: 1
+  }}
+>    <ListItemIcon sx={{ color: "white" }}>
   <AssignmentIcon />
 </ListItemIcon>
     <ListItemText primary="Planes" />
@@ -99,24 +121,51 @@ export default function Sidebar() {
   </ListItemButton>*/}
 
   {/* Rutinas */}
-  <ListItemButton component={Link} to="/dashboard/routines">
-    <ListItemIcon sx={{ color: "white" }}>
+<ListItemButton
+  component={Link}
+  to="/dashboard/routines"
+  sx={{
+    background: isActive("/dashboard/routines")
+      ? "linear-gradient(90deg,#3a8dff,#5da8ff)"
+      : "transparent",
+    borderRadius: "12px",
+    mb: 1
+  }}
+>    <ListItemIcon sx={{ color: "white" }}>
   <FitnessCenterIcon />
 </ListItemIcon>
     <ListItemText primary="Rutinas" />
   </ListItemButton>
 
   {/* Ejercicios */}
-  <ListItemButton component={Link} to="/dashboard/exercises">
-    <ListItemIcon sx={{ color: "white" }}>
+<ListItemButton
+  component={Link}
+  to="/dashboard/exercises"
+  sx={{
+    background: isActive("/dashboard/exercises")
+      ? "linear-gradient(90deg,#3a8dff,#5da8ff)"
+      : "transparent",
+    borderRadius: "12px",
+    mb: 1
+  }}
+>    <ListItemIcon sx={{ color: "white" }}>
   <SportsGymnasticsIcon />
 </ListItemIcon>
     <ListItemText primary="Ejercicios" />
   </ListItemButton>
 
   {/* Somatotipos */}
-  <ListItemButton component={Link} to="/dashboard/somatotypes">
-    <ListItemIcon sx={{ color: "white" }}>
+<ListItemButton
+  component={Link}
+  to="/dashboard/somatotypes"
+  sx={{
+    background: isActive("/dashboard/somatotypes")
+      ? "linear-gradient(90deg,#3a8dff,#5da8ff)"
+      : "transparent",
+    borderRadius: "12px",
+    mb: 1
+  }}
+>    <ListItemIcon sx={{ color: "white" }}>
   <AnalyticsIcon />
 </ListItemIcon>
     <ListItemText primary="Somatotipos" />

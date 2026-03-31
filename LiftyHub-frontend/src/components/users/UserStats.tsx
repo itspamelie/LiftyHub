@@ -13,7 +13,7 @@ gap:3
 }}
 >
 
-<Card sx={{background:"#202940",color:"white",borderRadius:"16px"}}>
+<Card sx={{background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",color:"white",borderRadius:"16px"}}>
 <CardContent>
 <Typography variant="body2" sx={{color:"#8f9bb3"}}>
 Usuarios registrados
@@ -24,7 +24,7 @@ Usuarios registrados
 </CardContent>
 </Card>
 
-<Card sx={{background:"#202940",color:"white",borderRadius:"16px"}}>
+<Card sx={{background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",color:"white",borderRadius:"16px"}}>
 <CardContent>
 <Typography variant="body2" sx={{color:"#8f9bb3"}}>
 Usuarios nuevos este mes
@@ -35,7 +35,7 @@ Usuarios nuevos este mes
 </CardContent>
 </Card>
 
-<Card sx={{background:"#202940",color:"white",borderRadius:"16px"}}>
+<Card sx={{background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",color:"white",borderRadius:"16px"}}>
 <CardContent>
 <Typography variant="body2" sx={{color:"#8f9bb3"}}>
 Entrenaron hoy
@@ -46,7 +46,7 @@ Entrenaron hoy
 </CardContent>
 </Card>
 
-<Card sx={{background:"#202940",color:"white",borderRadius:"16px"}}>
+<Card sx={{background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",color:"white",borderRadius:"16px"}}>
 <CardContent>
 <Typography variant="body2" sx={{color:"#8f9bb3"}}>
 Peso promedio

@@ -51,7 +51,9 @@ const handleSubmit = async () => {
     Swal.fire({
       icon: "success",
       title: "Somatotipo actualizado",
-      background: "#0f172a",
+      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+                    confirmButtonColor:"#60a5fa",
+
       color: "#fff"
     })
 
@@ -61,7 +63,9 @@ const handleSubmit = async () => {
     Swal.fire({
       icon: "error",
       title: "Error al actualizar",
-      background: "#0f172a",
+      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+                    confirmButtonColor:"#60a5fa",
+
       color: "#fff"
     })
   }
@@ -72,7 +76,7 @@ const handleSubmit = async () => {
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogContent
         sx={{
-          background: "#1a2035",
+          background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
           color: "white",
           p: 4,
           position: "relative",
@@ -134,7 +138,7 @@ const handleSubmit = async () => {
               cursor: "pointer",
               "&:hover": {
                 borderColor: "#6366f1",
-                background: "rgba(99,102,241,0.05)"
+                background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)"
               }
             }}
             component="label"
@@ -161,7 +165,7 @@ const handleSubmit = async () => {
               borderRadius: "10px",
               textTransform: "none",
               fontWeight: "bold",
-              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+              background:  "#60a5fa",
               py: 1.2
             }}
           >

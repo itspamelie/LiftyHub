@@ -135,10 +135,15 @@ public function store(Request $request)
             "mesage"=>"Archivo eliminado correctamente."
         ]);
     }
-    public function getByExercise($id)
+ public function getByExercise($id)
 {
-    $files = ExerciseFile::where('exercise_id', $id)->get();
+    $files = ExerciseFile::with('exercise')
+        ->where('exercise_id', $id)
+        ->get();
 
-    return response()->json($files);
+    return response()->json([
+        "status" => "ok",
+        "data" => $files
+    ]);
 }
 }

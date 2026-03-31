@@ -83,7 +83,7 @@ formData.append("img", form.img)
 try{
 
 await apiFetch(`/users/${form.id}`,{
-method:"POST",   // 👈 POST en lugar de PUT
+method:"POST", 
 body:formData
 })
 
@@ -91,7 +91,7 @@ Swal.fire({
 icon:"success",
 title:"Usuario actualizado",
 timer:1500,
-background:"#0f172a",
+background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
 color:"#fff",
 showConfirmButton:false
 })
@@ -119,7 +119,7 @@ maxWidth="md"
 fullWidth
 PaperProps={{
 sx:{
-background:"#1a2035",
+background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
 color:"white",
 borderRadius:"16px"
 }
