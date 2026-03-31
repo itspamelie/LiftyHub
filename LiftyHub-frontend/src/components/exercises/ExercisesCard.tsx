@@ -3,14 +3,15 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility"
 import UploadFileIcon from "@mui/icons-material/UploadFile"
-import ExerciseViewerModal from "./ExerciseViewerModal";
 import { useState } from "react"
 import CreateExerciseFileModal from "./CreateExerciseFileModal"
+import { useNavigate } from "react-router-dom";
 
 export default function ExercisesCard({ data, onDelete, onEdit }: any){
 const [openViewer, setOpenViewer] = useState(false)
 const [selectedExercise, setSelectedExercise] = useState<any>(null)
 const [openUpload, setOpenUpload] = useState(false)
+const navigate = useNavigate();
   return (
     <Box
       sx={{
@@ -29,7 +30,6 @@ maxWidth: 400,
       }}
     >
    
-
       {/* CONTENIDO */}
       <Box sx={{ p: 3 }}>
         <Typography variant="h6" fontWeight="bold" mb={1}>
@@ -76,10 +76,7 @@ maxWidth: 400,
 
              {/* VISUALIZAR */}
 <IconButton
-  onClick={() => {
-    setSelectedExercise(data)
-    setOpenViewer(true)
-  }}
+  onClick={() => navigate(`/dashboard/exercise/${data.id}`)}
   sx={{
     color: "#34d399",
     "&:hover": { backgroundColor: "rgba(52,211,153,0.1)" }
@@ -124,11 +121,7 @@ maxWidth: 400,
         </Box>
       </Box>
 
-<ExerciseViewerModal
-  open={openViewer}
-  onClose={() => setOpenViewer(false)}
-  exercise={selectedExercise}
-/>
+
 <CreateExerciseFileModal
   open={openUpload}
   onClose={() => setOpenUpload(false)}
