@@ -196,6 +196,16 @@ export default function ProfileScreen() {
                 <InfoStatCard icon="body" label={t("profile.somatotype")} value={profile.somatotype} />
                 <InfoStatCard icon="flag" label={t("profile.goal")} value={profile.goal} />
               </View>
+
+              {/* BOTÓN CONFIGURACIÓN */}
+              <TouchableOpacity
+                style={styles.settingsButton}
+                onPress={() => router.push("/settings")}
+              >
+                <Ionicons name="settings-outline" size={20} color={colors.textSecondary} />
+                <Text style={styles.settingsButtonText}>{t("profile.settings")}</Text>
+                <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+              </TouchableOpacity>
             </>
           )}
 
@@ -337,6 +347,42 @@ const styles = StyleSheet.create({
 
   tabBtnTextActive: {
     color: "white"
+  },
+
+  settingsSection: {
+    color: "#A1A1A1",
+    marginTop: 20,
+    marginBottom: 10,
+    fontSize: 14
+  },
+
+  settingsCard: {
+    backgroundColor: "#1C1C1E",
+    borderRadius: 16,
+    paddingVertical: 6
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: "#2A2A2A",
+    marginHorizontal: 16
+  },
+
+  settingsButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.card,
+    borderRadius: spacing.borderRadius,
+    padding: 16,
+    marginTop: 24,
+    gap: 12
+  },
+
+  settingsButtonText: {
+    flex: 1,
+    color: colors.textSecondary,
+    fontSize: 16,
+    fontWeight: "600"
   }
 
 });

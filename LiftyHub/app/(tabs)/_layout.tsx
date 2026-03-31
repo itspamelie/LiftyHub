@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 import { useLanguage } from "@/src/context/LanguageContext";
 
 function TabLabel({ scope, focused }: { scope: string; focused: boolean }) {
@@ -14,7 +14,9 @@ function TabLabel({ scope, focused }: { scope: string; focused: boolean }) {
 }
 
 export default function TabLayout() {
+  const { language } = useLanguage();
   return (
+    <View key={language} style={{ flex: 1 }}>
     <Tabs
       screenListeners={{
         tabPress: () => {
@@ -67,14 +69,7 @@ export default function TabLayout() {
         }}
       />
 
-      <Tabs.Screen
-        name="settings"
-        options={{
-          tabBarLabel: ({ focused }) => <TabLabel scope="tabs.settings" focused={focused} />,
-          tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
-        }}
-      />
-
     </Tabs>
+    </View>
   );
 }

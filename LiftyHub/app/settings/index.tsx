@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import SettingsItem from "@/src/components/settings/SettingsItem";
 import SettingsSwitchItem from "@/src/components/settings/SettingsSwitchItem";
+import BackButton from "@/src/components/buttons/backButton";
 import { deleteAccount } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 
@@ -110,116 +111,121 @@ export default function Settings() {
   }, []);
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={styles.container}>
 
-      <Text style={styles.title}>{t("settings.title")}</Text>
+      <BackButton />
 
-      {/* PLAN */}
-      <Text style={styles.section}>{t("settings.plan")}</Text>
-      <View style={styles.card}>
-        <SettingsItem
-          icon="diamond-outline"
-          label={t("settings.myPlan")}
-          value={t("settings.freePlan")}
-        />
-        <View style={styles.divider} />
-        <SettingsItem
-          icon="sparkles-outline"
-          label={t("settings.viewPlans")}
-          showArrow
-          onPress={() => router.push("/settings/plans")}
-        />
-      </View>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
 
-      {/* PREFERENCIAS */}
-      <Text style={styles.section}>{t("settings.preferences")}</Text>
-      <View style={styles.card}>
-        <SettingsItem
-          icon="moon-outline"
-          label={t("settings.theme")}
-          value={t("settings.dark")}
-        />
-        <View style={styles.divider} />
-        <SettingsItem
-          icon="barbell-outline"
-          label={t("settings.units")}
-          value={units}
-          onPress={handleUnits}
-          showArrow
-        />
-        <View style={styles.divider} />
-        <SettingsItem
-          icon="language-outline"
-          label={t("settings.language")}
-          value={language === "es" ? t("settings.langEs") : t("settings.langEn")}
-          onPress={handleLanguage}
-          showArrow
-        />
-      </View>
+        <Text style={styles.title}>{t("settings.title")}</Text>
 
-      {/* ENTRENAMIENTO */}
-      <Text style={styles.section}>{t("settings.workout")}</Text>
-      <View style={styles.card}>
-        <SettingsSwitchItem
-          icon="notifications-outline"
-          label={t("settings.reminders")}
-          value={notifications}
-          onChange={setNotifications}
-        />
-        <View style={styles.divider} />
-        <SettingsItem
-          icon="volume-high-outline"
-          label={t("settings.workoutSounds")}
-        />
-      </View>
+        {/* PLAN */}
+        <Text style={styles.section}>{t("settings.plan")}</Text>
+        <View style={styles.card}>
+          <SettingsItem
+            icon="diamond-outline"
+            label={t("settings.myPlan")}
+            value={t("settings.freePlan")}
+          />
+          <View style={styles.divider} />
+          <SettingsItem
+            icon="sparkles-outline"
+            label={t("settings.viewPlans")}
+            showArrow
+            onPress={() => router.push("/settings/plans")}
+          />
+        </View>
 
-      {/* ACERCA DE */}
-      <Text style={styles.section}>{t("settings.about")}</Text>
-      <View style={styles.card}>
-        <SettingsItem
-          icon="information-circle-outline"
-          label={t("settings.aboutLiftyHub")}
-          showArrow
-          onPress={() => router.push("/settings/about")}
-        />
-        <View style={styles.divider} />
-        <SettingsItem
-          icon="document-text-outline"
-          label={t("settings.privacy")}
-          showArrow
-          onPress={() => router.push("/settings/privacy")}
-        />
-        <View style={styles.divider} />
-        <SettingsItem
-          icon="code-outline"
-          label={t("settings.version")}
-          value="1.0.0"
-        />
-      </View>
+        {/* PREFERENCIAS */}
+        <Text style={styles.section}>{t("settings.preferences")}</Text>
+        <View style={styles.card}>
+          <SettingsItem
+            icon="moon-outline"
+            label={t("settings.theme")}
+            value={t("settings.dark")}
+          />
+          <View style={styles.divider} />
+          <SettingsItem
+            icon="barbell-outline"
+            label={t("settings.units")}
+            value={units}
+            onPress={handleUnits}
+            showArrow
+          />
+          <View style={styles.divider} />
+          <SettingsItem
+            icon="language-outline"
+            label={t("settings.language")}
+            value={language === "es" ? t("settings.langEs") : t("settings.langEn")}
+            onPress={handleLanguage}
+            showArrow
+          />
+        </View>
 
-      {/* CUENTA */}
-      <Text style={styles.section}>{t("settings.account")}</Text>
-      <View style={styles.card}>
-        <SettingsItem
-          icon="log-out-outline"
-          label={t("settings.logout")}
-          danger
-          onPress={handleLogout}
-        />
-        <View style={styles.divider} />
-        <SettingsItem
-          icon="trash-outline"
-          label={t("settings.deleteAccount")}
-          danger
-          onPress={handleDeleteAccount}
-        />
-      </View>
+        {/* ENTRENAMIENTO */}
+        <Text style={styles.section}>{t("settings.workout")}</Text>
+        <View style={styles.card}>
+          <SettingsSwitchItem
+            icon="notifications-outline"
+            label={t("settings.reminders")}
+            value={notifications}
+            onChange={setNotifications}
+          />
+          <View style={styles.divider} />
+          <SettingsItem
+            icon="volume-high-outline"
+            label={t("settings.workoutSounds")}
+          />
+        </View>
 
-    </ScrollView>
+        {/* ACERCA DE */}
+        <Text style={styles.section}>{t("settings.about")}</Text>
+        <View style={styles.card}>
+          <SettingsItem
+            icon="information-circle-outline"
+            label={t("settings.aboutLiftyHub")}
+            showArrow
+            onPress={() => router.push("/settings/about")}
+          />
+          <View style={styles.divider} />
+          <SettingsItem
+            icon="document-text-outline"
+            label={t("settings.privacy")}
+            showArrow
+            onPress={() => router.push("/settings/privacy")}
+          />
+          <View style={styles.divider} />
+          <SettingsItem
+            icon="code-outline"
+            label={t("settings.version")}
+            value="1.0.0"
+          />
+        </View>
+
+        {/* CUENTA */}
+        <Text style={styles.section}>{t("settings.account")}</Text>
+        <View style={styles.card}>
+          <SettingsItem
+            icon="log-out-outline"
+            label={t("settings.logout")}
+            danger
+            onPress={handleLogout}
+          />
+          <View style={styles.divider} />
+          <SettingsItem
+            icon="trash-outline"
+            label={t("settings.deleteAccount")}
+            danger
+            onPress={handleDeleteAccount}
+          />
+        </View>
+
+      </ScrollView>
+
+    </View>
   );
 }
 
@@ -232,6 +238,7 @@ const styles = StyleSheet.create({
 
   content: {
     padding: 20,
+    paddingTop: 120,
     paddingBottom: 80
   },
 
@@ -239,7 +246,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 28,
     fontWeight: "700",
-    marginTop: 40
+    marginBottom: 8,
   },
 
   section: {

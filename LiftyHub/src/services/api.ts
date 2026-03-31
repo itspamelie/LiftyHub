@@ -196,3 +196,47 @@ export const getExercises = async (token: string) => {
     }
   });
 };
+
+// 📋 OBTENER RUTINAS GENERALES
+export const getRoutines = async (token: string) => {
+  return apiFetch(`${API_URL}/routines`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json"
+    }
+  });
+};
+
+// 📋 OBTENER RUTINAS DEL USUARIO
+export const getUserRoutines = async (userId: number, token: string) => {
+  return apiFetch(`${API_URL}/userRoutines/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json"
+    }
+  });
+};
+
+// ➕ CREAR RUTINA DE USUARIO
+export const createUserRoutine = async (
+  data: {
+    user_id: number;
+    name: string;
+    objective: string;
+    level: string;
+    category: string;
+    duration: number;
+    img?: string;
+  },
+  token: string
+) => {
+  return apiFetch(`${API_URL}/userRoutines`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+};

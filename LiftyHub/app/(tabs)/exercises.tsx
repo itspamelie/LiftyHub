@@ -1,5 +1,6 @@
-import { ScrollView, View, Text, StyleSheet, TextInput, ActivityIndicator } from "react-native";
-import { useState, useEffect } from "react";
+import { ScrollView, View, Text, StyleSheet, TextInput, ActivityIndicator, RefreshControl } from "react-native";
+import { useState, useEffect, useCallback } from "react";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ExerciseCard from "@/src/components/exercises/ExerciseCard";
 import FilterButton from "@/src/components/exercises/FilterButton";
@@ -27,12 +28,13 @@ export default function ExercisesScreen() {
   const [activeFilter, setActiveFilter] = useState("Todo");
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const filters = [
     { key: "Todo",       labelKey: "exercises.muscleGroups.all" },
     { key: "Pecho",      labelKey: "exercises.muscleGroups.chest" },
     { key: "Espalda",    labelKey: "exercises.muscleGroups.back" },
-    { key: "Piernas",    labelKey: "exercises.muscleGroups.leg" },
+    { key: "Cuádriceps", labelKey: "exercises.muscleGroups.leg" },
     { key: "Glúteos",    labelKey: "exercises.muscleGroups.glutes" },
     { key: "Hombro",     labelKey: "exercises.muscleGroups.shoulder" },
     { key: "Bíceps",     labelKey: "exercises.muscleGroups.bicep" },
@@ -44,21 +46,26 @@ export default function ExercisesScreen() {
     { key: "Cardio",     labelKey: "exercises.muscleGroups.cardio" },
   ];
 
-  useEffect(() => {
-    const fetchExercises = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        if (!token) return;
-        const res = await getExercises(token);
-        if (res?.data) setExercises(res.data);
-      } catch (error) {
-        console.log("Error cargando ejercicios:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchExercises();
+  const fetchExercises = useCallback(async (isRefresh = false) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      const res = await getExercises(token);
+      if (res?.data) setExercises(res.data);
+    } catch (error) {
+      console.log("Error cargando ejercicios:", error);
+    } finally {
+      if (isRefresh) setRefreshing(false);
+      else setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { fetchExercises(); }, []);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchExercises(true);
+  }, [fetchExercises]);
 
   const filteredExercises = exercises.filter((exercise) => {
     const matchesSearch = exercise.name.toLowerCase().includes(search.toLowerCase());
@@ -70,6 +77,9 @@ export default function ExercisesScreen() {
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary} />
+      }
     >
 
       {/* HEADER */}

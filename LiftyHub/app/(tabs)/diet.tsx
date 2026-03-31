@@ -1,5 +1,5 @@
-import { Text, StyleSheet, ScrollView, RefreshControl } from "react-native";
-import { useState } from "react";
+import { Text, StyleSheet, ScrollView, RefreshControl, View, ActivityIndicator } from "react-native";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/src/context/LanguageContext";
 import NutritionistCard from "@/src/components/diet/NutritionistCard";
 import DietMealCard from "@/src/components/diet/DietMealCard";
@@ -95,12 +95,26 @@ const TIPS = [
 export default function DietScreen() {
 
   const { t } = useLanguage();
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 1000);
   };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "#0F0F10", justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#3B82F6" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView
