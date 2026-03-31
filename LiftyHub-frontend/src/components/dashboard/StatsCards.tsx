@@ -21,7 +21,7 @@ const StatCard: React.FC<StatCardProps> = ({
   return (
     <Card
       sx={{
-        background: "#202940",
+        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
         borderRadius: "16px",
         color: "white",
         boxShadow: "0px 8px 20px rgba(0,0,0,0.3)"

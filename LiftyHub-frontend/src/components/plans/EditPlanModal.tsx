@@ -38,7 +38,7 @@ export default function EditPlanModal({
       fullWidth
       PaperProps={{
         sx: {
-          background: "#1a2035",
+          background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
           color: "white",
           borderRadius: "16px"
         }

@@ -136,7 +136,7 @@ export default function SomatotypesDashboard() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        background:"#1a2035",
+        background:"#000000",
         width: "100%" 
 
       }}

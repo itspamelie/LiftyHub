@@ -34,7 +34,7 @@ confirmButtonText:"Eliminar",
 cancelButtonText:"Cancelar",
 confirmButtonColor:"#ed2d2d",
 cancelButtonColor:"#989a9e",
-background:"#202940",
+background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
 color:"#fff"
 })
 
@@ -52,7 +52,7 @@ Swal.fire({
 icon:"success",
 title:"Usuario eliminado",
 confirmButtonColor:"#60a5fa",
-background:"#202940",
+background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
 color:"#fff"
 })
 
@@ -67,7 +67,7 @@ setLocalUsers(users)
 return(
 
 <Card sx={{
-  background:"#202940",
+  background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
   color:"white",
   borderRadius:"16px",
   boxShadow:"none",

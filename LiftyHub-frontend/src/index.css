@@ -4,6 +4,11 @@
   padding: 0;
 }
 
+.dashboard {
+  background: #111827; 
+  min-height: 100vh;
+}
+
 html, body, #root {
   height: 100%;
   background-color: #000000;

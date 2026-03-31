@@ -27,7 +27,7 @@ export default function Dashboard() {
       sx={{
         display: "flex",
         minHeight: "100vh",
-        backgroundColor: "#1a2035"
+        backgroundColor: "#000000"
       }}
     >
       <Sidebar />
@@ -41,7 +41,7 @@ export default function Dashboard() {
       sx={{
         display: "flex",
         minHeight: "100vh",
-        backgroundColor: "#1a2035"
+        backgroundColor: "#000000"
       }}
     >
 

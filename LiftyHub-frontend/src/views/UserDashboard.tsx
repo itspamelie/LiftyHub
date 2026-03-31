@@ -83,7 +83,7 @@ useEffect(() => {
     Swal.fire({
       title: "Cargando usuarios...",
       text: "Obteniendo estadísticas",
-      background:"#0f172a",
+      background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
       color:"#fff",
       allowOutsideClick:false,
       didOpen: () => {
@@ -138,7 +138,7 @@ setTopStreaks(statsData.top_streaks || [])
         flexGrow: 1,
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#1a2035",
+        backgroundColor: "#000000",
         padding: 1
       }}
     >

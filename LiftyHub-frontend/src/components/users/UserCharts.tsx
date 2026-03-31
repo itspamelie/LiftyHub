@@ -9,7 +9,7 @@ return(
 
 <>
 
-<Card sx={{background:"#202940",color:"white",borderRadius:"16px"}}>
+<Card sx={{background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",color:"white",borderRadius:"16px"}}>
 <CardContent>
 
 <Typography variant="h6">
@@ -22,7 +22,7 @@ Distribución por género
 </Card>
 
 
-<Card sx={{background:"#202940",color:"white",borderRadius:"16px"}}>
+<Card sx={{background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",color:"white",borderRadius:"16px"}}>
 <CardContent>
 
 <Typography variant="h6">

@@ -38,7 +38,7 @@ export default function Sidebar() {
           justifyContent: "space-between",
 
           background:
-            "linear-gradient(180deg, #3a3a45 0%, #1e1e24 100%)",
+            "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
 
           color: "white",
           padding: "20px",

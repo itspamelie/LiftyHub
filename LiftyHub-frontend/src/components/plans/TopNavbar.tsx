@@ -10,7 +10,7 @@ const TopNavbar: React.FC = () => {
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      p={3}
+      p={4}
       color="white"
     >
       {/* Breadcrumb + Title */}

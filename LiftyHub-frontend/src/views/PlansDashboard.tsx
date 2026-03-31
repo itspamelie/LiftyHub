@@ -64,7 +64,7 @@ setEditPlan({
       Swal.fire({
         title: "Cargando planes...",
         text: "Obteniendo información",
-        background: "#0f172a",
+        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
         color: "#fff",
         allowOutsideClick: false,
         didOpen: () => {
@@ -114,7 +114,7 @@ setEditPlan({
       Swal.fire({
         icon: "success",
         title: "Plan creado",
-        background: "#0f172a",
+        background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
         confirmButtonColor:"#60a5fa",
         color: "#fff"
       });
@@ -129,8 +129,10 @@ setEditPlan({
       Swal.fire({
         icon: "error",
         title: "Error al crear plan",
-        background: "#0f172a",
-        color: "#fff"
+        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        color: "#fff",
+        confirmButtonColor:"#60a5fa",
+
       });
     }
   };
@@ -145,7 +147,7 @@ showCancelButton: true,
 confirmButtonText: "Sí, eliminar",
 cancelButtonText: "Cancelar",
 confirmButtonColor:"#e71d1d",
-background:"#0f172a",
+background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
 color:"#fff"
 })
 
@@ -162,7 +164,7 @@ setPlans(plans.filter(plan => plan.id !== id))
 Swal.fire({
 icon:"success",
 title:"Plan eliminado",
-background:"#0f172a",
+background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
 confirmButtonColor:"#60a5fa",
 color:"#fff"
 })
@@ -174,7 +176,7 @@ console.error(error)
 Swal.fire({
 icon:"error",
 title:"Error al eliminar",
-background:"#0f172a",
+background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
 confirmButtonColor:"#60a5fa",
 color:"#fff"
 })
@@ -201,8 +203,10 @@ p.id === editPlan.id ? editPlan : p
 Swal.fire({
 icon:"success",
 title:"Plan actualizado",
-background:"#0f172a",
-color:"#fff"
+background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+color:"#fff",
+confirmButtonColor:"#60a5fa",
+
 })
 
 closeEditModal()
@@ -214,8 +218,10 @@ console.error(error)
 Swal.fire({
 icon:"error",
 title:"Error al actualizar",
-background:"#0f172a",
-color:"#fff"
+background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+color:"#fff",
+confirmButtonColor:"#60a5fa",
+
 })
 
 }
@@ -227,7 +233,7 @@ sx={{
 minHeight: "100vh",
 display: "flex",
 flexDirection: "column",
-background:"#1a2035"
+background:"#000000"
 }}
 >
 
@@ -239,7 +245,7 @@ background:"#1a2035"
   value={search}
   onChange={(e) => searchPlans(e.target.value)}
   sx={{
-    width: "300px", // 👈 tamaño fijo
+    width: "300px", 
     mb: 1,
     mt: 4,
     pl:5,
