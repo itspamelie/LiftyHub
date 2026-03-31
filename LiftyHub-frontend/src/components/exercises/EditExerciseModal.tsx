@@ -71,7 +71,7 @@ export default function EditExerciseModal({ open, onClose, exercise, onUpdated }
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogContent
         sx={{
-          background: "#1a2035",
+          background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
           color: "white",
           p: 4,
           position: "relative",

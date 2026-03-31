@@ -4,7 +4,7 @@ import {
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { apiFetch } from "../services/api";
-import TopNavbar from "../components/exercises/TopNavbar";
+import TopNavbar from "../components/dashboard/TopNavbar";
 import SearchIcon from "@mui/icons-material/Search";
 import ExercisesCard from "../components/exercises/ExercisesCard"
 import CreateExerciseModal from "../components/exercises/CreateExerciseModal"
@@ -55,8 +55,9 @@ export default function ExercisesDashboard() {
       Swal.fire({
         title: "Cargando ejercicios...",
         text: "Obteniendo información",
-        background: "#0f172a",
+        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
         color: "#fff",
+              confirmButtonColor:"#60a5fa",
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
@@ -96,7 +97,7 @@ export default function ExercisesDashboard() {
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
       confirmButtonColor:"#e71d1d",
-      background:"#0f172a",
+      background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
       color:"#fff"
     })
 
@@ -112,9 +113,9 @@ export default function ExercisesDashboard() {
       Swal.fire({
         icon:"success",
         title:"Ejercicio eliminado",
-        background:"#0f172a",
-        confirmButtonColor:"#60a5fa",
-        color:"#fff"
+        background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        color: "#fff",
+              confirmButtonColor:"#60a5fa",
       })
 
     }catch(error){
@@ -123,9 +124,9 @@ export default function ExercisesDashboard() {
       Swal.fire({
         icon:"error",
         title:"Error al eliminar",
-        background:"#0f172a",
-        confirmButtonColor:"#60a5fa",
-        color:"#fff"
+        background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        color: "#fff",
+              confirmButtonColor:"#60a5fa",
       })
     }
   }
@@ -149,8 +150,8 @@ export default function ExercisesDashboard() {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    px: 5,
-    mt: 4
+    px: 8,
+    mt: 1
   }}
 >
   {/* BUSCADOR */}
@@ -184,7 +185,7 @@ export default function ExercisesDashboard() {
     borderRadius: "12px",
     textTransform: "none",
     fontWeight: "bold",
-    background: "linear-gradient(135deg, #6366f1, #8b5cf6)"
+    background: "linear-gradient(90deg,#3a8dff,#5da8ff)"
   }}
 >
   + Agregar

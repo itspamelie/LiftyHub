@@ -6,16 +6,19 @@ TextField,
 FormControl,
 Select,
 MenuItem,
-Button
+Button,
+Box
 } from "@mui/material"
 import { useState } from "react"
 import { apiFetch } from "../../services/api"
 import Swal from "sweetalert2"
+import UploadFileIcon from "@mui/icons-material/UploadFile"
+import { useRef } from "react"
 
 
 
 export default function UserForm({onUserCreated}:any){
-
+const fileInputRef = useRef<HTMLInputElement | null>(null)
 
 const inputWhite = {
 mb:2,
@@ -160,22 +163,39 @@ Genero
 </FormControl>
 {/* FOTO */}
 
-<Button
-variant="outlined"
-component="label"
-fullWidth
-sx={{
-mb:2,
-height:"40px",
-borderColor:"#d1d5db",
-color:"#374151",
-background:"#f8fafc"
-}}
+<Box
+  onClick={() => fileInputRef.current?.click()}
+  sx={{
+    border: "2px dashed #2d3561",
+    borderRadius: "12px",
+    p: 3,
+    mb:3,
+    textAlign: "center",
+    cursor: "pointer",
+    width:"100%",
+    "&:hover": {
+      borderColor: "#6366f1",
+      background: "rgba(99,102,241,0.05)"
+    }
+  }}
 >
-Subir foto
-<input hidden type="file" accept="image/*"
-onChange={(e)=>setImg(e.target.files?.[0] || null)}/>
-</Button>
+  <UploadFileIcon sx={{ fontSize: 30, color: "#94a3b8" }} />
+
+  <Typography sx={{ mt: 1 }}>
+    {img ? img.name : "Seleccionar archivo"}
+  </Typography>
+
+  <input
+    ref={fileInputRef}
+    type="file"
+    hidden
+    accept="image/*"
+    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      setImg(file || null)
+    }}
+  />
+</Box>
 
 {/* FECHA */}
 

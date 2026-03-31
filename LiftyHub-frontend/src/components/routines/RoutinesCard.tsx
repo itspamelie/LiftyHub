@@ -15,7 +15,7 @@ maxWidth: 400,
         maxHeight:500,
         borderRadius: "20px",
         overflow: "hidden",
-        background: "rgba(255,255,255,0.05)",
+        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
         backdropFilter: "blur(10px)",
         boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
         color: "white",
@@ -31,8 +31,8 @@ maxWidth: 400,
           backgroundImage: `
             linear-gradient(
               to bottom,
-              rgba(168, 85, 247, 0.7),
-              rgba(59, 130, 246, 0.7)
+              rgba(58, 141, 255, 0.7),
+              rgba(93, 168, 255, 0.6)
             ),
   url(${getImageUrl(data.img, "routines")})
             `,

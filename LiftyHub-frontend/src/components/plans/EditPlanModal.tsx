@@ -64,9 +64,9 @@ export default function EditPlanModal({
 
         <Box display="flex" flexDirection="column" gap={2}>
 
+<label htmlFor="name">Nombre del plan</label>
           <TextField
             name="name"
-            label="Nombre del plan"
             variant="outlined"
             fullWidth
             value={plan?.name || ""}
@@ -74,9 +74,10 @@ export default function EditPlanModal({
             sx={textFieldStyles}
           />
 
+<label htmlFor="description">Descripción</label>
+
           <TextField
             name="description"
-            label="Descripción"
             variant="outlined"
             multiline
             rows={3}
@@ -85,10 +86,9 @@ export default function EditPlanModal({
             onChange={onChange}
             sx={textFieldStyles}
           />
+<label htmlFor="price">Costo</label>
 
           <TextField
-            name="price"
-            label="Precio"
             type="number"
             variant="outlined"
             fullWidth
@@ -97,9 +97,10 @@ export default function EditPlanModal({
             sx={textFieldStyles}
           />
 
+<label htmlFor="level">Nivel</label>
+
           <TextField
             name="level"
-            label="Nivel"
             type="number"
             variant="outlined"
             fullWidth
@@ -108,9 +109,10 @@ export default function EditPlanModal({
             sx={textFieldStyles}
           />
 
+<label htmlFor="max_routines"># Rutinas</label>
+
           <TextField
             name="max_routines"
-            label="Cantidad de rutinas"
             type="number"
             variant="outlined"
             fullWidth

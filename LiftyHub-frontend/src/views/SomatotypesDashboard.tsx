@@ -4,7 +4,7 @@ import {
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { apiFetch } from "../services/api";
-import TopNavbar from "../components/somatotypes/TopNavbar";
+import TopNavbar from "../components/dashboard/TopNavbar";
 import SearchIcon from "@mui/icons-material/Search";
 import SomatotypesCard from "../components/somatotypes/SomatotypesCard"
 import CreateSomatotypeModal from "../components/somatotypes/CreateSomatotypeModal"
@@ -54,7 +54,7 @@ export default function SomatotypesDashboard() {
       Swal.fire({
         title: "Cargando somatotipos...",
         text: "Obteniendo información",
-        background: "#0f172a",
+        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
         color: "#fff",
         allowOutsideClick: false,
         didOpen: () => {
@@ -95,7 +95,7 @@ export default function SomatotypesDashboard() {
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
       confirmButtonColor:"#e71d1d",
-      background:"#0f172a",
+      background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
       color:"#fff"
     })
 
@@ -111,7 +111,7 @@ export default function SomatotypesDashboard() {
       Swal.fire({
         icon:"success",
         title:"Somatotipo eliminado",
-        background:"#0f172a",
+        background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
         confirmButtonColor:"#60a5fa",
         color:"#fff"
       })
@@ -121,7 +121,7 @@ export default function SomatotypesDashboard() {
 
       Swal.fire({
         icon:"error",
-        title:"Error al eliminar",
+        title:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
         background:"#0f172a",
         confirmButtonColor:"#60a5fa",
         color:"#fff"
@@ -149,8 +149,8 @@ export default function SomatotypesDashboard() {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    px: 5,
-    mt: 4
+    px: 8,
+    mt: 1
   }}
 >
   {/* BUSCADOR */}
@@ -184,7 +184,7 @@ export default function SomatotypesDashboard() {
     borderRadius: "12px",
     textTransform: "none",
     fontWeight: "bold",
-    background: "linear-gradient(135deg, #6366f1, #8b5cf6)"
+    background: "linear-gradient(90deg,#3a8dff,#5da8ff)"
   }}
 >
   + Agregar

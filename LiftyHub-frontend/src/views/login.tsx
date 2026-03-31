@@ -67,7 +67,7 @@ Swal.fire({
   icon: "error",
   title: "Credenciales inválidas",
   text: "El correo o la contraseña no son correctos",
-  background: "#0f172a",
+  background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
   color: "#ffffff",
   confirmButtonColor: "#2563eb",
   confirmButtonText: "Intentar de nuevo"

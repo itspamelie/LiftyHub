@@ -43,7 +43,7 @@ if (file) {
            Swal.fire({
               icon: "success",
               title: "Somatotipo creado",
-              background: "#0f172a",
+              background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
               confirmButtonColor:"#60a5fa",
               color: "#fff"
             });
@@ -52,7 +52,9 @@ if (file) {
        Swal.fire({
               icon: "error",
               title: "Error al crear somatotipo",
-              background: "#0f172a",
+              background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+                            confirmButtonColor:"#60a5fa",
+
               color: "#fff"
             });
     }
@@ -62,7 +64,7 @@ if (file) {
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogContent
         sx={{
-          background: "#1a2035",
+          background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
           color: "white",
           p: 4,
           position: "relative",
@@ -156,7 +158,7 @@ if (file) {
               borderRadius: "10px",
               textTransform: "none",
               fontWeight: "bold",
-              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+              background: "#60a5fa",
               py: 1.2,
               "&:hover": {
                 background: "linear-gradient(135deg, #4f46e5, #7c3aed)"

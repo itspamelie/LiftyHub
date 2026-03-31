@@ -86,7 +86,7 @@ useEffect(() => {
     >
       <TopNavbar />
 
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ pl: 3 }}>
 
         <StatsCards dashboard={dashboard} />
 
@@ -97,7 +97,7 @@ useEffect(() => {
             display: "grid",
             gridTemplateColumns: "2fr 1fr",
             gap: 3,
-            p:3
+            pl:3
           }}
         >
           <ProjectsTable  dashboard={dashboard} />

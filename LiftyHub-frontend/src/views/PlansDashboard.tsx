@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { apiFetch } from "../services/api";
 import EditPlanModal from "../components/plans/EditPlanModal"
-import TopNavbar from "../components/plans/TopNavbar";
+import TopNavbar from "../components/dashboard/TopNavbar";
 import SearchIcon from "@mui/icons-material/Search";
 
 
@@ -233,7 +233,7 @@ sx={{
 minHeight: "100vh",
 display: "flex",
 flexDirection: "column",
-background:"#000000"
+background:"#000000",
 }}
 >
 
@@ -247,8 +247,7 @@ background:"#000000"
   sx={{
     width: "300px", 
     mb: 1,
-    mt: 4,
-    pl:5,
+    pl:7,
     input: { color: "white" },
     "& .MuiOutlinedInput-root": {
       borderRadius: "12px",
@@ -270,7 +269,7 @@ flexGrow:1,
 display:"grid",
 gridTemplateColumns:"2fr 1fr",
 gap:3,
-p:5
+p:7
 }}
 >
 

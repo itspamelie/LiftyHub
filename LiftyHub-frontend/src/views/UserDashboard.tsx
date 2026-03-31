@@ -182,7 +182,7 @@ setTopStreaks(statsData.top_streaks || [])
       </Box>
     </Box>
 
-<Box sx={{p:6}}>
+<Box sx={{ml:6,mt:3}}>
 
 {/* GRID 1: estadísticas */}
 
