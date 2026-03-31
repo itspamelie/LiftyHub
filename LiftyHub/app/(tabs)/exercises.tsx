@@ -1,9 +1,11 @@
-import { ScrollView, View, Text, StyleSheet, TextInput } from "react-native";
-import { useState } from "react";
+import { ScrollView, View, Text, StyleSheet, TextInput, ActivityIndicator } from "react-native";
+import { useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import ExerciseCard from "@/src/components/exercises/ExerciseCard";
 import FilterButton from "@/src/components/exercises/FilterButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
+import { getExercises } from "@/src/services/api";
 
 type ExerciseFile = {
   file_path: string;
@@ -23,14 +25,14 @@ export default function ExercisesScreen() {
   const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("Todo");
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // key = valor interno para filtrar (viene del backend en español)
-  // labelKey = clave de traducción para mostrar
   const filters = [
     { key: "Todo",       labelKey: "exercises.muscleGroups.all" },
     { key: "Pecho",      labelKey: "exercises.muscleGroups.chest" },
     { key: "Espalda",    labelKey: "exercises.muscleGroups.back" },
-    { key: "Pierna",     labelKey: "exercises.muscleGroups.leg" },
+    { key: "Piernas",    labelKey: "exercises.muscleGroups.leg" },
     { key: "Glúteos",    labelKey: "exercises.muscleGroups.glutes" },
     { key: "Hombro",     labelKey: "exercises.muscleGroups.shoulder" },
     { key: "Bíceps",     labelKey: "exercises.muscleGroups.bicep" },
@@ -42,68 +44,25 @@ export default function ExercisesScreen() {
     { key: "Cardio",     labelKey: "exercises.muscleGroups.cardio" },
   ];
 
-  // MOCK DATA simulando backend
-  const exercises: Exercise[] = [
-    {
-      id: 1,
-      name: "Sentadilla",
-      muscle: "Pierna",
-      technique: "Mantén la espalda recta",
-      files: [
-        {
-          file_path: "https://images.unsplash.com/photo-1599058917765-a780eda07a3e",
-          type: "image"
-        }
-      ]
-    },
-    {
-      id: 2,
-      name: "Pull Ups",
-      muscle: "Espalda",
-      technique: "Sube controlado",
-      files: [
-        {
-          file_path: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438",
-          type: "image"
-        }
-      ]
-    },
-    {
-      id: 3,
-      name: "Press banca",
-      muscle: "Pecho",
-      technique: "Baja la barra controladamente",
-      files: [
-        {
-          file_path: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61",
-          type: "image"
-        }
-      ]
-    },
-    {
-      id: 4,
-      name: "Crunch abdominal",
-      muscle: "Abdomen",
-      technique: "Contrae el abdomen al subir",
-      files: [
-        {
-          file_path: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1",
-          type: "image"
-        }
-      ]
-    }
-  ];
-
+  useEffect(() => {
+    const fetchExercises = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) return;
+        const res = await getExercises(token);
+        if (res?.data) setExercises(res.data);
+      } catch (error) {
+        console.log("Error cargando ejercicios:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchExercises();
+  }, []);
 
   const filteredExercises = exercises.filter((exercise) => {
-
-    const matchesSearch =
-      exercise.name.toLowerCase().includes(search.toLowerCase());
-
-    const matchesFilter =
-      activeFilter === "Todo" ||
-      exercise.muscle === activeFilter;
-
+    const matchesSearch = exercise.name.toLowerCase().includes(search.toLowerCase());
+    const matchesFilter = activeFilter === "Todo" || exercise.muscle === activeFilter;
     return matchesSearch && matchesFilter;
   });
 
@@ -133,7 +92,6 @@ export default function ExercisesScreen() {
         showsHorizontalScrollIndicator={false}
         style={styles.filters}
       >
-
         {filters.map((filter) => (
           <FilterButton
             key={filter.key}
@@ -142,20 +100,24 @@ export default function ExercisesScreen() {
             onPress={() => setActiveFilter(filter.key)}
           />
         ))}
-
       </ScrollView>
 
       {/* LISTA */}
-      <View style={styles.list}>
-
-        {filteredExercises.map((exercise) => (
-          <ExerciseCard
-            key={exercise.id}
-            exercise={exercise}
-          />
-        ))}
-
-      </View>
+      {loading ? (
+        <ActivityIndicator color={colors.primary} style={{ marginTop: 40 }} />
+      ) : (
+        <View style={styles.list}>
+          {filteredExercises.map((exercise) => (
+            <ExerciseCard
+              key={exercise.id}
+              exercise={exercise}
+            />
+          ))}
+          {filteredExercises.length === 0 && (
+            <Text style={styles.empty}>No se encontraron ejercicios</Text>
+          )}
+        </View>
+      )}
 
     </ScrollView>
   );
@@ -206,6 +168,12 @@ const styles = StyleSheet.create({
 
   list: {
     marginTop: 10
+  },
+
+  empty: {
+    color: colors.textSecondary,
+    textAlign: "center",
+    marginTop: 40
   }
 
 });

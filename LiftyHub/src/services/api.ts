@@ -186,3 +186,13 @@ export const getUserProperties = async (id: number, token: string) => {
     }
   });
 };
+
+// 🏋️ OBTENER EJERCICIOS
+export const getExercises = async (token: string) => {
+  return apiFetch(`${API_URL}/exercises`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json"
+    }
+  });
+};

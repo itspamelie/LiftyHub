@@ -1,14 +1,21 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { Text } from "react-native";
 import { useLanguage } from "@/src/context/LanguageContext";
 
-export default function TabLayout() {
-  const { t, language } = useLanguage();
+function TabLabel({ scope, focused }: { scope: string; focused: boolean }) {
+  const { t } = useLanguage();
+  return (
+    <Text style={{ fontSize: 10, color: focused ? "#ffffff" : "#6B7280" }}>
+      {t(scope)}
+    </Text>
+  );
+}
 
+export default function TabLayout() {
   return (
     <Tabs
-      key={language}
       screenListeners={{
         tabPress: () => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -29,7 +36,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: t("tabs.routines"),
+          tabBarLabel: ({ focused }) => <TabLabel scope="tabs.routines" focused={focused} />,
           tabBarIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={color} />,
         }}
       />
@@ -39,7 +46,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="exercises"
         options={{
-          title: t("tabs.exercises"),
+          tabBarLabel: ({ focused }) => <TabLabel scope="tabs.exercises" focused={focused} />,
           tabBarIcon: ({ color, size }) => <Ionicons name="fitness" size={size} color={color} />,
         }}
       />
@@ -47,7 +54,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="diet"
         options={{
-          title: t("tabs.diet"),
+          tabBarLabel: ({ focused }) => <TabLabel scope="tabs.diet" focused={focused} />,
           tabBarIcon: ({ color, size }) => <Ionicons name="nutrition" size={size} color={color} />,
         }}
       />
@@ -55,7 +62,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: t("tabs.profile"),
+          tabBarLabel: ({ focused }) => <TabLabel scope="tabs.profile" focused={focused} />,
           tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
         }}
       />
@@ -63,7 +70,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: t("tabs.settings"),
+          tabBarLabel: ({ focused }) => <TabLabel scope="tabs.settings" focused={focused} />,
           tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
         }}
       />
