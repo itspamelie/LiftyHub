@@ -10,6 +10,7 @@ export default function OnboardingLayout() {
     >
       <Stack.Screen name="objectives" />
       <Stack.Screen name="personal" />
+      <Stack.Screen name="permissions" />
     </Stack>
   );
 }

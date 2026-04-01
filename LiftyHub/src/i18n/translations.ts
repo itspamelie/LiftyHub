@@ -18,6 +18,8 @@ export const translations = {
       button: "Entrar",
       noAccount: "¿No tienes cuenta?",
       createAccount: "Crear cuenta",
+      loading: "Entrando...",
+      errorInvalid: "Correo o contraseña incorrectos.",
     },
 
     // Auth - Register
@@ -160,6 +162,17 @@ export const translations = {
       cancel: "Cancelar",
       errorDelete: "No se pudo eliminar la cuenta",
     },
+
+    // Permissions
+    permissions: {
+      title: "Permisos",
+      notifications: "Notificaciones",
+      gallery: "Galería",
+      camera: "Cámara",
+      granted: "Activado",
+      denied: "Desactivado",
+      unknown: "Pendiente",
+    },
   },
 
   en: {
@@ -181,6 +194,8 @@ export const translations = {
       button: "Sign in",
       noAccount: "Don't have an account?",
       createAccount: "Create account",
+      loading: "Signing in...",
+      errorInvalid: "Incorrect email or password.",
     },
 
     // Auth - Register
@@ -322,6 +337,17 @@ export const translations = {
       deleteBtn: "Delete",
       cancel: "Cancel",
       errorDelete: "Could not delete account",
+    },
+
+    // Permissions
+    permissions: {
+      title: "Permissions",
+      notifications: "Notifications",
+      gallery: "Gallery",
+      camera: "Camera",
+      granted: "Enabled",
+      denied: "Disabled",
+      unknown: "Not set",
     },
   },
 };

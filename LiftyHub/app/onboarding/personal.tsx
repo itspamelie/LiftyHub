@@ -18,7 +18,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import BackButton from "@/src/components/buttons/backButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
-import { registerRequest, createUserProperties } from "@/src/services/api";
 
 export default function Personal() {
 
@@ -32,6 +31,7 @@ const [showPicker, setShowPicker] = useState(false);
 
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
+  const [waist, setWaist] = useState("");
   const [gender, setGender] = useState<string | null>(null);
   const [somatotype, setSomatotype] = useState<string | null>(null);
 
@@ -45,70 +45,43 @@ const [showPicker, setShowPicker] = useState(false);
   };
 
   const handleNext = async () => {
-    if (!birthdate || !height || !weight || !gender || !somatotype) {
+    if (!birthdate || !height || !weight || !waist || !gender || !somatotype) {
       Alert.alert("Error", "Completa todos los campos");
       return;
     }
 
-    try {
-      const registerDataRaw = await AsyncStorage.getItem("@register_data");
-      const objective = await AsyncStorage.getItem("@register_objective");
+    const somatotypeMap: Record<string, number> = {
+      "Ectomorfo": 1,
+      "Mesomorfo": 2,
+      "Endomorfo": 3,
+    };
 
-      if (!registerDataRaw || !objective) {
-        Alert.alert("Error", "Datos incompletos, vuelve a intentarlo");
-        return;
-      }
-
-      const { name, email, password } = JSON.parse(registerDataRaw);
-
-      const birthdateStr = birthdate.toISOString().split("T")[0];
-
-      const somatotypeMap: Record<string, number> = {
-        "Ectomorfo": 1,
-        "Mesomorfo": 2,
-        "Endomorfo": 3,
-      };
-
-      const data = await registerRequest({
-        name,
-        email,
-        password,
-        gender,
-        birthdate: birthdateStr,
-      });
-
-      if (data?.token) {
-        await AsyncStorage.setItem("token", data.token);
-        await AsyncStorage.setItem("user", JSON.stringify(data.user));
-
-        await createUserProperties(
-          {
-            user_id: data.user.id,
-            stature: parseFloat(height),
-            weight: parseFloat(weight),
-            objective,
-            somatotype_id: somatotypeMap[somatotype!],
-          },
-          data.token
-        );
-
-        await AsyncStorage.removeItem("@register_data");
-        await AsyncStorage.removeItem("@register_objective");
-
-        Alert.alert("Cuenta creada", "Tu cuenta se ha creado correctamente", [
-          { text: "OK", onPress: () => router.replace("/(tabs)" as any) }
-        ]);
-      } else {
-        const mensaje = data?.errors?.email?.[0] ?? data?.message ?? "No se pudo crear la cuenta";
-        Alert.alert("Error", mensaje, [
-          { text: "OK", onPress: () => router.replace("/auth/register" as any) }
-        ]);
-      }
-
-    } catch (error) {
-      console.log("Error en registro:", error);
-      Alert.alert("Error", "Ocurrió un problema, intenta de nuevo");
+    const registerDataRaw = await AsyncStorage.getItem("@register_data");
+    if (!registerDataRaw) {
+      Alert.alert("Error", "Datos incompletos, vuelve a intentarlo");
+      return;
     }
+
+    const { name, email, password } = JSON.parse(registerDataRaw);
+
+    // Actualiza @register_data con gender y birthdate
+    await AsyncStorage.setItem("@register_data", JSON.stringify({
+      name,
+      email,
+      password,
+      gender,
+      birthdate: birthdate.toISOString().split("T")[0],
+    }));
+
+    // Guarda los datos de propiedades para usarlos en permissions.tsx
+    await AsyncStorage.setItem("@register_properties", JSON.stringify({
+      height: parseFloat(height),
+      weight: parseFloat(weight),
+      waist: parseFloat(waist),
+      somatotype_id: somatotypeMap[somatotype!],
+    }));
+
+    router.push("/onboarding/permissions" as any);
   };
 
   return (
@@ -229,6 +202,19 @@ const [showPicker, setShowPicker] = useState(false);
             />
           </View>
 
+          {/* CINTURA */}
+          <View style={styles.inputContainer}>
+            <Ionicons name="body-outline" size={20} color={colors.textSecondary} />
+            <TextInput
+              placeholder="Cintura (cm)"
+              placeholderTextColor={colors.textSecondary}
+              style={styles.input}
+              value={waist}
+              onChangeText={setWaist}
+              keyboardType="numeric"
+            />
+          </View>
+
           {/* GÉNERO */}
           <Text style={styles.sectionTitle}>Género</Text>
 
@@ -287,10 +273,10 @@ const [showPicker, setShowPicker] = useState(false);
           <TouchableOpacity
             style={[
               styles.button,
-              (!birthdate || !height || !weight || !gender || !somatotype) && styles.disabled
+              (!birthdate || !height || !weight || !waist || !gender || !somatotype) && styles.disabled
             ]}
             onPress={handleNext}
-            disabled={!birthdate || !height || !weight || !gender || !somatotype}
+            disabled={!birthdate || !height || !weight || !waist || !gender || !somatotype}
           >
             <Text style={styles.buttonText}>Continuar</Text>
           </TouchableOpacity>

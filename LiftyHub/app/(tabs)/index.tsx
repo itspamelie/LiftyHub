@@ -1,4 +1,4 @@
-import { FlatList, View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, ScrollView, TouchableWithoutFeedback, ActivityIndicator, RefreshControl } from "react-native";
+import { FlatList, View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, ScrollView, TouchableWithoutFeedback, ActivityIndicator, RefreshControl, Alert } from "react-native";
 import RoutineCard from "@/src/components/routines/RoutineCard";
 import FilterButton from "@/src/components/exercises/FilterButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
@@ -7,7 +7,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Keyboard } from "react-native";
 import { useLanguage } from "@/src/context/LanguageContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getRoutines, getUserRoutines, createUserRoutine } from "@/src/services/api";
+import { getRoutines, getUserRoutines, createUserRoutine, deleteUserRoutine } from "@/src/services/api";
 
 const defaultImages = [
   "https://images.unsplash.com/photo-1599058917765-a780eda07a3e",
@@ -16,10 +16,8 @@ const defaultImages = [
   "https://images.unsplash.com/photo-1546483875-ad9014c88eba",
   "https://images.unsplash.com/photo-1518611012118-696072aa579a"
 ];
-const getRandomImage = () => defaultImages[Math.floor(Math.random() * defaultImages.length)];
-
-const getRoutineImage = (img: string | null | undefined) => {
-  if (!img || img === "default.jpg") return getRandomImage();
+const getRoutineImage = (img: string | null | undefined, id: number) => {
+  if (!img || img === "default.jpg") return defaultImages[id % defaultImages.length];
   if (img.startsWith("http")) return img;
   const base = (process.env.EXPO_PUBLIC_API_URL ?? "").replace(/\/api$/, "");
   return `${base}/routines/${img}`;
@@ -133,6 +131,30 @@ export default function RoutinesScreen() {
   const resetForm = () =>
     setNewRoutine({ name: "", category: "", objective: "", level: "", duration: 0, img: "" });
 
+  const handleDeleteRoutine = (id: number) => {
+    Alert.alert(
+      "Eliminar rutina",
+      "¿Estás seguro de que quieres eliminar esta rutina?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem("token");
+              if (!token) return;
+              await deleteUserRoutine(id, token);
+              setUserRoutines((prev) => prev.filter((r) => r.id !== id));
+            } catch (error) {
+              console.log("Error eliminando rutina:", error);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   if (loading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
@@ -230,7 +252,8 @@ export default function RoutinesScreen() {
             duration={`${item.duration} min`}
             level={item.level}
             category={item.category}
-            image={getRoutineImage(item.img)}
+            image={getRoutineImage(item.img, item.id)}
+            onDelete={activeTab === "mine" ? () => handleDeleteRoutine(item.id) : undefined}
           />
         )}
       />

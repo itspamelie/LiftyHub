@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 type Props = {
   title: string;
@@ -6,9 +7,10 @@ type Props = {
   level: string;
   category: string;
   image: string;
+  onDelete?: () => void;
 };
 
-export default function RoutineCard({ title, duration, level, category, image }: Props) {
+export default function RoutineCard({ title, duration, level, category, image, onDelete }: Props) {
   return (
     <View style={styles.card}>
 
@@ -34,9 +36,16 @@ export default function RoutineCard({ title, duration, level, category, image }:
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.playButton}>
-          <Text style={styles.playText}>▶</Text>
-        </TouchableOpacity>
+        <View style={styles.actions}>
+          {onDelete && (
+            <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
+              <Ionicons name="trash-outline" size={18} color="white" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.playButton}>
+            <Ionicons name="play" size={18} color="white" />
+          </TouchableOpacity>
+        </View>
 
       </View>
 
@@ -96,6 +105,21 @@ const styles = StyleSheet.create({
     marginTop: 4
   },
 
+  actions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8
+  },
+
+  deleteButton: {
+    backgroundColor: "#EF4444",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+
   playButton: {
     backgroundColor: "#3B82F6",
     width: 40,
@@ -104,10 +128,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center"
   },
-
-  playText: {
-    color: "white",
-    fontSize: 16
-  }
 
 });

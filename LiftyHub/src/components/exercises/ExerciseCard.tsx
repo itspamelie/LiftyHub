@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { colors, spacing } from "@/src/styles/globalstyles";
 
 type ExerciseFile = {
@@ -12,6 +13,7 @@ type Exercise = {
   name: string;
   muscle: string;
   technique: string;
+  categorie?: string;
   files?: ExerciseFile[];
 };
 
@@ -37,7 +39,19 @@ export default function ExerciseCard({ exercise }: Props) {
         <Text style={styles.title}>{exercise.name}</Text>
         <Text style={styles.muscle}>{exercise.muscle}</Text>
 
-        <TouchableOpacity style={styles.previewButton}>
+        <TouchableOpacity
+          style={styles.previewButton}
+          onPress={() => router.push({
+            pathname: "/exercise/[id]",
+            params: {
+              id: exercise.id,
+              name: exercise.name,
+              muscle: exercise.muscle,
+              technique: exercise.technique,
+              categorie: exercise.categorie ?? "",
+            }
+          })}
+        >
           <Text style={styles.previewText}>Vista previa</Text>
         </TouchableOpacity>
       </View>

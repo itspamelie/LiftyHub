@@ -13,8 +13,8 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const API_URL = process.env.EXPO_PUBLIC_API_URL;
-
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     const checkLogin = async () => {
       const token = await AsyncStorage.getItem("token");
@@ -26,19 +26,22 @@ export default function Login() {
   }, []);
 
   const handleLogin = async () => {
+    setError("");
+    setLoading(true);
     try {
       const data = await loginRequest(email, password);
-      console.log("API:", API_URL);
-      console.log("RESPUESTA DEL BACKEND:", data);
 
       if (data.token) {
         await AsyncStorage.setItem("token", data.token);
         await AsyncStorage.setItem("user", JSON.stringify(data.user));
-        console.log("TOKEN GUARDADO");
         router.replace("/(tabs)" as any);
+      } else {
+        setError(t("login.errorInvalid"));
       }
-    } catch (error) {
-      console.log("Error conectando al backend:", error);
+    } catch (e) {
+      setError(t("login.errorInvalid"));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -85,8 +88,10 @@ export default function Login() {
               />
             </View>
 
-            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-              <Text style={styles.loginText}>{t("login.button")}</Text>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+            <TouchableOpacity style={[styles.loginButton, loading && { opacity: 0.7 }]} onPress={handleLogin} disabled={loading}>
+              <Text style={styles.loginText}>{loading ? t("login.loading") : t("login.button")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => router.push("/auth/register" as any)}>
@@ -182,6 +187,13 @@ const styles = StyleSheet.create({
   registerHighlight: {
     color: "#3B82F6",
     fontWeight: "600"
+  },
+
+  errorText: {
+    color: "#EF4444",
+    fontSize: 13,
+    marginBottom: 10,
+    textAlign: "center"
   }
 
 });

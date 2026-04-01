@@ -32,10 +32,12 @@ export default function RootLayout() {
         <Stack.Screen name="auth/register" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="edit-profile" options={{ headerShown: false }} />
+        <Stack.Screen name="settings/index" options={{ headerShown: false }} />
         <Stack.Screen name="settings/about" options={{ headerShown: false }} />
         <Stack.Screen name="settings/privacy" options={{ headerShown: false }} />
         <Stack.Screen name="settings/plans" options={{ headerShown: false }} />
         <Stack.Screen name="nutritionist-profile" options={{ headerShown: false }} />
+        <Stack.Screen name="exercise/[id]" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="light" />
     </ThemeProvider>

@@ -71,6 +71,7 @@ export const createUserProperties = async (
     user_id: number;
     stature?: number;
     weight?: number;
+    waist?: number;
     objective: string;
     somatotype_id: number;
   },
@@ -238,5 +239,26 @@ export const createUserRoutine = async (
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
+  });
+};
+
+// 🗑️ ELIMINAR RUTINA DEL USUARIO
+export const deleteUserRoutine = async (routineId: number, token: string) => {
+  return apiFetch(`${API_URL}/userRoutines/${routineId}`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+// 🏋️ OBTENER ARCHIVOS DE UN EJERCICIO
+export const getExerciseFiles = async (exerciseId: number, token: string) => {
+  return apiFetch(`${API_URL}/exercise-files/${exerciseId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
   });
 };
