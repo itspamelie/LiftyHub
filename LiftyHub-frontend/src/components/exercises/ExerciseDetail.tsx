@@ -9,10 +9,12 @@ import Grid from "@mui/material/Grid";
 import { getImageUrl } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import CreateExerciseFileModal from "./CreateExerciseFileModal";
 
 
 export default function ExerciseDetail() {
       const [loading, setLoading] = useState(true);
+      const [openModal, setOpenModal] = useState(false);
   const { id } = useParams();
 const navigate = useNavigate();
   const [files, setFiles] = useState<any[]>([]);
@@ -243,17 +245,18 @@ const navigate = useNavigate();
 
     
     <Box mt={4} display="flex" gap={2}>
-      <Button
-      variant="outlined"
-        sx={{
-          borderColor: "#fff",
-          color: "#fff",
-          borderRadius: "12px",
-          px: 3
-        }}
-      >
-        Agregar archivo
-      </Button>
+     <Button
+  variant="outlined"
+  onClick={() => setOpenModal(true)} 
+  sx={{
+    borderColor: "#fff",
+    color: "#fff",
+    borderRadius: "12px",
+    px: 3
+  }}
+>
+  Agregar archivo
+</Button>
 
       <Button
      variant="contained"
@@ -282,7 +285,16 @@ const navigate = useNavigate();
 </Grid>
     </Grid>
   </Box>
+  <CreateExerciseFileModal
+  open={openModal}
+  onClose={() => setOpenModal(false)}
+  onCreated={() => {
+    setOpenModal(false);
+  }}
+  exercise={exercise}
+/>
   </Box>
+  
 );
 
 }

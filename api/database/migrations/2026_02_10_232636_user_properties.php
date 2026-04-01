@@ -16,12 +16,12 @@ return new class extends Migration
             $table->foreignId('user_id')->unique()->constrained('users');           
             $table->decimal('stature',5,2);
             $table->decimal('weight',5,2);
-            $table->decimal('waist',5,2);
-            $table->decimal('chest',5,2);
-            $table->decimal('hips',5,2);
-            $table->decimal('arms',5,2);
-            $table->decimal('shoulders',5,2);
-            $table->decimal('thighs',5,2);
+            $table->decimal('waist',5,2)->nullable();
+            $table->decimal('chest',5,2)->nullable();
+            $table->decimal('hips',5,2)->nullable();
+            $table->decimal('arms',5,2)->nullable();
+            $table->decimal('shoulders',5,2)->nullable();
+            $table->decimal('thighs',5,2)->nullable();
             $table->string('objective');
             $table->foreignId('somatotype_id')->constrained('somatotypes');
             $table->timestamps();
