@@ -117,5 +117,15 @@ class ExerciseRoutinesController extends Controller
         ]);
     }
 
-    
+     public function getByRoutine($id)
+{
+    $data = ExerciseRoutine::with('routine','exercise')
+        ->where('routine_id', $id)
+        ->get();
+
+    return response()->json([
+        "status" => "ok",
+        "data" => $data
+    ]);
+}
 }

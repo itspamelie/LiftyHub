@@ -25,7 +25,7 @@ class SubscriptionSeeder extends Seeder
             ],
             [
                 'user_id' => 4, 
-                'plan_id' => 0, // plan gratuito
+                'plan_id' => 1, // plan gratuito
                 'start_date' => now(),
                 'end_date' => now()->addMonth(),
                 'status' => 'active',

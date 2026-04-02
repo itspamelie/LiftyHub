@@ -108,7 +108,7 @@ maxWidth: 400,
 
                      {/* VISUALIZAR */}
 <IconButton
-  onClick={() => navigate(`/dashboard/exercise/${data.id}`)}
+  onClick={() => navigate(`/dashboard/exercise-routines/${data.id}`)}
   sx={{
     color: "#34d399",
     "&:hover": { backgroundColor: "rgba(52,211,153,0.1)" }

@@ -60,4 +60,5 @@ Route::get('/search-somatotypes', [SomatotypesController::class, 'searchSomatoty
 Route::get('/search-exercises', [ExerciseController::class, 'searchExercises']);
 Route::get('/search-routines', [RoutinesController::class, 'searchRoutines']);
 Route::get('/exercise-files/{id}', [ExerciseFilesController::class, 'getByExercise']);
+Route::get('/exercise-routines/{id}', [ExerciseRoutinesController::class, 'getByRoutine']);
 });
