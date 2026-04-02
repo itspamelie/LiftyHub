@@ -10,11 +10,13 @@ import SettingsItem from "@/src/components/settings/SettingsItem";
 import SettingsSwitchItem from "@/src/components/settings/SettingsSwitchItem";
 import { deleteAccount, checkPassword } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
+import { useSubscription } from "@/src/context/SubscriptionContext";
 import { colors } from "@/src/styles/globalstyles";
 
 export default function Settings() {
 
   const { t, language, changeLanguage } = useLanguage();
+  const { plan } = useSubscription();
   const [notifications, setNotifications] = useState(false);
   const [units, setUnits] = useState("kg");
 
@@ -180,7 +182,7 @@ export default function Settings() {
           <SettingsItem
             icon="diamond-outline"
             label={t("settings.myPlan")}
-            value={t("settings.freePlan")}
+            value={plan?.name ?? t("settings.freePlan")}
           />
           <View style={styles.divider} />
           <SettingsItem
