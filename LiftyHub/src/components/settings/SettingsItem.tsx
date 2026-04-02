@@ -6,6 +6,7 @@ type Props = {
   icon: any;
   label: string;
   value?: string;
+  valueColor?: string;
   onPress?: () => void;
   danger?: boolean;
   showArrow?: boolean;
@@ -15,6 +16,7 @@ export default function SettingsItem({
   icon,
   label,
   value,
+  valueColor,
   onPress,
   danger = false,
   showArrow = false
@@ -41,7 +43,7 @@ export default function SettingsItem({
 
       <View style={styles.rowRight}>
         {value && (
-          <Text style={[styles.value, onPress && styles.valueInteractive]}>
+          <Text style={[styles.value, onPress && styles.valueInteractive, valueColor ? { color: valueColor, fontWeight: "700" } : undefined]}>
             {value}
           </Text>
         )}

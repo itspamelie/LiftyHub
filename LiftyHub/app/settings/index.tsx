@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, Linking, Modal, TextInput, ActivityIndicator, TouchableWithoutFeedback, Keyboard, Platform } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, Linking, Modal, TextInput, ActivityIndicator, TouchableWithoutFeedback, Keyboard } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback } from "react";
@@ -17,6 +17,14 @@ export default function Settings() {
 
   const { t, language, changeLanguage } = useLanguage();
   const { plan } = useSubscription();
+
+  const PLAN_COLORS: Record<string, string> = {
+    Free:  "#A1A1A1",
+    Basic: "#3B82F6",
+    Meal:  "#10B981",
+    Pro:   "#F59E0B",
+  };
+  const planColor = plan ? (PLAN_COLORS[plan.name] ?? colors.primary) : "#A1A1A1";
   const [notifications, setNotifications] = useState(false);
   const [units, setUnits] = useState("kg");
 
@@ -183,6 +191,7 @@ export default function Settings() {
             icon="diamond-outline"
             label={t("settings.myPlan")}
             value={plan?.name ?? t("settings.freePlan")}
+            valueColor={planColor}
           />
           <View style={styles.divider} />
           <SettingsItem
