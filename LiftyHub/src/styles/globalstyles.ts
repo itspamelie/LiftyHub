@@ -11,3 +11,10 @@ export const spacing = {
   screenPadding: 20,
   borderRadius: 16
 };
+
+export const planColors: Record<string, string> = {
+  Free:  "#A1A1A1",
+  Basic: "#3B82F6",
+  Meal:  "#10B981",
+  Pro:   "#F59E0B",
+};

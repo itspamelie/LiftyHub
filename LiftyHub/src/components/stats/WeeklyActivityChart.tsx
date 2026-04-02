@@ -1,8 +1,11 @@
 import { View, Text, StyleSheet } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 export default function WeeklyActivityChart() {
+
+  const { t } = useLanguage();
 
   const data = [
     { value: 3, label: "L" },
@@ -17,7 +20,7 @@ export default function WeeklyActivityChart() {
   return (
     <View style={styles.card}>
 
-      <Text style={styles.title}>Actividad semanal</Text>
+      <Text style={styles.title}>{t("stats.weeklyActivity")}</Text>
 
       <View style={styles.chartWrapper}>
         <BarChart

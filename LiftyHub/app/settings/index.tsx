@@ -11,20 +11,14 @@ import SettingsSwitchItem from "@/src/components/settings/SettingsSwitchItem";
 import { deleteAccount, checkPassword } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
-import { colors } from "@/src/styles/globalstyles";
+import { colors, planColors } from "@/src/styles/globalstyles";
 
 export default function Settings() {
 
   const { t, language, changeLanguage } = useLanguage();
   const { plan } = useSubscription();
 
-  const PLAN_COLORS: Record<string, string> = {
-    Free:  "#A1A1A1",
-    Basic: "#3B82F6",
-    Meal:  "#10B981",
-    Pro:   "#F59E0B",
-  };
-  const planColor = plan ? (PLAN_COLORS[plan.name] ?? colors.primary) : "#A1A1A1";
+  const planColor = plan ? (planColors[plan.name] ?? colors.primary) : "#A1A1A1";
   const [notifications, setNotifications] = useState(false);
   const [units, setUnits] = useState("kg");
 
@@ -410,8 +404,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 10,
+    paddingBottom: 16,
     gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.card,
   },
 
   backButton: {

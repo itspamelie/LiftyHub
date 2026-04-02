@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 type Record = {
   exercise: string;
@@ -8,6 +9,8 @@ type Record = {
 };
 
 export default function PersonalRecords() {
+
+  const { t } = useLanguage();
 
   // ⚠️ Estos datos luego vendrán del backend
   const records: Record[] = [
@@ -20,12 +23,9 @@ export default function PersonalRecords() {
   if (records.length === 0) {
     return (
       <View style={styles.section}>
-        <Text style={styles.title}>Récords personales</Text>
+        <Text style={styles.title}>{t("stats.personalRecords")}</Text>
 
-        <Text style={styles.empty}>
-          Aún no tienes récords.
-          Registra tu primer entrenamiento para ver estadísticas.
-        </Text>
+        <Text style={styles.empty}>{t("stats.noRecords")}</Text>
       </View>
     );
   }
@@ -33,7 +33,7 @@ export default function PersonalRecords() {
   return (
     <View style={styles.section}>
 
-      <Text style={styles.title}>Récords personales</Text>
+      <Text style={styles.title}>{t("stats.personalRecords")}</Text>
 
       {records.map((record, index) => (
         <RecordItem

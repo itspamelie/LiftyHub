@@ -1,6 +1,6 @@
 import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, spacing } from "@/src/styles/globalstyles";
+import { colors, spacing, planColors } from "@/src/styles/globalstyles";
 import ProgressCard from "@/src/components/profile/ProgressCard";
 import InfoStatCard from "@/src/components/profile/InfoStatCard";
 import StatsSummaryGrid from "@/src/components/stats/StatsSummaryGrid";
@@ -11,6 +11,8 @@ import { useEffect, useState, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getUser, getUserProperties, getUserStreak, getUserRoutinesCount } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
+import { useSubscription } from "@/src/context/SubscriptionContext";
+
 
 
 // función para calcular la edad
@@ -33,6 +35,9 @@ const calculateAge = (birthdate: string) => {
 export default function ProfileScreen() {
 
   const { t } = useLanguage();
+  const { plan } = useSubscription();
+  const planColor = planColors[plan?.name ?? "Free"] ?? "#A1A1A1";
+
   const [profile, setProfile] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"perfil" | "stats">("perfil");
@@ -134,7 +139,7 @@ export default function ProfileScreen() {
 
             <Image
               source={profile.avatar}
-              style={styles.avatar}
+              style={[styles.avatar, { borderColor: planColor }]}
             />
 
             <Text style={styles.name}>{profile.name}</Text>

@@ -19,8 +19,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import { Stack, router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { colors, spacing } from "@/src/styles/globalstyles";
+import { colors, spacing, planColors } from "@/src/styles/globalstyles";
 import { getUserProperties, updateUser, updateUserProperties, checkPassword } from "@/src/services/api";
+import { useLanguage } from "@/src/context/LanguageContext";
+import { useSubscription } from "@/src/context/SubscriptionContext";
 
 const SOMATOTYPE_MAP: Record<string, number> = {
   "Ectomorfo": 1,
@@ -29,6 +31,10 @@ const SOMATOTYPE_MAP: Record<string, number> = {
 };
 
 export default function EditProfileScreen() {
+
+  const { t } = useLanguage();
+  const { plan } = useSubscription();
+  const planColor = planColors[plan?.name ?? "Free"] ?? "#A1A1A1";
 
   const [name, setName]           = useState("");
   const [height, setHeight]       = useState("");
@@ -111,10 +117,10 @@ export default function EditProfileScreen() {
       if (res?.valid) {
         setPasswordVerified(true);
       } else {
-        Alert.alert("Error", "La contraseña actual es incorrecta");
+        Alert.alert(t("editProfile.errorTitle"), t("editProfile.modal.errorWrongPassword"));
       }
     } catch {
-      Alert.alert("Error", "No se pudo verificar la contraseña");
+      Alert.alert(t("editProfile.errorTitle"), t("editProfile.modal.errorVerify"));
     } finally {
       setVerifying(false);
     }
@@ -122,21 +128,21 @@ export default function EditProfileScreen() {
 
   const handleChangePassword = async () => {
     if (newPassword.length < 6) {
-      Alert.alert("Error", "La nueva contraseña debe tener al menos 6 caracteres");
+      Alert.alert(t("editProfile.errorTitle"), t("editProfile.modal.errorPasswordLength"));
       return;
     }
     if (newPassword !== confirmPassword) {
-      Alert.alert("Error", "Las contraseñas no coinciden");
+      Alert.alert(t("editProfile.errorTitle"), t("editProfile.modal.errorPasswordMatch"));
       return;
     }
     if (!userId || !token) return;
     setChangingPassword(true);
     try {
       await updateUser(userId, { password: newPassword } as any, token);
-      Alert.alert("Listo", "Contraseña actualizada correctamente");
+      Alert.alert(t("editProfile.successTitle"), t("editProfile.modal.successPassword"));
       resetPasswordModal();
     } catch {
-      Alert.alert("Error", "No se pudo cambiar la contraseña");
+      Alert.alert(t("editProfile.errorTitle"), t("editProfile.modal.errorChange"));
     } finally {
       setChangingPassword(false);
     }
@@ -172,12 +178,12 @@ export default function EditProfileScreen() {
         await AsyncStorage.setItem("user", JSON.stringify({ ...user, name }));
       }
 
-      Alert.alert("Listo", "Perfil actualizado correctamente", [
+      Alert.alert(t("editProfile.successTitle"), t("editProfile.successSave"), [
         { text: "OK", onPress: () => router.back() }
       ]);
     } catch (e) {
       console.log("Error guardando:", e);
-      Alert.alert("Error", "No se pudo actualizar el perfil");
+      Alert.alert(t("editProfile.errorTitle"), t("editProfile.errorSave"));
     } finally {
       setSaving(false);
     }
@@ -199,10 +205,13 @@ export default function EditProfileScreen() {
 
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* BOTÓN BACK */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={20} color="white" />
-      </TouchableOpacity>
+      {/* HEADER */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={20} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{t("editProfile.title")}</Text>
+      </View>
 
       <ScrollView
         contentContainerStyle={styles.content}
@@ -217,42 +226,42 @@ export default function EditProfileScreen() {
         <View style={styles.avatarSection}>
           <Image
             source={require("@/src/assets/defaultd.png")}
-            style={styles.avatar}
+            style={[styles.avatar, { borderColor: planColor }]}
           />
           <TouchableOpacity style={styles.changePhoto}>
             <Ionicons name="camera" size={16} color="white" />
-            <Text style={styles.changePhotoText}>Cambiar foto</Text>
+            <Text style={styles.changePhotoText}>{t("editProfile.changePhoto")}</Text>
           </TouchableOpacity>
         </View>
 
         {/* DATOS PERSONALES */}
-        <Text style={styles.section}>Datos personales</Text>
+        <Text style={styles.section}>{t("editProfile.personalData")}</Text>
 
         <View style={styles.card}>
           <View style={styles.row}>
             <View style={styles.rowLeft}>
               <Ionicons name="person-outline" size={20} color={colors.text} />
-              <Text style={styles.label}>Nombre</Text>
+              <Text style={styles.label}>{t("editProfile.name")}</Text>
             </View>
             <TextInput
               value={name}
               onChangeText={setName}
               style={styles.input}
-              placeholder="Nombre"
+              placeholder={t("editProfile.name")}
               placeholderTextColor={colors.textSecondary}
             />
           </View>
         </View>
 
         {/* INFORMACIÓN FÍSICA */}
-        <Text style={styles.section}>Información física</Text>
+        <Text style={styles.section}>{t("editProfile.physicalInfo")}</Text>
 
         {/* ALTURA */}
         <View style={styles.card}>
           <View style={styles.row}>
             <View style={styles.rowLeft}>
               <Ionicons name="resize-outline" size={20} color={colors.text} />
-              <Text style={styles.label}>Altura (cm)</Text>
+              <Text style={styles.label}>{t("editProfile.height")}</Text>
             </View>
             <TextInput
               value={height}
@@ -270,7 +279,7 @@ export default function EditProfileScreen() {
           <View style={styles.row}>
             <View style={styles.rowLeft}>
               <Ionicons name="barbell-outline" size={20} color={colors.text} />
-              <Text style={styles.label}>Peso (kg)</Text>
+              <Text style={styles.label}>{t("editProfile.weight")}</Text>
             </View>
             <TextInput
               value={weight}
@@ -288,7 +297,7 @@ export default function EditProfileScreen() {
           <View style={styles.rowColumn}>
             <View style={styles.rowLeft}>
               <Ionicons name="body-outline" size={20} color={colors.text} />
-              <Text style={styles.label}>Somatotipo</Text>
+              <Text style={styles.label}>{t("editProfile.somatotype")}</Text>
             </View>
             <View style={styles.selectorContainer}>
               {["Ectomorfo", "Mesomorfo", "Endomorfo"].map((type) => (
@@ -311,7 +320,7 @@ export default function EditProfileScreen() {
           <View style={styles.rowColumn}>
             <View style={styles.rowLeft}>
               <Ionicons name="flag-outline" size={20} color={colors.text} />
-              <Text style={styles.label}>Objetivo</Text>
+              <Text style={styles.label}>{t("editProfile.goal")}</Text>
             </View>
             <View style={styles.selectorContainer}>
               {[
@@ -341,7 +350,7 @@ export default function EditProfileScreen() {
           onPress={() => setShowPasswordModal(true)}
         >
           <Ionicons name="lock-closed-outline" size={18} color={colors.primary} />
-          <Text style={styles.passwordButtonText}>Cambiar contraseña</Text>
+          <Text style={styles.passwordButtonText}>{t("editProfile.changePassword")}</Text>
         </TouchableOpacity>
 
         {/* BOTÓN GUARDAR */}
@@ -352,7 +361,7 @@ export default function EditProfileScreen() {
         >
           {saving
             ? <ActivityIndicator color="white" />
-            : <Text style={styles.saveText}>Guardar cambios</Text>
+            : <Text style={styles.saveText}>{t("editProfile.saveChanges")}</Text>
           }
         </TouchableOpacity>
 
@@ -365,16 +374,16 @@ export default function EditProfileScreen() {
           <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
           <View style={styles.modalContent}>
 
-            <Text style={styles.modalTitle}>Cambiar contraseña</Text>
+            <Text style={styles.modalTitle}>{t("editProfile.modal.title")}</Text>
 
             {!passwordVerified ? (
               <>
-                <Text style={styles.modalSubtitle}>Primero verifica tu contraseña actual</Text>
+                <Text style={styles.modalSubtitle}>{t("editProfile.modal.verifySubtitle")}</Text>
 
                 <View style={styles.inputContainer}>
                   <TextInput
                     style={styles.modalInput}
-                    placeholder="Contraseña actual"
+                    placeholder={t("editProfile.modal.currentPassword")}
                     placeholderTextColor={colors.textSecondary}
                     secureTextEntry={!showCurrent}
                     value={currentPassword}
@@ -392,18 +401,18 @@ export default function EditProfileScreen() {
                 >
                   {verifying
                     ? <ActivityIndicator color="white" />
-                    : <Text style={styles.modalButtonText}>Verificar</Text>
+                    : <Text style={styles.modalButtonText}>{t("editProfile.modal.verify")}</Text>
                   }
                 </TouchableOpacity>
               </>
             ) : (
               <>
-                <Text style={styles.modalSubtitle}>Ingresa tu nueva contraseña</Text>
+                <Text style={styles.modalSubtitle}>{t("editProfile.modal.newSubtitle")}</Text>
 
                 <View style={styles.inputContainer}>
                   <TextInput
                     style={styles.modalInput}
-                    placeholder="Nueva contraseña"
+                    placeholder={t("editProfile.modal.newPassword")}
                     placeholderTextColor={colors.textSecondary}
                     secureTextEntry={!showNew}
                     value={newPassword}
@@ -417,7 +426,7 @@ export default function EditProfileScreen() {
                 <View style={styles.inputContainer}>
                   <TextInput
                     style={styles.modalInput}
-                    placeholder="Confirmar contraseña"
+                    placeholder={t("editProfile.modal.confirmPassword")}
                     placeholderTextColor={colors.textSecondary}
                     secureTextEntry={!showConfirm}
                     value={confirmPassword}
@@ -435,14 +444,14 @@ export default function EditProfileScreen() {
                 >
                   {changingPassword
                     ? <ActivityIndicator color="white" />
-                    : <Text style={styles.modalButtonText}>Guardar contraseña</Text>
+                    : <Text style={styles.modalButtonText}>{t("editProfile.modal.savePassword")}</Text>
                   }
                 </TouchableOpacity>
               </>
             )}
 
             <TouchableOpacity style={styles.modalCancel} onPress={resetPasswordModal}>
-              <Text style={styles.modalCancelText}>Cancelar</Text>
+              <Text style={styles.modalCancelText}>{t("editProfile.modal.cancel")}</Text>
             </TouchableOpacity>
 
           </View>
@@ -474,22 +483,35 @@ const styles = StyleSheet.create({
     paddingBottom: 120
   },
 
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.card,
+  },
+
+  headerTitle: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+
   backButton: {
-    position: "absolute",
-    top: 60,
-    left: 20,
     width: 45,
     height: 45,
     borderRadius: 25,
     backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 20
   },
 
   avatarSection: {
     alignItems: "center",
-    marginTop: 80,
+    marginTop: 24,
     marginBottom: 40
   },
 

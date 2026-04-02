@@ -117,7 +117,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
     backgroundColor: colors.background,
-    gap: 14
+    gap: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.card,
   },
 
   backBtn: {

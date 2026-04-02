@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import PlanCard from "@/src/components/plans/PlanCard";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
-import { colors } from "@/src/styles/globalstyles";
+import { colors, planColors } from "@/src/styles/globalstyles";
 
 export default function Plans() {
 
@@ -17,7 +17,7 @@ export default function Plans() {
       title: "Free",
       description: t("plans.free"),
       price: "$0",
-      accentColor: "#A1A1A1",
+      accentColor: planColors.Free,
       features: [
         { label: t("plans.features.routines7"),       included: true  },
         { label: t("plans.features.exercises"),        included: true  },
@@ -32,7 +32,7 @@ export default function Plans() {
       title: "Basic",
       description: "Más rutinas y seguimiento",
       price: "$99 " + t("plans.month"),
-      accentColor: "#3B82F6",
+      accentColor: planColors.Basic,
       features: [
         { label: t("plans.features.routines20"),       included: true  },
         { label: t("plans.features.exercises"),        included: true  },
@@ -47,7 +47,7 @@ export default function Plans() {
       title: "Meal",
       description: "Solo dieta",
       price: "$400 " + t("plans.month"),
-      accentColor: "#10B981",
+      accentColor: planColors.Meal,
       features: [
         { label: t("plans.features.routines7"),        included: true  },
         { label: t("plans.features.exercises"),        included: true  },
@@ -62,7 +62,7 @@ export default function Plans() {
       title: "Pro",
       description: "Acceso completo + nutriólogo",
       price: "$600 " + t("plans.month"),
-      accentColor: "#F59E0B",
+      accentColor: planColors.Pro,
       recommended: true,
       features: [
         { label: t("plans.features.routinesUnlimited"), included: true },
@@ -130,6 +130,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
     gap: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.card,
   },
 
   backBtn: {
