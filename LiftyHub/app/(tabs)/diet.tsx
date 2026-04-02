@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
+import { router } from "expo-router";
 import { useState, useEffect } from "react";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
@@ -94,18 +95,16 @@ const TIPS = [
 
 const PLAN_OPTIONS = [
   {
-    name: "Basic",
-    price: "$99/mes",
-    level: 1,
-    color: "#3B82F6",
-    features: ["Rutinas ilimitadas", "Seguimiento de progreso", "Estadísticas avanzadas"],
+    name: "Meal",
+    price: "$400/mes",
+    color: "#10B981",
+    features: ["Nutriólogo personal", "Plan de dieta personalizado", "Suplementos recomendados"],
   },
   {
     name: "Pro",
-    price: "$199/mes",
-    level: 2,
-    color: colors.primary,
-    features: ["Todo lo de Basic", "Nutriólogo personal", "Plan de dieta personalizado", "Suplementos recomendados"],
+    price: "$600/mes",
+    color: "#F59E0B",
+    features: ["Nutriólogo personal", "Plan de dieta personalizado", "Suplementos recomendados", "Estadísticas avanzadas", "Rutinas ilimitadas"],
     highlighted: true,
   },
 ];
@@ -219,35 +218,38 @@ export default function DietScreen() {
             </Text>
 
             {/* Planes */}
-            {PLAN_OPTIONS.map((plan) => (
-              <View
-                key={plan.name}
-                style={[
-                  styles.planCard,
-                  plan.highlighted && { borderColor: plan.color, borderWidth: 2 }
-                ]}
-              >
-                {plan.highlighted && (
-                  <View style={[styles.planBadge, { backgroundColor: plan.color }]}>
-                    <Text style={styles.planBadgeText}>Recomendado</Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {PLAN_OPTIONS.map((plan) => (
+                <TouchableOpacity
+                  key={plan.name}
+                  style={[
+                    styles.planCard,
+                    plan.highlighted && { borderColor: plan.color, borderWidth: 2 }
+                  ]}
+                  onPress={() => { setShowUpgradeModal(false); router.push("/settings/plans"); }}
+                >
+                  {plan.highlighted && (
+                    <View style={[styles.planBadge, { backgroundColor: plan.color }]}>
+                      <Text style={styles.planBadgeText}>Recomendado</Text>
+                    </View>
+                  )}
+                  <View style={styles.planHeader}>
+                    <Text style={[styles.planName, { color: plan.color }]}>{plan.name}</Text>
+                    <Text style={styles.planPrice}>{plan.price}</Text>
                   </View>
-                )}
-                <View style={styles.planHeader}>
-                  <Text style={[styles.planName, { color: plan.color }]}>{plan.name}</Text>
-                  <Text style={styles.planPrice}>{plan.price}</Text>
-                </View>
-                {plan.features.map((f, i) => (
-                  <View key={i} style={styles.planFeature}>
-                    <Ionicons name="checkmark-circle" size={16} color={plan.color} />
-                    <Text style={styles.planFeatureText}>{f}</Text>
-                  </View>
-                ))}
-              </View>
-            ))}
+                  {plan.features.map((f, i) => (
+                    <View key={i} style={styles.planFeature}>
+                      <Ionicons name="checkmark-circle" size={16} color={plan.color} />
+                      <Text style={styles.planFeatureText}>{f}</Text>
+                    </View>
+                  ))}
+                </TouchableOpacity>
+              ))}
 
-            <Text style={styles.modalNote}>
-              Contacta a un administrador para actualizar tu plan.
-            </Text>
+              <Text style={styles.modalNote}>
+                Contacta a un administrador para actualizar tu plan.
+              </Text>
+            </ScrollView>
 
           </View>
         </View>
