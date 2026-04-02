@@ -64,6 +64,30 @@ class UsersSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+             [
+                'id' => 5,
+                'name' => 'Panchita López',
+                'email' => 'panchita@test.com',
+                'password' => Hash::make('123456'),
+                'gender' => 'Femenino',
+                'img' => 'default.jpg',
+                'birthdate' => '2001-02-10',
+                'role' => 'user',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+             [
+                'id' => 6,
+                'name' => 'juanita López',
+                'email' => 'juanita@test.com',
+                'password' => Hash::make('123456'),
+                'gender' => 'Femenino',
+                'img' => 'default.jpg',
+                'birthdate' => '2001-02-10',
+                'role' => 'user',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }
