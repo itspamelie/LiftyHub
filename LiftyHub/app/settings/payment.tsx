@@ -2,13 +2,21 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert 
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { colors } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 export default function PaymentScreen() {
 
-  const { title, price } = useLocalSearchParams<{ title: string; price: string }>();
+  const { t } = useLanguage();
+  const { title, price, accentColor: accentParam } = useLocalSearchParams<{
+    title: string;
+    price: string;
+    accentColor: string;
+  }>();
+
+  const accentColor = accentParam ?? colors.primary;
 
   const handlePay = () => {
-    Alert.alert("Pago", "Esta función estará disponible próximamente.");
+    Alert.alert(t("payment.title"), t("payment.comingSoon"));
   };
 
   return (
@@ -17,38 +25,41 @@ export default function PaymentScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={[styles.backBtn, { backgroundColor: accentColor }]}
+          onPress={() => router.back()}
+        >
           <Ionicons name="arrow-back" size={20} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Pago</Text>
+        <Text style={styles.headerTitle}>{t("payment.title")}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         {/* RESUMEN DEL PLAN */}
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>Plan seleccionado</Text>
-          <Text style={styles.summaryPlan}>{title}</Text>
+        <View style={[styles.summaryCard, { borderColor: accentColor }]}>
+          <Text style={styles.summaryLabel}>{t("payment.selectedPlan")}</Text>
+          <Text style={[styles.summaryPlan, { color: accentColor }]}>{title}</Text>
           <View style={styles.divider} />
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryTotal}>Total</Text>
-            <Text style={styles.summaryPrice}>{price}</Text>
+            <Text style={styles.summaryTotal}>{t("payment.total")}</Text>
+            <Text style={[styles.summaryPrice, { color: accentColor }]}>{price}</Text>
           </View>
         </View>
 
         {/* FORMULARIO */}
-        <Text style={styles.section}>Datos de pago</Text>
+        <Text style={styles.section}>{t("payment.paymentDetails")}</Text>
 
         <View style={styles.card}>
 
-          <Text style={styles.label}>Nombre en la tarjeta</Text>
+          <Text style={styles.label}>{t("payment.cardHolder")}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ej. Juan Pérez"
+            placeholder={t("payment.cardHolderPlaceholder")}
             placeholderTextColor="#666"
           />
 
-          <Text style={styles.label}>Número de tarjeta</Text>
+          <Text style={styles.label}>{t("payment.cardNumber")}</Text>
           <View style={styles.inputRow}>
             <Ionicons name="card-outline" size={20} color="#666" style={styles.inputIcon} />
             <TextInput
@@ -62,7 +73,7 @@ export default function PaymentScreen() {
 
           <View style={styles.row}>
             <View style={styles.half}>
-              <Text style={styles.label}>Vencimiento</Text>
+              <Text style={styles.label}>{t("payment.expiry")}</Text>
               <TextInput
                 style={styles.input}
                 placeholder="MM/AA"
@@ -72,7 +83,7 @@ export default function PaymentScreen() {
               />
             </View>
             <View style={styles.half}>
-              <Text style={styles.label}>CVV</Text>
+              <Text style={styles.label}>{t("payment.cvv")}</Text>
               <TextInput
                 style={styles.input}
                 placeholder="•••"
@@ -89,12 +100,15 @@ export default function PaymentScreen() {
         {/* SEGURIDAD */}
         <View style={styles.secureRow}>
           <Ionicons name="lock-closed-outline" size={14} color="#666" />
-          <Text style={styles.secureText}>Pago seguro con encriptación SSL</Text>
+          <Text style={styles.secureText}>{t("payment.secure")}</Text>
         </View>
 
         {/* BOTON */}
-        <TouchableOpacity style={styles.payButton} onPress={handlePay}>
-          <Text style={styles.payButtonText}>Pagar {price}</Text>
+        <TouchableOpacity
+          style={[styles.payButton, { backgroundColor: accentColor }]}
+          onPress={handlePay}
+        >
+          <Text style={styles.payButtonText}>{t("payment.payBtn")} {price}</Text>
         </TouchableOpacity>
 
       </ScrollView>
@@ -124,7 +138,6 @@ const styles = StyleSheet.create({
     width: 45,
     height: 45,
     borderRadius: 25,
-    backgroundColor: "#3B82F6",
     justifyContent: "center",
     alignItems: "center"
   },
@@ -144,8 +157,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#1C1C1E",
     borderRadius: 16,
     padding: 20,
-    borderWidth: 1,
-    borderColor: "#3B82F6",
+    borderWidth: 2,
     marginBottom: 24
   },
 
@@ -156,7 +168,6 @@ const styles = StyleSheet.create({
   },
 
   summaryPlan: {
-    color: "white",
     fontSize: 20,
     fontWeight: "700",
     marginBottom: 14
@@ -180,7 +191,6 @@ const styles = StyleSheet.create({
   },
 
   summaryPrice: {
-    color: "#3B82F6",
     fontSize: 18,
     fontWeight: "700"
   },
@@ -256,7 +266,6 @@ const styles = StyleSheet.create({
   },
 
   payButton: {
-    backgroundColor: "#3B82F6",
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: "center"

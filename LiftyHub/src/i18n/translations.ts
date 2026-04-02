@@ -174,6 +174,49 @@ export const translations = {
       denied: "Desactivado",
       unknown: "Pendiente",
     },
+
+    // Plans
+    plans: {
+      title: "Planes LiftyHub",
+      subtitle: "Mejora tu entrenamiento con funciones premium",
+      current: "Plan actual",
+      recommended: "Recomendado",
+      month: "/ mes",
+      free: "Gratis",
+      contact: "Contacta a un administrador para cambiar tu plan.",
+      features: {
+        routines7: "Hasta 7 rutinas",
+        routines20: "Hasta 20 rutinas",
+        routinesUnlimited: "Rutinas ilimitadas",
+        exercises: "Catálogo completo de ejercicios",
+        stats: "Estadísticas avanzadas",
+        nutritionist: "Nutriólogo personal",
+        dietPlan: "Plan de dieta personalizado",
+        supplements: "Suplementos recomendados",
+      },
+      notIncluded: {
+        nutritionist: "Sin nutriólogo",
+        dietPlan: "Sin plan de dieta",
+        stats: "Sin estadísticas avanzadas",
+      },
+    },
+
+    // Payment
+    payment: {
+      title: "Pago",
+      selectedPlan: "Plan seleccionado",
+      total: "Total",
+      paymentDetails: "Datos de pago",
+      cardHolder: "Nombre en la tarjeta",
+      cardHolderPlaceholder: "Ej. Juan Pérez",
+      cardNumber: "Número de tarjeta",
+      expiry: "Vencimiento",
+      cvv: "CVV",
+      secure: "Pago seguro con encriptación SSL",
+      payBtn: "Pagar",
+      selectPlan: "Seleccionar plan",
+      comingSoon: "Esta función estará disponible próximamente.",
+    },
   },
 
   en: {
@@ -350,6 +393,49 @@ export const translations = {
       granted: "Enabled",
       denied: "Disabled",
       unknown: "Not set",
+    },
+
+    // Plans
+    plans: {
+      title: "LiftyHub Plans",
+      subtitle: "Level up your training with premium features",
+      current: "Current plan",
+      recommended: "Recommended",
+      month: "/ month",
+      free: "Free",
+      contact: "Contact an administrator to change your plan.",
+      features: {
+        routines7: "Up to 7 routines",
+        routines20: "Up to 20 routines",
+        routinesUnlimited: "Unlimited routines",
+        exercises: "Full exercise catalog",
+        stats: "Advanced statistics",
+        nutritionist: "Personal nutritionist",
+        dietPlan: "Personalized diet plan",
+        supplements: "Recommended supplements",
+      },
+      notIncluded: {
+        nutritionist: "No nutritionist",
+        dietPlan: "No diet plan",
+        stats: "No advanced statistics",
+      },
+    },
+
+    // Payment
+    payment: {
+      title: "Payment",
+      selectedPlan: "Selected plan",
+      total: "Total",
+      paymentDetails: "Payment details",
+      cardHolder: "Cardholder name",
+      cardHolderPlaceholder: "E.g. John Doe",
+      cardNumber: "Card number",
+      expiry: "Expiry",
+      cvv: "CVV",
+      secure: "Secure payment with SSL encryption",
+      payBtn: "Pay",
+      selectPlan: "Select plan",
+      comingSoon: "This feature will be available soon.",
     },
   },
 };

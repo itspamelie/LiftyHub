@@ -2,12 +2,80 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-nati
 import { Stack, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import PlanCard from "@/src/components/plans/PlanCard";
-
+import { useLanguage } from "@/src/context/LanguageContext";
+import { useSubscription } from "@/src/context/SubscriptionContext";
+import { colors } from "@/src/styles/globalstyles";
 
 export default function Plans() {
 
-  return (
+  const { t } = useLanguage();
+  const { plan: currentPlan } = useSubscription();
 
+  const planList = [
+    {
+      id: 1,
+      title: "Free",
+      description: t("plans.free"),
+      price: "$0",
+      accentColor: "#A1A1A1",
+      features: [
+        { label: t("plans.features.routines7"),       included: true  },
+        { label: t("plans.features.exercises"),        included: true  },
+        { label: t("plans.features.stats"),            included: false },
+        { label: t("plans.features.nutritionist"),     included: false },
+        { label: t("plans.features.dietPlan"),         included: false },
+        { label: t("plans.features.supplements"),      included: false },
+      ],
+    },
+    {
+      id: 2,
+      title: "Basic",
+      description: "Más rutinas y seguimiento",
+      price: "$99 " + t("plans.month"),
+      accentColor: "#3B82F6",
+      features: [
+        { label: t("plans.features.routines20"),       included: true  },
+        { label: t("plans.features.exercises"),        included: true  },
+        { label: t("plans.features.stats"),            included: true  },
+        { label: t("plans.features.nutritionist"),     included: false },
+        { label: t("plans.features.dietPlan"),         included: false },
+        { label: t("plans.features.supplements"),      included: false },
+      ],
+    },
+    {
+      id: 4,
+      title: "Meal",
+      description: "Solo dieta",
+      price: "$400 " + t("plans.month"),
+      accentColor: "#10B981",
+      features: [
+        { label: t("plans.features.routines7"),        included: true  },
+        { label: t("plans.features.exercises"),        included: true  },
+        { label: t("plans.features.nutritionist"),     included: true  },
+        { label: t("plans.features.dietPlan"),         included: true  },
+        { label: t("plans.features.supplements"),      included: true  },
+        { label: t("plans.features.stats"),            included: false },
+      ],
+    },
+    {
+      id: 3,
+      title: "Pro",
+      description: "Acceso completo + nutriólogo",
+      price: "$600 " + t("plans.month"),
+      accentColor: "#F59E0B",
+      recommended: true,
+      features: [
+        { label: t("plans.features.routinesUnlimited"), included: true },
+        { label: t("plans.features.exercises"),          included: true },
+        { label: t("plans.features.stats"),              included: true },
+        { label: t("plans.features.nutritionist"),       included: true },
+        { label: t("plans.features.dietPlan"),           included: true },
+        { label: t("plans.features.supplements"),        included: true },
+      ],
+    },
+  ];
+
+  return (
     <View style={styles.container}>
 
       <Stack.Screen options={{ headerShown: false }} />
@@ -16,44 +84,35 @@ export default function Plans() {
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Planes LiftyHub</Text>
+        <Text style={styles.headerTitle}>{t("plans.title")}</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-        <Text style={styles.subtitle}>
-          Mejora tu entrenamiento con funciones premium
-        </Text>
+        <Text style={styles.subtitle}>{t("plans.subtitle")}</Text>
 
-        <PlanCard
-          title="Pro"
-          description="Entrena sin límites"
-          price="$50 MXN / mes"
-          recommended
-          features={[
-            "Rutinas premium",
-            "Estadísticas avanzadas",
-            "Seguimiento mensual",
-            "Progreso detallado"
-          ]}
-        />
+        {planList.map((plan) => (
+          <PlanCard
+            key={plan.id}
+            title={plan.title}
+            description={plan.description}
+            price={plan.price}
+            features={plan.features}
+            recommended={plan.recommended}
+            isCurrent={currentPlan?.id === plan.id}
+            accentColor={plan.accentColor}
+            onSelect={plan.title !== "Free" ? () => router.push({
+              pathname: "/settings/payment",
+              params: { title: plan.title, price: plan.price, accentColor: plan.accentColor },
+            }) : undefined}
+          />
+        ))}
 
-        <PlanCard
-          title="Elite"
-          description="Entrenamiento completo"
-          price="$50 MXN / mes"
-          features={[
-            "Todo lo del plan Pro",
-            "Acceso a nutricionistas",
-            "Planes de dieta personalizados",
-            "Prioridad en nuevas funciones"
-          ]}
-        />
+        <Text style={styles.note}>{t("plans.contact")}</Text>
 
       </ScrollView>
 
     </View>
-
   );
 }
 
@@ -61,13 +120,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: "#0F0F10"
-  },
-
-  content: {
-    padding: 20,
-    paddingTop: 80,
-    paddingBottom: 80
+    backgroundColor: "#0F0F10",
   },
 
   header: {
@@ -76,35 +129,40 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: "#0F0F10",
-    gap: 14
+    gap: 14,
   },
 
   backBtn: {
     width: 45,
     height: 45,
     borderRadius: 25,
-    backgroundColor: "#3B82F6",
+    backgroundColor: colors.primary,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
 
   headerTitle: {
     color: "white",
     fontSize: 22,
-    fontWeight: "700"
+    fontWeight: "700",
   },
 
-  title: {
-    color: "white",
-    fontSize: 28,
-    fontWeight: "700"
+  content: {
+    padding: 20,
+    paddingBottom: 80,
   },
 
   subtitle: {
     color: "#A1A1A1",
-    marginTop: 6,
-    marginBottom: 30
-  }
+    fontSize: 14,
+    marginBottom: 24,
+  },
+
+  note: {
+    color: "#555",
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 4,
+  },
 
 });
