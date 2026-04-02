@@ -253,6 +253,16 @@ export const deleteUserRoutine = async (routineId: number, token: string) => {
   });
 };
 
+// 💎 OBTENER SUSCRIPCIONES
+export const getSubscriptions = async (token: string) => {
+  return apiFetch(`${API_URL}/subscriptions`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 // 🏋️ OBTENER ARCHIVOS DE UN EJERCICIO
 export const getExerciseFiles = async (exerciseId: number, token: string) => {
   return apiFetch(`${API_URL}/exercise-files/${exerciseId}`, {

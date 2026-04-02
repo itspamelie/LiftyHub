@@ -20,6 +20,7 @@ export const translations = {
       createAccount: "Crear cuenta",
       loading: "Entrando...",
       errorInvalid: "Correo o contraseña incorrectos.",
+      errorNotAllowed: "Esta cuenta no tiene acceso a la app móvil.",
     },
 
     // Auth - Register
@@ -196,6 +197,7 @@ export const translations = {
       createAccount: "Create account",
       loading: "Signing in...",
       errorInvalid: "Incorrect email or password.",
+      errorNotAllowed: "This account does not have access to the mobile app.",
     },
 
     // Auth - Register

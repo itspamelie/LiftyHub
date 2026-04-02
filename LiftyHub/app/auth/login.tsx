@@ -32,6 +32,10 @@ export default function Login() {
       const data = await loginRequest(email, password);
 
       if (data.token) {
+        if (data.user?.role !== "user") {
+          setError(t("login.errorNotAllowed"));
+          return;
+        }
         await AsyncStorage.setItem("token", data.token);
         await AsyncStorage.setItem("user", JSON.stringify(data.user));
         router.replace("/(tabs)" as any);
