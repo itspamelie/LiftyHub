@@ -10,6 +10,11 @@ import { getImageUrl } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import CreateExerciseFileModal from "./CreateExerciseFileModal";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+
 
 
 export default function ExerciseDetail() {
@@ -19,24 +24,26 @@ export default function ExerciseDetail() {
 const navigate = useNavigate();
   const [files, setFiles] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-
+const [exercise, setExercise] = useState<any>(null);
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const res = await apiFetch(`/exercise-files/${id}`);
-        setFiles(res.data);
-        setLoading(false);
-        Swal.close();
-        
-      } catch (error) {
-        console.error(error);
-         setLoading(false);
-         Swal.close();
-         
+const getData = async () => {
+  try {
+    const [filesRes, exerciseRes] = await Promise.all([
+      apiFetch(`/exercise-files/${id}`),
+      apiFetch(`/exercises/${id}`) // 👈 NUEVO
+    ]);
 
-      }
-    };
+    setFiles(filesRes.data);
+    setExercise(exerciseRes.data);
+    setLoading(false);
+    Swal.close();
 
+  } catch (error) {
+    console.error(error);
+    setLoading(false);
+    Swal.close();
+  }
+};
     getData();
   }, [id]);
 
@@ -71,10 +78,64 @@ const navigate = useNavigate();
     );
   };
 
-  if (!files.length) return <p>Cargando...</p>;
 
-  const exercise = files[0].exercise;
 
+  const handleDelete = async () => {
+  try {
+    const fileToDelete = files[currentIndex];
+
+    const confirm = await Swal.fire({
+      title: "¿Eliminar archivo?",
+      text: "Esta acción no se puede deshacer",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Sí, eliminar",
+      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      color: "#fff"
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    await apiFetch(`/exerciseFiles/${fileToDelete.id}`, {
+      method: "DELETE"
+    });
+
+    // actualizar estado
+    setFiles((prev:any) => {
+      const updated = prev.filter((f:any) => f.id !== fileToDelete.id);
+
+      // ajustar índice
+      if (updated.length === 0) {
+        setCurrentIndex(0);
+      } else if (currentIndex >= updated.length) {
+        setCurrentIndex(updated.length - 1);
+      }
+
+      return updated;
+    });
+
+    Swal.fire({
+      icon: "success",
+      title: "Archivo eliminado",
+      confirmButtonColor: "#60a5fa",
+      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      color: "#fff"
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    Swal.fire({
+      icon: "error",
+      title: "Error al eliminar",
+      confirmButtonColor: "#60a5fa",
+      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      color: "#fff"
+    });
+  }
+};
   return (
 
   <Box
@@ -91,7 +152,9 @@ const navigate = useNavigate();
     sx={{
       position: "absolute",
       inset: 0,
-      backgroundImage: `url(${getImageUrl(files[currentIndex].file_path, "exercises")})`,
+      backgroundImage: files.length
+  ? `url(${getImageUrl(files[currentIndex].file_path, "exercises")})`
+  : "none",
       backgroundSize: "cover",
       backgroundPosition: "center",
       filter: "blur(20px)",
@@ -114,18 +177,60 @@ const navigate = useNavigate();
 
 <Button
   variant="contained"
+  startIcon={<ArrowBackIcon />}
   onClick={() => navigate(`/dashboard/exercises/`)}
   sx={{
     borderRadius: "12px",
     textTransform: "none",
     fontWeight: "bold",
     background: "linear-gradient(90deg,#3a8dff,#5da8ff)",
-    mb:5,
-    ml:1
+    mb: 5,
+    ml: 1
   }}
 >
-  Regresar a Ejercicios
+  Regresar
 </Button>
+{/*SI NO HAY ARCHIVOS... */}
+{files.length === 0 ? (
+
+  <Box
+    sx={{
+      height: "60vh",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      textAlign: "center",
+      gap: 3
+    }}
+  >
+    <Typography variant="h5" fontWeight="bold">
+      No tienes imágenes o videos!
+    </Typography>
+
+    <Typography sx={{ opacity: 0.7 }}>
+      Agrega uno para Acceder a la vista previa
+    </Typography>
+
+   <Button
+  variant="contained"
+  startIcon={<AddIcon />}
+  onClick={() => setOpenModal(true)}
+  sx={{
+    borderRadius: "12px",
+    background: "linear-gradient(90deg,#3a8dff,#5da8ff)",
+    px: 4
+  }}
+>
+  Agregar archivo
+</Button>
+
+  </Box>
+
+    
+) : (
+
+
 <Grid container spacing={4} >
           {/* IZQUIERDA - IMAGEN */}
 <Grid item xs={12} md={6}>
@@ -140,6 +245,7 @@ const navigate = useNavigate();
 >
   <img
     src={getImageUrl(files[currentIndex].file_path, "exercises")}
+    key={files[currentIndex]?.id}
     style={{
       width: "100%",
       height: "420px",
@@ -186,10 +292,39 @@ const navigate = useNavigate();
       "&:hover": { backgroundColor: "rgba(255,255,255,0.3)" }
     }}
   >
+
     <ArrowForwardIosIcon />
   </IconButton>
+
+   
 </Box>
+
+
+<Button
+  disableRipple
+  variant="contained"
+  startIcon={<DeleteIcon />}
+  onClick={handleDelete}
+  sx={{
+    borderRadius: "12px",
+    px: 10,
+    mt: 3,
+    backdropFilter: "blur(10px)",
+    backgroundColor: "rgba(239,68,68,0.8)",
+
+    "&:hover": {
+      backgroundColor: "rgba(239,68,68,1)"
+    },
+
+    "&:focus": {
+      outline: "none"
+    }
+  }}
+>
+  Eliminar foto
+</Button>
       </Grid>
+      
 
       {/* DERECHA - INFO */}
 <Grid item xs={12} md={6}>
@@ -245,9 +380,10 @@ const navigate = useNavigate();
 
     
     <Box mt={4} display="flex" gap={2}>
-     <Button
+ <Button
   variant="outlined"
-  onClick={() => setOpenModal(true)} 
+  startIcon={<AddIcon />}
+  onClick={() => setOpenModal(true)}
   sx={{
     borderColor: "#fff",
     color: "#fff",
@@ -258,39 +394,33 @@ const navigate = useNavigate();
   Agregar archivo
 </Button>
 
-      <Button
-     variant="contained"
-        sx={{
-          background: "#fff",
-          color: "#000000",
-          borderRadius: "12px",
-          px: 3
-        }}
-      >
-        Ver Video
-      </Button>
 
-      <Button
-        variant="contained"
-        sx={{
-          background: "linear-gradient(45deg, #3b82f6, #2563eb)",
-          borderRadius: "12px",
-          px: 3,
-        }}
-      >
-        Añadir a rutina
-      </Button>
+     <Button
+  variant="contained"
+  startIcon={<FitnessCenterIcon />}
+  sx={{
+    background: "linear-gradient(45deg, #3b82f6, #2563eb)",
+    borderRadius: "12px",
+    px: 3,
+  }}
+>
+  Añadir a rutina
+</Button>
     </Box>
   </Box>
 </Grid>
     </Grid>
+)}
   </Box>
   <CreateExerciseFileModal
   open={openModal}
   onClose={() => setOpenModal(false)}
-  onCreated={() => {
-    setOpenModal(false);
-  }}
+  onCreated={(newFile:any) => {
+  setOpenModal(false);
+
+  setFiles((prev:any) => [...prev, newFile]);
+  setCurrentIndex(files.length); // ir al nuevo
+}}
   exercise={exercise}
 />
   </Box>

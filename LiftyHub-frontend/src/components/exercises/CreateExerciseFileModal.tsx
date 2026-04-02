@@ -30,7 +30,7 @@ export default function CreateExerciseFileModal({ open, onClose, onCreated, exer
         body: formData
       })
 
-      onCreated(res)
+      onCreated(res.data)
       onClose()
       setFile(null)
 

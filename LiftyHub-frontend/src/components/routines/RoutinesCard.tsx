@@ -2,9 +2,12 @@ import { Box, Typography, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getImageUrl } from "../../services/api";
+import { useNavigate } from "react-router-dom";
+import VisibilityIcon from "@mui/icons-material/Visibility"
 
 
 export default function RoutinesCard({ data, onDelete, onEdit }: any){
+const navigate = useNavigate();
 
   return (
     <Box
@@ -102,6 +105,18 @@ maxWidth: 400,
         </Typography>
 
         <Box>
+
+                     {/* VISUALIZAR */}
+<IconButton
+  onClick={() => navigate(`/dashboard/exercise/${data.id}`)}
+  sx={{
+    color: "#34d399",
+    "&:hover": { backgroundColor: "rgba(52,211,153,0.1)" }
+  }}
+>
+  <VisibilityIcon />
+</IconButton>
+
           <IconButton
   onClick={() => onEdit(data)}
   sx={{
@@ -120,6 +135,8 @@ maxWidth: 400,
           >
             <DeleteIcon />
           </IconButton>
+
+  
         </Box>
       </Box>
 

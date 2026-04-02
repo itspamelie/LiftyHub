@@ -124,17 +124,34 @@ public function store(Request $request)
     /**
      * Remove the specified resource from storage.
      */
+
     public function destroy(string $id)
-    {
-         $data = ExerciseFile::find($id);
-        if($data){
-            $data->delete();
-        }
+{
+    $exercisefile = ExerciseFile::find($id);
+
+    if(!$exercisefile){
         return response()->json([
-            "status"=>"ok",
-            "mesage"=>"Archivo eliminado correctamente."
+            "status"=>"error",
+            "message"=>"Archivo no encontrado"
         ]);
     }
+
+    // eliminar imagen de perfil (si no es default)
+    
+
+        $path = public_path('exercises/'.$exercisefile->file_path);
+
+        if(file_exists($path)){
+            unlink($path);
+        }
+    $exercisefile->delete();
+
+    return response()->json([
+        "status"=>"ok",
+        "message"=>"Archivo eliminado correctamente."
+    ]);
+}
+
  public function getByExercise($id)
 {
     $files = ExerciseFile::with('exercise')

@@ -2,7 +2,6 @@ import { Box, Typography, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility"
-import UploadFileIcon from "@mui/icons-material/UploadFile"
 import { useState } from "react"
 import CreateExerciseFileModal from "./CreateExerciseFileModal"
 import { useNavigate } from "react-router-dom";
@@ -85,19 +84,7 @@ maxWidth: 400,
   <VisibilityIcon />
 </IconButton>
 
-    {/* SUBIR ARCHIVO */}
-    <IconButton
-  onClick={() => {
-    setSelectedExercise(data)
-    setOpenUpload(true)
-  }}
-  sx={{
-    color: "#fbbf24",
-    "&:hover": { backgroundColor: "rgba(251,191,36,0.1)" }
-  }}
->
-  <UploadFileIcon />
-</IconButton>
+  
           <IconButton
   onClick={() => onEdit(data)}
   sx={{
