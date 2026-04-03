@@ -17,7 +17,7 @@ import { colors, spacing } from "@/src/styles/globalstyles";
 import { getRoutineExercises, getUserRoutineExercises } from "@/src/services/api";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const HERO_HEIGHT = 300;
+const HERO_HEIGHT = 240;
 
 type ExerciseEntry = {
   id: number;
@@ -100,32 +100,30 @@ export default function RoutineDetail() {
     <View style={styles.root}>
       <ScrollView showsVerticalScrollIndicator={false} bounces contentContainerStyle={{ paddingBottom: 110 }}>
 
-        {/* ── HERO ── */}
+        {/* ── HERO IMAGE ── */}
         <View style={styles.heroWrapper}>
           <Image source={{ uri: image ?? "" }} style={styles.heroImage} resizeMode="cover" />
-
-          {/* gradient overlay */}
           <View style={styles.heroOverlay} />
-
-          {/* back button */}
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={20} color="white" />
           </TouchableOpacity>
+          {/* arco inferior para transición suave */}
+          <View style={styles.heroArc} />
+        </View>
 
-          {/* title + chips at bottom of hero */}
-          <View style={styles.heroFooter}>
-            <View style={styles.chipsRow}>
-              <View style={styles.chip}>
-                <Ionicons name={categoryIcon} size={11} color="white" />
-                <Text style={styles.chipText}>{category}</Text>
-              </View>
-              <View style={[styles.chip, { backgroundColor: `${levelColor}22`, borderColor: `${levelColor}55` }]}>
-                <Ionicons name={levelIcon} size={11} color={levelColor} />
-                <Text style={[styles.chipText, { color: levelColor }]}>{level}</Text>
-              </View>
+        {/* ── CARD que sube sobre la imagen ── */}
+        <View style={styles.headerCard}>
+          <View style={styles.chipsRow}>
+            <View style={styles.chip}>
+              <Ionicons name={categoryIcon} size={11} color="white" />
+              <Text style={styles.chipText}>{category}</Text>
             </View>
-            <Text style={styles.heroTitle}>{name}</Text>
+            <View style={[styles.chip, { backgroundColor: `${levelColor}22`, borderColor: `${levelColor}55` }]}>
+              <Ionicons name={levelIcon} size={11} color={levelColor} />
+              <Text style={[styles.chipText, { color: levelColor }]}>{level}</Text>
+            </View>
           </View>
+          <Text style={styles.heroTitle}>{name}</Text>
         </View>
 
         <View style={styles.body}>
@@ -355,14 +353,23 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
 
-  heroFooter: {
+  heroArc: {
     position: "absolute",
-    bottom: 0,
+    bottom: -1,
     left: 0,
     right: 0,
+    height: 28,
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+  },
+
+  headerCard: {
     paddingHorizontal: spacing.screenPadding,
-    paddingVertical: 18,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingTop: 20,
+    paddingBottom: 4,
+    marginTop: -28,
+    backgroundColor: colors.background,
   },
 
   chipsRow: {
@@ -399,7 +406,7 @@ const styles = StyleSheet.create({
   // BODY
   body: {
     paddingHorizontal: spacing.screenPadding,
-    paddingTop: 24,
+    paddingTop: 16,
   },
 
   // STAT CARDS

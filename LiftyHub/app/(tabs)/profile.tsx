@@ -164,7 +164,13 @@ export default function ProfileScreen() {
             />
 
             <Text style={styles.name}>{profile.name}</Text>
-            <Text style={styles.subtitle}>{profile.age} {t("profile.years")}</Text>
+            <View style={styles.subtitleRow}>
+              <Text style={styles.subtitle}>{profile.age} {t("profile.years")}</Text>
+              <View style={[styles.planBadgeInline, { backgroundColor: `${planColor}20`, borderColor: `${planColor}55` }]}>
+                <View style={[styles.planDot, { backgroundColor: planColor }]} />
+                <Text style={[styles.planBadgeInlineText, { color: planColor }]}>{plan?.name ?? "Free"}</Text>
+              </View>
+            </View>
 
           </View>
 
@@ -353,7 +359,45 @@ const styles = StyleSheet.create({
   subtitle: {
     color: colors.textSecondary,
     fontSize: 14,
-    marginTop: 4
+  },
+
+  subtitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 4,
+  },
+
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  nameRowBadge: {
+    position: "absolute",
+    right: -80,
+  },
+
+  planBadgeInline: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+
+  planDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+
+  planBadgeInlineText: {
+    fontSize: 12,
+    fontWeight: "700",
   },
 
   statsCard: {
