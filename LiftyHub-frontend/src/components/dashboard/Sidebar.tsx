@@ -112,13 +112,13 @@ return (
     <ListItemText primary="Planes" />
   </ListItemButton>
 
-  {/* Nutriólogos 
+  {/* Nutriólogos */}
   <ListItemButton component={Link} to="/dashboard/nutritionists">
     <ListItemIcon sx={{ color: "white" }}>
   <RestaurantIcon />
 </ListItemIcon>
     <ListItemText primary="Nutriólogos" />
-  </ListItemButton>*/}
+  </ListItemButton>
 
   {/* Rutinas */}
 <ListItemButton

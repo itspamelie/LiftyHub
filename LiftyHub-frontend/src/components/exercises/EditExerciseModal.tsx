@@ -68,8 +68,18 @@ export default function EditExerciseModal({ open, onClose, exercise, onUpdated }
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogContent
+<Dialog
+  open={open}
+  onClose={onClose}
+  maxWidth="sm"
+  fullWidth
+  PaperProps={{
+    sx: {
+      borderRadius: "20px", 
+      overflow: "hidden"
+    }
+  }}
+>         <DialogContent
         sx={{
           background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
           color: "white",

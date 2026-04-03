@@ -13,6 +13,7 @@ import { useParams } from "react-router-dom";
 import { apiFetch, getImageUrl } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import EditExerciseRoutineModal from "./EditExerciseRoutineModal";
 import LabelIcon from '@mui/icons-material/Label';
 
 
@@ -23,6 +24,8 @@ export default function RoutineDetail() {
 const navigate = useNavigate();
 const [routine, setRoutine] = useState<any>(null);
 const [exercises, setExercises] = useState<any[]>([]);
+const [openEditModal, setOpenEditModal] = useState(false);
+const [selectedExercise, setSelectedExercise] = useState<any>(null);
 
 useEffect(() => {
   const fetchData = async () => {
@@ -45,6 +48,7 @@ if (exercisesData.length > 0) {
 
     return {
       id: item.id,
+      exercise_id: item.exercise.id,
       name: item.exercise.name,
       img: randomImg,
       reps: item.repetitions,
@@ -307,9 +311,15 @@ const handleDelete = async (id: number) => {
             <VisibilityIcon />
           </IconButton>
 
-          <IconButton sx={{ color: "#60a5fa" }}>
-            <EditIcon />
-          </IconButton>
+     <IconButton
+  sx={{ color: "#60a5fa" }}
+  onClick={() => {
+    setSelectedExercise(ex);
+    setOpenEditModal(true);
+  }}
+>
+  <EditIcon />
+</IconButton>
 
           <IconButton
             sx={{ color: "#f87171" }}
@@ -326,6 +336,16 @@ const handleDelete = async (id: number) => {
 )}
 
       </Box> {/* CONTENIDO */}
+      <EditExerciseRoutineModal
+  open={openEditModal}
+  onClose={() => setOpenEditModal(false)}
+  exerciseRoutine={selectedExercise}
+  routineId={id}
+  onUpdated={() => {
+    // vuelve a cargar ejercicios
+    window.location.reload(); // (temporal fácil)
+  }}
+/>
     </Box>  
   );
 }

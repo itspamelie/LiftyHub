@@ -15,6 +15,8 @@ const routeNames: Record<string, string> = {
   "/dashboard/exercises": "Ejercicios",
   "/dashboard/somatotypes": "Somatotipos",
   "/dashboard": "Dashboard",
+  "/dashboard/nutritionist": "Nutriólogoss",
+  "/dashboard/exercise/:id": "Detalles del ejercicio",
 };
 
 const getCurrentTitle = () => {
