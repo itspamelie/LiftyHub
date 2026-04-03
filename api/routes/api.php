@@ -38,7 +38,7 @@ Route::resource('users',UsersController::class);
 Route::resource('userStreak',UserStreaksController::class);
 Route::get('/userRoutines/{id}/count', [UserRoutinesController::class, 'count']);
 Route::resource('userRoutines',UserRoutinesController::class);
-Route::resource('userRoutineExercises',userRoutineExercises::class);
+Route::resource('userRoutineExercises',UserRoutineExercises::class);
 Route::resource('userProperties',UserPropertiesController::class);
 Route::resource('subscriptions',SubscriptionsController::class);
 Route::resource('somatotypes',SomatotypesController::class);
@@ -61,4 +61,5 @@ Route::get('/search-somatotypes', [SomatotypesController::class, 'searchSomatoty
 Route::get('/search-exercises', [ExerciseController::class, 'searchExercises']);
 Route::get('/search-routines', [RoutinesController::class, 'searchRoutines']);
 Route::get('/exercise-files/{id}', [ExerciseFilesController::class, 'getByExercise']);
-Route::get('/routines/{id}/exercises', [ExerciseRoutinesController::class, 'getByRoutine']);});
+Route::get('/routines/{id}/exercises', [ExerciseRoutinesController::class, 'getByRoutine']);
+Route::get('/userroutines/{id}/exercises', [UserRoutineExercises::class, 'getByRoutine']);});

@@ -115,4 +115,28 @@ class UserRoutineExercisesController extends Controller
             "mesage"=>"Registro eliminado correctamente."
         ]);
     }
+
+    public function getByRoutine($id)
+{
+    $data = UserRoutineExercise::with([
+        'routine.plan',
+        'routine.somatotype',
+        'exercise.exerciseFiles'
+    ])
+    ->where('routine_id', $id)
+    ->get();
+
+    if ($data->isEmpty()) {
+        return response()->json([
+            "status" => "ok",
+            "data" => [],
+            "message" => "No hay ejercicios en esta rutina"
+        ]);
+    }
+
+    return response()->json([
+        "status" => "ok",
+        "data" => $data
+    ]);
+}
 }

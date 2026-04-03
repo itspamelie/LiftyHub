@@ -57,6 +57,8 @@ useEffect(() => {
         });
 
         setExercises(mapped);
+      } else{
+        setExercises([]);
       }
 
       
