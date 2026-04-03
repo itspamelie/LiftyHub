@@ -27,9 +27,8 @@ class Routine extends Model
 {
     return $this->hasMany(UserSavedRoutine::class, 'routine_id');
 }
-public function exercises()
+public function exerciseRoutines()
 {
-    return $this->belongsToMany(Exercise::class, 'exercise_routines')
-        ->withPivot('reps', 'series', 'rest', 'technique');
+    return $this->hasMany(ExerciseRoutine::class, 'routine_id');
 }
 }

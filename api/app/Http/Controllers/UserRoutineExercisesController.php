@@ -123,7 +123,7 @@ class UserRoutineExercisesController extends Controller
         'routine.somatotype',
         'exercise.exerciseFiles'
     ])
-    ->where('routine_id', $id)
+    ->where('user_routine_id', $id)
     ->get();
 
     if ($data->isEmpty()) {

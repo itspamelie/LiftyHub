@@ -120,25 +120,23 @@ class ExerciseRoutinesController extends Controller
 
 public function getByRoutine($id)
 {
-    $data = ExerciseRoutine::with([
-        'routine.plan',
-        'routine.somatotype',
-        'exercise.exerciseFiles'
-    ])
-    ->where('routine_id', $id)
-    ->get();
+    $routine = Routine::with([
+        'plan',
+        'somatotype',
+        'exerciseRoutines.exercise.exerciseFiles'
+    ])->find($id);
 
-    if ($data->isEmpty()) {
+    if (!$routine) {
         return response()->json([
-            "status" => "ok",
-            "data" => [],
-            "message" => "No hay ejercicios en esta rutina"
-        ]);
+            "status" => "error",
+            "message" => "Rutina no encontrada"
+        ], 404);
     }
 
     return response()->json([
         "status" => "ok",
-        "data" => $data
+        "routine" => $routine,
+        "exercises" => $routine->exerciseRoutines
     ]);
 }
 }
