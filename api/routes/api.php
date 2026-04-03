@@ -62,4 +62,4 @@ Route::get('/search-exercises', [ExerciseController::class, 'searchExercises']);
 Route::get('/search-routines', [RoutinesController::class, 'searchRoutines']);
 Route::get('/exercise-files/{id}', [ExerciseFilesController::class, 'getByExercise']);
 Route::get('/routines/{id}/exercises', [ExerciseRoutinesController::class, 'getByRoutine']);
-Route::get('/userroutines/{id}/exercises', [UserRoutineExercises::class, 'getByRoutine']);});
+Route::get('/userroutines/{id}/exercises', [UserRoutineExercisesController::class, 'getByRoutine']);});
