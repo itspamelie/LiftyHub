@@ -227,96 +227,102 @@ const handleDelete = async (id: number) => {
           </Button>
         </Box>
 
-        {/* LISTA EJERCICIOS */}
-        
-<Box
-  sx={{
-    display: "grid",
-    gridTemplateColumns: "repeat(2, 1fr)", // 2 por fila
-    gap: 2,
-    px: 2
-  }}
+   {/* LISTA EJERCICIOS */}
+{exercises.length === 0 ? (
+  <Typography sx={{ px: 4, color: "#cbd5e1" }}>
+    No tienes ejercicios! Agrega uno a tu rutina.
+  </Typography>
+) : (
+  <Box
+    sx={{
+      display: "grid",
+      gridTemplateColumns: "repeat(2, 1fr)", // 2 por fila
+      gap: 2,
+      px: 2
+    }}
+  >
+    {exercises.map((ex) => (
+      <Box
+        key={ex.id}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          p: 2,
+          borderRadius: "20px",
+          background: "rgba(255,255,255,0.05)",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255,255,255,0.1)"
+        }}
+      >
+        {/* IZQUIERDA */}
+        <Box display="flex" gap={2} alignItems="center">
+          <Box
+            sx={{
+              width: 110,
+              height: 110,
+              borderRadius: "16px",
+              backgroundImage: `url(${getImageUrl(ex.img, "exercises")})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center"
+            }}
+          />
 
-> 
-         {exercises.map((ex) => (
+          <Box>
+            <Typography fontWeight="bold">{ex.name}</Typography>
+            <Typography>Repeticiones: {ex.reps}</Typography>
+            <Typography>Series: {ex.series}</Typography>
+            <Typography>Descanso: {ex.rest}s entre serie</Typography>
+
             <Box
-              key={ex.id}
               sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                p: 2,
-                borderRadius: "20px",
-                background: "rgba(255,255,255,0.05)",
-                backdropFilter: "blur(10px)",
-                border: "1px solid rgba(255,255,255,0.1)"
+                mt: 1,
+                px: 2,
+                py: "3px",
+                borderRadius: "12px",
+                background: "rgba(255,255,255,0.1)",
+                display: "inline-block"
               }}
             >
-              {/* IZQUIERDA */}
-              <Box display="flex" gap={2} alignItems="center">
-                <Box
-                  sx={{
-                    width: 110,
-                    height: 110,
-                    borderRadius: "16px",
-                    backgroundImage: `url(${getImageUrl(ex.img, "exercises")})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center"
-                  }}
-                />
-
-                <Box>
-                  <Typography fontWeight="bold">{ex.name}</Typography>
-                  <Typography>Repeticiones: {ex.reps}</Typography>
-                  <Typography>Series: {ex.series}</Typography>
-                  <Typography>Descanso: {ex.rest}s entre serie</Typography>
-
-                  <Box
-                    sx={{
-                      mt: 1,
-                      px: 2,
-                      py: "3px",
-                      borderRadius: "12px",
-                      background: "rgba(255,255,255,0.1)",
-                      display: "inline-block"
-                    }}
-                  >
-                    <Typography variant="caption">
-                      Técnica: {ex.technique}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-
-              {/* DERECHA (ICONOS) */}
-              <Box>
-                             {/* VISUALIZAR */}
-<IconButton
-  onClick={() => navigate(`/dashboard/exercise/${ex.id}`)}
-  sx={{
-    color: "#34d399",
-    "&:hover": { backgroundColor: "rgba(52,211,153,0.1)" }
-  }}
->
-    
-  <VisibilityIcon />
-</IconButton>
-
-                <IconButton sx={{ color: "#60a5fa" }}>
-                  <EditIcon />
-                </IconButton>
-
-                <IconButton
-  sx={{ color: "#f87171" }}
-  onClick={() => handleDelete(ex.id)}
-> <DeleteIcon />
-</IconButton>
-              </Box>
+              <Typography variant="caption">
+                Técnica: {ex.technique}
+              </Typography>
             </Box>
-          ))}
+          </Box>
         </Box>
 
+        {/* DERECHA (ICONOS) */}
+        <Box>
+          {/* VISUALIZAR */}
+          <IconButton
+            onClick={() => navigate(`/dashboard/exercise/${ex.id}`)}
+            sx={{
+              color: "#34d399",
+              "&:hover": { backgroundColor: "rgba(52,211,153,0.1)" }
+            }}
+          >
+            <VisibilityIcon />
+          </IconButton>
+
+          <IconButton sx={{ color: "#60a5fa" }}>
+            <EditIcon />
+          </IconButton>
+
+          <IconButton
+            sx={{ color: "#f87171" }}
+            onClick={() => handleDelete(ex.id)}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
       </Box>
-    </Box>
+      
+    ))}
+  </Box>
+
+)}
+
+      </Box> {/* CONTENIDO */}
+    </Box>  
   );
 }

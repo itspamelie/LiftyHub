@@ -38,7 +38,7 @@ Route::resource('users',UsersController::class);
 Route::resource('userStreak',UserStreaksController::class);
 Route::get('/userRoutines/{id}/count', [UserRoutinesController::class, 'count']);
 Route::resource('userRoutines',UserRoutinesController::class);
-Route::resource('userRoutineExercises',UserRoutineExercises::class);
+Route::resource('userRoutineExercises',UserRoutineExercisesController::class);
 Route::resource('userProperties',UserPropertiesController::class);
 Route::resource('subscriptions',SubscriptionsController::class);
 Route::resource('somatotypes',SomatotypesController::class);
