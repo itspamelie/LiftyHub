@@ -287,7 +287,7 @@ export const getSubscriptions = async (token: string) => {
 
 // 📋 OBTENER EJERCICIOS DE UNA RUTINA (app)
 export const getRoutineExercises = async (routineId: number, token: string) => {
-  return apiFetch(`${API_URL}/exercise-routines/${routineId}`, {
+  return apiFetch(`${API_URL}/routines/${routineId}/exercises`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
