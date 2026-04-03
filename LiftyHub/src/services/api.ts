@@ -242,6 +242,28 @@ export const createUserRoutine = async (
   });
 };
 
+// ➕ AGREGAR EJERCICIO A RUTINA DE USUARIO
+export const createUserRoutineExercise = async (
+  data: {
+    user_routine_id: number;
+    exercise_id: number;
+    sets: number;
+    repetitions: number;
+    seconds_rest: number;
+  },
+  token: string
+) => {
+  return apiFetch(`${API_URL}/userRoutineExercises`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+};
+
 // 🗑️ ELIMINAR RUTINA DEL USUARIO
 export const deleteUserRoutine = async (routineId: number, token: string) => {
   return apiFetch(`${API_URL}/userRoutines/${routineId}`, {
@@ -256,6 +278,26 @@ export const deleteUserRoutine = async (routineId: number, token: string) => {
 // 💎 OBTENER SUSCRIPCIONES
 export const getSubscriptions = async (token: string) => {
   return apiFetch(`${API_URL}/subscriptions`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+// 📋 OBTENER EJERCICIOS DE UNA RUTINA (app)
+export const getRoutineExercises = async (routineId: number, token: string) => {
+  return apiFetch(`${API_URL}/exercise-routines/${routineId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+// 📋 OBTENER EJERCICIOS DE UNA RUTINA DE USUARIO
+export const getUserRoutineExercises = async (routineId: number, token: string) => {
+  return apiFetch(`${API_URL}/userRoutineExercises/${routineId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",

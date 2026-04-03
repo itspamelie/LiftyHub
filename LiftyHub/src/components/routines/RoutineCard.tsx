@@ -7,12 +7,15 @@ type Props = {
   level: string;
   category: string;
   image: string;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
   onDelete?: () => void;
+  onPress?: () => void;
 };
 
-export default function RoutineCard({ title, duration, level, category, image, onDelete }: Props) {
+export default function RoutineCard({ title, duration, level, category, image, isFavorite, onToggleFavorite, onDelete, onPress }: Props) {
   return (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={onPress ? 0.85 : 1}>
 
       {/* CONTENEDOR DE IMAGEN */}
       <View style={styles.imageContainer}>
@@ -23,6 +26,17 @@ export default function RoutineCard({ title, duration, level, category, image, o
         <View style={styles.categoryBadge}>
           <Text style={styles.categoryText}>{category}</Text>
         </View>
+
+        {/* FAVORITO */}
+        {onToggleFavorite && (
+          <TouchableOpacity style={styles.favoriteButton} onPress={onToggleFavorite}>
+            <Ionicons
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={20}
+              color={isFavorite ? "#EF4444" : "white"}
+            />
+          </TouchableOpacity>
+        )}
 
       </View>
 
@@ -49,7 +63,7 @@ export default function RoutineCard({ title, duration, level, category, image, o
 
       </View>
 
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -69,6 +83,18 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: 150
+  },
+
+  favoriteButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   categoryBadge: {

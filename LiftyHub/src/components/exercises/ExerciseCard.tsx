@@ -19,9 +19,11 @@ type Exercise = {
 
 type Props = {
   exercise: Exercise;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
 };
 
-export default function ExerciseCard({ exercise }: Props) {
+export default function ExerciseCard({ exercise, isFavorite, onToggleFavorite }: Props) {
 
   const getImage = () => {
     const imageFile = exercise.files?.find(file => file.type === "image");
@@ -56,10 +58,19 @@ export default function ExerciseCard({ exercise }: Props) {
         </TouchableOpacity>
       </View>
 
-      {/* BOTÓN + */}
-      <TouchableOpacity style={styles.addButton}>
-        <Ionicons name="add" size={20} color="white" />
-      </TouchableOpacity>
+      {/* ACCIONES */}
+      <View style={styles.actions}>
+        <TouchableOpacity style={styles.favoriteButton} onPress={onToggleFavorite}>
+          <Ionicons
+            name={isFavorite ? "heart" : "heart-outline"}
+            size={18}
+            color={isFavorite ? "#EF4444" : "white"}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.addButton}>
+          <Ionicons name="add" size={20} color="white" />
+        </TouchableOpacity>
+      </View>
 
     </View>
   );
@@ -113,6 +124,21 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
 
+  actions: {
+    flexDirection: "row",
+    gap: 8,
+    marginLeft: 10,
+  },
+
+  favoriteButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   addButton: {
     width: 36,
     height: 36,
@@ -120,7 +146,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: 10
   }
 
 });

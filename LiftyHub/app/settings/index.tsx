@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, Linking, Modal, TextInput, ActivityIndicator, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, Modal, TextInput, ActivityIndicator, TouchableWithoutFeedback, Keyboard } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router, useFocusEffect } from "expo-router";
-import { useCallback } from "react";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import * as Notifications from "expo-notifications";
-import * as ImagePicker from "expo-image-picker";
 import SettingsItem from "@/src/components/settings/SettingsItem";
 import SettingsSwitchItem from "@/src/components/settings/SettingsSwitchItem";
 import { deleteAccount, checkPassword } from "@/src/services/api";
@@ -76,22 +73,6 @@ export default function Settings() {
     }
   };
 
-  const [notifPerm, setNotifPerm] = useState<"granted" | "denied" | "unknown">("unknown");
-  const [galleryPerm, setGalleryPerm] = useState<"granted" | "denied" | "unknown">("unknown");
-  const [cameraPerm, setCameraPerm] = useState<"granted" | "denied" | "unknown">("unknown");
-
-  const checkPermissions = useCallback(async () => {
-    const notif = await Notifications.getPermissionsAsync();
-    setNotifPerm(notif.status === "granted" ? "granted" : notif.status === "denied" ? "denied" : "unknown");
-
-    const gallery = await ImagePicker.getMediaLibraryPermissionsAsync();
-    setGalleryPerm(gallery.status === "granted" ? "granted" : gallery.status === "denied" ? "denied" : "unknown");
-
-    const camera = await ImagePicker.getCameraPermissionsAsync();
-    setCameraPerm(camera.status === "granted" ? "granted" : camera.status === "denied" ? "denied" : "unknown");
-  }, []);
-
-  useFocusEffect(useCallback(() => { checkPermissions(); }, [checkPermissions]));
 
   const logout = async () => {
     try {
@@ -220,6 +201,13 @@ export default function Settings() {
             onPress={handleLanguage}
             showArrow
           />
+          <View style={styles.divider} />
+          <SettingsItem
+            icon="shield-checkmark-outline"
+            label={t("permissions.title")}
+            showArrow
+            onPress={() => router.push("/settings/permissions")}
+          />
         </View>
 
         {/* ENTRENAMIENTO */}
@@ -235,34 +223,6 @@ export default function Settings() {
           <SettingsItem
             icon="volume-high-outline"
             label={t("settings.workoutSounds")}
-          />
-        </View>
-
-        {/* PERMISOS */}
-        <Text style={styles.section}>{t("permissions.title")}</Text>
-        <View style={styles.card}>
-          <SettingsItem
-            icon="notifications-outline"
-            label={t("permissions.notifications")}
-            value={t(`permissions.${notifPerm}`)}
-            onPress={() => Linking.openSettings()}
-            showArrow
-          />
-          <View style={styles.divider} />
-          <SettingsItem
-            icon="images-outline"
-            label={t("permissions.gallery")}
-            value={t(`permissions.${galleryPerm}`)}
-            onPress={() => Linking.openSettings()}
-            showArrow
-          />
-          <View style={styles.divider} />
-          <SettingsItem
-            icon="camera-outline"
-            label={t("permissions.camera")}
-            value={t(`permissions.${cameraPerm}`)}
-            onPress={() => Linking.openSettings()}
-            showArrow
           />
         </View>
 

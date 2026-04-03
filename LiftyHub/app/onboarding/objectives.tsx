@@ -3,7 +3,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
 } from "react-native";
 
 import { useRouter, Stack } from "expo-router";
@@ -12,18 +12,19 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import BackButton from "@/src/components/buttons/backButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 export default function Objectives() {
-
   const router = useRouter();
+  const { t } = useLanguage();
   const [selected, setSelected] = useState<string | null>(null);
 
   const objectives = [
-    { label: "Perder grasa", icon: "flame-outline" },
-    { label: "Ganar músculo", icon: "barbell-outline" },
-    { label: "Recomposición corporal", icon: "repeat-outline" },
-    { label: "Mejorar resistencia", icon: "heart-outline" },
-    { label: "Mejorar fuerza", icon: "fitness-outline" }
+    { key: "Perder grasa", label: t("onboarding.fatLoss"), icon: "flame-outline" },
+    { key: "Ganar músculo", label: t("onboarding.muscle"), icon: "barbell-outline" },
+    { key: "Recomposición corporal", label: t("onboarding.recomposition"), icon: "repeat-outline" },
+    { key: "Mejorar resistencia", label: t("onboarding.endurance"), icon: "heart-outline" },
+    { key: "Mejorar fuerza", label: t("onboarding.strength"), icon: "fitness-outline" },
   ];
 
   const handleNext = async () => {
@@ -34,105 +35,76 @@ export default function Objectives() {
 
   return (
     <View style={styles.container}>
-
       <Stack.Screen options={{ headerShown: false }} />
-
-      {/* 🔙 BOTÓN BACK */}
       <BackButton />
 
       <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.title}>{t("onboarding.objectivesTitle")}</Text>
+        <Text style={styles.subtitle}>{t("onboarding.objectivesSubtitle")}</Text>
 
-        {/* 🔥 TÍTULO LIMPIO */}
-        <Text style={styles.title}>¿Cuál es tu objetivo?</Text>
-        <Text style={styles.subtitle}>
-          Esto nos ayudará a personalizar tu plan
-        </Text>
-
-        {/* CARD */}
         <View style={styles.card}>
-
-          {objectives.map((item, index) => {
-            const isActive = selected === item.label;
-
+          {objectives.map((item) => {
+            const isActive = selected === item.key;
             return (
               <TouchableOpacity
-                key={index}
-                style={[
-                  styles.option,
-                  isActive && styles.optionActive
-                ]}
-                onPress={() => setSelected(item.label)}
+                key={item.key}
+                style={[styles.option, isActive && styles.optionActive]}
+                onPress={() => setSelected(item.key)}
               >
-
                 <Ionicons
                   name={item.icon as any}
                   size={22}
                   color={isActive ? colors.primary : colors.textSecondary}
                 />
-
-                <Text
-                  style={[
-                    styles.optionText,
-                    isActive && styles.optionTextActive
-                  ]}
-                >
+                <Text style={[styles.optionText, isActive && styles.optionTextActive]}>
                   {item.label}
                 </Text>
-
               </TouchableOpacity>
             );
           })}
-
         </View>
 
-        {/* BOTÓN */}
         <TouchableOpacity
-          style={[
-            styles.button,
-            !selected && styles.disabled
-          ]}
+          style={[styles.button, !selected && styles.disabled]}
           onPress={handleNext}
           disabled={!selected}
         >
-          <Text style={styles.buttonText}>Continuar</Text>
+          <Text style={styles.buttonText}>{t("onboarding.objectiveContinue")}</Text>
         </TouchableOpacity>
-
       </ScrollView>
-
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
-    backgroundColor: colors.background
+    backgroundColor: colors.background,
   },
 
   content: {
-  flexGrow: 1,
-  justifyContent: "center",
-  padding: spacing.screenPadding,
-  paddingTop: 100
-},
+    flexGrow: 1,
+    justifyContent: "center",
+    padding: spacing.screenPadding,
+    paddingTop: 100,
+  },
 
   title: {
     color: colors.text,
     fontSize: 28,
     fontWeight: "700",
-    marginBottom: 6
+    marginBottom: 6,
   },
 
   subtitle: {
     color: colors.textSecondary,
-    marginBottom: 24
+    marginBottom: 24,
   },
 
   card: {
     backgroundColor: colors.card,
     borderRadius: spacing.borderRadius,
-    padding: 16
+    padding: 16,
   },
 
   option: {
@@ -141,24 +113,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#2C2C2E",
     borderRadius: 14,
     padding: 14,
-    marginBottom: 10
+    marginBottom: 10,
   },
 
   optionActive: {
     borderWidth: 1,
     borderColor: colors.primary,
-    backgroundColor: "#1E3A8A33"
+    backgroundColor: "#1E3A8A33",
   },
 
   optionText: {
     color: colors.text,
     marginLeft: 10,
-    fontSize: 15
+    fontSize: 15,
   },
 
   optionTextActive: {
     color: colors.primary,
-    fontWeight: "600"
+    fontWeight: "600",
   },
 
   button: {
@@ -167,19 +139,16 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20
+    marginTop: 20,
   },
 
   buttonText: {
     color: colors.text,
     fontSize: 16,
-    fontWeight: "600"
+    fontWeight: "600",
   },
 
   disabled: {
-    opacity: 0.5
-  }
-
+    opacity: 0.5,
+  },
 });
-
-

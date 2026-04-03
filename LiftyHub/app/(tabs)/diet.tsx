@@ -104,7 +104,7 @@ const PLAN_OPTIONS = [
     name: "Pro",
     price: "$600/mes",
     color: "#F59E0B",
-    features: ["Nutriólogo personal", "Plan de dieta personalizado", "Suplementos recomendados", "Estadísticas avanzadas", "Rutinas ilimitadas"],
+    features: ["Nutriólogo personal", "Plan de dieta personalizado", "Suplementos recomendados", "Estadísticas avanzadas", "Rutinas ilimitadas", "Compartir rutinas ilimitadas"],
     highlighted: true,
   },
 ];

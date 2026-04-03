@@ -1,13 +1,33 @@
-import { FlatList, View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from "react-native";
+import { FlatList, View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl, Alert, Modal, Dimensions, ScrollView } from "react-native";
 import RoutineCard from "@/src/components/routines/RoutineCard";
 import FilterButton from "@/src/components/exercises/FilterButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useFocusEffect, router } from "expo-router";
 import { useLanguage } from "@/src/context/LanguageContext";
+import { useSubscription } from "@/src/context/SubscriptionContext";
+import { BlurView } from "expo-blur";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getRoutines, getUserRoutines, deleteUserRoutine } from "@/src/services/api";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+const PLAN_OPTIONS = [
+  {
+    name: "Basic",
+    price: "$99/mes",
+    color: "#3B82F6",
+    features: ["Rutinas de la app", "Hasta 20 rutinas propias", "Estadísticas avanzadas"],
+  },
+  {
+    name: "Pro",
+    price: "$600/mes",
+    color: "#F59E0B",
+    features: ["Todo lo de Basic", "Rutinas ilimitadas", "Compartir rutinas ilimitadas", "Nutriólogo personal", "Plan de dieta personalizado"],
+    highlighted: true,
+  },
+];
 
 const defaultImages = [
   "https://images.unsplash.com/photo-1599058917765-a780eda07a3e",
@@ -51,10 +71,14 @@ type UserRoutine = {
 export default function RoutinesScreen() {
 
   const { t } = useLanguage();
+  const { plan, loading: subLoading } = useSubscription();
+  const hasAppAccess = plan?.name !== "Free";
   const listRef = useRef<FlatList>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const filters = [
     { key: "Todo",      label: t("routines.categories.all") },
+    { key: "Favoritos", label: t("routines.categories.favorites") },
     { key: "Fuerza",    label: t("routines.categories.strength") },
     { key: "Movilidad", label: t("routines.categories.mobility") },
     { key: "Cardio",    label: t("routines.categories.cardio") },
@@ -64,11 +88,33 @@ export default function RoutinesScreen() {
 
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [userRoutines, setUserRoutines] = useState<UserRoutine[]>([]);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"mine" | "app">("mine");
   const [selectedFilter, setSelectedFilter] = useState("Todo");
   const [search, setSearch] = useState("");
+
+  const favKey = (tab: "mine" | "app") => `@liftyhub_favorites_${tab}`;
+
+  const loadFavorites = useCallback(async () => {
+    try {
+      const raw = await AsyncStorage.getItem(favKey(activeTab));
+      setFavorites(new Set(raw ? JSON.parse(raw) : []));
+    } catch {}
+  }, [activeTab]);
+
+  const toggleFavorite = async (id: number) => {
+    const key = favKey(activeTab);
+    const itemKey = String(id);
+    const next = new Set(favorites);
+    if (next.has(itemKey)) next.delete(itemKey);
+    else next.add(itemKey);
+    setFavorites(next);
+    try {
+      await AsyncStorage.setItem(key, JSON.stringify([...next]));
+    } catch {}
+  };
 
   const fetchAll = useCallback(async (isRefresh = false) => {
     try {
@@ -93,11 +139,11 @@ export default function RoutinesScreen() {
     }
   }, []);
 
-  // Recarga la lista al volver de la pantalla de nueva rutina
   useFocusEffect(
     useCallback(() => {
       fetchAll();
-    }, [fetchAll])
+      loadFavorites();
+    }, [fetchAll, loadFavorites])
   );
 
   const handleRefresh = useCallback(() => {
@@ -105,15 +151,32 @@ export default function RoutinesScreen() {
     fetchAll(true);
   }, [fetchAll]);
 
-  const handleTabSwitch = (tab: "mine" | "app") => {
+  useEffect(() => {
+    if (!subLoading && activeTab === "app" && !hasAppAccess) {
+      setShowUpgradeModal(true);
+    }
+  }, [subLoading, activeTab, hasAppAccess]);
+
+  const handleTabSwitch = async (tab: "mine" | "app") => {
+    if (tab === "app" && !hasAppAccess) {
+      setShowUpgradeModal(true);
+      return;
+    }
     setActiveTab(tab);
     setSelectedFilter("Todo");
     setSearch("");
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
+    try {
+      const raw = await AsyncStorage.getItem(`@liftyhub_favorites_${tab}`);
+      setFavorites(new Set(raw ? JSON.parse(raw) : []));
+    } catch {}
   };
 
   const activeData = (activeTab === "mine" ? userRoutines : routines).filter((r) => {
-    const matchCategory = selectedFilter === "Todo" || r.category === selectedFilter;
+    const isFav = favorites.has(String(r.id));
+    const matchCategory =
+      selectedFilter === "Todo" ||
+      (selectedFilter === "Favoritos" ? isFav : r.category === selectedFilter);
     const matchSearch = r.name.toLowerCase().includes(search.toLowerCase());
     return matchCategory && matchSearch;
   });
@@ -151,6 +214,7 @@ export default function RoutinesScreen() {
   }
 
   return (
+    <View style={{ flex: 1 }}>
     <FlatList
       ref={listRef}
       style={styles.container}
@@ -208,9 +272,14 @@ export default function RoutinesScreen() {
               style={[styles.tabBtn, activeTab === "app" && styles.tabBtnActive]}
               onPress={() => handleTabSwitch("app")}
             >
-              <Text style={[styles.tabBtnText, activeTab === "app" && styles.tabBtnTextActive]}>
-                {t("routines.appRoutines")}
-              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                {!hasAppAccess && (
+                  <Ionicons name="lock-closed" size={11} color={activeTab === "app" ? "white" : "#A1A1A1"} />
+                )}
+                <Text style={[styles.tabBtnText, activeTab === "app" && styles.tabBtnTextActive]}>
+                  {t("routines.appRoutines")}
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
 
@@ -238,10 +307,86 @@ export default function RoutinesScreen() {
           level={item.level}
           category={item.category}
           image={getRoutineImage(item.img, item.id)}
+          isFavorite={favorites.has(String(item.id))}
+          onToggleFavorite={() => toggleFavorite(item.id)}
           onDelete={activeTab === "mine" ? () => handleDeleteRoutine(item.id) : undefined}
+          onPress={() => router.push({
+            pathname: "/routines/[id]",
+            params: {
+              id: item.id,
+              name: item.name,
+              duration: `${item.duration} min`,
+              level: item.level,
+              category: item.category,
+              objective: item.objective,
+              image: getRoutineImage(item.img, item.id),
+              isUserRoutine: activeTab === "mine" ? "true" : "false",
+            }
+          })}
         />
       )}
     />
+
+      {/* BLUR si está en pestaña app sin acceso */}
+      {activeTab === "app" && !hasAppAccess && (
+        <BlurView intensity={55} tint="dark" style={StyleSheet.absoluteFill} pointerEvents="box-none" />
+      )}
+
+      {/* BOTÓN reabrir modal */}
+      {activeTab === "app" && !hasAppAccess && !showUpgradeModal && (
+        <View style={styles.unlockBar}>
+          <TouchableOpacity style={styles.unlockButton} onPress={() => setShowUpgradeModal(true)}>
+            <Ionicons name="lock-closed" size={16} color="white" />
+            <Text style={styles.unlockText}>Desbloquear Rutinas App</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* MODAL UPGRADE */}
+      <Modal visible={showUpgradeModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity style={styles.modalClose} onPress={() => setShowUpgradeModal(false)}>
+              <Ionicons name="close" size={22} color={colors.textSecondary} />
+            </TouchableOpacity>
+            <View style={styles.modalIcon}>
+              <Ionicons name="barbell" size={32} color={colors.primary} />
+            </View>
+            <Text style={styles.modalTitle}>Desbloquea las Rutinas App</Text>
+            <Text style={styles.modalSubtitle}>
+              Accede a todas las rutinas diseñadas por expertos con cualquier plan de pago.
+            </Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {PLAN_OPTIONS.map((plan) => (
+                <TouchableOpacity
+                  key={plan.name}
+                  style={[styles.planCard, plan.highlighted && { borderColor: plan.color, borderWidth: 2 }]}
+                  onPress={() => { setShowUpgradeModal(false); router.push("/settings/plans"); }}
+                >
+                  {plan.highlighted && (
+                    <View style={[styles.planBadge, { backgroundColor: plan.color }]}>
+                      <Text style={styles.planBadgeText}>Recomendado</Text>
+                    </View>
+                  )}
+                  <View style={styles.planHeader}>
+                    <Text style={[styles.planName, { color: plan.color }]}>{plan.name}</Text>
+                    <Text style={styles.planPrice}>{plan.price}</Text>
+                  </View>
+                  {plan.features.map((f, i) => (
+                    <View key={i} style={styles.planFeature}>
+                      <Ionicons name="checkmark-circle" size={16} color={plan.color} />
+                      <Text style={styles.planFeatureText}>{f}</Text>
+                    </View>
+                  ))}
+                </TouchableOpacity>
+              ))}
+              <Text style={styles.modalNote}>Contacta a un administrador para actualizar tu plan.</Text>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+    </View>
   );
 }
 
@@ -346,6 +491,142 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginTop: 5,
     textAlign: "center"
+  },
+
+  unlockBar: {
+    position: "absolute",
+    bottom: 100,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
+
+  unlockButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: spacing.borderRadius,
+    gap: 8,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+
+  unlockText: {
+    color: "white",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "flex-end",
+  },
+
+  modalContent: {
+    backgroundColor: "#1C1C1E",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 48,
+    maxHeight: SCREEN_HEIGHT * 0.85,
+  },
+
+  modalClose: {
+    alignSelf: "flex-end",
+    padding: 4,
+  },
+
+  modalIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "rgba(59,130,246,0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+
+  modalTitle: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+
+  modalSubtitle: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+
+  planCard: {
+    backgroundColor: "#2C2C2E",
+    borderRadius: spacing.borderRadius,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+
+  planBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginBottom: 8,
+  },
+
+  planBadgeText: {
+    color: "white",
+    fontSize: 11,
+    fontWeight: "700",
+  },
+
+  planHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+
+  planName: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+
+  planPrice: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  planFeature: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 6,
+  },
+
+  planFeatureText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+  },
+
+  modalNote: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 8,
   },
 
 });

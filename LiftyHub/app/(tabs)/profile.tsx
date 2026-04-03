@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, RefreshControl } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, RefreshControl, Modal, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, planColors } from "@/src/styles/globalstyles";
 import ProgressCard from "@/src/components/profile/ProgressCard";
@@ -12,6 +12,25 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getUser, getUserProperties, getUserStreak, getUserRoutinesCount } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
+import { BlurView } from "expo-blur";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+const STATS_PLAN_OPTIONS = [
+  {
+    name: "Basic",
+    price: "$99/mes",
+    color: "#3B82F6",
+    features: ["Estadísticas avanzadas", "Actividad semanal", "Records personales", "Hasta 20 rutinas propias"],
+  },
+  {
+    name: "Pro",
+    price: "$600/mes",
+    color: "#F59E0B",
+    features: ["Todo lo de Basic", "Rutinas ilimitadas", "Nutriólogo personal", "Plan de dieta personalizado"],
+    highlighted: true,
+  },
+];
 
 
 
@@ -37,12 +56,14 @@ export default function ProfileScreen() {
   const { t } = useLanguage();
   const { plan } = useSubscription();
   const planColor = planColors[plan?.name ?? "Free"] ?? "#A1A1A1";
+  const hasStatsAccess = plan?.name === "Basic" || plan?.name === "Pro";
 
   const [profile, setProfile] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"perfil" | "stats">("perfil");
   const [stats, setStats] = useState<any>(null);
   const [animationTrigger, setAnimationTrigger] = useState(0);
+  const [showStatsModal, setShowStatsModal] = useState(false);
 
   const loadUser = async (isRefresh = false) => {
     try {
@@ -157,18 +178,25 @@ export default function ProfileScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.tabBtn, activeTab === "stats" && styles.tabBtnActive]}
-              onPress={() => setActiveTab("stats")}
+              onPress={() => hasStatsAccess ? setActiveTab("stats") : setShowStatsModal(true)}
             >
-              <Text style={[styles.tabBtnText, activeTab === "stats" && styles.tabBtnTextActive]}>{t("profile.tabStats")}</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                {!hasStatsAccess && (
+                  <Ionicons name="lock-closed" size={11} color={activeTab === "stats" ? "white" : "#A1A1A1"} />
+                )}
+                <Text style={[styles.tabBtnText, activeTab === "stats" && styles.tabBtnTextActive]}>{t("profile.tabStats")}</Text>
+              </View>
             </TouchableOpacity>
           </View>
 
           {activeTab === "stats" ? (
-            <View style={{ marginTop: 20 }}>
-              {stats && <StatsSummaryGrid stats={stats} trigger={animationTrigger} />}
-              <WeeklyActivityChart />
-              <PersonalRecords />
-            </View>
+            hasStatsAccess ? (
+              <View style={{ marginTop: 20 }}>
+                {stats && <StatsSummaryGrid stats={stats} trigger={animationTrigger} />}
+                <WeeklyActivityChart />
+                <PersonalRecords />
+              </View>
+            ) : null
           ) : (
             <>
               {/* TARJETA DE ESTADÍSTICAS */}
@@ -217,6 +245,50 @@ export default function ProfileScreen() {
         </View>
 
       </ScrollView>
+
+      {/* MODAL UPGRADE STATS */}
+      <Modal visible={showStatsModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity style={styles.modalClose} onPress={() => setShowStatsModal(false)}>
+              <Ionicons name="close" size={22} color={colors.textSecondary} />
+            </TouchableOpacity>
+            <View style={styles.modalIcon}>
+              <Ionicons name="bar-chart-outline" size={32} color={colors.primary} />
+            </View>
+            <Text style={styles.modalTitle}>Desbloquea Estadísticas</Text>
+            <Text style={styles.modalSubtitle}>
+              Accede a tus estadísticas detalladas, actividad semanal y records personales.
+            </Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {STATS_PLAN_OPTIONS.map((p) => (
+                <TouchableOpacity
+                  key={p.name}
+                  style={[styles.planCard, p.highlighted && { borderColor: p.color, borderWidth: 2 }]}
+                  onPress={() => { setShowStatsModal(false); router.push("/settings/plans"); }}
+                >
+                  {p.highlighted && (
+                    <View style={[styles.planBadge, { backgroundColor: p.color }]}>
+                      <Text style={styles.planBadgeText}>Recomendado</Text>
+                    </View>
+                  )}
+                  <View style={styles.planHeader}>
+                    <Text style={[styles.planName, { color: p.color }]}>{p.name}</Text>
+                    <Text style={styles.planPrice}>{p.price}</Text>
+                  </View>
+                  {p.features.map((f, i) => (
+                    <View key={i} style={styles.planFeature}>
+                      <Ionicons name="checkmark-circle" size={16} color={p.color} />
+                      <Text style={styles.planFeatureText}>{f}</Text>
+                    </View>
+                  ))}
+                </TouchableOpacity>
+              ))}
+              <Text style={styles.modalNote}>Contacta a un administrador para actualizar tu plan.</Text>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
     </View>
   );
@@ -388,7 +460,162 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 16,
     fontWeight: "600"
-  }
+  },
+
+  lockedContainer: {
+    alignItems: "center",
+    paddingVertical: 48,
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+
+  lockedIconBg: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "rgba(59,130,246,0.12)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+
+  lockedTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+
+  lockedSubtitle: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    textAlign: "center",
+    lineHeight: 20,
+  },
+
+  lockedButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: spacing.borderRadius,
+    marginTop: 8,
+  },
+
+  lockedButtonText: {
+    color: "white",
+    fontSize: 15,
+    fontWeight: "700",
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "flex-end",
+  },
+
+  modalContent: {
+    backgroundColor: "#1C1C1E",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 48,
+    maxHeight: SCREEN_HEIGHT * 0.85,
+  },
+
+  modalClose: {
+    alignSelf: "flex-end",
+    padding: 4,
+  },
+
+  modalIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "rgba(59,130,246,0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+
+  modalTitle: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+
+  modalSubtitle: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+
+  planCard: {
+    backgroundColor: "#2C2C2E",
+    borderRadius: spacing.borderRadius,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+
+  planBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginBottom: 8,
+  },
+
+  planBadgeText: {
+    color: "white",
+    fontSize: 11,
+    fontWeight: "700",
+  },
+
+  planHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+
+  planName: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+
+  planPrice: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  planFeature: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 6,
+  },
+
+  planFeatureText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+  },
+
+  modalNote: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 8,
+  },
 
 });
 

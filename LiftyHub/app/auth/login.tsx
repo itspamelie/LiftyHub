@@ -5,11 +5,13 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loginRequest } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
+import { useSubscription } from "@/src/context/SubscriptionContext";
 
 export default function Login() {
 
   const router = useRouter();
   const { t } = useLanguage();
+  const { refresh } = useSubscription();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,6 +40,7 @@ export default function Login() {
         }
         await AsyncStorage.setItem("token", data.token);
         await AsyncStorage.setItem("user", JSON.stringify(data.user));
+        await refresh();
         router.replace("/(tabs)" as any);
       } else {
         setError(t("login.errorInvalid"));

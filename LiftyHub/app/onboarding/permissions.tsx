@@ -7,11 +7,13 @@ import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { registerRequest, createUserProperties } from "@/src/services/api";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 type PermissionStatus = "idle" | "granted" | "denied";
 
 export default function Permissions() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const [notifStatus, setNotifStatus] = useState<PermissionStatus>("idle");
   const [galleryStatus, setGalleryStatus] = useState<PermissionStatus>("idle");
@@ -40,17 +42,8 @@ export default function Permissions() {
       const objective = await AsyncStorage.getItem("@register_objective");
       const propertiesRaw = await AsyncStorage.getItem("@register_properties");
 
-      console.log("[permissions] keys →", {
-        hasRegisterData: !!registerDataRaw,
-        hasObjective: !!objective,
-        hasProperties: !!propertiesRaw,
-        registerData: registerDataRaw,
-        properties: propertiesRaw,
-        objective,
-      });
-
       if (!registerDataRaw || !objective || !propertiesRaw) {
-        Alert.alert("Error", "Datos incompletos, vuelve a intentarlo");
+        Alert.alert("Error", t("onboarding.errorIncomplete"));
         setLoading(false);
         return;
       }
@@ -58,17 +51,13 @@ export default function Permissions() {
       const { name, email, password, gender, birthdate } = JSON.parse(registerDataRaw);
       const { height, weight, waist, somatotype_id } = JSON.parse(propertiesRaw);
 
-      console.log("[permissions] registerData:", { name, email, gender, birthdate });
-      console.log("[permissions] properties:", { height, weight, somatotype_id, objective });
-
       const data = await registerRequest({ name, email, password, gender, birthdate });
-      console.log("[permissions] registerRequest response:", JSON.stringify(data));
 
       if (data?.token) {
         await AsyncStorage.setItem("token", data.token);
         await AsyncStorage.setItem("user", JSON.stringify(data.user));
 
-        const propsResult = await createUserProperties(
+        await createUserProperties(
           {
             user_id: data.user.id,
             stature: height,
@@ -79,7 +68,6 @@ export default function Permissions() {
           },
           data.token
         );
-        console.log("[permissions] createUserProperties response:", JSON.stringify(propsResult));
 
         await AsyncStorage.removeItem("@register_data");
         await AsyncStorage.removeItem("@register_objective");
@@ -87,14 +75,13 @@ export default function Permissions() {
 
         router.replace("/(tabs)" as any);
       } else {
-        const mensaje = data?.errors?.email?.[0] ?? data?.message ?? "No se pudo crear la cuenta";
+        const mensaje = data?.errors?.email?.[0] ?? data?.message ?? t("onboarding.errorGeneral");
         Alert.alert("Error", mensaje, [
-          { text: "OK", onPress: () => router.replace("/auth/register" as any) }
+          { text: "OK", onPress: () => router.replace("/auth/register" as any) },
         ]);
       }
-    } catch (error) {
-      console.log("Error en registro:", error);
-      Alert.alert("Error", "Ocurrió un problema, intenta de nuevo");
+    } catch {
+      Alert.alert("Error", t("onboarding.errorGeneral"));
     } finally {
       setLoading(false);
     }
@@ -107,120 +94,87 @@ export default function Permissions() {
   };
 
   const getIconColor = (status: PermissionStatus) => {
-    if (status === "granted") return colors.primary;
+    if (status === "granted") return "#10B981";
     if (status === "denied") return "#EF4444";
     return colors.textSecondary;
   };
+
+  const permissionRows = [
+    {
+      icon: "notifications-outline",
+      title: t("permissions.notifications"),
+      desc: t("onboarding.notificationsDesc"),
+      status: notifStatus,
+      onPress: requestNotifications,
+    },
+    {
+      icon: "images-outline",
+      title: t("permissions.gallery"),
+      desc: t("onboarding.galleryDesc"),
+      status: galleryStatus,
+      onPress: requestGallery,
+    },
+    {
+      icon: "camera-outline",
+      title: t("permissions.camera"),
+      desc: t("onboarding.cameraDesc"),
+      status: cameraStatus,
+      onPress: requestCamera,
+    },
+  ];
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* HEADER */}
       <View style={styles.header}>
         <Ionicons name="shield-checkmark-outline" size={50} color={colors.primary} />
-        <Text style={styles.title}>Permisos</Text>
-        <Text style={styles.subtitle}>
-          Necesitamos tu autorización para algunas funciones de la app
-        </Text>
+        <Text style={styles.title}>{t("onboarding.permissionsTitle")}</Text>
+        <Text style={styles.subtitle}>{t("onboarding.permissionsSubtitle")}</Text>
       </View>
 
-      {/* PERMISOS */}
       <View style={styles.card}>
-
-        {/* NOTIFICACIONES */}
-        <TouchableOpacity
-          style={styles.permissionRow}
-          onPress={requestNotifications}
-          disabled={notifStatus !== "idle"}
-        >
-          <View style={styles.permissionIcon}>
-            <Ionicons name="notifications-outline" size={24} color={colors.primary} />
+        {permissionRows.map((row, index) => (
+          <View key={row.icon}>
+            {index > 0 && <View style={styles.divider} />}
+            <TouchableOpacity
+              style={styles.permissionRow}
+              onPress={row.onPress}
+              disabled={row.status !== "idle"}
+            >
+              <View style={styles.permissionIcon}>
+                <Ionicons name={row.icon as any} size={24} color={colors.primary} />
+              </View>
+              <View style={styles.permissionInfo}>
+                <Text style={styles.permissionTitle}>{row.title}</Text>
+                <Text style={styles.permissionDesc}>{row.desc}</Text>
+              </View>
+              <Ionicons
+                name={getIcon(row.status, "checkmark-circle", "chevron-forward-outline") as any}
+                size={22}
+                color={getIconColor(row.status)}
+              />
+            </TouchableOpacity>
           </View>
-          <View style={styles.permissionInfo}>
-            <Text style={styles.permissionTitle}>Notificaciones</Text>
-            <Text style={styles.permissionDesc}>
-              Recordatorios de entrenamiento y actualizaciones
-            </Text>
-          </View>
-          <Ionicons
-            name={getIcon(notifStatus, "checkmark-circle", "chevron-forward-outline") as any}
-            size={22}
-            color={getIconColor(notifStatus)}
-          />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        {/* GALERÍA */}
-        <TouchableOpacity
-          style={styles.permissionRow}
-          onPress={requestGallery}
-          disabled={galleryStatus !== "idle"}
-        >
-          <View style={styles.permissionIcon}>
-            <Ionicons name="images-outline" size={24} color={colors.primary} />
-          </View>
-          <View style={styles.permissionInfo}>
-            <Text style={styles.permissionTitle}>Galería</Text>
-            <Text style={styles.permissionDesc}>
-              Para subir tu foto de perfil y progreso
-            </Text>
-          </View>
-          <Ionicons
-            name={getIcon(galleryStatus, "checkmark-circle", "chevron-forward-outline") as any}
-            size={22}
-            color={getIconColor(galleryStatus)}
-          />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        {/* CÁMARA */}
-        <TouchableOpacity
-          style={styles.permissionRow}
-          onPress={requestCamera}
-          disabled={cameraStatus !== "idle"}
-        >
-          <View style={styles.permissionIcon}>
-            <Ionicons name="camera-outline" size={24} color={colors.primary} />
-          </View>
-          <View style={styles.permissionInfo}>
-            <Text style={styles.permissionTitle}>Cámara</Text>
-            <Text style={styles.permissionDesc}>
-              Para tomar fotos de perfil y de progreso
-            </Text>
-          </View>
-          <Ionicons
-            name={getIcon(cameraStatus, "checkmark-circle", "chevron-forward-outline") as any}
-            size={22}
-            color={getIconColor(cameraStatus)}
-          />
-        </TouchableOpacity>
-
+        ))}
       </View>
 
-      <Text style={styles.hint}>
-        Puedes cambiar estos permisos en cualquier momento desde la configuración de tu dispositivo.
-      </Text>
+      <Text style={styles.hint}>{t("onboarding.permissionsHint")}</Text>
 
-      {/* BOTÓN FINALIZAR */}
       <TouchableOpacity
-        style={[styles.button, loading && { opacity: 0.7 }]}
+        style={[styles.button, loading && styles.disabled]}
         onPress={handleFinish}
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Creando cuenta..." : "Empezar"}
+          {loading ? t("onboarding.loadingAccount") : t("onboarding.finish")}
         </Text>
       </TouchableOpacity>
-
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -314,4 +268,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  disabled: {
+    opacity: 0.7,
+  },
 });

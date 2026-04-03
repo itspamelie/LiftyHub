@@ -27,11 +27,33 @@ export default function ExercisesScreen() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("Todo");
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  const FAV_KEY = "@liftyhub_favorites_exercises";
+
+  const loadFavorites = useCallback(async () => {
+    try {
+      const raw = await AsyncStorage.getItem(FAV_KEY);
+      setFavorites(new Set(raw ? JSON.parse(raw) : []));
+    } catch {}
+  }, []);
+
+  const toggleFavorite = async (id: number) => {
+    const itemKey = String(id);
+    const next = new Set(favorites);
+    if (next.has(itemKey)) next.delete(itemKey);
+    else next.add(itemKey);
+    setFavorites(next);
+    try {
+      await AsyncStorage.setItem(FAV_KEY, JSON.stringify([...next]));
+    } catch {}
+  };
+
   const filters = [
     { key: "Todo",       labelKey: "exercises.muscleGroups.all" },
+    { key: "Favoritos",  labelKey: "exercises.muscleGroups.favorites" },
     { key: "Pecho",      labelKey: "exercises.muscleGroups.chest" },
     { key: "Espalda",    labelKey: "exercises.muscleGroups.back" },
     { key: "Cuádriceps", labelKey: "exercises.muscleGroups.leg" },
@@ -60,7 +82,7 @@ export default function ExercisesScreen() {
     }
   }, []);
 
-  useEffect(() => { fetchExercises(); }, []);
+  useEffect(() => { fetchExercises(); loadFavorites(); }, []);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -69,7 +91,10 @@ export default function ExercisesScreen() {
 
   const filteredExercises = exercises.filter((exercise) => {
     const matchesSearch = exercise.name.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = activeFilter === "Todo" || exercise.muscle === activeFilter;
+    const isFav = favorites.has(String(exercise.id));
+    const matchesFilter =
+      activeFilter === "Todo" ||
+      (activeFilter === "Favoritos" ? isFav : exercise.muscle === activeFilter);
     return matchesSearch && matchesFilter;
   });
 
@@ -121,6 +146,8 @@ export default function ExercisesScreen() {
             <ExerciseCard
               key={exercise.id}
               exercise={exercise}
+              isFavorite={favorites.has(String(exercise.id))}
+              onToggleFavorite={() => toggleFavorite(exercise.id)}
             />
           ))}
           {filteredExercises.length === 0 && (

@@ -9,14 +9,24 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Modal,
+  FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { colors, spacing } from "@/src/styles/globalstyles";
-import { createUserRoutine } from "@/src/services/api";
+import { createUserRoutine, createUserRoutineExercise, getExercises } from "@/src/services/api";
+
+type Exercise = { id: number; name: string; muscle: string; categorie: string };
+type SelectedExercise = {
+  exercise: Exercise;
+  sets: string;
+  repetitions: string;
+  seconds_rest: string;
+};
 
 export default function NewRoutineScreen() {
   const { t } = useLanguage();
@@ -45,6 +55,53 @@ export default function NewRoutineScreen() {
   });
   const [saving, setSaving] = useState(false);
 
+  // Ejercicios
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [selectedExercises, setSelectedExercises] = useState<SelectedExercise[]>([]);
+  const [showPicker, setShowPicker] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [pendingExercise, setPendingExercise] = useState<Exercise | null>(null);
+  const [pendingSets, setPendingSets] = useState("3");
+  const [pendingReps, setPendingReps] = useState("12");
+  const [pendingRest, setPendingRest] = useState("60");
+
+  useEffect(() => {
+    const load = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      const res = await getExercises(token);
+      setExercises(res?.data ?? []);
+    };
+    load();
+  }, []);
+
+  const filteredExercises = exercises.filter(
+    (e) =>
+      !selectedExercises.some((s) => s.exercise.id === e.id) &&
+      e.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleSelectExercise = (exercise: Exercise) => {
+    setShowPicker(false);
+    setPendingExercise(exercise);
+    setPendingSets("3");
+    setPendingReps("12");
+    setPendingRest("60");
+  };
+
+  const handleConfirmExercise = () => {
+    if (!pendingExercise) return;
+    setSelectedExercises((prev) => [
+      ...prev,
+      { exercise: pendingExercise, sets: pendingSets, repetitions: pendingReps, seconds_rest: pendingRest },
+    ]);
+    setPendingExercise(null);
+  };
+
+  const handleRemoveExercise = (id: number) => {
+    setSelectedExercises((prev) => prev.filter((s) => s.exercise.id !== id));
+  };
+
   const handleSave = async () => {
     if (!form.name || !form.objective || !form.level || !form.duration || !form.category) {
       Alert.alert(t("routines.modal.errorEmpty"));
@@ -58,7 +115,7 @@ export default function NewRoutineScreen() {
       if (!token || !userRaw) return;
 
       const user = JSON.parse(userRaw);
-      await createUserRoutine(
+      const res = await createUserRoutine(
         {
           user_id: user.id,
           name: form.name.trim(),
@@ -70,6 +127,22 @@ export default function NewRoutineScreen() {
         },
         token
       );
+
+      const routineId = res?.data?.id;
+      if (routineId && selectedExercises.length > 0) {
+        for (const sel of selectedExercises) {
+          await createUserRoutineExercise(
+            {
+              user_routine_id: routineId,
+              exercise_id: sel.exercise.id,
+              sets: Number(sel.sets),
+              repetitions: Number(sel.repetitions),
+              seconds_rest: Number(sel.seconds_rest),
+            },
+            token
+          );
+        }
+      }
 
       router.back();
     } catch (error) {
@@ -171,7 +244,32 @@ export default function NewRoutineScreen() {
           autoCapitalize="none"
         />
 
-        {/* BOTON GUARDAR */}
+        {/* EJERCICIOS */}
+        <Text style={styles.sectionTitle}>{t("routines.modal.exercises")}</Text>
+
+        {selectedExercises.map((sel) => (
+          <View key={sel.exercise.id} style={styles.exerciseCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.exerciseName}>{sel.exercise.name}</Text>
+              <Text style={styles.exerciseMeta}>
+                {sel.sets} series × {sel.repetitions} reps · {sel.seconds_rest}s
+              </Text>
+            </View>
+            <TouchableOpacity onPress={() => handleRemoveExercise(sel.exercise.id)}>
+              <Ionicons name="close-circle" size={22} color={colors.danger} />
+            </TouchableOpacity>
+          </View>
+        ))}
+
+        <TouchableOpacity
+          style={styles.addExerciseButton}
+          onPress={() => { setSearchQuery(""); setShowPicker(true); }}
+        >
+          <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
+          <Text style={styles.addExerciseText}>{t("routines.modal.addExercise")}</Text>
+        </TouchableOpacity>
+
+        {/* GUARDAR */}
         <TouchableOpacity
           style={[styles.saveButton, saving && { opacity: 0.6 }]}
           onPress={handleSave}
@@ -183,6 +281,98 @@ export default function NewRoutineScreen() {
           }
         </TouchableOpacity>
       </ScrollView>
+
+      {/* MODAL PICKER DE EJERCICIOS */}
+      <Modal visible={showPicker} animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity style={styles.backButton} onPress={() => setShowPicker(false)}>
+              <Ionicons name="arrow-back" size={20} color="white" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>{t("routines.modal.selectExercise")}</Text>
+          </View>
+
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={18} color={colors.textSecondary} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder={t("routines.modal.searchExercises")}
+              placeholderTextColor={colors.textSecondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+
+          <FlatList
+            data={filteredExercises}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity style={styles.exerciseItem} onPress={() => handleSelectExercise(item)}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.exerciseItemName}>{item.name}</Text>
+                  <Text style={styles.exerciseItemMeta}>{item.muscle} · {item.categorie}</Text>
+                </View>
+                <Ionicons name="add-circle-outline" size={22} color={colors.primary} />
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>{t("routines.modal.noExercisesFound")}</Text>
+            }
+            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
+          />
+        </View>
+      </Modal>
+
+      {/* MODAL CONFIG SETS/REPS/REST */}
+      <Modal visible={!!pendingExercise} transparent animationType="fade">
+        <View style={styles.configOverlay}>
+          <View style={styles.configContent}>
+            <Text style={styles.configTitle}>{pendingExercise?.name}</Text>
+            <Text style={styles.configSubtitle}>{pendingExercise?.muscle}</Text>
+
+            <View style={styles.configRow}>
+              <View style={styles.configField}>
+                <Text style={styles.configLabel}>{t("routines.modal.sets")}</Text>
+                <TextInput
+                  style={styles.configInput}
+                  value={pendingSets}
+                  onChangeText={setPendingSets}
+                  keyboardType="numeric"
+                  placeholderTextColor={colors.textSecondary}
+                />
+              </View>
+              <View style={styles.configField}>
+                <Text style={styles.configLabel}>{t("routines.modal.repetitions")}</Text>
+                <TextInput
+                  style={styles.configInput}
+                  value={pendingReps}
+                  onChangeText={setPendingReps}
+                  keyboardType="numeric"
+                  placeholderTextColor={colors.textSecondary}
+                />
+              </View>
+              <View style={styles.configField}>
+                <Text style={styles.configLabel}>{t("routines.modal.rest")}</Text>
+                <TextInput
+                  style={styles.configInput}
+                  value={pendingRest}
+                  onChangeText={setPendingRest}
+                  keyboardType="numeric"
+                  placeholderTextColor={colors.textSecondary}
+                />
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.saveButton} onPress={handleConfirmExercise}>
+              <Text style={styles.saveButtonText}>{t("routines.modal.confirm")}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.cancelButton} onPress={() => setPendingExercise(null)}>
+              <Text style={styles.cancelButtonText}>{t("settings.cancel")}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -279,17 +469,190 @@ const styles = StyleSheet.create({
     color: "white",
   },
 
+  exerciseCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.card,
+    borderRadius: spacing.borderRadius,
+    padding: 14,
+    marginBottom: 8,
+  },
+
+  exerciseName: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  exerciseMeta: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    marginTop: 2,
+  },
+
+  addExerciseButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: colors.card,
+    borderRadius: spacing.borderRadius,
+    padding: 14,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderStyle: "dashed",
+  },
+
+  addExerciseText: {
+    color: colors.primary,
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
   saveButton: {
     backgroundColor: colors.primary,
     borderRadius: spacing.borderRadius,
     paddingVertical: 14,
     alignItems: "center",
-    marginTop: 28,
+    marginTop: 20,
   },
 
   saveButtonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+
+  // Modal picker
+  modalContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 60,
+    paddingBottom: 16,
+    paddingHorizontal: spacing.screenPadding,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.card,
+  },
+
+  modalTitle: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.card,
+    margin: 16,
+    borderRadius: spacing.borderRadius,
+    paddingHorizontal: 14,
+    gap: 8,
+  },
+
+  searchInput: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 15,
+    paddingVertical: 12,
+  },
+
+  exerciseItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.card,
+  },
+
+  exerciseItemName: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  exerciseItemMeta: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    marginTop: 2,
+  },
+
+  emptyText: {
+    color: colors.textSecondary,
+    textAlign: "center",
+    marginTop: 40,
+    fontSize: 15,
+  },
+
+  // Modal config
+  configOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  configContent: {
+    backgroundColor: "#1C1C1E",
+    borderRadius: 20,
+    padding: 24,
+    width: "90%",
+  },
+
+  configTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+
+  configSubtitle: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    marginBottom: 20,
+  },
+
+  configRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 8,
+  },
+
+  configField: {
+    flex: 1,
+    alignItems: "center",
+  },
+
+  configLabel: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginBottom: 6,
+    textAlign: "center",
+  },
+
+  configInput: {
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    paddingVertical: 10,
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: "700",
+    textAlign: "center",
+    width: "100%",
+  },
+
+  cancelButton: {
+    alignItems: "center",
+    marginTop: 12,
+  },
+
+  cancelButtonText: {
+    color: colors.textSecondary,
+    fontSize: 14,
   },
 });
