@@ -52,7 +52,7 @@ export default function EditExerciseModal({ open, onClose, exercise, onUpdated }
       Swal.fire({
         icon: "success",
         title: "Ejercicio actualizado",
-        background: "#0f172a",
+        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
         color: "#fff"
       })
 
@@ -61,7 +61,7 @@ export default function EditExerciseModal({ open, onClose, exercise, onUpdated }
       Swal.fire({
         icon: "error",
         title: "Error al actualizar",
-        background: "#0f172a",
+        background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
         color: "#fff"
       })
     }

@@ -22,6 +22,7 @@ export default function CreateRoutineModal({ open, onClose, onCreated }: any) {
   const [plan, setPlan] = useState("")
   const [somatotype, setSomatotype] = useState("")
   const [img, setImg] = useState("")
+  const [category, setCategory] = useState("")
 
   // NUEVOS STATES
   const [plans, setPlans] = useState<any[]>([])
@@ -64,6 +65,7 @@ const handleFileChange = (e: any) => {
 
       formData.append("plan_id", plan)
       formData.append("somatotype_id", somatotype)
+      formData.append("category", category)
 
 if (file) {
   formData.append("img", file)
@@ -83,6 +85,7 @@ if (file) {
       setSomatotype("")
       setObjective("")
       setImg("")
+      setCategory("")
 
       Swal.fire({
         icon: "success",
@@ -242,6 +245,28 @@ if (file) {
                       <MenuItem value="Avanzado">Avanzado</MenuItem>
           </TextField>
 
+
+
+<TextField
+  select
+  fullWidth
+              value={category}
+            onChange={(e) => setCategory(e.target.value)}
+  sx={{
+    "& .MuiOutlinedInput-root": {
+      background: "#fff",
+      borderRadius: "10px"
+    }
+  }}
+>
+          <MenuItem value=""><em>Selecciona Categoría</em></MenuItem>
+                      <MenuItem value="Todo">Todo</MenuItem>
+                      <MenuItem value="Fuerza">Fuerza</MenuItem>
+                      <MenuItem value="Movilidad">Movilidad</MenuItem>
+                      <MenuItem value="Cardio">Cardio</MenuItem>
+                      <MenuItem value="HIIT">HIIT</MenuItem>
+                      <MenuItem value="Full Body">Full Body</MenuItem>
+          </TextField>
 {/* FILE BONITO */}
 <Box
   component="label"

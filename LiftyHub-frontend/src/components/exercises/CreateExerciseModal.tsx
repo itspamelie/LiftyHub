@@ -123,15 +123,16 @@ export default function CreateExerciseModal({ open, onClose, onCreated }: any) {
   }}
 >
   <MenuItem value=""><em>Selecciona músculo</em></MenuItem>
-            <MenuItem value="Gluteo">Glúteo</MenuItem>
+            <MenuItem value="Glúteo">Glúteo</MenuItem>
             <MenuItem value="Pantorrilla">Pantorrilla</MenuItem>
-            <MenuItem value="Triceps">Tríceps</MenuItem>
-            <MenuItem value="Biceps">Bíceps</MenuItem>
+            <MenuItem value="Tríceps">Tríceps</MenuItem>
+            <MenuItem value="Bíceps">Bíceps</MenuItem>
             <MenuItem value="Hombro">Hombro</MenuItem>
             <MenuItem value="Espalda">Espalda</MenuItem>
-            <MenuItem value="Cuadriceps">Cuádriceps</MenuItem>
+            <MenuItem value="Cuádriceps">Cuádriceps</MenuItem>
             <MenuItem value="Femoral">Femoral</MenuItem>
             <MenuItem value="Abdomen">Abdomen</MenuItem>
+            <MenuItem value="Antebrazo">Antebrazo</MenuItem>
             <MenuItem value="Pecho">Pecho</MenuItem>
           </TextField>
 
@@ -166,11 +167,12 @@ export default function CreateExerciseModal({ open, onClose, onCreated }: any) {
 >
             <MenuItem value=""><em>Selecciona categoría</em></MenuItem>
             <MenuItem value="Cardio">Cardio</MenuItem>
-            <MenuItem value="Hipertrofia">Hipertrofia</MenuItem>
             <MenuItem value="Fuerza">Fuerza</MenuItem>
             <MenuItem value="Resistencia">Resistencia</MenuItem>
             <MenuItem value="Movilidad">Movilidad</MenuItem>
-            <MenuItem value="Funcional">Funcional</MenuItem>
+            <MenuItem value="Funcional">HIIT</MenuItem>
+            <MenuItem value="Core">Core</MenuItem>
+            <MenuItem value="Todo">Todo</MenuItem>
           </TextField>
 
           {/* BOTÓN */}

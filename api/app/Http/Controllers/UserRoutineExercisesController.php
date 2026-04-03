@@ -116,15 +116,11 @@ class UserRoutineExercisesController extends Controller
         ]);
     }
 
-    public function getByRoutine($id)
+public function getByRoutine($id)
 {
-    $data = UserRoutineExercise::with([
-        'routine.plan',
-        'routine.somatotype',
-        'exercise.exerciseFiles'
-    ])
-    ->where('user_routine_id', $id)
-    ->get();
+    $data = UserRoutineExercise::with(['exercise'])
+        ->where('user_routine_id', $id)
+        ->get();
 
     if ($data->isEmpty()) {
         return response()->json([

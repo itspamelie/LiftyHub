@@ -13,6 +13,7 @@ import { useParams } from "react-router-dom";
 import { apiFetch, getImageUrl } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import LabelIcon from '@mui/icons-material/Label';
 
 
 export default function RoutineDetail() {
@@ -28,39 +29,35 @@ useEffect(() => {
     try {
       const res = await apiFetch(`/routines/${id}/exercises`);
 
-      const data = res.data;
+const routineData = res.routine;
+const exercisesData = res.exercises;
 
-      if (data && data.length > 0) {
+setRoutine(routineData);
 
-        // rutina
-        setRoutine(data[0].routine);
+if (exercisesData.length > 0) {
+  const mapped = exercisesData.map((item: any) => {
+    const files = item.exercise?.exercise_files;
 
-        // ejercicios
-        const mapped = data.map((item: any) => {
-          const files = item.exercise?.exercise_files;
+    const randomImg =
+      files && files.length > 0
+        ? files[Math.floor(Math.random() * files.length)].file_path
+        : null;
 
-          const randomImg =
-            files && files.length > 0
-              ? files[Math.floor(Math.random() * files.length)].file_path
-              : null;
+    return {
+      id: item.id,
+      name: item.exercise.name,
+      img: randomImg,
+      reps: item.repetitions,
+      series: item.sets,
+      rest: item.seconds_rest,
+      technique: item.exercise.technique
+    };
+  });
 
-          return {
-            id: item.id,
-            name: item.exercise.name,
-            img: randomImg,
-
-            reps: item.repetitions,
-            series: item.sets,
-            rest: item.seconds_rest,
-            technique: item.exercise.technique
-          };
-        });
-
-        setExercises(mapped);
-      } else{
-        setExercises([]);
-      }
-
+  setExercises(mapped);
+} else {
+  setExercises([]);
+}
       
       setLoading(false);
       Swal.close();
@@ -205,10 +202,16 @@ const handleDelete = async (id: number) => {
           </Box>
 
           <Box display="flex" gap={1} alignItems="center">
+            <LabelIcon></LabelIcon>
+            <Typography>Categoria: {routine.category}</Typography>
+          </Box>
+
+          <Box display="flex" gap={1} alignItems="center">
             <PersonIcon />
             <Typography>Elaborada por: Admin</Typography>
           </Box>
         </Box>
+        
 
         {/* HEADER EJERCICIOS */}
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} p={4}>

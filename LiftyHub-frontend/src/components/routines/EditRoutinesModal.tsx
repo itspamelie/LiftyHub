@@ -239,6 +239,27 @@ export default function EditRoutinesModal({ open, onClose, routine, onUpdated }:
             ))}
           </TextField>
 
+          <TextField
+  select
+  fullWidth
+              value={category}
+            onChange={(e) => setCategory(e.target.value)}
+  sx={{
+    "& .MuiOutlinedInput-root": {
+      background: "#fff",
+      borderRadius: "10px"
+    }
+  }}
+>
+          <MenuItem value=""><em>Selecciona Categoría</em></MenuItem>
+                      <MenuItem value="Todo">Todo</MenuItem>
+                      <MenuItem value="Fuerza">Fuerza</MenuItem>
+                      <MenuItem value="Movilidad">Movilidad</MenuItem>
+                      <MenuItem value="Cardio">Cardio</MenuItem>
+                      <MenuItem value="HIIT">HIIT</MenuItem>
+                      <MenuItem value="Full Body">Full Body</MenuItem>
+          </TextField>
+
           {/* Upload */}
           <Box
             component="label"
