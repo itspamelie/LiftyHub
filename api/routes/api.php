@@ -22,6 +22,7 @@ use App\Http\Controllers\UserPropertiesController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\UserRoutinesController;
 use App\Http\Controllers\UserStreaksController;
+use App\Http\Controllers\UserRoutineExercisesController;
 use App\Http\Controllers\DashboardController;
 
 
@@ -37,6 +38,7 @@ Route::resource('users',UsersController::class);
 Route::resource('userStreak',UserStreaksController::class);
 Route::get('/userRoutines/{id}/count', [UserRoutinesController::class, 'count']);
 Route::resource('userRoutines',UserRoutinesController::class);
+Route::resource('userRoutineExercises',userRoutineExercises::class);
 Route::resource('userProperties',UserPropertiesController::class);
 Route::resource('subscriptions',SubscriptionsController::class);
 Route::resource('somatotypes',SomatotypesController::class);
@@ -51,7 +53,6 @@ Route::resource('exerciseFiles',ExerciseFilesController::class);
 Route::resource('exercises',ExerciseController::class);
 Route::resource('dietReviews',DietReviewsController::class);
 Route::resource('dietPlans',DietPlansController::class);
-Route::resource('exerciseRoutines',ExerciseRoutinesController::class);
 Route::resource('routines',RoutinesController::class);
 Route::get('/dashboard', [DashboardController::class, 'stats']);
 Route::get('/search-users', [UsersController::class, 'searchUsers']);
@@ -60,5 +61,4 @@ Route::get('/search-somatotypes', [SomatotypesController::class, 'searchSomatoty
 Route::get('/search-exercises', [ExerciseController::class, 'searchExercises']);
 Route::get('/search-routines', [RoutinesController::class, 'searchRoutines']);
 Route::get('/exercise-files/{id}', [ExerciseFilesController::class, 'getByExercise']);
-Route::get('/exercise-routines/{id}', [ExerciseRoutinesController::class, 'getByRoutine']);
-});
+Route::get('/routines/{id}/exercises', [ExerciseRoutinesController::class, 'getByRoutine']);});

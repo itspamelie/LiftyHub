@@ -175,21 +175,7 @@ const getData = async () => {
   <Box sx={{ position: "relative", zIndex: 2, pl: 9,pr:9 }}>
     <TopNavbar />
 
-<Button
-  variant="contained"
-  startIcon={<ArrowBackIcon />}
-  onClick={() => navigate(`/dashboard/exercises/`)}
-  sx={{
-    borderRadius: "12px",
-    textTransform: "none",
-    fontWeight: "bold",
-    background: "linear-gradient(90deg,#3a8dff,#5da8ff)",
-    mb: 5,
-    ml: 1
-  }}
->
-  Regresar
-</Button>
+
 {/*SI NO HAY ARCHIVOS... */}
 {files.length === 0 ? (
 

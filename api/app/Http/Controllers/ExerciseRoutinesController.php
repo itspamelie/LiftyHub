@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ExerciseRoutine;
+use App\Models\Routine;
 
 
 class ExerciseRoutinesController extends Controller
@@ -117,11 +118,15 @@ class ExerciseRoutinesController extends Controller
         ]);
     }
 
-     public function getByRoutine($id)
+public function getByRoutine($id)
 {
-    $data = ExerciseRoutine::with('routine','exercise')
-        ->where('routine_id', $id)
-        ->get();
+    $data = ExerciseRoutine::with([
+    'routine.plan',
+    'routine.somatotype',
+    'exercise.exerciseFiles'
+])
+->where('routine_id', $id)
+->get();
 
     return response()->json([
         "status" => "ok",

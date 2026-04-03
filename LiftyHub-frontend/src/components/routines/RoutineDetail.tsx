@@ -8,40 +8,136 @@ import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { apiFetch, getImageUrl } from "../../services/api";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+
 
 export default function RoutineDetail() {
+      const [loading, setLoading] = useState(true);
 
-  const routine = {
-    name: "FULL BODY PRINCIPIANTE",
-    objective: "Adaptación",
-    duration: 40,
-    level: "Principiante",
-    plan: "Free",
-    somatotype: "Mesomorfo",
-    img: "https://images.unsplash.com/photo-1599058917765-a780eda07a3e"
+  const { id } = useParams();
+const navigate = useNavigate();
+const [routine, setRoutine] = useState<any>(null);
+const [exercises, setExercises] = useState<any[]>([]);
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const res = await apiFetch(`/routines/${id}/exercises`);
+
+      const data = res.data;
+
+      if (data && data.length > 0) {
+
+        // rutina
+        setRoutine(data[0].routine);
+
+        // ejercicios
+        const mapped = data.map((item: any) => {
+          const files = item.exercise?.exercise_files;
+
+          const randomImg =
+            files && files.length > 0
+              ? files[Math.floor(Math.random() * files.length)].file_path
+              : null;
+
+          return {
+            id: item.id,
+            name: item.exercise.name,
+            img: randomImg,
+
+            reps: item.repetitions,
+            series: item.sets,
+            rest: item.seconds_rest,
+            technique: item.exercise.technique
+          };
+        });
+
+        setExercises(mapped);
+      }
+
+      
+      setLoading(false);
+      Swal.close();
+
+    } catch (error) {
+      console.error("ERROR:", error);
+      setLoading(false);
+      Swal.close();
+    }
   };
 
-  const exercises = [
-    {
-      id: 1,
-      name: "Press de banca",
-      reps: 12,
-      series: 4,
-      rest: 60,
-      technique: "Controlar bajada",
-      img: "https://i.imgur.com/8Km9tLL.png"
-    },
-    {
-      id: 2,
-      name: "Sentadilla libre",
-      reps: 10,
-      series: 4,
-      rest: 90,
-      technique: "Rodillas afuera",
-      img: "https://i.imgur.com/2nCt3Sbl.jpg"
-    }
-  ];
+  fetchData();
+}, [id]);
 
+
+    // LOADING ALERT
+    useEffect(() => {
+      if (loading) {
+        Swal.fire({
+          title: "Cargando rutinas...",
+          text: "Obteniendo información",
+          background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+          color: "#fff",
+                confirmButtonColor:"#60a5fa",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+      }
+    }, [loading]);
+  
+    if (loading) return null;
+
+
+const handleDelete = async (id: number) => {
+  try {
+
+    const confirm = await Swal.fire({
+      title: "¿Eliminar ejercicio de la rutina?",
+      text: "Esta acción no se puede deshacer",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Sí, eliminar",
+      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      color: "#fff"
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    await apiFetch(`/exerciseRoutines/${id}`, {
+      method: "DELETE"
+    });
+
+    //quitar de la vista
+    setExercises(prev => prev.filter(ex => ex.id !== id));
+
+    Swal.fire({
+      icon: "success",
+      title: "Ejercicio eliminado de la rutina",
+      confirmButtonColor: "#60a5fa",
+      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      color: "#fff"
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    Swal.fire({
+      icon: "error",
+      title: "Error al eliminar el ejercicio",
+      confirmButtonColor: "#60a5fa",
+      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      color: "#fff"
+    });
+  }
+};
   return (
     <Box sx={{ background: "#000", minHeight: "100vh", width:"100%", color: "white" }}>
 
@@ -52,7 +148,7 @@ export default function RoutineDetail() {
           height: 280,
           backgroundImage: `
             linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.9)),
-            url(${routine.img})
+           url(${getImageUrl(routine.img, "routines")})
           `,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -98,12 +194,12 @@ export default function RoutineDetail() {
 
           <Box display="flex" gap={1} alignItems="center">
             <LocalOfferIcon />
-            <Typography>Plan: {routine.plan}</Typography>
+            <Typography>Plan: {routine.plan?.name}</Typography>
           </Box>
 
           <Box display="flex" gap={1} alignItems="center">
             <MonitorWeightIcon />
-            <Typography> Somatotipo: {routine.somatotype}</Typography>
+            <Typography> Somatotipo: {routine.somatotype?.type}</Typography>
           </Box>
 
           <Box display="flex" gap={1} alignItems="center">
@@ -130,14 +226,17 @@ export default function RoutineDetail() {
         </Box>
 
         {/* LISTA EJERCICIOS */}
+        
 <Box
   sx={{
     display: "grid",
-    gridTemplateColumns: "repeat(2, 1fr)", // 👈 2 por fila
+    gridTemplateColumns: "repeat(2, 1fr)", // 2 por fila
     gap: 2,
     px: 2
   }}
->          {exercises.map((ex) => (
+
+> 
+         {exercises.map((ex) => (
             <Box
               key={ex.id}
               sx={{
@@ -158,7 +257,7 @@ export default function RoutineDetail() {
                     width: 110,
                     height: 110,
                     borderRadius: "16px",
-                    backgroundImage: `url(${ex.img})`,
+                    backgroundImage: `url(${getImageUrl(ex.img, "exercises")})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center"
                   }}
@@ -168,7 +267,7 @@ export default function RoutineDetail() {
                   <Typography fontWeight="bold">{ex.name}</Typography>
                   <Typography>Repeticiones: {ex.reps}</Typography>
                   <Typography>Series: {ex.series}</Typography>
-                  <Typography>Descanso: {ex.rest}s</Typography>
+                  <Typography>Descanso: {ex.rest}s entre serie</Typography>
 
                   <Box
                     sx={{
@@ -189,17 +288,27 @@ export default function RoutineDetail() {
 
               {/* DERECHA (ICONOS) */}
               <Box>
-                <IconButton sx={{ color: "#34d399" }}>
-                  <VisibilityIcon />
-                </IconButton>
+                             {/* VISUALIZAR */}
+<IconButton
+  onClick={() => navigate(`/dashboard/exercise/${ex.id}`)}
+  sx={{
+    color: "#34d399",
+    "&:hover": { backgroundColor: "rgba(52,211,153,0.1)" }
+  }}
+>
+    
+  <VisibilityIcon />
+</IconButton>
 
                 <IconButton sx={{ color: "#60a5fa" }}>
                   <EditIcon />
                 </IconButton>
 
-                <IconButton sx={{ color: "#f87171" }}>
-                  <DeleteIcon />
-                </IconButton>
+                <IconButton
+  sx={{ color: "#f87171" }}
+  onClick={() => handleDelete(ex.id)}
+> <DeleteIcon />
+</IconButton>
               </Box>
             </Box>
           ))}
