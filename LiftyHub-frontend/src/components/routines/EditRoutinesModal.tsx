@@ -23,7 +23,7 @@ export default function EditRoutinesModal({ open, onClose, routine, onUpdated }:
   const [planId, setPlanId] = useState("")
   const [somatotypeId, setSomatotypeId] = useState("")
   const [file, setFile] = useState<any>(null)
-
+const [category, setCategory] = useState("")
   const [plans, setPlans] = useState<any[]>([]) //nunca undefined
   const [somatotypes, setSomatotypes] = useState<any[]>([])
 
@@ -36,6 +36,7 @@ export default function EditRoutinesModal({ open, onClose, routine, onUpdated }:
       setDuration(routine.duration || "")
       setPlanId(routine.plan_id || routine.plan?.id || "")
       setSomatotypeId(routine.somatotype_id || routine.somatotype?.id || "")
+      setCategory(routine.category || "") 
       setFile(null)
     }
   }, [routine])
@@ -70,6 +71,7 @@ export default function EditRoutinesModal({ open, onClose, routine, onUpdated }:
       formData.append("duration", duration)
       formData.append("plan_id", planId)
       formData.append("somatotype_id", somatotypeId)
+      formData.append("category", category)
 
       if (file) {
         formData.append("img", file)
