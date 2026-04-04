@@ -14,7 +14,7 @@ class Exercise extends Model
         'categorie'
     ];
 
-    public function exerciseFiles()
+public function exercise_files()
 {
     return $this->hasMany(ExerciseFile::class);
 }

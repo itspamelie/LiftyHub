@@ -33,30 +33,32 @@ useEffect(() => {
       const res = await apiFetch(`/routines/${id}/exercises`);
 
 const routineData = res.routine;
-const exercisesData = res.exercises;
-
+const exercisesData = res.exercises || res.data || [];
 setRoutine(routineData);
 
 if (exercisesData.length > 0) {
-  const mapped = exercisesData.map((item: any) => {
-    const files = item.exercise?.exercise_files;
+const mapped = exercisesData.map((item: any) => {
 
-    const randomImg =
-      files && files.length > 0
-        ? files[Math.floor(Math.random() * files.length)].file_path
-        : null;
+  const exercise = item.exercise || item;
 
-    return {
-      id: item.id,
-      exercise_id: item.exercise.id,
-      name: item.exercise.name,
-      img: randomImg,
-      reps: item.repetitions,
-      series: item.sets,
-      rest: item.seconds_rest,
-      technique: item.exercise.technique
-    };
-  });
+  const files = exercise.exercise_files;
+
+  const randomImg =
+    files && files.length > 0
+      ? files[Math.floor(Math.random() * files.length)].file_path
+      : null;
+
+  return {
+    id: item.id,
+    exercise_id: exercise.id,
+    name: exercise.name,
+    img: randomImg,
+    reps: item.repetitions,
+    series: item.sets,
+    rest: item.seconds_rest,
+    technique: exercise.technique
+  };
+});
 
   setExercises(mapped);
 } else {
@@ -142,7 +144,7 @@ const handleDelete = async (id: number) => {
   }
 };
   return (
-    <Box sx={{ background: "#000", minHeight: "100vh", width:"100%", color: "white" }}>
+    <Box sx={{ background: "#000", width:"100%", color: "white" }}>
 
       {/* HEADER FULL WIDTH */}
       <Box
@@ -221,17 +223,18 @@ const handleDelete = async (id: number) => {
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} p={4}>
           <Typography variant="h5">Ejercicios</Typography>
 
-          <Button
-            startIcon={<AddIcon />}
-            sx={{
-              background: "linear-gradient(90deg,#3a8dff,#5da8ff)",
-              color: "white",
-              borderRadius: "12px",
-              px: 3
-            }}
-          >
-            AGREGAR
-          </Button>
+         <Button
+  startIcon={<AddIcon />}
+  onClick={() => navigate(`/dashboard/routine/${id}/add-exercise`)}
+  sx={{
+    background: "linear-gradient(90deg,#3a8dff,#5da8ff)",
+    color: "white",
+    borderRadius: "12px",
+    px: 3
+  }}
+>
+  AGREGAR
+</Button>
         </Box>
 
    {/* LISTA EJERCICIOS */}

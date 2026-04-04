@@ -9,7 +9,7 @@ class ExerciseController extends Controller
 {
                           public function index()
     {
-         $data = Exercise::all();
+         $data = Exercise::with('exercise_files')->get();
 
         //Siempre que hagamos una api enviamos un JSON
         return response()->json([

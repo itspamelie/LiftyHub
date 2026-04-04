@@ -120,8 +120,7 @@ if (file) {
       overflow: "hidden"
     }
   }}
->   
-      <DialogContent
+>         <DialogContent
         sx={{
           background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
           color: "white",

@@ -123,7 +123,7 @@ public function getByRoutine($id)
     $routine = Routine::with([
         'plan',
         'somatotype',
-        'exerciseRoutines.exercise.exerciseFiles'
+'exerciseRoutines.exercise.exercise_files'
     ])->find($id);
 
     if (!$routine) {
