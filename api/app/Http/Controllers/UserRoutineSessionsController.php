@@ -34,8 +34,8 @@ class UserRoutineSessionsController extends Controller
     {
           $validated = $request->validate([
             'user_id'=>'required',
-            'routine_id'=>'required',
-            'user_routine_id'=>'required',
+            'routine_id'=>'nullable',
+            'user_routine_id'=>'nullable',
             'started_at'=>'required|date',
             'finished_at'=>'required|date',
         ]);
@@ -84,8 +84,8 @@ class UserRoutineSessionsController extends Controller
     {
          $validated = $request->validate([
             'user_id'=>'required',
-            'routine_id'=>'required',
-            'user_routine_id'=>'required',
+            'routine_id'=>'nullable',
+            'user_routine_id'=>'nullable',
             'started_at'=>'required|date',
             'finished_at'=>'required|date',
         ]);
