@@ -37,7 +37,7 @@ class UserRoutineSessionsController extends Controller
             'routine_id'=>'nullable',
             'user_routine_id'=>'nullable',
             'started_at'=>'required|date',
-            'finished_at'=>'required|date',
+            'finished_at'=>'nullable|date',
         ]);
 
         //metodo si los campos se llaman igual que en la base de datos
