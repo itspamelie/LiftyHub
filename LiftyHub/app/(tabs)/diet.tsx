@@ -172,8 +172,8 @@ export default function DietScreen() {
 
       {/* MODAL UPGRADE */}
       <Modal visible={showUpgradeModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowUpgradeModal(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
             <TouchableOpacity style={styles.modalClose} onPress={() => setShowUpgradeModal(false)}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
             </TouchableOpacity>
@@ -210,8 +210,8 @@ export default function DietScreen() {
               ))}
               <Text style={styles.modalNote}>Contacta a un administrador para actualizar tu plan.</Text>
             </ScrollView>
-          </View>
-        </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
 
     </View>
@@ -408,11 +408,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: spacing.borderRadius,
     gap: 8,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
   },
 
   unlockText: {

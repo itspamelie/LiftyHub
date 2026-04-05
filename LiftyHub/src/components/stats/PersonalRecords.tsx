@@ -3,24 +3,45 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
 
+type Props = {
+  logs: any[];
+};
+
 type Record = {
   exercise: string;
   weight: number;
   reps: number;
 };
 
-export default function PersonalRecords() {
+function calculate1RM(weight: number, reps: number) {
+  return Math.round(weight * (1 + reps / 30));
+}
+
+export default function PersonalRecords({ logs }: Props) {
 
   const { t } = useLanguage();
 
-  const records: Record[] = [];
+  // Agrupar por ejercicio y quedarse con el mayor peso
+  const recordMap: { [exerciseId: number]: Record } = {};
+  logs.forEach((l: any) => {
+    const weight = parseFloat(l.weight_lifted) || 0;
+    const name = l.exercise?.name ?? `Ejercicio ${l.exercise_id}`;
+    const existing = recordMap[l.exercise_id];
+    if (!existing || weight > existing.weight) {
+      recordMap[l.exercise_id] = {
+        exercise: name,
+        weight,
+        reps: l.repetitions ?? 1,
+      };
+    }
+  });
 
-  // 🧠 Si el usuario aún no tiene datos
+  const records = Object.values(recordMap);
+
   if (records.length === 0) {
     return (
       <View style={styles.section}>
         <Text style={styles.title}>{t("stats.personalRecords")}</Text>
-
         <View style={styles.emptyContainer}>
           <Ionicons name="trophy-outline" size={36} color={colors.textSecondary} />
           <Text style={styles.empty}>Empieza a entrenar para ver tus records personales</Text>
@@ -31,9 +52,7 @@ export default function PersonalRecords() {
 
   return (
     <View style={styles.section}>
-
       <Text style={styles.title}>{t("stats.personalRecords")}</Text>
-
       {records.map((record, index) => (
         <RecordItem
           key={index}
@@ -42,14 +61,8 @@ export default function PersonalRecords() {
           reps={record.reps}
         />
       ))}
-
     </View>
   );
-}
-
-// 🧠 Calcula el One Rep Max
-function calculate1RM(weight: number, reps: number) {
-  return Math.round(weight * (1 + reps / 30));
 }
 
 type RecordItemProps = {
@@ -59,24 +72,18 @@ type RecordItemProps = {
 };
 
 function RecordItem({ exercise, weight, reps }: RecordItemProps) {
-
   const rm = calculate1RM(weight, reps);
-
   return (
     <View style={styles.card}>
-
       <Text style={styles.exercise}>{exercise}</Text>
-
       <View style={styles.row}>
         <Text style={styles.label}>PR</Text>
         <Text style={styles.value}>{weight} kg</Text>
       </View>
-
       <View style={styles.row}>
-        <Text style={styles.label}>1RM</Text>
+        <Text style={styles.label}>1RM est.</Text>
         <Text style={styles.value}>{rm} kg</Text>
       </View>
-
     </View>
   );
 }
@@ -84,42 +91,42 @@ function RecordItem({ exercise, weight, reps }: RecordItemProps) {
 const styles = StyleSheet.create({
 
   section: {
-    marginTop: 30
+    marginTop: 30,
   },
 
   title: {
     color: colors.text,
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 12
+    marginBottom: 12,
   },
 
   card: {
     backgroundColor: colors.card,
     borderRadius: spacing.borderRadius,
     padding: 16,
-    marginBottom: 10
+    marginBottom: 10,
   },
 
   exercise: {
     color: colors.text,
     fontWeight: "600",
-    marginBottom: 8
+    marginBottom: 8,
   },
 
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 4
+    marginTop: 4,
   },
 
   label: {
-    color: colors.textSecondary
+    color: colors.textSecondary,
   },
 
   value: {
     color: colors.primary,
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
 
   emptyContainer: {
@@ -131,6 +138,6 @@ const styles = StyleSheet.create({
   empty: {
     color: colors.textSecondary,
     textAlign: "center",
-  }
+  },
 
 });

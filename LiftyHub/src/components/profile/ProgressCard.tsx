@@ -20,25 +20,25 @@ export default function ProgressCard({
       <Text style={styles.title}>Progreso semanal</Text>
 
       {/* Círculo simple */}
-      <View style={styles.circle}>
-        <Text style={styles.percent}>{progress}%</Text>
+      <View style={[styles.circle, progress === 0 && styles.circleEmpty]}>
+        <Text style={styles.percent}>{progress > 0 ? `${progress}%` : "—"}</Text>
         <Text style={styles.week}>de la semana</Text>
       </View>
 
       <View style={styles.stats}>
 
         <View style={styles.stat}>
-          <Text style={styles.number}>{workouts}</Text>
+          <Text style={styles.number}>{workouts > 0 ? workouts : "—"}</Text>
           <Text style={styles.label}>Entrenos</Text>
         </View>
 
         <View style={styles.stat}>
-          <Text style={styles.number}>{reps}</Text>
+          <Text style={styles.number}>{reps > 0 ? reps : "—"}</Text>
           <Text style={styles.label}>Reps</Text>
         </View>
 
         <View style={styles.stat}>
-          <Text style={styles.number}>{sets}</Text>
+          <Text style={styles.number}>{sets > 0 ? sets : "—"}</Text>
           <Text style={styles.label}>Series</Text>
         </View>
 
@@ -73,6 +73,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignSelf: "center",
     marginBottom: 20
+  },
+
+  circleEmpty: {
+    borderColor: colors.textSecondary,
+    borderStyle: "dashed",
   },
 
   percent: {

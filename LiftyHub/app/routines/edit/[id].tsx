@@ -256,15 +256,9 @@ export default function EditRoutineScreen() {
         >
           <Ionicons name="arrow-back" size={20} color="white" />
         </TouchableOpacity>
-
-        <View style={styles.progressBar}>
-          {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-            <View key={i} style={[styles.progressSegment, i < step && styles.progressSegmentActive]} />
-          ))}
-        </View>
-
-        <Text style={styles.stepCounter}>{step}/{TOTAL_STEPS}</Text>
+        <Text style={styles.headerTitle}>Editar rutina</Text>
       </View>
+      <View style={styles.headerDivider} />
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.card}>
@@ -427,19 +421,28 @@ export default function EditRoutineScreen() {
               </TouchableOpacity>
             </View>
           )}
+          <TouchableOpacity
+            style={[styles.continueButton, (!canContinue() || saving) && { opacity: 0.5 }]}
+            onPress={step < TOTAL_STEPS ? () => setStep(step + 1) : handleSave}
+            disabled={!canContinue() || saving}
+          >
+            {saving
+              ? <ActivityIndicator color="white" />
+              : <Text style={styles.continueText}>{step < TOTAL_STEPS ? "Continuar" : "Guardar cambios"}</Text>
+            }
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity
-          style={[styles.continueButton, (!canContinue() || saving) && { opacity: 0.5 }]}
-          onPress={step < TOTAL_STEPS ? () => setStep(step + 1) : handleSave}
-          disabled={!canContinue() || saving}
-        >
-          {saving
-            ? <ActivityIndicator color="white" />
-            : <Text style={styles.continueText}>{step < TOTAL_STEPS ? "Continuar" : "Guardar cambios"}</Text>
-          }
-        </TouchableOpacity>
       </ScrollView>
+
+      {/* PROGRESS BAR FIJA ABAJO */}
+      <View style={styles.bottomBar}>
+        <View style={styles.progressBarContainer}>
+          {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+            <View key={i} style={[styles.progressSegment, i < step && styles.progressSegmentActive]} />
+          ))}
+        </View>
+        <Text style={styles.stepCounter}>{step}/{TOTAL_STEPS}</Text>
+      </View>
 
       {Toast}
 
@@ -565,7 +568,9 @@ export default function EditRoutineScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: "row", alignItems: "center", paddingTop: 60, paddingBottom: 16, paddingHorizontal: spacing.screenPadding, backgroundColor: colors.background, gap: 12 },
+  header: { flexDirection: "row", alignItems: "center", paddingTop: 60, paddingBottom: 12, paddingHorizontal: spacing.screenPadding, backgroundColor: colors.background, gap: 12 },
+  headerTitle: { flex: 1, color: colors.text, fontSize: 20, fontWeight: "700" },
+  headerDivider: { height: 1, backgroundColor: "#2A2A2A" },
   backButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: "center", alignItems: "center" },
   progressBar: { flex: 1, flexDirection: "row", gap: 6 },
   progressSegment: { flex: 1, height: 4, borderRadius: 2, backgroundColor: colors.card },
@@ -607,6 +612,8 @@ const styles = StyleSheet.create({
   addExerciseText: { color: colors.primary, fontSize: 15, fontWeight: "600" },
   continueButton: { backgroundColor: colors.primary, borderRadius: 30, paddingVertical: 16, alignItems: "center", marginTop: 28 },
   continueText: { color: "white", fontSize: 16, fontWeight: "bold" },
+  bottomBar: { flexDirection: "row", alignItems: "center", paddingHorizontal: spacing.screenPadding, paddingVertical: 14, paddingBottom: 32, backgroundColor: colors.background, borderTopWidth: 1, borderTopColor: colors.card, gap: 10 },
+  progressBarContainer: { flex: 1, flexDirection: "row", gap: 6 },
   modalContainer: { flex: 1, backgroundColor: colors.background },
   modalHeader: { flexDirection: "row", alignItems: "center", paddingTop: 60, paddingBottom: 16, paddingHorizontal: spacing.screenPadding, borderBottomWidth: 1, borderBottomColor: colors.card, gap: 12 },
   modalTitle: { color: colors.text, fontSize: 20, fontWeight: "bold" },

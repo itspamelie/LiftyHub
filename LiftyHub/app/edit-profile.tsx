@@ -83,8 +83,8 @@ export default function EditProfileScreen() {
         setGoal(d.objective ?? "Ganar músculo");
         setSomatotype(d.somatotype?.type ?? "Mesomorfo");
       }
-    } catch (e) {
-      console.log("Error cargando datos:", e);
+    } catch {
+      Alert.alert("Error", "No se pudieron cargar tus datos. Verifica tu conexión.");
     } finally {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);

@@ -34,6 +34,7 @@ export default function NutritionistsScreen() {
 
   const [nutritionists, setNutritionists] = useState<Nutritionist[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [selected, setSelected] = useState<Nutritionist | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -47,7 +48,7 @@ export default function NutritionistsScreen() {
         const all: Nutritionist[] = data?.data ?? [];
         setNutritionists(all.filter((n) => n.is_active));
       } catch {
-        // error silencioso
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -78,6 +79,17 @@ export default function NutritionistsScreen() {
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Ionicons name="cloud-offline-outline" size={48} color={colors.textSecondary} />
+        <Text style={{ color: colors.textSecondary, marginTop: 12, fontSize: 15, textAlign: "center" }}>
+          No se pudieron cargar los nutriólogos.{"\n"}Verifica tu conexión e intenta de nuevo.
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
 
@@ -99,7 +111,7 @@ export default function NutritionistsScreen() {
           </View>
         ) : (
           nutritionists.map((n) => (
-            <TouchableOpacity key={n.id} style={styles.card} onPress={() => handleSelect(n)}>
+            <View key={n.id} style={styles.card}>
 
               <View style={styles.cardTop}>
                 {n.profile_pic ? (
@@ -124,12 +136,31 @@ export default function NutritionistsScreen() {
                 <Text style={styles.bio} numberOfLines={2}>{n.bio}</Text>
               ) : null}
 
-              <View style={styles.selectRow}>
-                <Text style={styles.selectText}>Seleccionar</Text>
-                <Ionicons name="arrow-forward" size={16} color={colors.primary} />
+              <View style={styles.actionsRow}>
+                <TouchableOpacity
+                  style={styles.viewBtn}
+                  onPress={() => router.push({
+                    pathname: "/nutritionist-profile",
+                    params: {
+                      name: n.user?.name ?? "Nutriólogo",
+                      specialty: n.specialty,
+                      bio: n.bio ?? "",
+                      rating: n.rating,
+                      location: n.location ?? "",
+                      profile_pic: n.profile_pic ?? "",
+                    },
+                  } as any)}
+                >
+                  <Ionicons name="person-outline" size={15} color={colors.primary} />
+                  <Text style={styles.viewBtnText}>Ver perfil</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.selectBtn} onPress={() => handleSelect(n)}>
+                  <Text style={styles.selectBtnText}>Seleccionar</Text>
+                  <Ionicons name="arrow-forward" size={15} color="white" />
+                </TouchableOpacity>
               </View>
 
-            </TouchableOpacity>
+            </View>
           ))
         )}
       </ScrollView>
@@ -318,6 +349,47 @@ const styles = StyleSheet.create({
 
   selectText: {
     color: colors.primary,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  actionsRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 4,
+  },
+
+  viewBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    borderRadius: spacing.borderRadius,
+    paddingVertical: 10,
+  },
+
+  viewBtnText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  selectBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: colors.primary,
+    borderRadius: spacing.borderRadius,
+    paddingVertical: 10,
+  },
+
+  selectBtnText: {
+    color: "white",
     fontSize: 14,
     fontWeight: "600",
   },

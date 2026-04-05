@@ -104,8 +104,24 @@ export default function RoutinesScreen() {
   const [scannedData, setScannedData] = useState<any>(null);
   const [importing, setImporting] = useState(false);
   const scanLock = useRef(false);
+  const [scannerUsed, setScannerUsed] = useState(false);
+  const [showScannerWarning, setShowScannerWarning] = useState(false);
+  const [nextScanDate, setNextScanDate] = useState<Date | null>(null);
 
-  const handleOpenScanner = async () => {
+  useEffect(() => {
+    AsyncStorage.getItem("@liftyhub_scanner_date").then((val) => {
+      if (!val) return;
+      const last = new Date(val);
+      const next = new Date(last);
+      next.setMonth(next.getMonth() + 1);
+      if (new Date() < next) {
+        setScannerUsed(true);
+        setNextScanDate(next);
+      }
+    });
+  }, []);
+
+  const openScannerCamera = async () => {
     if (!cameraPermission?.granted) {
       const { granted } = await requestCameraPermission();
       if (!granted) {
@@ -115,6 +131,29 @@ export default function RoutinesScreen() {
     }
     scanLock.current = false;
     setShowScanner(true);
+  };
+
+  const handleOpenScanner = () => {
+    if (!hasAppAccess) {
+      if (scannerUsed) {
+        setShowUpgradeModal(true);
+      } else {
+        setShowScannerWarning(true);
+      }
+      return;
+    }
+    openScannerCamera();
+  };
+
+  const handleScannerWarningConfirm = async () => {
+    setShowScannerWarning(false);
+    const now = new Date().toISOString();
+    await AsyncStorage.setItem("@liftyhub_scanner_date", now);
+    setScannerUsed(true);
+    const next = new Date();
+    next.setMonth(next.getMonth() + 1);
+    setNextScanDate(next);
+    openScannerCamera();
   };
 
   const handleBarCodeScanned = ({ data }: { data: string }) => {
@@ -413,8 +452,8 @@ export default function RoutinesScreen() {
 
       {/* MODAL UPGRADE */}
       <Modal visible={showUpgradeModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowUpgradeModal(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
             <TouchableOpacity style={styles.modalClose} onPress={() => setShowUpgradeModal(false)}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
             </TouchableOpacity>
@@ -423,7 +462,9 @@ export default function RoutinesScreen() {
             </View>
             <Text style={styles.modalTitle}>Desbloquea las Rutinas App</Text>
             <Text style={styles.modalSubtitle}>
-              Accede a todas las rutinas diseñadas por expertos con cualquier plan de pago.
+              {scannerUsed && nextScanDate
+                ? `Ya usaste tu escaneo mensual gratuito. Se renueva el ${nextScanDate.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}. Actualiza tu plan para escanear sin límites.`
+                : "Accede a todas las rutinas diseñadas por expertos con cualquier plan de pago."}
             </Text>
             <ScrollView showsVerticalScrollIndicator={false}>
               {PLAN_OPTIONS.map((plan) => (
@@ -451,8 +492,8 @@ export default function RoutinesScreen() {
               ))}
               <Text style={styles.modalNote}>Contacta a un administrador para actualizar tu plan.</Text>
             </ScrollView>
-          </View>
-        </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
 
       {/* MODAL SCANNER QR */}
@@ -475,6 +516,40 @@ export default function RoutinesScreen() {
       </Modal>
 
       {Toast}
+
+      {/* MODAL ADVERTENCIA SCANNER FREE */}
+      <Modal visible={showScannerWarning} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowScannerWarning(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+            <View style={styles.modalIcon}>
+              <Ionicons name="qr-code-outline" size={32} color={colors.primary} />
+            </View>
+            <Text style={styles.modalTitle}>Escaneo mensual gratuito</Text>
+            <Text style={styles.modalSubtitle}>
+              Con el plan Free puedes escanear una rutina por QR cada mes. Tu próximo escaneo estará disponible el{" "}
+              {(() => {
+                const next = new Date();
+                next.setMonth(next.getMonth() + 1);
+                return next.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
+              })()}.
+            </Text>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <TouchableOpacity
+                style={[styles.planCard, { flex: 1, alignItems: "center", paddingVertical: 14, borderColor: "#2C2C2E", borderWidth: 1 }]}
+                onPress={() => setShowScannerWarning(false)}
+              >
+                <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.planCard, { flex: 1, alignItems: "center", paddingVertical: 14, backgroundColor: colors.primary }]}
+                onPress={handleScannerWarningConfirm}
+              >
+                <Text style={{ color: "white", fontWeight: "700" }}>Escanear</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
 
       {/* MODAL CONFIRMACIÓN IMPORTAR */}
       <Modal visible={!!scannedData} transparent animationType="slide" onRequestClose={() => setScannedData(null)}>
@@ -652,11 +727,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: spacing.borderRadius,
     gap: 8,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
   },
 
   unlockText: {

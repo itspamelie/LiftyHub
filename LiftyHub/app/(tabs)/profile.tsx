@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, RefreshControl, Modal, Dimensions, TextInput } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, RefreshControl, Modal, Dimensions, TextInput, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, planColors } from "@/src/styles/globalstyles";
 import ProgressCard from "@/src/components/profile/ProgressCard";
@@ -9,7 +9,7 @@ import PersonalRecords from "@/src/components/stats/PersonalRecords";
 import { router } from "expo-router";
 import { useEffect, useState, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getUser, getUserProperties, getUserStreak, getUserRoutinesCount } from "@/src/services/api";
+import { getUser, getUserProperties, getUserStreak, getUserRoutinesCount, getUserRoutineSessions, getExerciseLogs } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import { BlurView } from "expo-blur";
@@ -62,6 +62,8 @@ export default function ProfileScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"perfil" | "stats">("perfil");
   const [stats, setStats] = useState<any>(null);
+  const [allSessions, setAllSessions] = useState<any[]>([]);
+  const [allLogs, setAllLogs] = useState<any[]>([]);
   const [animationTrigger, setAnimationTrigger] = useState(0);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showConverterModal, setShowConverterModal] = useState(false);
@@ -84,10 +86,14 @@ export default function ProfileScreen() {
 
       const userParsed = JSON.parse(userStorage);
 
-      const userData         = await getUser(userParsed.id, token);
-      const propsData        = await getUserProperties(userParsed.id, token);
-      const streakData       = await getUserStreak(userParsed.id, token);
-      const routinesCountData = await getUserRoutinesCount(userParsed.id, token);
+      const [userData, propsData, streakData, routinesCountData, sessionsData, logsData] = await Promise.all([
+        getUser(userParsed.id, token),
+        getUserProperties(userParsed.id, token),
+        getUserStreak(userParsed.id, token),
+        getUserRoutinesCount(userParsed.id, token),
+        getUserRoutineSessions(token),
+        getExerciseLogs(token),
+      ]);
 
       const user   = userData.data ?? userData;
       const props  = propsData.data ?? propsData;
@@ -96,16 +102,56 @@ export default function ProfileScreen() {
       const routinesCount = routinesCountData?.count ?? 0;
       const currentStreak = streak?.current_streak ?? 0;
 
+      // Calcular inicio y fin de la semana actual (lunes–domingo)
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0=Dom, 1=Lun...
+      const diffToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() + diffToMonday);
+      weekStart.setHours(0, 0, 0, 0);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      weekEnd.setHours(23, 59, 59, 999);
+
+      // Sesiones de esta semana del usuario
+      const rawSessions: any[] = (sessionsData?.data ?? []).filter(
+        (s: any) => Number(s.user_id) === Number(userParsed.id)
+      );
+      const weeklySessions = rawSessions.filter((s: any) => {
+        const d = new Date((s.started_at ?? "").replace(" ", "T"));
+        return d >= weekStart && d <= weekEnd;
+      });
+      const weeklyWorkouts = weeklySessions.length;
+      const weeklyProgress = Math.min(Math.round((weeklyWorkouts / 7) * 100), 100);
+
+      // Logs de ejercicio de esta semana del usuario
+      const rawLogs: any[] = (logsData?.data ?? []).filter(
+        (l: any) => Number(l.user_id) === Number(userParsed.id)
+      );
+      const weeklyLogs = rawLogs.filter((l: any) => {
+        const d = new Date((l.workout_date ?? "").replace(" ", "T"));
+        return d >= weekStart && d <= weekEnd;
+      });
+      const weeklyReps = weeklyLogs.reduce((sum: number, l: any) => sum + (l.repetitions ?? 0), 0);
+      const weeklySets = weeklyLogs.reduce((sum: number, l: any) => sum + (l.sets ?? 0), 0);
+
+      setAllSessions(rawSessions);
+      setAllLogs(rawLogs);
+
       setProfile({
-        name:          user.name,
-        age:           user.birthdate ? calculateAge(user.birthdate) : "N/A",
-        avatar:        require("@/src/assets/defaultd.png"),
+        name:            user.name,
+        age:             user.birthdate ? calculateAge(user.birthdate) : "N/A",
+        avatar:          require("@/src/assets/defaultd.png"),
         routinesCount,
-        streak:        currentStreak,
-        weight:        props?.weight ? parseFloat(props.weight).toString() : "0",
-        height:        props?.stature ? parseFloat(props.stature).toString() : "0",
-        somatotype:    props?.somatotype?.type ?? "N/A",
-        goal:          props?.objective ?? "N/A",
+        streak:          currentStreak,
+        weight:          props?.weight ? parseFloat(props.weight).toString() : "0",
+        height:          props?.stature ? parseFloat(props.stature).toString() : "0",
+        somatotype:      props?.somatotype?.type ?? "N/A",
+        goal:            props?.objective ?? "N/A",
+        weeklyWorkouts,
+        weeklyProgress,
+        weeklyReps,
+        weeklySets,
       });
 
       setStats({
@@ -114,8 +160,8 @@ export default function ProfileScreen() {
         totalTime:   0,
         totalWeight: 0,
       });
-    } catch (error) {
-      console.log("ERROR:", error);
+    } catch {
+      Alert.alert("Error", "No se pudo cargar tu perfil. Verifica tu conexión.");
     } finally {
       if (isRefresh) setRefreshing(false);
     }
@@ -212,8 +258,8 @@ export default function ProfileScreen() {
             hasStatsAccess ? (
               <View style={{ marginTop: 20 }}>
                 {stats && <StatsSummaryGrid stats={stats} trigger={animationTrigger} />}
-                <WeeklyActivityChart />
-                <PersonalRecords />
+                <WeeklyActivityChart sessions={allSessions} />
+                <PersonalRecords logs={allLogs} />
               </View>
             ) : null
           ) : (
@@ -222,29 +268,34 @@ export default function ProfileScreen() {
               <View style={styles.statsCard}>
                 <View style={styles.stat}>
                   <Ionicons name="barbell" size={24} color={colors.text} />
-                  <Text style={styles.statNumber}>{profile.routinesCount}</Text>
+                  <Text style={styles.statNumber}>{profile.routinesCount > 0 ? profile.routinesCount : "—"}</Text>
                   <Text style={styles.statLabel}>{t("profile.routines")}</Text>
                 </View>
                 <View style={styles.stat}>
                   <Ionicons name="scale" size={24} color={colors.text} />
-                  <Text style={styles.statNumber}>{profile.weight} kg</Text>
+                  <Text style={styles.statNumber}>{profile.weight !== "0" ? `${profile.weight} kg` : "—"}</Text>
                   <Text style={styles.statLabel}>{t("profile.weight")}</Text>
                 </View>
                 <View style={styles.stat}>
                   <Ionicons name="flame" size={24} color={colors.text} />
-                  <Text style={styles.statNumber}>{profile.streak}</Text>
+                  <Text style={styles.statNumber}>{profile.streak > 0 ? profile.streak : "—"}</Text>
                   <Text style={styles.statLabel}>{t("profile.streak")}</Text>
                 </View>
               </View>
 
               {/* PROGRESO */}
-              <ProgressCard progress={75} workouts={6} reps={420} sets={45} />
+              <ProgressCard
+                progress={profile.weeklyProgress ?? 0}
+                workouts={profile.weeklyWorkouts ?? 0}
+                reps={profile.weeklyReps ?? 0}
+                sets={profile.weeklySets ?? 0}
+              />
 
               {/* INFORMACIÓN FÍSICA */}
               <Text style={styles.title}>{t("profile.physicalInfo")}</Text>
               <View style={styles.infoGrid}>
-                <InfoStatCard icon="resize" label={t("profile.height")} value={`${profile.height} cm`} />
-                <InfoStatCard icon="scale" label={t("profile.weight")} value={`${profile.weight} kg`} />
+                <InfoStatCard icon="resize" label={t("profile.height")} value={profile.height !== "0" ? `${profile.height} cm` : "—"} />
+                <InfoStatCard icon="scale" label={t("profile.weight")} value={profile.weight !== "0" ? `${profile.weight} kg` : "—"} />
                 <InfoStatCard icon="body" label={t("profile.somatotype")} value={profile.somatotype} />
                 <InfoStatCard icon="flag" label={t("profile.goal")} value={profile.goal} />
               </View>
@@ -328,8 +379,8 @@ export default function ProfileScreen() {
 
       {/* MODAL UPGRADE STATS */}
       <Modal visible={showStatsModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowStatsModal(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
             <TouchableOpacity style={styles.modalClose} onPress={() => setShowStatsModal(false)}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
             </TouchableOpacity>
@@ -366,8 +417,8 @@ export default function ProfileScreen() {
               ))}
               <Text style={styles.modalNote}>Contacta a un administrador para actualizar tu plan.</Text>
             </ScrollView>
-          </View>
-        </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
 
     </View>

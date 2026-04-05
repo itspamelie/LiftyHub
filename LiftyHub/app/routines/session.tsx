@@ -21,6 +21,7 @@ import {
   createUserStreak,
   updateUserStreak,
   createUserRoutineSession,
+  updateUserRoutineSession,
   createExerciseLog,
 } from "@/src/services/api";
 
@@ -36,6 +37,11 @@ type ExerciseEntry = {
 
 type Phase = "exercise" | "rest" | "done";
 
+const toMySQLDate = (d: Date) => {
+  const p = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+};
+
 export default function SessionScreen() {
   const { id, name, isUserRoutine } = useLocalSearchParams<{
     id: string;
@@ -49,7 +55,7 @@ export default function SessionScreen() {
 
   // session
   const [sessionId, setSessionId] = useState<number | null>(null);
-  const startedAt = useRef<string>(new Date().toISOString());
+  const startedAt = useRef<string>("");
 
   // navigation
   const [exIndex, setExIndex] = useState(0);
@@ -94,6 +100,7 @@ export default function SessionScreen() {
   // load exercises + create session
   useEffect(() => {
     const load = async () => {
+      startedAt.current = toMySQLDate(new Date());
       try {
         const token = await AsyncStorage.getItem("token");
         const userRaw = await AsyncStorage.getItem("user");
@@ -131,7 +138,7 @@ export default function SessionScreen() {
             );
             if (sessionRes?.data?.id) setSessionId(sessionRes.data.id);
           } catch {
-            // route not available yet — continue in local mode
+            // route not available — continue in local mode
           }
         }
       } catch {}
@@ -223,9 +230,14 @@ export default function SessionScreen() {
       const userRaw = await AsyncStorage.getItem("user");
       if (!token || !userRaw) { router.back(); return; }
       const user = JSON.parse(userRaw);
-      const finishedAt = new Date().toISOString();
+      const finishedAt = toMySQLDate(new Date());
 
-      // 1) save exercise logs
+      // 1) close session
+      if (sessionId) {
+        await updateUserRoutineSession(sessionId, { finished_at: finishedAt }, token).catch(() => {});
+      }
+
+      // 2) save exercise logs
       if (sessionId) {
         const workoutDate = today();
         for (let i = 0; i < exercises.length; i++) {

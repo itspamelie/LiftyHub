@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, Modal, TextInput, ActivityIndicator, TouchableWithoutFeedback, Keyboard } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
@@ -13,11 +13,51 @@ import { colors, planColors } from "@/src/styles/globalstyles";
 export default function Settings() {
 
   const { t, language, changeLanguage } = useLanguage();
-  const { plan } = useSubscription();
+  const { plan, refresh: refreshSubscription } = useSubscription();
 
   const planColor = plan ? (planColors[plan.name] ?? colors.primary) : "#A1A1A1";
   const [notifications, setNotifications] = useState(false);
   const [units, setUnits] = useState("kg");
+
+  // Dev mode
+  const versionTaps = useRef(0);
+  const [showDevModal, setShowDevModal] = useState(false);
+  const [devActivePlan, setDevActivePlan] = useState<string | null>(null);
+
+  const DEV_PLANS = [
+    { id: 1, name: "Free",  level: 0, price: 0,   description: "Acceso limitado" },
+    { id: 2, name: "Basic", level: 1, price: 99,  description: "Plan básico" },
+    { id: 3, name: "Meal",  level: 2, price: 400, description: "Plan nutrición" },
+    { id: 4, name: "Pro",   level: 2, price: 600, description: "Plan completo" },
+  ] as const;
+
+  useEffect(() => {
+    AsyncStorage.getItem("@liftyhub_dev_plan").then((val) => {
+      if (val) setDevActivePlan(JSON.parse(val).name);
+    });
+  }, []);
+
+  const handleVersionTap = () => {
+    versionTaps.current += 1;
+    if (versionTaps.current >= 5) {
+      versionTaps.current = 0;
+      setShowDevModal(true);
+    }
+  };
+
+  const handleSetDevPlan = async (p: typeof DEV_PLANS[number]) => {
+    await AsyncStorage.setItem("@liftyhub_dev_plan", JSON.stringify(p));
+    setDevActivePlan(p.name);
+    await refreshSubscription();
+    setShowDevModal(false);
+  };
+
+  const handleClearDevPlan = async () => {
+    await AsyncStorage.removeItem("@liftyhub_dev_plan");
+    setDevActivePlan(null);
+    await refreshSubscription();
+    setShowDevModal(false);
+  };
 
   // Modal eliminar cuenta
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -79,8 +119,8 @@ export default function Settings() {
       await AsyncStorage.removeItem("token");
       await AsyncStorage.removeItem("user");
       router.replace("/auth/login");
-    } catch (error) {
-      console.log("Error al cerrar sesión:", error);
+    } catch {
+      Alert.alert("Error", "No se pudo cerrar sesión. Intenta de nuevo.");
     }
   };
 
@@ -247,6 +287,7 @@ export default function Settings() {
             icon="code-outline"
             label={t("settings.version")}
             value="1.0.0"
+            onPress={handleVersionTap}
           />
         </View>
 
@@ -341,6 +382,38 @@ export default function Settings() {
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* MODAL DEV — plan override */}
+      <Modal visible={showDevModal} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowDevModal(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+            <Text style={styles.modalTitle}>🛠 Dev — Cambiar plan</Text>
+            <Text style={styles.modalSubtitle}>
+              Plan activo: <Text style={{ color: "white", fontWeight: "700" }}>{devActivePlan ?? plan?.name ?? "Free"}</Text>
+            </Text>
+            {DEV_PLANS.map((p) => (
+              <TouchableOpacity
+                key={p.name}
+                style={[
+                  styles.modalButtonDanger,
+                  { backgroundColor: colors.primary },
+                  devActivePlan === p.name && { opacity: 0.5 },
+                  { marginBottom: 8 },
+                ]}
+                onPress={() => handleSetDevPlan(p)}
+                disabled={devActivePlan === p.name}
+              >
+                <Text style={styles.modalButtonText}>{p.name}</Text>
+              </TouchableOpacity>
+            ))}
+            {devActivePlan && (
+              <TouchableOpacity style={[styles.modalCancel, { marginTop: 4 }]} onPress={handleClearDevPlan}>
+                <Text style={styles.modalCancelText}>Usar plan real del servidor</Text>
+              </TouchableOpacity>
+            )}
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
 
     </View>

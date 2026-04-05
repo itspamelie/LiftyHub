@@ -66,8 +66,8 @@ export default function ExerciseDetail() {
         if (!token || !id) return;
         const res = await getExerciseFiles(Number(id), token);
         if (res?.data) setFiles(res.data);
-      } catch (e) {
-        console.log("Error cargando archivos:", e);
+      } catch {
+        // Los archivos son opcionales, el ejercicio igual se muestra
       } finally {
         setLoading(false);
       }

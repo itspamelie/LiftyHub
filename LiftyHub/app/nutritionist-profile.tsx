@@ -8,75 +8,36 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { colors, spacing } from "@/src/styles/globalstyles";
 
-const NUTRITIONIST = {
-  name: "Dra. Laura Pérez",
-  specialty: "Nutricionista deportiva",
-  location: "Ciudad de México, México",
-  followers: 1240,
-  connections: 318,
-  imageUrl: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80",
-  coverUrl: "https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=900&q=80",
-  about:
-    "Especialista en nutrición aplicada al rendimiento deportivo con más de 8 años de experiencia. Trabajo con atletas de alto rendimiento, entusiastas del fitness y personas que buscan mejorar su composición corporal de forma sostenible.",
-  experience: [
-    {
-      id: 1,
-      role: "Nutricionista deportiva",
-      company: "LiftyHub Health",
-      period: "2023 – Presente",
-      icon: "barbell-outline",
-    },
-    {
-      id: 2,
-      role: "Consultora nutricional",
-      company: "Clínica FitLife",
-      period: "2019 – 2023",
-      icon: "medkit-outline",
-    },
-    {
-      id: 3,
-      role: "Investigadora en nutrición",
-      company: "UNAM — Facultad de Medicina",
-      period: "2017 – 2019",
-      icon: "flask-outline",
-    },
-  ],
-  education: [
-    {
-      id: 1,
-      degree: "Maestría en Nutrición Deportiva",
-      school: "Universidad Iberoamericana",
-      year: "2017",
-    },
-    {
-      id: 2,
-      degree: "Licenciatura en Nutriología",
-      school: "UNAM",
-      year: "2015",
-    },
-  ],
-  skills: [
-    "Planes de alimentación",
-    "Composición corporal",
-    "Suplementación deportiva",
-    "Pérdida de grasa",
-    "Hipertrofia muscular",
-    "Nutrición clínica",
-    "Coaching nutricional",
-  ],
-  rating: 4.9,
-  reviews: 87,
-};
+const COVER_URL = "https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=900&q=80";
 
 export default function NutritionistProfileScreen() {
+  const params = useLocalSearchParams<{
+    name: string;
+    specialty: string;
+    bio: string;
+    rating: string;
+    location: string;
+    profile_pic: string;
+  }>();
+
+  const name = params.name ?? "Nutriólogo";
+  const specialty = params.specialty ?? "";
+  const bio = params.bio ?? "";
+  const rating = parseFloat(params.rating ?? "0");
+  const location = params.location ?? "";
+  const profile_pic = params.profile_pic ?? "";
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 
       {/* PORTADA */}
-      <ImageBackground source={{ uri: NUTRITIONIST.coverUrl }} style={styles.cover}>
+      <ImageBackground
+        source={{ uri: "https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=900&q=80" }}
+        style={styles.cover}
+      >
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={22} color="white" />
         </TouchableOpacity>
@@ -87,112 +48,48 @@ export default function NutritionistProfileScreen() {
 
         {/* AVATAR FLOTANTE */}
         <View style={styles.avatarWrapper}>
-          <Image source={{ uri: NUTRITIONIST.imageUrl }} style={styles.avatar} />
-          <View style={styles.onlineDot} />
-        </View>
-
-        {/* ACCIONES */}
-        <View style={styles.actions}>
-          <TouchableOpacity style={styles.btnPrimary}>
-            <Ionicons name="chatbubble-ellipses-outline" size={16} color="white" />
-            <Text style={styles.btnPrimaryText}>Mensaje</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btnSecondary}>
-            <Ionicons name="person-add-outline" size={16} color={colors.primary} />
-            <Text style={styles.btnSecondaryText}>Conectar</Text>
-          </TouchableOpacity>
+          {profile_pic ? (
+            <Image source={{ uri: profile_pic }} style={styles.avatar} />
+          ) : (
+            <View style={[styles.avatar, styles.avatarFallback]}>
+              <Ionicons name="person" size={36} color={colors.textSecondary} />
+            </View>
+          )}
         </View>
 
         {/* NOMBRE E INFO */}
-        <Text style={styles.name}>{NUTRITIONIST.name}</Text>
-        <Text style={styles.specialty}>{NUTRITIONIST.specialty}</Text>
+        <Text style={styles.name}>{name}</Text>
+        <Text style={styles.specialty}>{specialty}</Text>
 
-        <View style={styles.locationRow}>
-          <Ionicons name="location-outline" size={14} color={colors.textSecondary} />
-          <Text style={styles.location}>{NUTRITIONIST.location}</Text>
-        </View>
+        {location ? (
+          <View style={styles.locationRow}>
+            <Ionicons name="location-outline" size={14} color={colors.textSecondary} />
+            <Text style={styles.location}>{location}</Text>
+          </View>
+        ) : null}
 
         {/* RATING */}
         <View style={styles.ratingRow}>
           {[1, 2, 3, 4, 5].map((star) => (
             <Ionicons
               key={star}
-              name={star <= Math.floor(NUTRITIONIST.rating) ? "star" : "star-outline"}
+              name={star <= Math.floor(rating) ? "star" : "star-outline"}
               size={16}
               color="#F59E0B"
             />
           ))}
-          <Text style={styles.ratingText}>
-            {NUTRITIONIST.rating} · {NUTRITIONIST.reviews} reseñas
-          </Text>
-        </View>
-
-        {/* SEGUIDORES */}
-        <View style={styles.followRow}>
-          <View style={styles.followItem}>
-            <Text style={styles.followNumber}>{NUTRITIONIST.followers.toLocaleString()}</Text>
-            <Text style={styles.followLabel}>Seguidores</Text>
-          </View>
-          <View style={styles.followDivider} />
-          <View style={styles.followItem}>
-            <Text style={styles.followNumber}>{NUTRITIONIST.connections}</Text>
-            <Text style={styles.followLabel}>Conexiones</Text>
-          </View>
+          <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
         </View>
 
       </View>
 
       {/* ACERCA DE */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Acerca de</Text>
-        <Text style={styles.aboutText}>{NUTRITIONIST.about}</Text>
-      </View>
-
-      {/* EXPERIENCIA */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Experiencia</Text>
-        {NUTRITIONIST.experience.map((exp) => (
-          <View key={exp.id} style={styles.expCard}>
-            <View style={styles.expIcon}>
-              <Ionicons name={exp.icon as any} size={20} color={colors.primary} />
-            </View>
-            <View style={styles.expInfo}>
-              <Text style={styles.expRole}>{exp.role}</Text>
-              <Text style={styles.expCompany}>{exp.company}</Text>
-              <Text style={styles.expPeriod}>{exp.period}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
-
-      {/* EDUCACIÓN */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Educación</Text>
-        {NUTRITIONIST.education.map((edu) => (
-          <View key={edu.id} style={styles.expCard}>
-            <View style={styles.expIcon}>
-              <Ionicons name="school-outline" size={20} color="#10B981" />
-            </View>
-            <View style={styles.expInfo}>
-              <Text style={styles.expRole}>{edu.degree}</Text>
-              <Text style={styles.expCompany}>{edu.school}</Text>
-              <Text style={styles.expPeriod}>{edu.year}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
-
-      {/* HABILIDADES */}
-      <View style={[styles.section, { marginBottom: 40 }]}>
-        <Text style={styles.sectionTitle}>Especialidades</Text>
-        <View style={styles.skillsWrap}>
-          {NUTRITIONIST.skills.map((skill) => (
-            <View key={skill} style={styles.skillChip}>
-              <Text style={styles.skillText}>{skill}</Text>
-            </View>
-          ))}
+      {bio ? (
+        <View style={[styles.section, { marginBottom: 40 }]}>
+          <Text style={styles.sectionTitle}>Acerca de</Text>
+          <Text style={styles.aboutText}>{bio}</Text>
         </View>
-      </View>
+      ) : null}
 
     </ScrollView>
   );
@@ -236,6 +133,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -50,
     left: 20,
+  },
+
+  avatarFallback: {
+    backgroundColor: "#2C2C2E",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
   },
 
   avatar: {

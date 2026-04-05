@@ -24,6 +24,7 @@ const TIPS = [
 export default function DietPlanScreen() {
 
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [plan, setPlan] = useState<any>(null);
   const [nutritionist, setNutritionist] = useState<any>(null);
 
@@ -47,7 +48,7 @@ export default function DietPlanScreen() {
           setNutritionist(match);
         }
       } catch {
-        // error silencioso
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -59,6 +60,17 @@ export default function DietPlanScreen() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Ionicons name="cloud-offline-outline" size={48} color={colors.textSecondary} />
+        <Text style={{ color: colors.textSecondary, marginTop: 12, fontSize: 15, textAlign: "center" }}>
+          No se pudo cargar tu plan de dieta.{"\n"}Verifica tu conexión e intenta de nuevo.
+        </Text>
       </View>
     );
   }

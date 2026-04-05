@@ -10,6 +10,7 @@ import {
   Platform,
   Modal,
   Share,
+  Alert,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { useLocalSearchParams, router } from "expo-router";
@@ -85,15 +86,14 @@ export default function RoutineDetail() {
         const res = isUser
           ? await getUserRoutineExercises(Number(id), token)
           : await getRoutineExercises(Number(id), token);
-        console.log("RES EJERCICIOS:", JSON.stringify(res));
         if (isUser) {
           if (Array.isArray(res?.data)) setExercises(res.data);
         } else {
           if (Array.isArray(res?.exercises)) setExercises(res.exercises);
           else if (Array.isArray(res?.data)) setExercises(res.data);
         }
-      } catch (e) {
-        console.log("Error cargando ejercicios de rutina:", e);
+      } catch {
+        Alert.alert("Error", "No se pudieron cargar los ejercicios de esta rutina.");
       } finally {
         setLoading(false);
       }

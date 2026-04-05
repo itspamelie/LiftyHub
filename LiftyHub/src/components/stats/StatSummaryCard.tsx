@@ -17,11 +17,15 @@ export default function StatSummaryCard({ icon, label, value, trigger = 0 }: Pro
 
       <Ionicons name={icon as any} size={22} color={colors.primary} />
 
-      <AnimatedStatNumber
-        value={value}
-        trigger={trigger}
-        style={styles.value}
-      />
+      {value > 0 ? (
+        <AnimatedStatNumber
+          value={value}
+          trigger={trigger}
+          style={styles.value}
+        />
+      ) : (
+        <Text style={styles.value}>—</Text>
+      )}
 
       <Text style={styles.label}>{label}</Text>
 

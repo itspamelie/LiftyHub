@@ -8,12 +8,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { registerRequest, createUserProperties } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
+import { useSubscription } from "@/src/context/SubscriptionContext";
 
 type PermissionStatus = "idle" | "granted" | "denied";
 
 export default function Permissions() {
   const router = useRouter();
   const { t } = useLanguage();
+  const { refresh: refreshSubscription } = useSubscription();
 
   const [notifStatus, setNotifStatus] = useState<PermissionStatus>("idle");
   const [galleryStatus, setGalleryStatus] = useState<PermissionStatus>("idle");
@@ -56,6 +58,7 @@ export default function Permissions() {
       if (data?.token) {
         await AsyncStorage.setItem("token", data.token);
         await AsyncStorage.setItem("user", JSON.stringify(data.user));
+        await refreshSubscription();
 
         await createUserProperties(
           {

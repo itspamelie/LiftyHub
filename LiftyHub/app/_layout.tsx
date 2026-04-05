@@ -44,6 +44,7 @@ export default function RootLayout() {
         <Stack.Screen name="routines/new" options={{ headerShown: false }} />
         <Stack.Screen name="routines/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="routines/session" options={{ headerShown: false }} />
+        <Stack.Screen name="routines/edit/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="diet/nutritionists" options={{ headerShown: false }} />
         <Stack.Screen name="diet/plan" options={{ headerShown: false }} />
       </Stack>

@@ -89,8 +89,8 @@ export default function ExercisesScreen() {
       if (!token) return;
       const res = await getExercises(token);
       if (res?.data) setExercises(res.data);
-    } catch (error) {
-      console.log("Error cargando ejercicios:", error);
+    } catch {
+      showToast("No se pudieron cargar los ejercicios.", "error");
     } finally {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);

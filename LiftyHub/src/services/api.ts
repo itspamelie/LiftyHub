@@ -456,6 +456,26 @@ export const updateUserStreak = async (
   });
 };
 
+// 📅 OBTENER SESIONES DE RUTINA DEL USUARIO
+export const getUserRoutineSessions = async (token: string) => {
+  return apiFetch(`${API_URL}/userRoutineSessions`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+// 📊 OBTENER LOGS DE EJERCICIO DEL USUARIO
+export const getExerciseLogs = async (token: string) => {
+  return apiFetch(`${API_URL}/exerciseLogs`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 // 🔥 CREAR RACHA DEL USUARIO (si no existe)
 export const createUserStreak = async (
   data: {
