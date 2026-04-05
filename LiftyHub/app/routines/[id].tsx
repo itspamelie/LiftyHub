@@ -8,7 +8,10 @@ import {
   ActivityIndicator,
   Dimensions,
   Platform,
+  Modal,
+  Share,
 } from "react-native";
+import QRCode from "react-native-qrcode-svg";
 import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -71,6 +74,7 @@ export default function RoutineDetail() {
 
   const [exercises, setExercises] = useState<ExerciseEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showQR, setShowQR] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -81,7 +85,13 @@ export default function RoutineDetail() {
         const res = isUser
           ? await getUserRoutineExercises(Number(id), token)
           : await getRoutineExercises(Number(id), token);
-        if (res?.data) setExercises(res.data);
+        console.log("RES EJERCICIOS:", JSON.stringify(res));
+        if (isUser) {
+          if (Array.isArray(res?.data)) setExercises(res.data);
+        } else {
+          if (Array.isArray(res?.exercises)) setExercises(res.exercises);
+          else if (Array.isArray(res?.data)) setExercises(res.data);
+        }
       } catch (e) {
         console.log("Error cargando ejercicios de rutina:", e);
       } finally {
@@ -96,6 +106,36 @@ export default function RoutineDetail() {
   const categoryIcon = CATEGORY_ICONS[category ?? ""] ?? "pricetag-outline";
   const durationNum  = duration?.replace(" min", "") ?? "—";
 
+  const buildQrData = () => JSON.stringify({
+    app: "liftyhub",
+    v: 1,
+    name,
+    objective,
+    level,
+    category,
+    duration,
+    exercises: exercises.map((ex) => ({
+      name: ex.exercise?.name ?? ex.name ?? "",
+      muscle: ex.exercise?.muscle ?? ex.muscle ?? "",
+      sets: ex.sets ?? 0,
+      reps: ex.repetitions ?? 0,
+      rest: ex.seconds_rest ?? 0,
+    })),
+  });
+
+  const handleShareText = async () => {
+    const exList = exercises
+      .map((ex, i) => {
+        const n = ex.exercise?.name ?? ex.name ?? "Ejercicio";
+        return `${i + 1}. ${n} — ${ex.sets ?? 0} series × ${ex.repetitions ?? 0} reps`;
+      })
+      .join("\n");
+    await Share.share({
+      message: `🏋️ ${name}\n📋 ${category} · ${level} · ${durationNum} min\n\n${exList}`,
+      title: name ?? "Rutina",
+    });
+  };
+
   return (
     <View style={styles.root}>
       <ScrollView showsVerticalScrollIndicator={false} bounces contentContainerStyle={{ paddingBottom: 110 }}>
@@ -106,6 +146,20 @@ export default function RoutineDetail() {
           <View style={styles.heroOverlay} />
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={20} color="white" />
+          </TouchableOpacity>
+          {isUserRoutine === "true" && (
+            <TouchableOpacity
+              style={[styles.shareButton, { right: 60 }]}
+              onPress={() => router.push({
+                pathname: "/routines/edit/[id]",
+                params: { id, name, objective, level, category, duration: duration.replace(" min", ""), img: image ?? "" },
+              })}
+            >
+              <Ionicons name="pencil-outline" size={20} color="white" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.shareButton} onPress={() => setShowQR(true)}>
+            <Ionicons name="qr-code-outline" size={20} color="white" />
           </TouchableOpacity>
           {/* arco inferior para transición suave */}
           <View style={styles.heroArc} />
@@ -187,55 +241,69 @@ export default function RoutineDetail() {
                 const hasSets   = item.sets !== undefined && item.sets !== null;
                 const isLast    = index === exercises.length - 1;
                 const canNavigate = !!item.exercise;
+                const restSecs  = item.seconds_rest ?? 0;
+                const showRest  = !isLast && restSecs > 0;
 
                 return (
-                  <View key={item.id} style={styles.exerciseRow}>
-                    {/* timeline line */}
-                    {!isLast && <View style={styles.timelineLine} />}
+                  <View key={item.id}>
+                    <View style={styles.exerciseRow}>
+                      {/* timeline line — se extiende más si hay descanso */}
+                      {!isLast && (
+                        <View style={[styles.timelineLine, showRest && { bottom: -44 }]} />
+                      )}
 
-                    {/* number badge */}
-                    <View style={styles.indexBadge}>
-                      <Text style={styles.indexBadgeText}>{index + 1}</Text>
-                    </View>
+                      {/* number badge */}
+                      <View style={styles.indexBadge}>
+                        <Text style={styles.indexBadgeText}>{index + 1}</Text>
+                      </View>
 
-                    <TouchableOpacity
-                      style={styles.exerciseCard}
-                      activeOpacity={canNavigate ? 0.75 : 1}
-                      onPress={() => {
-                        if (!canNavigate) return;
-                        router.push({
-                          pathname: "/exercise/[id]",
-                          params: {
-                            id: item.exercise!.id,
-                            name: item.exercise!.name,
-                            muscle: item.exercise!.muscle,
-                            technique: item.exercise!.technique ?? "",
-                            categorie: item.exercise!.categorie ?? "",
-                          },
-                        });
-                      }}
-                    >
-                      <View style={styles.exerciseCardInner}>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.exerciseName}>{exName}</Text>
-                          {(exMuscle || exCat) && (
-                            <Text style={styles.exerciseMuscle}>
-                              {[exMuscle, exCat].filter(Boolean).join(" · ")}
-                            </Text>
-                          )}
-                          {hasSets && (
-                            <View style={styles.metaRow}>
-                              <MetaChip icon="repeat-outline" label={`${item.sets} series`} />
-                              <MetaChip icon="return-down-forward-outline" label={`${item.repetitions} reps`} />
-                              <MetaChip icon="timer-outline" label={`${item.seconds_rest}s`} />
-                            </View>
+                      <TouchableOpacity
+                        style={styles.exerciseCard}
+                        activeOpacity={canNavigate ? 0.75 : 1}
+                        onPress={() => {
+                          if (!canNavigate) return;
+                          router.push({
+                            pathname: "/exercise/[id]",
+                            params: {
+                              id: item.exercise!.id,
+                              name: item.exercise!.name,
+                              muscle: item.exercise!.muscle,
+                              technique: item.exercise!.technique ?? "",
+                              categorie: item.exercise!.categorie ?? "",
+                            },
+                          });
+                        }}
+                      >
+                        <View style={styles.exerciseCardInner}>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.exerciseName}>{exName}</Text>
+                            {(exMuscle || exCat) && (
+                              <Text style={styles.exerciseMuscle}>
+                                {[exMuscle, exCat].filter(Boolean).join(" · ")}
+                              </Text>
+                            )}
+                            {hasSets && (
+                              <View style={styles.metaRow}>
+                                <MetaChip icon="repeat-outline" label={`${item.sets} series`} />
+                                <MetaChip icon="return-down-forward-outline" label={`${item.repetitions} reps`} />
+                                <MetaChip icon="timer-outline" label={`${item.seconds_rest}s`} />
+                              </View>
+                            )}
+                          </View>
+                          {canNavigate && (
+                            <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
                           )}
                         </View>
-                        {canNavigate && (
-                          <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
-                        )}
+                      </TouchableOpacity>
+                    </View>
+
+                    {/* DESCANSO entre ejercicios */}
+                    {showRest && (
+                      <View style={styles.restRow}>
+                        <Ionicons name="timer-outline" size={13} color={colors.textSecondary} />
+                        <Text style={styles.restText}>{restSecs}s descanso</Text>
                       </View>
-                    </TouchableOpacity>
+                    )}
                   </View>
                 );
               })}
@@ -247,11 +315,48 @@ export default function RoutineDetail() {
 
       {/* ── CTA STICKY ── */}
       <View style={styles.ctaWrapper}>
-        <TouchableOpacity style={styles.ctaButton} activeOpacity={0.85}>
+        <TouchableOpacity
+          style={styles.ctaButton}
+          activeOpacity={0.85}
+          onPress={() => router.push({
+            pathname: "/routines/session",
+            params: { id, name, isUserRoutine },
+          })}
+        >
           <Ionicons name="play-circle-outline" size={22} color="white" />
           <Text style={styles.ctaText}>Iniciar Entrenamiento</Text>
         </TouchableOpacity>
       </View>
+
+      {/* ── MODAL QR ── */}
+      <Modal visible={showQR} transparent animationType="fade">
+        <View style={styles.qrOverlay}>
+          <View style={styles.qrCard}>
+            <Text style={styles.qrTitle}>{name}</Text>
+            <Text style={styles.qrSubtitle}>{category} · {level} · {durationNum} min</Text>
+
+            <View style={styles.qrBox}>
+              <QRCode
+                value={buildQrData()}
+                size={220}
+                backgroundColor="#FFFFFF"
+                color="#000000"
+              />
+            </View>
+
+            <Text style={styles.qrHint}>Escanea este código para importar la rutina</Text>
+
+            <TouchableOpacity style={styles.qrShareButton} onPress={handleShareText}>
+              <Ionicons name="share-outline" size={18} color="white" />
+              <Text style={styles.qrShareText}>Compartir como texto</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.qrCloseButton} onPress={() => setShowQR(false)}>
+              <Text style={styles.qrCloseText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -538,6 +643,22 @@ const styles = StyleSheet.create({
     gap: 6,
   },
 
+  // DESCANSO
+  restRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingLeft: 48,
+    marginTop: -4,
+    marginBottom: 12,
+  },
+
+  restText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: "500",
+  },
+
   // EMPTY
   emptyBox: {
     alignItems: "center",
@@ -578,6 +699,92 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "700",
+  },
+
+  // SHARE BUTTON (hero)
+  shareButton: {
+    position: "absolute",
+    top: Platform.OS === "ios" ? 58 : 38,
+    right: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+
+  // QR MODAL
+  qrOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.75)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+
+  qrCard: {
+    backgroundColor: "#1C1C1E",
+    borderRadius: 24,
+    padding: 28,
+    width: "100%",
+    alignItems: "center",
+    gap: 12,
+  },
+
+  qrTitle: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+
+  qrSubtitle: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    textAlign: "center",
+  },
+
+  qrBox: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginVertical: 8,
+  },
+
+  qrHint: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    textAlign: "center",
+  },
+
+  qrShareButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: colors.primary,
+    borderRadius: spacing.borderRadius,
+    paddingVertical: 13,
+    paddingHorizontal: 24,
+    marginTop: 4,
+    width: "100%",
+    justifyContent: "center",
+  },
+
+  qrShareText: {
+    color: "white",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  qrCloseButton: {
+    paddingVertical: 10,
+  },
+
+  qrCloseText: {
+    color: colors.textSecondary,
+    fontSize: 14,
   },
 
 });

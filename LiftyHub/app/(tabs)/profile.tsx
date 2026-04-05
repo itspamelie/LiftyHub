@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, RefreshControl, Modal, Dimensions } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, RefreshControl, Modal, Dimensions, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, planColors } from "@/src/styles/globalstyles";
 import ProgressCard from "@/src/components/profile/ProgressCard";
@@ -64,6 +64,16 @@ export default function ProfileScreen() {
   const [stats, setStats] = useState<any>(null);
   const [animationTrigger, setAnimationTrigger] = useState(0);
   const [showStatsModal, setShowStatsModal] = useState(false);
+  const [showConverterModal, setShowConverterModal] = useState(false);
+  const [converterValue, setConverterValue] = useState("");
+  const [converterMode, setConverterMode] = useState<"kg" | "lbs">("kg");
+
+  const convertedValue = (() => {
+    const num = parseFloat(converterValue);
+    if (isNaN(num)) return "";
+    if (converterMode === "kg") return (num * 2.20462).toFixed(2);
+    return (num / 2.20462).toFixed(2);
+  })();
 
   const loadUser = async (isRefresh = false) => {
     try {
@@ -83,16 +93,26 @@ export default function ProfileScreen() {
       const props  = propsData.data ?? propsData;
       const streak = streakData.data ?? streakData;
 
+      const routinesCount = routinesCountData?.count ?? 0;
+      const currentStreak = streak?.current_streak ?? 0;
+
       setProfile({
         name:          user.name,
         age:           user.birthdate ? calculateAge(user.birthdate) : "N/A",
         avatar:        require("@/src/assets/defaultd.png"),
-        routinesCount: routinesCountData?.count ?? 0,
-        streak:        streak?.current_streak ?? 0,
+        routinesCount,
+        streak:        currentStreak,
         weight:        props?.weight ? parseFloat(props.weight).toString() : "0",
         height:        props?.stature ? parseFloat(props.stature).toString() : "0",
         somatotype:    props?.somatotype?.type ?? "N/A",
         goal:          props?.objective ?? "N/A",
+      });
+
+      setStats({
+        workouts:    routinesCount,
+        streak:      currentStreak,
+        totalTime:   0,
+        totalWeight: 0,
       });
     } catch (error) {
       console.log("ERROR:", error);
@@ -103,17 +123,10 @@ export default function ProfileScreen() {
 
   useEffect(() => { loadUser(); }, []);
 
-  const loadStats = async () => {
-    setStats({ workouts: 24, streak: 5, totalTime: 18, totalWeight: 12450 });
-  };
-
-  useEffect(() => { loadStats(); }, []);
-
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
     setAnimationTrigger(prev => prev + 1);
     loadUser(true);
-    loadStats();
   }, []);
 
 
@@ -245,12 +258,73 @@ export default function ProfileScreen() {
                 <Text style={styles.settingsButtonText}>{t("profile.settings")}</Text>
                 <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
               </TouchableOpacity>
+
+              {/* BOTÓN CALCULADORA */}
+              <TouchableOpacity
+                style={styles.settingsButton}
+                onPress={() => { setConverterValue(""); setShowConverterModal(true); }}
+              >
+                <Ionicons name="swap-horizontal-outline" size={20} color={colors.textSecondary} />
+                <Text style={styles.settingsButtonText}>Calculadora kg / lbs</Text>
+                <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+              </TouchableOpacity>
             </>
           )}
 
         </View>
 
       </ScrollView>
+
+      {/* MODAL CALCULADORA KG/LBS */}
+      <Modal visible={showConverterModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity style={styles.modalClose} onPress={() => setShowConverterModal(false)}>
+              <Ionicons name="close" size={22} color={colors.textSecondary} />
+            </TouchableOpacity>
+            <View style={styles.modalIcon}>
+              <Ionicons name="swap-horizontal-outline" size={32} color={colors.primary} />
+            </View>
+            <Text style={styles.modalTitle}>Calculadora kg / lbs</Text>
+
+            {/* TOGGLE MODO */}
+            <View style={styles.converterToggle}>
+              <TouchableOpacity
+                style={[styles.converterToggleBtn, converterMode === "kg" && styles.converterToggleBtnActive]}
+                onPress={() => { setConverterMode("kg"); setConverterValue(""); }}
+              >
+                <Text style={[styles.converterToggleText, converterMode === "kg" && styles.converterToggleTextActive]}>kg → lbs</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.converterToggleBtn, converterMode === "lbs" && styles.converterToggleBtnActive]}
+                onPress={() => { setConverterMode("lbs"); setConverterValue(""); }}
+              >
+                <Text style={[styles.converterToggleText, converterMode === "lbs" && styles.converterToggleTextActive]}>lbs → kg</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* INPUT */}
+            <TextInput
+              style={styles.converterInput}
+              keyboardType="numeric"
+              placeholder={converterMode === "kg" ? "Ingresa kg" : "Ingresa lbs"}
+              placeholderTextColor={colors.textSecondary}
+              value={converterValue}
+              onChangeText={setConverterValue}
+            />
+
+            {/* RESULTADO */}
+            {convertedValue !== "" && (
+              <View style={styles.converterResult}>
+                <Text style={styles.converterResultLabel}>{converterMode === "kg" ? "Libras" : "Kilogramos"}</Text>
+                <Text style={styles.converterResultValue}>
+                  {convertedValue} {converterMode === "kg" ? "lbs" : "kg"}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
 
       {/* MODAL UPGRADE STATS */}
       <Modal visible={showStatsModal} transparent animationType="slide">
@@ -659,6 +733,64 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
     marginTop: 8,
+  },
+
+  converterToggle: {
+    flexDirection: "row",
+    backgroundColor: "#2C2C2E",
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 20,
+  },
+
+  converterToggleBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: "center",
+    borderRadius: 10,
+  },
+
+  converterToggleBtnActive: {
+    backgroundColor: colors.primary,
+  },
+
+  converterToggleText: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  converterToggleTextActive: {
+    color: "white",
+  },
+
+  converterInput: {
+    backgroundColor: "#2C2C2E",
+    borderRadius: spacing.borderRadius,
+    padding: 16,
+    color: colors.text,
+    fontSize: 18,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+
+  converterResult: {
+    backgroundColor: "#2C2C2E",
+    borderRadius: spacing.borderRadius,
+    padding: 20,
+    alignItems: "center",
+    gap: 4,
+  },
+
+  converterResultLabel: {
+    color: colors.textSecondary,
+    fontSize: 13,
+  },
+
+  converterResultValue: {
+    color: colors.primary,
+    fontSize: 32,
+    fontWeight: "bold",
   },
 
 });

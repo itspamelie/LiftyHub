@@ -9,7 +9,9 @@ import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import { BlurView } from "expo-blur";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getRoutines, getUserRoutines, deleteUserRoutine } from "@/src/services/api";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import { getRoutines, getUserRoutines, deleteUserRoutine, createUserRoutine } from "@/src/services/api";
+import { useToast } from "@/src/hooks/useToast";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -70,6 +72,7 @@ type UserRoutine = {
 // ---------------------- COMPONENTE ----------------------
 export default function RoutinesScreen() {
 
+  const { showToast, Toast } = useToast();
   const { t } = useLanguage();
   const { plan, loading: subLoading } = useSubscription();
   const hasAppAccess = plan?.name !== "Free";
@@ -94,6 +97,69 @@ export default function RoutinesScreen() {
   const [activeTab, setActiveTab] = useState<"mine" | "app">("mine");
   const [selectedFilter, setSelectedFilter] = useState("Todo");
   const [search, setSearch] = useState("");
+
+  // QR Import
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const [showScanner, setShowScanner] = useState(false);
+  const [scannedData, setScannedData] = useState<any>(null);
+  const [importing, setImporting] = useState(false);
+  const scanLock = useRef(false);
+
+  const handleOpenScanner = async () => {
+    if (!cameraPermission?.granted) {
+      const { granted } = await requestCameraPermission();
+      if (!granted) {
+        showToast("Necesitamos acceso a la cámara para escanear el QR.", "error");
+        return;
+      }
+    }
+    scanLock.current = false;
+    setShowScanner(true);
+  };
+
+  const handleBarCodeScanned = ({ data }: { data: string }) => {
+    if (scanLock.current) return;
+    try {
+      const parsed = JSON.parse(data);
+      if (parsed?.app !== "liftyhub") {
+        showToast("Este código no es una rutina de LiftyHub.", "error");
+        return;
+      }
+      scanLock.current = true;
+      setShowScanner(false);
+      setScannedData(parsed);
+    } catch {
+      showToast("No se pudo leer el código QR.", "error");
+    }
+  };
+
+  const handleImportRoutine = async () => {
+    if (!scannedData) return;
+    setImporting(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const userRaw = await AsyncStorage.getItem("user");
+      if (!token || !userRaw) return;
+      const user = JSON.parse(userRaw);
+
+      await createUserRoutine({
+        user_id: user.id,
+        name: scannedData.name,
+        objective: scannedData.objective ?? "",
+        level: scannedData.level ?? "",
+        category: scannedData.category ?? "",
+        duration: Number(scannedData.duration) || 30,
+      }, token);
+
+      setScannedData(null);
+      fetchAll();
+      showToast(`"${scannedData.name}" fue agregada a tus rutinas.`, "success");
+    } catch {
+      showToast("No se pudo importar la rutina.", "error");
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const favKey = (tab: "mine" | "app") => `@liftyhub_favorites_${tab}`;
 
@@ -131,8 +197,8 @@ export default function RoutinesScreen() {
 
       if (resRoutines?.data) setRoutines(resRoutines.data);
       if (resUserRoutines?.data) setUserRoutines(resUserRoutines.data);
-    } catch (error) {
-      console.log("Error cargando rutinas:", error);
+    } catch {
+      showToast("Error al cargar las rutinas.", "error");
     } finally {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
@@ -196,8 +262,9 @@ export default function RoutinesScreen() {
               if (!token) return;
               await deleteUserRoutine(id, token);
               setUserRoutines((prev) => prev.filter((r) => r.id !== id));
-            } catch (error) {
-              console.log("Error eliminando rutina:", error);
+              showToast("Rutina eliminada.", "success");
+            } catch {
+              showToast("No se pudo eliminar la rutina.", "error");
             }
           }
         }
@@ -249,12 +316,14 @@ export default function RoutinesScreen() {
             />
 
             {activeTab === "mine" && (
-              <TouchableOpacity
-                style={styles.addButton}
-                onPress={() => router.push("/routines/new")}
-              >
-                <Ionicons name="pencil" size={20} color="white" />
-              </TouchableOpacity>
+              <View style={styles.headerButtons}>
+                <TouchableOpacity style={styles.iconButton} onPress={handleOpenScanner}>
+                  <Ionicons name="qr-code-outline" size={20} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton} onPress={() => router.push("/routines/new")}>
+                  <Ionicons name="pencil" size={20} color="white" />
+                </TouchableOpacity>
+              </View>
             )}
           </View>
 
@@ -386,6 +455,75 @@ export default function RoutinesScreen() {
         </View>
       </Modal>
 
+      {/* MODAL SCANNER QR */}
+      <Modal visible={showScanner} animationType="slide" onRequestClose={() => setShowScanner(false)}>
+        <View style={styles.scannerContainer}>
+          <CameraView
+            style={StyleSheet.absoluteFillObject}
+            facing="back"
+            onBarcodeScanned={handleBarCodeScanned}
+            barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+          />
+          <View style={styles.scannerOverlay}>
+            <View style={styles.scannerFrame} />
+            <Text style={styles.scannerHint}>Apunta al QR de la rutina</Text>
+          </View>
+          <TouchableOpacity style={styles.scannerClose} onPress={() => setShowScanner(false)}>
+            <Ionicons name="close" size={28} color="white" />
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
+      {Toast}
+
+      {/* MODAL CONFIRMACIÓN IMPORTAR */}
+      <Modal visible={!!scannedData} transparent animationType="slide" onRequestClose={() => setScannedData(null)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity style={styles.modalClose} onPress={() => setScannedData(null)}>
+              <Ionicons name="close" size={22} color={colors.textSecondary} />
+            </TouchableOpacity>
+
+            <View style={styles.modalIcon}>
+              <Ionicons name="download-outline" size={32} color={colors.primary} />
+            </View>
+
+            <Text style={styles.modalTitle}>Importar rutina</Text>
+            <Text style={styles.modalSubtitle}>¿Quieres agregar esta rutina a tu lista?</Text>
+
+            {scannedData && (
+              <View style={styles.importCard}>
+                <Text style={styles.importName}>{scannedData.name}</Text>
+                <Text style={styles.importMeta}>
+                  {scannedData.category}  ·  {scannedData.level}  ·  {scannedData.duration} min
+                </Text>
+                {scannedData.exercises?.length > 0 && (
+                  <View style={styles.importExercises}>
+                    {scannedData.exercises.slice(0, 4).map((ex: any, i: number) => (
+                      <Text key={i} style={styles.importExerciseItem}>• {ex.name}  ({ex.sets}×{ex.reps})</Text>
+                    ))}
+                    {scannedData.exercises.length > 4 && (
+                      <Text style={styles.importExerciseItem}>+{scannedData.exercises.length - 4} más...</Text>
+                    )}
+                  </View>
+                )}
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={[styles.importButton, importing && { opacity: 0.6 }]}
+              onPress={handleImportRoutine}
+              disabled={importing}
+            >
+              {importing
+                ? <ActivityIndicator color="white" />
+                : <Text style={styles.importButtonText}>Agregar a mis rutinas</Text>
+              }
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </View>
   );
 }
@@ -429,17 +567,22 @@ const styles = StyleSheet.create({
     fontSize: 16
   },
 
-  addButton: {
+  headerButtons: {
     position: "absolute",
     top: 40,
     right: 0,
+    flexDirection: "row",
+    gap: 8,
+    zIndex: 20,
+  },
+
+  iconButton: {
     width: 45,
     height: 45,
     borderRadius: 30,
     backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 20
   },
 
   tabRow: {
@@ -627,6 +770,73 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
     marginTop: 8,
+  },
+
+  // Scanner
+  scannerContainer: {
+    flex: 1,
+    backgroundColor: "black",
+  },
+  scannerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scannerFrame: {
+    width: 220,
+    height: 220,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    borderRadius: 16,
+  },
+  scannerHint: {
+    color: "white",
+    marginTop: 20,
+    fontSize: 14,
+  },
+  scannerClose: {
+    position: "absolute",
+    top: 56,
+    right: 24,
+  },
+
+  // Import confirm
+  importCard: {
+    backgroundColor: "#2C2C2E",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    width: "100%",
+  },
+  importName: {
+    color: colors.text,
+    fontSize: 17,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  importMeta: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    marginBottom: 12,
+  },
+  importExercises: {
+    gap: 4,
+  },
+  importExerciseItem: {
+    color: colors.textSecondary,
+    fontSize: 13,
+  },
+  importButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    width: "100%",
+  },
+  importButtonText: {
+    color: "white",
+    fontWeight: "700",
+    fontSize: 16,
   },
 
 });

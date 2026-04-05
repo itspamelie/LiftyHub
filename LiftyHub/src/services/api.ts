@@ -275,6 +275,41 @@ export const deleteUserRoutine = async (routineId: number, token: string) => {
   });
 };
 
+// ✏️ ACTUALIZAR RUTINA DEL USUARIO
+export const updateUserRoutine = async (
+  routineId: number,
+  data: {
+    name?: string;
+    objective?: string;
+    level?: string;
+    category?: string;
+    duration?: number;
+    img?: string;
+  },
+  token: string
+) => {
+  return apiFetch(`${API_URL}/userRoutines/${routineId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+};
+
+// 🗑️ ELIMINAR EJERCICIO DE RUTINA
+export const deleteUserRoutineExercise = async (exerciseId: number, token: string) => {
+  return apiFetch(`${API_URL}/userRoutineExercises/${exerciseId}`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 // 💎 OBTENER SUSCRIPCIONES
 export const getSubscriptions = async (token: string) => {
   return apiFetch(`${API_URL}/subscriptions`, {
@@ -297,7 +332,7 @@ export const getRoutineExercises = async (routineId: number, token: string) => {
 
 // 📋 OBTENER EJERCICIOS DE UNA RUTINA DE USUARIO
 export const getUserRoutineExercises = async (routineId: number, token: string) => {
-  return apiFetch(`${API_URL}/userRoutineExercises/${routineId}`, {
+  return apiFetch(`${API_URL}/userroutines/${routineId}/exercises`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
@@ -312,5 +347,132 @@ export const getExerciseFiles = async (exerciseId: number, token: string) => {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
+  });
+};
+
+// 🥗 OBTENER PLANES DE DIETA
+export const getDietPlans = async (token: string) => {
+  return apiFetch(`${API_URL}/dietPlans`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+// 👨‍⚕️ OBTENER PERFILES DE NUTRIÓLOGOS
+export const getNutritionistProfiles = async (token: string) => {
+  return apiFetch(`${API_URL}/nutritionistProfiles`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+// 🏃 CREAR SESIÓN DE RUTINA
+export const createUserRoutineSession = async (
+  data: {
+    user_id: number;
+    routine_id?: number | null;
+    user_routine_id?: number | null;
+    started_at: string;
+    finished_at?: string;
+  },
+  token: string
+) => {
+  return apiFetch(`${API_URL}/userRoutineSessions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+};
+
+// 🏃 ACTUALIZAR SESIÓN DE RUTINA
+export const updateUserRoutineSession = async (
+  id: number,
+  data: { finished_at: string },
+  token: string
+) => {
+  return apiFetch(`${API_URL}/userRoutineSessions/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+};
+
+// 📝 CREAR LOG DE EJERCICIO
+export const createExerciseLog = async (
+  data: {
+    user_id: number;
+    exercise_id: number;
+    weight_lifted: number;
+    repetitions: number;
+    sets: number;
+    exercise_routine_id: number;
+    user_routine_session_id: number;
+    workout_date: string;
+  },
+  token: string
+) => {
+  return apiFetch(`${API_URL}/exerciseLogs`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+};
+
+// 🔥 ACTUALIZAR RACHA DEL USUARIO
+export const updateUserStreak = async (
+  streakId: number,
+  data: {
+    user_id: number;
+    current_streak: number;
+    longest_streak: number;
+    last_training_date: string;
+  },
+  token: string
+) => {
+  return apiFetch(`${API_URL}/userStreak/${streakId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+};
+
+// 🔥 CREAR RACHA DEL USUARIO (si no existe)
+export const createUserStreak = async (
+  data: {
+    user_id: number;
+    current_streak: number;
+    longest_streak: number;
+    last_training_date: string;
+  },
+  token: string
+) => {
+  return apiFetch(`${API_URL}/userStreak`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
   });
 };

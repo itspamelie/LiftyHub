@@ -10,16 +10,88 @@ import {
   Dimensions,
 } from "react-native";
 import { router } from "expo-router";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
+import NutritionistCard from "@/src/components/diet/NutritionistCard";
+import DietMealCard from "@/src/components/diet/DietMealCard";
+import DietTipCard from "@/src/components/diet/DietTipCard";
+import SupplementCard from "@/src/components/diet/SupplementCard";
 import { colors, spacing } from "@/src/styles/globalstyles";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getDietPlans } from "@/src/services/api";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+const NUTRITIONIST = {
+  name: "Dra. Laura Pérez",
+  specialty: "Nutrición deportiva",
+  imageUrl: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&q=80",
+  status: "active" as const,
+  updatedAt: "2026-03-15"
+};
+
+const MEALS = [
+  {
+    emoji: "🥣",
+    name: "Desayuno",
+    calories: "450 kcal",
+    imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80",
+    items: ["Avena con frutas y miel", "2 huevos revueltos", "1 vaso de leche descremada"]
+  },
+  {
+    emoji: "🥗",
+    name: "Comida",
+    calories: "650 kcal",
+    imageUrl: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80",
+    items: ["Pechuga de pollo a la plancha (200g)", "Arroz integral (1 taza)", "Ensalada verde con aceite de oliva"]
+  },
+  {
+    emoji: "🍎",
+    name: "Snack",
+    calories: "180 kcal",
+    imageUrl: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=600&q=80",
+    items: ["Yogur natural sin azúcar", "Un puño de nueces o almendras"]
+  },
+  {
+    emoji: "🍽️",
+    name: "Cena",
+    calories: "520 kcal",
+    imageUrl: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&q=80",
+    items: ["Salmón al horno (150g)", "Verduras al vapor", "Tortillas integrales (2)"]
+  }
+];
+
+const SUPPLEMENTS = [
+  {
+    name: "Proteína Whey",
+    dose: "30g — 1 scoop post-entrenamiento",
+    timing: "Después de entrenar",
+    imageUrl: "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=600&q=80",
+    color: "#3B82F6"
+  },
+  {
+    name: "Creatina",
+    dose: "5g — disuelto en agua",
+    timing: "Con el desayuno",
+    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80",
+    color: "#F59E0B"
+  },
+  {
+    name: "Omega 3",
+    dose: "2 cápsulas al día",
+    timing: "Con la comida",
+    imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=80",
+    color: "#10B981"
+  }
+];
+
+const TIPS = [
+  "Come cada 3-4 horas para mantener tu metabolismo activo",
+  "No te saltes el desayuno, es la comida más importante",
+  "Cena al menos 2 horas antes de dormir",
+  "Mantente bien hidratado durante el entrenamiento"
+];
 
 const PLAN_OPTIONS = [
   {
@@ -32,7 +104,7 @@ const PLAN_OPTIONS = [
     name: "Pro",
     price: "$600/mes",
     color: "#F59E0B",
-    features: ["Nutriólogo personal", "Plan de dieta personalizado", "Suplementos recomendados", "Estadísticas avanzadas", "Rutinas ilimitadas"],
+    features: ["Nutriólogo personal", "Plan de dieta personalizado", "Suplementos recomendados", "Estadísticas avanzadas", "Rutinas ilimitadas", "Compartir rutinas ilimitadas"],
     highlighted: true,
   },
 ];
@@ -44,38 +116,24 @@ export default function DietScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [dietPlan, setDietPlan] = useState<any>(null);
 
   const hasAccess = planLevel >= 2;
 
-  const loadDietPlan = useCallback(async (isRefresh = false) => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-      const userStorage = await AsyncStorage.getItem("user");
-      if (!token || !userStorage) return;
-
-      const user = JSON.parse(userStorage);
-      const data = await getDietPlans(token);
-      const plans = data?.data ?? [];
-      const userPlan = plans.find((p: any) => p.user_id === user.id) ?? null;
-      setDietPlan(userPlan);
-    } catch {
-      // sin plan
-    } finally {
-      setLoading(false);
-      if (isRefresh) setRefreshing(false);
-    }
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 600);
+    return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => { loadDietPlan(); }, [loadDietPlan]);
-
+  // Mostrar modal automáticamente si no tiene acceso
   useEffect(() => {
-    if (!subLoading && !hasAccess) setShowUpgradeModal(true);
+    if (!subLoading && !hasAccess) {
+      setShowUpgradeModal(true);
+    }
   }, [subLoading, hasAccess]);
 
   const handleRefresh = () => {
     setRefreshing(true);
-    loadDietPlan(true);
+    setTimeout(() => setRefreshing(false), 1000);
   };
 
   if (loading || subLoading) {
@@ -89,6 +147,7 @@ export default function DietScreen() {
   return (
     <View style={{ flex: 1 }}>
 
+      {/* CONTENIDO (siempre renderizado, puede estar bloqueado) */}
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
@@ -101,69 +160,36 @@ export default function DietScreen() {
         }
       >
         <Text style={styles.title}>{t("diet.title")}</Text>
-
-        {dietPlan ? (
-          /* ── TIENE PLAN ASIGNADO ── */
-          <TouchableOpacity style={styles.planCard} onPress={() => router.push("/diet/plan")}>
-            <View style={styles.planCardHeader}>
-              <Ionicons name="nutrition" size={24} color={colors.primary} />
-              <Text style={styles.planCardTitle}>Tu plan de dieta</Text>
-              <View style={styles.planStatusBadge}>
-                <Text style={styles.planStatusText}>{dietPlan.status}</Text>
-              </View>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.planRow}>
-              <Ionicons name="flag-outline" size={16} color={colors.textSecondary} />
-              <Text style={styles.planLabel}>Objetivo</Text>
-              <Text style={styles.planValue}>{dietPlan.goal}</Text>
-            </View>
-            <View style={styles.planRow}>
-              <Ionicons name="calendar-outline" size={16} color={colors.textSecondary} />
-              <Text style={styles.planLabel}>Duración</Text>
-              <Text style={styles.planValue}>{dietPlan.duration_days} días</Text>
-            </View>
-            {dietPlan.notes ? (
-              <View style={styles.notesBox}>
-                <Text style={styles.notesLabel}>Notas del nutriólogo</Text>
-                <Text style={styles.notesText}>{dietPlan.notes}</Text>
-              </View>
-            ) : null}
-            <View style={styles.seeDetailRow}>
-              <Text style={styles.seeDetailText}>Ver detalles</Text>
-              <Ionicons name="arrow-forward" size={16} color={colors.primary} />
-            </View>
-          </TouchableOpacity>
-        ) : (
-          /* ── SIN PLAN — EMPTY STATE ── */
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconBg}>
-              <Ionicons name="nutrition-outline" size={40} color={colors.primary} />
-            </View>
-            <Text style={styles.emptyTitle}>Aún no tienes un plan de dieta</Text>
-            <Text style={styles.emptySubtitle}>
-              Elige un nutriólogo y recibe un plan personalizado según tus objetivos.
-            </Text>
-            <TouchableOpacity
-              style={styles.chooseBtn}
-              onPress={() => router.push("/diet/nutritionists")}
-            >
-              <Ionicons name="person-add-outline" size={18} color="white" />
-              <Text style={styles.chooseBtnText}>Escógete tu nutriólogo</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
+        <NutritionistCard {...NUTRITIONIST} />
+        <Text style={styles.section}>{t("diet.mealPlan")}</Text>
+        {MEALS.map((meal, index) => (
+          <DietMealCard key={index} meal={meal} />
+        ))}
+        <Text style={styles.section}>{t("diet.supplements")}</Text>
+        {SUPPLEMENTS.map((supplement, index) => (
+          <SupplementCard key={index} supplement={supplement} />
+        ))}
+        <Text style={styles.section}>{t("diet.tips")}</Text>
+        <DietTipCard tips={TIPS} />
       </ScrollView>
 
-      {/* BLUR si no tiene acceso */}
+      {/* BLUR OVERLAY si no tiene acceso */}
       {!hasAccess && (
-        <BlurView intensity={55} tint="dark" style={StyleSheet.absoluteFill} pointerEvents="box-none" />
+        <BlurView
+          intensity={55}
+          tint="dark"
+          style={StyleSheet.absoluteFill}
+          pointerEvents="box-none"
+        />
       )}
 
+      {/* BOTÓN para reabrir el modal si lo cerró */}
       {!hasAccess && !showUpgradeModal && (
         <View style={styles.unlockBar}>
-          <TouchableOpacity style={styles.unlockButton} onPress={() => setShowUpgradeModal(true)}>
+          <TouchableOpacity
+            style={styles.unlockButton}
+            onPress={() => setShowUpgradeModal(true)}
+          >
             <Ionicons name="lock-closed" size={16} color="white" />
             <Text style={styles.unlockText}>Desbloquear Nutrición</Text>
           </TouchableOpacity>
@@ -174,9 +200,15 @@ export default function DietScreen() {
       <Modal visible={showUpgradeModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <TouchableOpacity style={styles.modalClose} onPress={() => setShowUpgradeModal(false)}>
+
+            {/* Header */}
+            <TouchableOpacity
+              style={styles.modalClose}
+              onPress={() => setShowUpgradeModal(false)}
+            >
               <Ionicons name="close" size={22} color={colors.textSecondary} />
             </TouchableOpacity>
+
             <View style={styles.modalIcon}>
               <Ionicons name="nutrition" size={32} color={colors.primary} />
             </View>
@@ -184,11 +216,16 @@ export default function DietScreen() {
             <Text style={styles.modalSubtitle}>
               Accede a tu nutriólogo personal, plan de dieta y suplementos recomendados.
             </Text>
+
+            {/* Planes */}
             <ScrollView showsVerticalScrollIndicator={false}>
               {PLAN_OPTIONS.map((plan) => (
                 <TouchableOpacity
                   key={plan.name}
-                  style={[styles.planOptionCard, plan.highlighted && { borderColor: plan.color, borderWidth: 2 }]}
+                  style={[
+                    styles.planCard,
+                    plan.highlighted && { borderColor: plan.color, borderWidth: 2 }
+                  ]}
                   onPress={() => { setShowUpgradeModal(false); router.push("/settings/plans"); }}
                 >
                   {plan.highlighted && (
@@ -208,8 +245,12 @@ export default function DietScreen() {
                   ))}
                 </TouchableOpacity>
               ))}
-              <Text style={styles.modalNote}>Contacta a un administrador para actualizar tu plan.</Text>
+
+              <Text style={styles.modalNote}>
+                Contacta a un administrador para actualizar tu plan.
+              </Text>
             </ScrollView>
+
           </View>
         </View>
       </Modal>
@@ -236,160 +277,21 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,
     paddingBottom: 100,
-    flexGrow: 1,
   },
 
   title: {
     color: "white",
     fontSize: 28,
     fontWeight: "700",
-    marginBottom: 24,
+    marginBottom: 20,
   },
 
-  emptyContainer: {
-    alignItems: "center",
-    paddingVertical: 40,
-    paddingHorizontal: 24,
-    gap: 12,
-    backgroundColor: "#1C1C1E",
-    borderRadius: 18,
-    marginTop: "auto",
-    marginBottom: "auto",
-  },
-
-  emptyIconBg: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(59,130,246,0.12)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-
-  emptyTitle: {
+  section: {
     color: "white",
-    fontSize: 18,
-    fontWeight: "700",
-    textAlign: "center",
-  },
-
-  emptySubtitle: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 20,
-  },
-
-  chooseBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: spacing.borderRadius,
-    marginTop: 8,
-  },
-
-  chooseBtnText: {
-    color: "white",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-
-  planCard: {
-    backgroundColor: "#1C1C1E",
-    borderRadius: 18,
-    padding: 20,
-  },
-
-  planCardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 14,
-  },
-
-  planCardTitle: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "700",
-    flex: 1,
-  },
-
-  planStatusBadge: {
-    backgroundColor: "rgba(22,163,74,0.15)",
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: "#16a34a",
-  },
-
-  planStatusText: {
-    color: "#16a34a",
-    fontSize: 12,
-    fontWeight: "600",
-    textTransform: "capitalize",
-  },
-
-  divider: {
-    height: 1,
-    backgroundColor: "#2A2A2A",
-    marginBottom: 14,
-  },
-
-  planRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 10,
-  },
-
-  planLabel: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    flex: 1,
-  },
-
-  planValue: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-
-  notesBox: {
-    backgroundColor: "#2C2C2E",
-    borderRadius: 12,
-    padding: 14,
-    marginTop: 6,
-    gap: 6,
-  },
-
-  notesLabel: {
-    color: colors.textSecondary,
-    fontSize: 12,
-  },
-
-  notesText: {
-    color: "white",
-    fontSize: 14,
-    lineHeight: 20,
-  },
-
-  seeDetailRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    gap: 4,
-    marginTop: 12,
-  },
-
-  seeDetailText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 12,
+    marginTop: 20,
   },
 
   unlockBar: {
@@ -468,7 +370,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  planOptionCard: {
+  planCard: {
     backgroundColor: "#2C2C2E",
     borderRadius: spacing.borderRadius,
     padding: 16,

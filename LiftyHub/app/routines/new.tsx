@@ -6,29 +6,43 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Modal,
   FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { createUserRoutine, createUserRoutineExercise, getExercises } from "@/src/services/api";
+import { useToast } from "@/src/hooks/useToast";
 
 type Exercise = { id: number; name: string; muscle: string; categorie: string };
+
+const REST_OPTIONS = [15, 30, 45, 60, 90, 120, 150, 180, 240, 300];
+const ITEM_HEIGHT = 60;
+
+function formatRest(secs: number): string {
+  if (secs < 60) return `${secs} seg`;
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return s === 0 ? `${m} min` : `${m} min ${s} seg`;
+}
 type SelectedExercise = {
+  uid: number;
   exercise: Exercise;
   sets: string;
   repetitions: string;
   seconds_rest: string;
 };
 
+const TOTAL_STEPS = 5;
+
 export default function NewRoutineScreen() {
+  const { showToast, Toast } = useToast();
   const { t } = useLanguage();
 
   const filters = [
@@ -40,11 +54,12 @@ export default function NewRoutineScreen() {
   ];
 
   const levels = [
-    { key: "Principiante", label: t("routines.levels.beginner") },
-    { key: "Intermedio",   label: t("routines.levels.intermediate") },
-    { key: "Avanzado",     label: t("routines.levels.advanced") },
+    { key: "Principiante", label: t("routines.levels.beginner"),   icon: "leaf-outline" as const },
+    { key: "Intermedio",   label: t("routines.levels.intermediate"), icon: "flame-outline" as const },
+    { key: "Avanzado",     label: t("routines.levels.advanced"),    icon: "rocket-outline" as const },
   ];
 
+  const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     name: "",
     objective: "",
@@ -53,11 +68,15 @@ export default function NewRoutineScreen() {
     duration: "",
     img: "",
   });
+  const [restEnabled, setRestEnabled] = useState<boolean | null>(null);
+  const [defaultRest, setDefaultRest] = useState("60");
+  const [showRestPicker, setShowRestPicker] = useState(false);
+  const restScrollRef = useRef<ScrollView>(null);
   const [saving, setSaving] = useState(false);
 
-  // Ejercicios
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [selectedExercises, setSelectedExercises] = useState<SelectedExercise[]>([]);
+  const uidRef = useRef(0);
   const [showPicker, setShowPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingExercise, setPendingExercise] = useState<Exercise | null>(null);
@@ -75,10 +94,8 @@ export default function NewRoutineScreen() {
     load();
   }, []);
 
-  const filteredExercises = exercises.filter(
-    (e) =>
-      !selectedExercises.some((s) => s.exercise.id === e.id) &&
-      e.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredExercises = exercises.filter((e) =>
+    e.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleSelectExercise = (exercise: Exercise) => {
@@ -86,28 +103,31 @@ export default function NewRoutineScreen() {
     setPendingExercise(exercise);
     setPendingSets("3");
     setPendingReps("12");
-    setPendingRest("60");
+    setPendingRest(restEnabled ? defaultRest : "0");
   };
 
   const handleConfirmExercise = () => {
     if (!pendingExercise) return;
     setSelectedExercises((prev) => [
       ...prev,
-      { exercise: pendingExercise, sets: pendingSets, repetitions: pendingReps, seconds_rest: pendingRest },
+      { uid: ++uidRef.current, exercise: pendingExercise, sets: pendingSets, repetitions: pendingReps, seconds_rest: pendingRest },
     ]);
     setPendingExercise(null);
   };
 
-  const handleRemoveExercise = (id: number) => {
-    setSelectedExercises((prev) => prev.filter((s) => s.exercise.id !== id));
+  const handleRemoveExercise = (uid: number) => {
+    setSelectedExercises((prev) => prev.filter((s) => s.uid !== uid));
+  };
+
+  const canContinue = () => {
+    if (step === 1) return !!form.name.trim() && !!form.objective.trim();
+    if (step === 2) return !!form.level;
+    if (step === 3) return !!form.category && !!form.duration;
+    if (step === 4) return restEnabled !== null;
+    return true;
   };
 
   const handleSave = async () => {
-    if (!form.name || !form.objective || !form.level || !form.duration || !form.category) {
-      Alert.alert(t("routines.modal.errorEmpty"));
-      return;
-    }
-
     setSaving(true);
     try {
       const token = await AsyncStorage.getItem("token");
@@ -145,13 +165,20 @@ export default function NewRoutineScreen() {
       }
 
       router.back();
-    } catch (error) {
-      console.log("Error creando rutina:", error);
-      Alert.alert("Error", "No se pudo crear la rutina.");
+    } catch {
+      showToast("No se pudo crear la rutina.", "error");
     } finally {
       setSaving(false);
     }
   };
+
+  const stepConfig = [
+    { icon: "barbell-outline" as const,     title: t("routines.modal.title"),     desc: "Dale un nombre a tu rutina y cuéntanos qué quieres lograr" },
+    { icon: "stats-chart-outline" as const, title: t("routines.modal.level"),     desc: "¿Cuál es tu nivel de experiencia?" },
+    { icon: "grid-outline" as const,        title: t("routines.modal.type"),      desc: "Elige la categoría y cuánto tiempo tienes disponible" },
+    { icon: "timer-outline" as const,       title: "Detalles",                    desc: "Configura los descansos y agrega una imagen a tu rutina" },
+    { icon: "list-outline" as const,        title: t("routines.modal.exercises"), desc: "Agrega los ejercicios que formarán tu rutina" },
+  ];
 
   return (
     <KeyboardAvoidingView
@@ -160,127 +187,223 @@ export default function NewRoutineScreen() {
     >
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => (step === 1 ? router.back() : setStep(step - 1))}
+        >
           <Ionicons name="arrow-back" size={20} color="white" />
         </TouchableOpacity>
-        <Text style={styles.title}>{t("routines.modal.title")}</Text>
+        <Text style={styles.headerTitle}>Crear rutina</Text>
       </View>
+      <View style={styles.headerDivider} />
 
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        {/* INFO BASICA */}
-        <Text style={styles.sectionTitle}>{t("routines.modal.section")}</Text>
-
-        <TextInput
-          placeholder={t("routines.modal.name")}
-          placeholderTextColor={colors.textSecondary}
-          value={form.name}
-          onChangeText={(v) => setForm({ ...form, name: v })}
-          style={styles.input}
-        />
-
-        <TextInput
-          placeholder={t("routines.modal.objective")}
-          placeholderTextColor={colors.textSecondary}
-          value={form.objective}
-          onChangeText={(v) => setForm({ ...form, objective: v })}
-          style={styles.input}
-        />
-
-        {/* NIVEL */}
-        <Text style={styles.sectionTitle}>{t("routines.modal.level")}</Text>
-        <View style={styles.levelRow}>
-          {levels.map((nivel) => (
-            <TouchableOpacity
-              key={nivel.key}
-              style={[styles.levelButton, form.level === nivel.key && styles.buttonActive]}
-              onPress={() => setForm({ ...form, level: nivel.key })}
-            >
-              <Text style={[styles.buttonText, form.level === nivel.key && styles.buttonTextActive]}>
-                {nivel.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* CATEGORIA */}
-        <Text style={styles.sectionTitle}>{t("routines.modal.type")}</Text>
-        <View style={styles.categoryGrid}>
-          {filters.map((cat) => (
-            <TouchableOpacity
-              key={cat.key}
-              style={[styles.categoryButton, form.category === cat.key && styles.buttonActive]}
-              onPress={() => setForm({ ...form, category: cat.key })}
-            >
-              <Text style={[styles.buttonText, form.category === cat.key && styles.buttonTextActive]}>
-                {cat.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* DURACION */}
-        <Text style={styles.sectionTitle}>{t("routines.modal.duration")}</Text>
-        <TextInput
-          placeholder={t("routines.modal.durationPlaceholder")}
-          placeholderTextColor={colors.textSecondary}
-          keyboardType="numeric"
-          value={form.duration}
-          onChangeText={(v) => setForm({ ...form, duration: v })}
-          style={styles.input}
-        />
-
-        {/* IMAGEN */}
-        <Text style={styles.sectionTitle}>{t("routines.modal.image")}</Text>
-        <TextInput
-          placeholder={t("routines.modal.imagePlaceholder")}
-          placeholderTextColor={colors.textSecondary}
-          value={form.img}
-          onChangeText={(v) => setForm({ ...form, img: v })}
-          style={styles.input}
-          autoCapitalize="none"
-        />
-
-        {/* EJERCICIOS */}
-        <Text style={styles.sectionTitle}>{t("routines.modal.exercises")}</Text>
-
-        {selectedExercises.map((sel) => (
-          <View key={sel.exercise.id} style={styles.exerciseCard}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.exerciseName}>{sel.exercise.name}</Text>
-              <Text style={styles.exerciseMeta}>
-                {sel.sets} series × {sel.repetitions} reps · {sel.seconds_rest}s
-              </Text>
+        {/* CARD */}
+        <View style={styles.card}>
+          {/* ICON + TÍTULO DEL PASO */}
+          <View style={styles.stepHeader}>
+            <View style={styles.iconCircle}>
+              <Ionicons name={stepConfig[step - 1].icon} size={34} color={colors.primary} />
             </View>
-            <TouchableOpacity onPress={() => handleRemoveExercise(sel.exercise.id)}>
-              <Ionicons name="close-circle" size={22} color={colors.danger} />
-            </TouchableOpacity>
+            <Text style={styles.stepTitle}>{stepConfig[step - 1].title}</Text>
+            <Text style={styles.stepDesc}>{stepConfig[step - 1].desc}</Text>
           </View>
-        ))}
 
-        <TouchableOpacity
-          style={styles.addExerciseButton}
-          onPress={() => { setSearchQuery(""); setShowPicker(true); }}
-        >
-          <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
-          <Text style={styles.addExerciseText}>{t("routines.modal.addExercise")}</Text>
-        </TouchableOpacity>
+          {/* PASO 1: nombre + objetivo */}
+          {step === 1 && (
+            <View style={styles.stepContent}>
+              <TextInput
+                placeholder={t("routines.modal.name")}
+                placeholderTextColor={colors.textSecondary}
+                value={form.name}
+                onChangeText={(v) => setForm({ ...form, name: v })}
+                style={styles.input}
+              />
+              <TextInput
+                placeholder={t("routines.modal.objective")}
+                placeholderTextColor={colors.textSecondary}
+                value={form.objective}
+                onChangeText={(v) => setForm({ ...form, objective: v })}
+                style={[styles.input, styles.inputMultiline]}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+            </View>
+          )}
 
-        {/* GUARDAR */}
-        <TouchableOpacity
-          style={[styles.saveButton, saving && { opacity: 0.6 }]}
-          onPress={handleSave}
-          disabled={saving}
-        >
-          {saving
-            ? <ActivityIndicator color="white" />
-            : <Text style={styles.saveButtonText}>{t("routines.modal.button")}</Text>
-          }
-        </TouchableOpacity>
+          {/* PASO 2: nivel */}
+          {step === 2 && (
+            <View style={styles.stepContent}>
+              {levels.map((nivel) => {
+                const active = form.level === nivel.key;
+                return (
+                  <TouchableOpacity
+                    key={nivel.key}
+                    style={[styles.optionCard, active && styles.optionCardActive]}
+                    onPress={() => setForm({ ...form, level: nivel.key })}
+                  >
+                    <View style={[styles.optionIconBox, active && styles.optionIconBoxActive]}>
+                      <Ionicons name={nivel.icon} size={22} color={active ? colors.primary : colors.textSecondary} />
+                    </View>
+                    <Text style={[styles.optionText, active && styles.optionTextActive]}>
+                      {nivel.label}
+                    </Text>
+                    {active && <Ionicons name="checkmark-circle" size={22} color={colors.primary} />}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+
+          {/* PASO 3: categoría + duración */}
+          {step === 3 && (
+            <View style={styles.stepContent}>
+              <Text style={styles.sectionLabel}>{t("routines.modal.type")}</Text>
+              <View style={styles.categoryGrid}>
+                {filters.map((cat) => {
+                  const active = form.category === cat.key;
+                  return (
+                    <TouchableOpacity
+                      key={cat.key}
+                      style={[styles.categoryButton, active && styles.categoryButtonActive]}
+                      onPress={() => setForm({ ...form, category: cat.key })}
+                    >
+                      <Text style={[styles.categoryText, active && styles.categoryTextActive]}>
+                        {cat.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              <Text style={styles.sectionLabel}>{t("routines.modal.duration")}</Text>
+              <TextInput
+                placeholder={t("routines.modal.durationPlaceholder")}
+                placeholderTextColor={colors.textSecondary}
+                keyboardType="numeric"
+                value={form.duration}
+                onChangeText={(v) => setForm({ ...form, duration: v })}
+                style={styles.input}
+              />
+            </View>
+          )}
+
+          {/* PASO 4: descanso + imagen */}
+          {step === 4 && (
+            <View style={styles.stepContent}>
+              <Text style={styles.sectionLabel}>¿Descanso entre series?</Text>
+              <View style={styles.restToggleRow}>
+                <TouchableOpacity
+                  style={[styles.restToggleButton, restEnabled === true && styles.restToggleActive]}
+                  onPress={() => setRestEnabled(true)}
+                >
+                  <Ionicons name="checkmark-circle-outline" size={18} color={restEnabled === true ? colors.primary : colors.textSecondary} />
+                  <Text style={[styles.restToggleText, restEnabled === true && styles.restToggleTextActive]}>Sí</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.restToggleButton, restEnabled === false && styles.restToggleActive]}
+                  onPress={() => setRestEnabled(false)}
+                >
+                  <Ionicons name="close-circle-outline" size={18} color={restEnabled === false ? colors.primary : colors.textSecondary} />
+                  <Text style={[styles.restToggleText, restEnabled === false && styles.restToggleTextActive]}>No</Text>
+                </TouchableOpacity>
+              </View>
+              {restEnabled === true && (
+                <TouchableOpacity
+                  style={styles.restPickerTrigger}
+                  onPress={() => {
+                    setShowRestPicker(true);
+                    const idx = REST_OPTIONS.indexOf(Number(defaultRest));
+                    const validIdx = idx >= 0 ? idx : 3;
+                    setTimeout(() => {
+                      restScrollRef.current?.scrollTo({ y: validIdx * ITEM_HEIGHT, animated: false });
+                    }, 80);
+                  }}
+                >
+                  <Ionicons name="timer-outline" size={18} color={colors.primary} />
+                  <Text style={styles.restPickerValue}>{formatRest(Number(defaultRest))}</Text>
+                  <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+                </TouchableOpacity>
+              )}
+
+              <Text style={styles.sectionLabel}>{t("routines.modal.image")}</Text>
+              <TextInput
+                placeholder={t("routines.modal.imagePlaceholder")}
+                placeholderTextColor={colors.textSecondary}
+                value={form.img}
+                onChangeText={(v) => setForm({ ...form, img: v })}
+                style={styles.input}
+                autoCapitalize="none"
+              />
+            </View>
+          )}
+
+          {/* PASO 5: ejercicios */}
+          {step === 5 && (
+            <View style={styles.stepContent}>
+              {selectedExercises.length === 0 && (
+                <Text style={styles.emptyHint}>{t("routines.modal.noExercisesFound")}</Text>
+              )}
+
+              {selectedExercises.map((sel) => (
+                <View key={sel.uid} style={styles.exerciseCard}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.exerciseName}>{sel.exercise.name}</Text>
+                    <Text style={styles.exerciseMeta}>
+                      {sel.sets} series × {sel.repetitions} reps · {formatRest(Number(sel.seconds_rest))}
+                    </Text>
+                  </View>
+                  <TouchableOpacity onPress={() => handleRemoveExercise(sel.uid)}>
+                    <Ionicons name="close-circle" size={22} color={colors.danger} />
+                  </TouchableOpacity>
+                </View>
+              ))}
+
+              <TouchableOpacity
+                style={styles.addExerciseButton}
+                onPress={() => { setSearchQuery(""); setShowPicker(true); }}
+              >
+                <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
+                <Text style={styles.addExerciseText}>{t("routines.modal.addExercise")}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {/* BOTÓN CONTINUAR / CREAR */}
+          <TouchableOpacity
+            style={[styles.continueButton, (!canContinue() || saving) && { opacity: 0.5 }]}
+            onPress={step < TOTAL_STEPS ? () => setStep(step + 1) : handleSave}
+            disabled={!canContinue() || saving}
+          >
+            {saving ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text style={styles.continueText}>
+                {step < TOTAL_STEPS ? t("onboarding.personalContinue") : t("routines.modal.button")}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </ScrollView>
+
+      {/* PROGRESS BAR FIJA ABAJO */}
+      <View style={styles.bottomBar}>
+        <View style={styles.progressBarContainer}>
+          {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+            <View
+              key={i}
+              style={[styles.progressSegment, i < step && styles.progressSegmentActive]}
+            />
+          ))}
+        </View>
+        <Text style={styles.stepCounter}>{step}/{TOTAL_STEPS}</Text>
+      </View>
+
+      {Toast}
 
       {/* MODAL PICKER DE EJERCICIOS */}
       <Modal visible={showPicker} animationType="slide">
@@ -320,6 +443,56 @@ export default function NewRoutineScreen() {
             }
             contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
           />
+        </View>
+      </Modal>
+
+      {/* MODAL PICKER DESCANSO */}
+      <Modal visible={showRestPicker} transparent animationType="slide">
+        <View style={styles.restPickerOverlay}>
+          <TouchableOpacity style={StyleSheet.absoluteFill} onPress={() => setShowRestPicker(false)} />
+          <View style={styles.restPickerSheet}>
+            <View style={styles.restPickerHeader}>
+              <Text style={styles.restPickerTitle}>Descanso entre series</Text>
+              <TouchableOpacity onPress={() => setShowRestPicker(false)}>
+                <Text style={styles.restPickerDoneText}>Listo</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.restPickerBody}>
+              <View style={styles.pickerHighlight} pointerEvents="none" />
+              <ScrollView
+                ref={restScrollRef}
+                showsVerticalScrollIndicator={false}
+                snapToInterval={ITEM_HEIGHT}
+                decelerationRate="fast"
+                onMomentumScrollEnd={(e) => {
+                  const idx = Math.round(e.nativeEvent.contentOffset.y / ITEM_HEIGHT);
+                  const clamped = Math.max(0, Math.min(idx, REST_OPTIONS.length - 1));
+                  setDefaultRest(REST_OPTIONS[clamped].toString());
+                }}
+                contentContainerStyle={{ paddingVertical: ITEM_HEIGHT * 2 }}
+              >
+                {REST_OPTIONS.map((secs) => {
+                  const selected = secs.toString() === defaultRest;
+                  return (
+                    <TouchableOpacity
+                      key={secs}
+                      style={styles.pickerItem}
+                      onPress={() => {
+                        const idx = REST_OPTIONS.indexOf(secs);
+                        restScrollRef.current?.scrollTo({ y: idx * ITEM_HEIGHT, animated: true });
+                        setDefaultRest(secs.toString());
+                      }}
+                    >
+                      <Text style={[styles.pickerItemText, selected && styles.pickerItemTextSelected]}>
+                        {formatRest(secs)}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </View>
         </View>
       </Modal>
 
@@ -382,11 +555,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingTop: 60,
-    paddingBottom: 16,
+    paddingBottom: 12,
     paddingHorizontal: spacing.screenPadding,
     backgroundColor: colors.background,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.card,
+    gap: 12,
+  },
+
+  headerTitle: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: "700",
+  },
+
+  headerDivider: {
+    height: 1,
+    backgroundColor: "#2A2A2A",
   },
 
   backButton: {
@@ -396,50 +580,157 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
   },
 
-  title: {
-    color: colors.text,
-    fontSize: 20,
-    fontWeight: "bold",
+  bottomBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: spacing.screenPadding,
+    paddingVertical: 14,
+    paddingBottom: 32,
+    backgroundColor: colors.background,
+    borderTopWidth: 1,
+    borderTopColor: colors.card,
+    gap: 10,
+  },
+
+  progressBarContainer: {
+    flex: 1,
+    flexDirection: "row",
+    gap: 6,
+  },
+
+  progressSegment: {
+    flex: 1,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.card,
+  },
+
+  progressSegmentActive: {
+    backgroundColor: colors.primary,
+  },
+
+  stepCounter: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: "600",
+    minWidth: 28,
+    textAlign: "right",
   },
 
   content: {
+    flexGrow: 1,
+    justifyContent: "center",
     padding: spacing.screenPadding,
     paddingBottom: 40,
   },
 
-  sectionTitle: {
+  card: {
+    backgroundColor: colors.card,
+    borderRadius: spacing.borderRadius,
+    padding: 20,
+  },
+
+  stepHeader: {
+    alignItems: "center",
+    marginBottom: 32,
+    marginTop: 8,
+  },
+
+  iconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: `${colors.primary}18`,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+
+  stepTitle: {
     color: colors.text,
-    fontSize: 16,
-    fontWeight: "600",
-    marginTop: 20,
+    fontSize: 24,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+
+  stepDesc: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 6,
+    lineHeight: 20,
+  },
+
+  stepContent: {
+    gap: 12,
     marginBottom: 8,
   },
 
   input: {
-    backgroundColor: colors.card,
+    backgroundColor: "#2C2C2E",
     borderRadius: spacing.borderRadius,
     paddingHorizontal: 16,
     paddingVertical: 14,
     color: colors.text,
     fontSize: 16,
-    marginBottom: 8,
   },
 
-  levelRow: {
+  inputMultiline: {
+    minHeight: 90,
+    paddingTop: 14,
+  },
+
+  // nivel
+  optionCard: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 8,
+    alignItems: "center",
+    backgroundColor: "#2C2C2E",
+    borderRadius: spacing.borderRadius,
+    padding: 16,
+    gap: 14,
+    borderWidth: 1,
+    borderColor: "transparent",
   },
 
-  levelButton: {
-    flex: 1,
-    backgroundColor: colors.card,
-    paddingVertical: 12,
-    borderRadius: spacing.borderRadius,
+  optionCardActive: {
+    borderColor: colors.primary,
+    backgroundColor: `${colors.primary}12`,
+  },
+
+  optionIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#2C2C2E",
+    justifyContent: "center",
     alignItems: "center",
+  },
+
+  optionIconBoxActive: {
+    backgroundColor: `${colors.primary}20`,
+  },
+
+  optionText: {
+    flex: 1,
+    color: colors.textSecondary,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  optionTextActive: {
+    color: colors.text,
+  },
+
+  // categoria
+  sectionLabel: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 4,
   },
 
   categoryGrid: {
@@ -449,33 +740,78 @@ const styles = StyleSheet.create({
   },
 
   categoryButton: {
-    backgroundColor: colors.card,
+    backgroundColor: "#2C2C2E",
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: spacing.borderRadius,
+    borderWidth: 1,
+    borderColor: "transparent",
   },
 
-  buttonActive: {
-    backgroundColor: colors.primary,
+  categoryButtonActive: {
+    backgroundColor: `${colors.primary}18`,
+    borderColor: colors.primary,
   },
 
-  buttonText: {
+  categoryText: {
     color: colors.textSecondary,
     fontWeight: "600",
     fontSize: 14,
   },
 
-  buttonTextActive: {
-    color: "white",
+  categoryTextActive: {
+    color: colors.primary,
+  },
+
+  // descanso toggle
+  restToggleRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 8,
+  },
+
+  restToggleButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: "#2C2C2E",
+    borderRadius: spacing.borderRadius,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+
+  restToggleActive: {
+    borderColor: colors.primary,
+    backgroundColor: `${colors.primary}18`,
+  },
+
+  restToggleText: {
+    color: colors.textSecondary,
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  restToggleTextActive: {
+    color: colors.primary,
+  },
+
+  // ejercicios
+  emptyHint: {
+    color: colors.textSecondary,
+    textAlign: "center",
+    marginVertical: 20,
+    fontSize: 14,
   },
 
   exerciseCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.card,
+    backgroundColor: "#2C2C2E",
     borderRadius: spacing.borderRadius,
     padding: 14,
-    marginBottom: 8,
   },
 
   exerciseName: {
@@ -497,7 +833,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderRadius: spacing.borderRadius,
     padding: 14,
-    marginBottom: 8,
     borderWidth: 1,
     borderColor: colors.primary,
     borderStyle: "dashed",
@@ -509,12 +844,27 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  // continuar
+  continueButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 30,
+    paddingVertical: 16,
+    alignItems: "center",
+    marginTop: 28,
+  },
+
+  continueText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
   saveButton: {
     backgroundColor: colors.primary,
     borderRadius: spacing.borderRadius,
     paddingVertical: 14,
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 8,
   },
 
   saveButtonText: {
@@ -523,7 +873,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  // Modal picker
+  // modal picker
   modalContainer: {
     flex: 1,
     backgroundColor: colors.background,
@@ -537,6 +887,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.screenPadding,
     borderBottomWidth: 1,
     borderBottomColor: colors.card,
+    gap: 12,
   },
 
   modalTitle: {
@@ -589,7 +940,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
 
-  // Modal config
+  // modal config
   configOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.7)",
@@ -654,5 +1005,98 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: colors.textSecondary,
     fontSize: 14,
+  },
+
+  // rest picker trigger
+  restPickerTrigger: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: "#2C2C2E",
+    borderRadius: spacing.borderRadius,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: `${colors.primary}55`,
+  },
+
+  restPickerValue: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  // rest picker modal
+  restPickerOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    justifyContent: "flex-end",
+  },
+
+  restPickerSheet: {
+    backgroundColor: "#1C1C1E",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingBottom: 36,
+  },
+
+  restPickerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: "#2C2C2E",
+  },
+
+  restPickerTitle: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+
+  restPickerDoneText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+
+  restPickerBody: {
+    height: ITEM_HEIGHT * 5,
+    overflow: "hidden",
+    position: "relative",
+  },
+
+  pickerHighlight: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: ITEM_HEIGHT * 2,
+    height: ITEM_HEIGHT,
+    backgroundColor: `${colors.primary}18`,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: `${colors.primary}40`,
+    zIndex: 1,
+  },
+
+  pickerItem: {
+    height: ITEM_HEIGHT,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  pickerItemText: {
+    color: colors.textSecondary,
+    fontSize: 18,
+    fontWeight: "500",
+  },
+
+  pickerItemTextSelected: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: "700",
   },
 });
