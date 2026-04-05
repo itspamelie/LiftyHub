@@ -21,9 +21,10 @@ type Props = {
   exercise: Exercise;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
+  onAdd?: () => void;
 };
 
-export default function ExerciseCard({ exercise, isFavorite, onToggleFavorite }: Props) {
+export default function ExerciseCard({ exercise, isFavorite, onToggleFavorite, onAdd }: Props) {
 
   const getImage = () => {
     const imageFile = exercise.files?.find(file => file.type === "image");
@@ -67,7 +68,7 @@ export default function ExerciseCard({ exercise, isFavorite, onToggleFavorite }:
             color={isFavorite ? "#EF4444" : "white"}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton} onPress={onAdd}>
           <Ionicons name="add" size={20} color="white" />
         </TouchableOpacity>
       </View>

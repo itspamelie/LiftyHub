@@ -3,11 +3,13 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { Text, View } from "react-native";
 import { useLanguage } from "@/src/context/LanguageContext";
+import { useSubscription } from "@/src/context/SubscriptionContext";
+import { planColors } from "@/src/styles/globalstyles";
 
-function TabLabel({ scope, focused }: { scope: string; focused: boolean }) {
+function TabLabel({ scope, focused, activeColor }: { scope: string; focused: boolean; activeColor?: string }) {
   const { t } = useLanguage();
   return (
-    <Text style={{ fontSize: 10, color: focused ? "#ffffff" : "#6B7280" }}>
+    <Text style={{ fontSize: 10, color: focused ? (activeColor ?? "#ffffff") : "#6B7280" }}>
       {t(scope)}
     </Text>
   );
@@ -15,6 +17,8 @@ function TabLabel({ scope, focused }: { scope: string; focused: boolean }) {
 
 export default function TabLayout() {
   const { language } = useLanguage();
+  const { plan } = useSubscription();
+  const membershipColor = planColors[plan?.name ?? "Free"];
   return (
     <View key={language} style={{ flex: 1 }}>
     <Tabs
@@ -65,8 +69,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarLabel: ({ focused }) => <TabLabel scope="tabs.profile" focused={focused} />,
-          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+          tabBarLabel: ({ focused }) => (
+            <TabLabel scope="tabs.profile" focused={focused} activeColor={membershipColor} />
+          ),
+          tabBarIcon: ({ focused, size }) => (
+            <Ionicons name="person" size={size} color={focused ? membershipColor : "#6B7280"} />
+          ),
         }}
       />
 

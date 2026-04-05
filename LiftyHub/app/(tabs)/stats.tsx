@@ -79,7 +79,7 @@ export default function StatsScreen() {
 
         <StatsSummaryGrid stats={stats} trigger={animationTrigger} />
 
-        <WeeklyActivityChart />
+<WeeklyActivityChart />
         <PersonalRecords />
 
       </ScrollView>

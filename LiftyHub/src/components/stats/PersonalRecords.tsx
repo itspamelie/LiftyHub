@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
 
@@ -12,12 +13,7 @@ export default function PersonalRecords() {
 
   const { t } = useLanguage();
 
-  // ⚠️ Estos datos luego vendrán del backend
-  const records: Record[] = [
-    { exercise: "Bench Press", weight: 90, reps: 5 },
-    { exercise: "Squat", weight: 120, reps: 4 },
-    { exercise: "Deadlift", weight: 150, reps: 3 }
-  ];
+  const records: Record[] = [];
 
   // 🧠 Si el usuario aún no tiene datos
   if (records.length === 0) {
@@ -25,7 +21,10 @@ export default function PersonalRecords() {
       <View style={styles.section}>
         <Text style={styles.title}>{t("stats.personalRecords")}</Text>
 
-        <Text style={styles.empty}>{t("stats.noRecords")}</Text>
+        <View style={styles.emptyContainer}>
+          <Ionicons name="trophy-outline" size={36} color={colors.textSecondary} />
+          <Text style={styles.empty}>Empieza a entrenar para ver tus records personales</Text>
+        </View>
       </View>
     );
   }
@@ -123,10 +122,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold"
   },
 
+  emptyContainer: {
+    alignItems: "center",
+    paddingVertical: 32,
+    gap: 10,
+  },
+
   empty: {
     color: colors.textSecondary,
     textAlign: "center",
-    marginTop: 10
   }
 
 });
