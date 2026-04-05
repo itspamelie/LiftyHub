@@ -10,7 +10,6 @@ import { getImageUrl } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import CreateExerciseFileModal from "./CreateExerciseFileModal";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";

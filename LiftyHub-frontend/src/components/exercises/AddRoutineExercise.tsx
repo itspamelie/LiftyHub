@@ -1,4 +1,4 @@
-import {Box,Typography,TextField,List,ListItemButton,ListItemText,Button} from "@mui/material";
+import {Box,Typography,TextField,Button} from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiFetch, getImageUrl } from "../../services/api";
@@ -105,7 +105,6 @@ navigate(`/dashboard/exercise-routine/${selected.id}`);
     });
   }
 };
-  const [routine, setRoutine] = useState<any>(null);
 
   {/*OBTENER EL NOMBRE DE LA RUTINA */}
 useEffect(() => {
