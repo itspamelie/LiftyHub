@@ -13,10 +13,10 @@ const routeNames: Record<string, string> = {
   "/dashboard/plans": "Planes",
   "/dashboard/routines": "Rutinas",
   "/dashboard/exercises": "Ejercicios",
+  "/dashboard/nutritionists": "Nutriólogos",
   "/dashboard/somatotypes": "Somatotipos",
-  "/dashboard": "Dashboard",
-  "/dashboard/nutritionist": "Nutriólogoss",
   "/dashboard/exercise/:id": "Detalles del ejercicio",
+  "/dashboard": "Dashboard",
 };
 
 const getCurrentTitle = () => {
