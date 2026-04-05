@@ -31,4 +31,6 @@ class NutritionistProfilesSeeder extends Seeder
         ]);
 
     }
+
+    
 }

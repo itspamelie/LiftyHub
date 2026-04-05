@@ -56,21 +56,29 @@ class NutritionistProfilesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-         $data = NutritionistProfile::find($id);
-        if($data){
-            return response()->json([
-            "status"=>"ok",
-            "mesage"=>"Perfil encontrado",
-            "data"=>$data
-        ]);
-        }
+public function show(string $id) 
+{
+    $data = NutritionistProfile::with([
+        'user',
+        'education',
+        'experience',
+        'specialties',
+        'reviews.user'
+    ])->find($id);
+
+    if($data){
         return response()->json([
-            "status"=>"error",
-            "mesage"=>"Perfil no encontrado"
-        ],400);
+            "status" => "ok",
+            "message" => "Perfil encontrado",
+            "data" => $data
+        ]);
     }
+
+    return response()->json([
+        "status" => "error",
+        "message" => "Perfil no encontrado"
+    ], 400);
+}
 
     /**
      * Show the form for editing the specified resource.

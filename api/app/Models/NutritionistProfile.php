@@ -21,4 +21,29 @@ class NutritionistProfile extends Model
       public function  user(){
         return $this->hasOne(User::class,'id','user_id');
     }
+
+        public function education()
+{
+    return $this->hasMany(NutritionistEducation::class, 'nutritionist_profile_id');
+}
+    public function experience()
+{
+    return $this->hasMany(NutritionistExperience::class, 'nutritionist_profile_id');
+}
+public function specialties()
+{
+    return $this->belongsToMany(
+        Specialty::class,
+        'nutritionist_specialties',
+        'nutritionist_profile_id',
+        'specialty_id'
+    );
+}
+public function reviews()
+{
+    return $this->hasMany(
+        NutritionistReview::class,
+        'nutritionist_profile_id'
+    );
+}
 }

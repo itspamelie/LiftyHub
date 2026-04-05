@@ -13,6 +13,7 @@ import ExerciseDetail from './components/exercises/ExerciseDetail';
 import RoutineDetail from './components/routines/RoutineDetail'
 import AddExerciseToRoutine from './components/routines/AddExerciseRoutine';
 import AddRoutineToExercise from './components/exercises/AddRoutineExercise';
+import NutritionistDetail from './components/nutritionist/NutritionistDetail'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("token");
@@ -40,6 +41,7 @@ function App() {
 <Route path="exercise-routine/:id" element={<RoutineDetail />} />
 <Route path="routine/:id/add-exercise"element={<AddExerciseToRoutine />}/>
 <Route path="routine/:id/add-routine-to-exercise"element={<AddRoutineToExercise />}/>
+<Route path="nutritionists/:id" element={<NutritionistDetail />} />
         </Route>
 
       </Routes>
