@@ -382,6 +382,7 @@ const getData = async () => {
 
 
      <Button
+  onClick={() => navigate(`/dashboard/routine/${id}/add-routine-to-exercise`)}
   variant="contained"
   startIcon={<FitnessCenterIcon />}
   sx={{
