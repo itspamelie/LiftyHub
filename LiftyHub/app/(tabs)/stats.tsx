@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 import { getUserStreak, getUserRoutineSessions, getExerciseLogs } from "@/src/services/api";
 
 import StatsSummaryGrid from "@/src/components/stats/StatsSummaryGrid";
@@ -12,6 +13,7 @@ import PersonalRecords from "@/src/components/stats/PersonalRecords";
 
 export default function StatsScreen() {
 
+  const { t } = useLanguage();
   const [stats, setStats] = useState<any>(null);
   const [sessions, setSessions] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
@@ -65,7 +67,7 @@ export default function StatsScreen() {
       setSessions(allSessions);
       setLogs(allLogs);
     } catch {
-      Alert.alert("Error", "No se pudieron cargar las estadísticas. Verifica tu conexión.");
+      Alert.alert("Error", t("statsScreen.errorLoad"));
     } finally {
       setLoading(false);
     }
@@ -103,8 +105,8 @@ export default function StatsScreen() {
           />
         }
       >
-        <Text style={styles.title}>Estadísticas</Text>
-        <Text style={styles.subtitle}>Resumen de tu entrenamiento</Text>
+        <Text style={styles.title}>{t("statsScreen.title")}</Text>
+        <Text style={styles.subtitle}>{t("statsScreen.subtitle")}</Text>
 
         {stats && <StatsSummaryGrid stats={stats} trigger={animationTrigger} />}
 

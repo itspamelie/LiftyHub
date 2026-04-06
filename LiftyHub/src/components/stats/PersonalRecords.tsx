@@ -2,6 +2,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
+import { useUnits } from "@/src/context/UnitsContext";
 
 type Props = {
   logs: any[];
@@ -20,6 +21,7 @@ function calculate1RM(weight: number, reps: number) {
 export default function PersonalRecords({ logs }: Props) {
 
   const { t } = useLanguage();
+  const { unitLabel, toDisplay } = useUnits();
 
   // Agrupar por ejercicio y quedarse con el mayor peso
   const recordMap: { [exerciseId: number]: Record } = {};
@@ -44,7 +46,7 @@ export default function PersonalRecords({ logs }: Props) {
         <Text style={styles.title}>{t("stats.personalRecords")}</Text>
         <View style={styles.emptyContainer}>
           <Ionicons name="trophy-outline" size={36} color={colors.textSecondary} />
-          <Text style={styles.empty}>Empieza a entrenar para ver tus records personales</Text>
+          <Text style={styles.empty}>{t("stats.noRecords")}</Text>
         </View>
       </View>
     );
@@ -57,8 +59,9 @@ export default function PersonalRecords({ logs }: Props) {
         <RecordItem
           key={index}
           exercise={record.exercise}
-          weight={record.weight}
+          weight={toDisplay(record.weight)}
           reps={record.reps}
+          unitLabel={unitLabel}
         />
       ))}
     </View>
@@ -69,20 +72,21 @@ type RecordItemProps = {
   exercise: string;
   weight: number;
   reps: number;
+  unitLabel: string;
 };
 
-function RecordItem({ exercise, weight, reps }: RecordItemProps) {
+function RecordItem({ exercise, weight, reps, unitLabel }: RecordItemProps) {
   const rm = calculate1RM(weight, reps);
   return (
     <View style={styles.card}>
       <Text style={styles.exercise}>{exercise}</Text>
       <View style={styles.row}>
         <Text style={styles.label}>PR</Text>
-        <Text style={styles.value}>{weight} kg</Text>
+        <Text style={styles.value}>{weight} {unitLabel}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>1RM est.</Text>
-        <Text style={styles.value}>{rm} kg</Text>
+        <Text style={styles.value}>{rm} {unitLabel}</Text>
       </View>
     </View>
   );

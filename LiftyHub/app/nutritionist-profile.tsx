@@ -10,6 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 const COVER_URL = "https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=900&q=80";
 
@@ -23,7 +24,8 @@ export default function NutritionistProfileScreen() {
     profile_pic: string;
   }>();
 
-  const name = params.name ?? "Nutriólogo";
+  const { t } = useLanguage();
+  const name = params.name ?? t("nutritionistProfile.fallbackName");
   const specialty = params.specialty ?? "";
   const bio = params.bio ?? "";
   const rating = parseFloat(params.rating ?? "0");
@@ -86,7 +88,7 @@ export default function NutritionistProfileScreen() {
       {/* ACERCA DE */}
       {bio ? (
         <View style={[styles.section, { marginBottom: 40 }]}>
-          <Text style={styles.sectionTitle}>Acerca de</Text>
+          <Text style={styles.sectionTitle}>{t("nutritionistProfile.about")}</Text>
           <Text style={styles.aboutText}>{bio}</Text>
         </View>
       ) : null}

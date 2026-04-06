@@ -2,8 +2,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-nati
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, router } from "expo-router";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 export default function PrivacyScreen() {
+  const { t } = useLanguage();
 
   return (
     <View style={styles.container}>
@@ -15,87 +17,55 @@ export default function PrivacyScreen() {
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Política de privacidad</Text>
+        <Text style={styles.headerTitle}>{t("privacy.title")}</Text>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        <Text style={styles.date}>Última actualización: marzo 2026</Text>
+        <Text style={styles.date}>{t("privacy.lastUpdated")}</Text>
 
-        <Text style={styles.section}>1. Introducción</Text>
-        <Text style={styles.text}>
-          En LiftyHub nos comprometemos a proteger tu privacidad. Esta política
-          describe cómo recopilamos, usamos y protegemos tu información personal
-          de conformidad con la Ley Federal de Protección de Datos Personales en
-          Posesión de los Particulares (LFPDPPP) de México.
-        </Text>
+        <Text style={styles.section}>{t("privacy.s1Title")}</Text>
+        <Text style={styles.text}>{t("privacy.s1Text")}</Text>
 
-        <Text style={styles.section}>2. Datos que recopilamos</Text>
-        <Text style={styles.text}>
-          Al usar LiftyHub recopilamos la siguiente información:
-        </Text>
-        <Text style={styles.bullet}>• Datos de cuenta: nombre, correo electrónico y contraseña.</Text>
-        <Text style={styles.bullet}>• Datos personales: género, fecha de nacimiento y fotografía de perfil.</Text>
-        <Text style={styles.bullet}>• Datos físicos: peso, altura, medidas corporales (cintura, pecho, caderas, brazos, hombros, muslos) y somatotipo.</Text>
-        <Text style={styles.bullet}>• Datos de entrenamiento: rutinas, ejercicios, series, repeticiones, pesos y registro de actividad.</Text>
-        <Text style={styles.bullet}>• Datos de progreso: historial mensual, rachas y récords personales.</Text>
-        <Text style={styles.bullet}>• Datos nutricionales: planes de dieta y revisiones con nutricionistas.</Text>
+        <Text style={styles.section}>{t("privacy.s2Title")}</Text>
+        <Text style={styles.text}>{t("privacy.s2Intro")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s2b1")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s2b2")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s2b3")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s2b4")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s2b5")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s2b6")}</Text>
 
-        <Text style={styles.section}>3. Uso de la información</Text>
-        <Text style={styles.text}>
-          Utilizamos tu información exclusivamente para:
-        </Text>
-        <Text style={styles.bullet}>• Brindarte una experiencia personalizada dentro de la app.</Text>
-        <Text style={styles.bullet}>• Mostrarte tu progreso físico y de entrenamiento.</Text>
-        <Text style={styles.bullet}>• Conectarte con planes y rutinas adecuadas a tu perfil.</Text>
-        <Text style={styles.bullet}>• Mejorar nuestros servicios y funcionalidades.</Text>
+        <Text style={styles.section}>{t("privacy.s3Title")}</Text>
+        <Text style={styles.text}>{t("privacy.s3Intro")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s3b1")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s3b2")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s3b3")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s3b4")}</Text>
 
-        <Text style={styles.section}>4. Compartición de datos</Text>
-        <Text style={styles.text}>
-          LiftyHub no vende, alquila ni comparte tu información personal con
-          terceros sin tu consentimiento expreso, salvo cuando sea requerido por
-          autoridades competentes conforme a la legislación mexicana vigente.
-        </Text>
+        <Text style={styles.section}>{t("privacy.s4Title")}</Text>
+        <Text style={styles.text}>{t("privacy.s4Text")}</Text>
 
-        <Text style={styles.section}>5. Seguridad</Text>
-        <Text style={styles.text}>
-          Implementamos medidas de seguridad técnicas y administrativas para
-          proteger tu información contra accesos no autorizados, pérdida o
-          alteración. Tus contraseñas se almacenan cifradas y nunca en texto
-          plano.
-        </Text>
+        <Text style={styles.section}>{t("privacy.s5Title")}</Text>
+        <Text style={styles.text}>{t("privacy.s5Text")}</Text>
 
-        <Text style={styles.section}>6. Tus derechos (ARCO)</Text>
-        <Text style={styles.text}>
-          Conforme a la LFPDPPP, tienes derecho a Acceder, Rectificar, Cancelar
-          u Oponerte al tratamiento de tus datos personales. Para ejercer estos
-          derechos puedes:
-        </Text>
-        <Text style={styles.bullet}>• Editar tu perfil directamente desde la app.</Text>
-        <Text style={styles.bullet}>• Eliminar tu cuenta desde Configuración → Cuenta → Eliminar cuenta.</Text>
-        <Text style={styles.bullet}>• Contactarnos en support@liftyhub.app</Text>
+        <Text style={styles.section}>{t("privacy.s6Title")}</Text>
+        <Text style={styles.text}>{t("privacy.s6Intro")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s6b1")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s6b2")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s6b3")}</Text>
 
-        <Text style={styles.section}>7. Retención de datos</Text>
-        <Text style={styles.text}>
-          Conservamos tu información mientras tu cuenta esté activa. Al eliminar
-          tu cuenta, tus datos personales serán eliminados de nuestros servidores
-          en un plazo máximo de 30 días naturales.
-        </Text>
+        <Text style={styles.section}>{t("privacy.s7Title")}</Text>
+        <Text style={styles.text}>{t("privacy.s7Text")}</Text>
 
-        <Text style={styles.section}>8. Cambios a esta política</Text>
-        <Text style={styles.text}>
-          Podemos actualizar esta política ocasionalmente. Te notificaremos
-          dentro de la app ante cualquier cambio significativo. El uso continuado
-          de LiftyHub después de dichos cambios implica tu aceptación.
-        </Text>
+        <Text style={styles.section}>{t("privacy.s8Title")}</Text>
+        <Text style={styles.text}>{t("privacy.s8Text")}</Text>
 
-        <Text style={styles.section}>9. Contacto</Text>
-        <Text style={styles.text}>
-          Si tienes dudas sobre esta política o el manejo de tus datos, contáctanos:
-        </Text>
-        <Text style={styles.bullet}>• Correo: support@liftyhub.app</Text>
-        <Text style={styles.bullet}>• País: México</Text>
+        <Text style={styles.section}>{t("privacy.s9Title")}</Text>
+        <Text style={styles.text}>{t("privacy.s9Intro")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s9b1")}</Text>
+        <Text style={styles.bullet}>{t("privacy.s9b2")}</Text>
 
-        <Text style={styles.footer}>© 2026 LiftyHub. Todos los derechos reservados.</Text>
+        <Text style={styles.footer}>{t("privacy.footer")}</Text>
 
       </ScrollView>
 

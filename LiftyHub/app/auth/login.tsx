@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, Alert } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -107,6 +107,24 @@ export default function Login() {
               </Text>
             </TouchableOpacity>
 
+            {/* SEPARATOR */}
+            <View style={styles.separator}>
+              <View style={styles.separatorLine} />
+              <Text style={styles.separatorText}>{t("login.orContinueWith")}</Text>
+              <View style={styles.separatorLine} />
+            </View>
+
+            {/* GOOGLE BUTTON */}
+            <TouchableOpacity
+              style={styles.googleBtn}
+              onPress={() => Alert.alert(t("login.googleSoon"), t("login.googleSoonMsg"))}
+            >
+              <View style={styles.googleIconCircle}>
+                <Text style={styles.googleIconText}>G</Text>
+              </View>
+              <Text style={styles.googleBtnText}>{t("login.googleButton")}</Text>
+            </TouchableOpacity>
+
           </View>
 
         </View>
@@ -201,6 +219,58 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginBottom: 10,
     textAlign: "center"
-  }
+  },
+
+  separator: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
+    marginBottom: 16,
+    gap: 10,
+  },
+
+  separatorLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#3A3A3E",
+  },
+
+  separatorText: {
+    color: "#A1A1A1",
+    fontSize: 12,
+  },
+
+  googleBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    backgroundColor: "#2C2C2E",
+    borderRadius: 14,
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#3A3A3E",
+  },
+
+  googleIconCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  googleIconText: {
+    color: "#4285F4",
+    fontSize: 14,
+    fontWeight: "800",
+  },
+
+  googleBtnText: {
+    color: "white",
+    fontSize: 15,
+    fontWeight: "600",
+  },
 
 });

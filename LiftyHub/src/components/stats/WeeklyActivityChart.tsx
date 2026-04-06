@@ -40,7 +40,7 @@ export default function WeeklyActivityChart({ sessions }: Props) {
       {!hasActivity ? (
         <View style={styles.empty}>
           <Ionicons name="bar-chart-outline" size={36} color={colors.textSecondary} />
-          <Text style={styles.emptyText}>Empieza a entrenar para ver tu actividad semanal</Text>
+          <Text style={styles.emptyText}>{t("stats.noActivity")}</Text>
         </View>
       ) : (
         <View style={styles.chart}>

@@ -14,6 +14,8 @@ import { useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
+import { useUnits } from "@/src/context/UnitsContext";
 import {
   getRoutineExercises,
   getUserRoutineExercises,
@@ -49,6 +51,8 @@ export default function SessionScreen() {
     isUserRoutine: string;
   }>();
 
+  const { t } = useLanguage();
+  const { unitLabel, toKg } = useUnits();
   const [exercises, setExercises] = useState<ExerciseEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -243,7 +247,8 @@ export default function SessionScreen() {
         for (let i = 0; i < exercises.length; i++) {
           const ex = exercises[i];
           const weights = setWeights[i] ?? [];
-          const avgWeight = weights.reduce((sum, w) => sum + (parseFloat(w) || 0), 0) / (weights.length || 1);
+          const avgDisplay = weights.reduce((sum, w) => sum + (parseFloat(w) || 0), 0) / (weights.length || 1);
+          const avgWeight = toKg(avgDisplay);
           const exId = ex.exercise?.id;
           if (!exId) continue;
           try {
@@ -313,9 +318,9 @@ export default function SessionScreen() {
     return (
       <View style={styles.centered}>
         <Ionicons name="barbell-outline" size={44} color={colors.textSecondary} />
-        <Text style={styles.emptyText}>Esta rutina no tiene ejercicios.</Text>
+        <Text style={styles.emptyText}>{t("session.noExercises")}</Text>
         <TouchableOpacity style={styles.solidBtn} onPress={() => router.back()}>
-          <Text style={styles.solidBtnText}>Volver</Text>
+          <Text style={styles.solidBtnText}>{t("session.back")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -332,20 +337,20 @@ export default function SessionScreen() {
           <View style={styles.doneIconBg}>
             <Ionicons name="trophy" size={44} color="#F59E0B" />
           </View>
-          <Text style={styles.doneTitle}>¡Entrenamiento completado!</Text>
+          <Text style={styles.doneTitle}>{t("session.completed")}</Text>
           <Text style={styles.doneSub}>{name}</Text>
 
           <View style={styles.doneStat}>
             <Ionicons name="time-outline" size={20} color={colors.primary} />
-            <Text style={styles.doneStatText}>Duración: {formatTime(elapsedSecs)}</Text>
+            <Text style={styles.doneStatText}>{t("session.duration")} {formatTime(elapsedSecs)}</Text>
           </View>
           <View style={styles.doneStat}>
             <Ionicons name="barbell-outline" size={20} color={colors.primary} />
-            <Text style={styles.doneStatText}>{totalExercises} ejercicios · {totalSetsAll} series</Text>
+            <Text style={styles.doneStatText}>{totalExercises} {t("session.exercisesStat")} · {totalSetsAll} {t("session.setsStat")}</Text>
           </View>
           <View style={styles.doneStat}>
             <Ionicons name="flame-outline" size={20} color="#F59E0B" />
-            <Text style={styles.doneStatText}>¡Racha diaria completada!</Text>
+            <Text style={styles.doneStatText}>{t("session.streakDone")}</Text>
           </View>
 
           {/* weight summary */}
@@ -357,7 +362,7 @@ export default function SessionScreen() {
               return (
                 <View key={ex.id} style={styles.doneExRow}>
                   <Text style={styles.doneExName}>{n}</Text>
-                  <Text style={styles.doneExWeight}>{maxW > 0 ? `${maxW} kg` : "—"}</Text>
+                  <Text style={styles.doneExWeight}>{maxW > 0 ? `${maxW} ${unitLabel}` : "—"}</Text>
                 </View>
               );
             })}
@@ -370,7 +375,7 @@ export default function SessionScreen() {
           >
             {saving
               ? <ActivityIndicator color="white" />
-              : <Text style={styles.solidBtnText}>Guardar y finalizar</Text>
+              : <Text style={styles.solidBtnText}>{t("session.saveAndFinish")}</Text>
             }
           </TouchableOpacity>
         </View>
@@ -388,7 +393,7 @@ export default function SessionScreen() {
 
     return (
       <View style={styles.restRoot}>
-        <Text style={styles.restLabel}>Descanso</Text>
+        <Text style={styles.restLabel}>{t("session.rest")}</Text>
         <Text style={styles.restTimer}>{formatTime(restLeft)}</Text>
 
         <View style={styles.restProgressBar}>
@@ -397,12 +402,12 @@ export default function SessionScreen() {
 
         <Text style={styles.restNext}>
           {nextName
-            ? `Siguiente: ${nextName}`
-            : `Siguiente: serie ${currentSet + 1} de ${totalSets}`}
+            ? `${t("session.nextExercise")} ${nextName}`
+            : `${t("session.nextExercise")} ${t("session.setOf")} ${currentSet + 1} ${t("session.of")} ${totalSets}`}
         </Text>
 
         <TouchableOpacity style={styles.skipBtn} onPress={handleSkipRest}>
-          <Text style={styles.skipBtnText}>Saltar descanso</Text>
+          <Text style={styles.skipBtnText}>{t("session.skipRest")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -431,7 +436,7 @@ export default function SessionScreen() {
           </View>
 
           {/* set dots */}
-          <Text style={styles.setLabel}>Serie {currentSet} de {totalSets}</Text>
+          <Text style={styles.setLabel}>{t("session.setOf")} {currentSet} {t("session.of")} {totalSets}</Text>
           <View style={styles.setDots}>
             {Array.from({ length: totalSets }).map((_, i) => (
               <View
@@ -452,13 +457,13 @@ export default function SessionScreen() {
           {/* reps */}
           <View style={styles.repsCard}>
             <Text style={styles.repsNum}>{reps}</Text>
-            <Text style={styles.repsLabel}>repeticiones</Text>
+            <Text style={styles.repsLabel}>{t("session.reps")}</Text>
           </View>
 
           {/* weight input */}
           <View style={styles.weightCard}>
             <Ionicons name="barbell-outline" size={18} color={colors.textSecondary} />
-            <Text style={styles.weightLabel}>Peso (kg)</Text>
+            <Text style={styles.weightLabel}>{t("session.weightLabel", { unit: unitLabel })}</Text>
             <TextInput
               style={styles.weightInput}
               value={currentWeight}
@@ -474,7 +479,7 @@ export default function SessionScreen() {
           {restSecs > 0 && (
             <View style={styles.restInfo}>
               <Ionicons name="timer-outline" size={14} color={colors.textSecondary} />
-              <Text style={styles.restInfoText}>{restSecs}s de descanso al completar</Text>
+              <Text style={styles.restInfoText}>{restSecs}{t("session.restAfterSet")}</Text>
             </View>
           )}
 
@@ -495,7 +500,7 @@ export default function SessionScreen() {
                   </Text>
                   {done && setWeights[i] && (
                     <Text style={styles.miniWeight}>
-                      {Math.max(...(setWeights[i]?.map((w) => parseFloat(w) || 0) ?? [0]))} kg
+                      {Math.max(...(setWeights[i]?.map((w) => parseFloat(w) || 0) ?? [0]))} {unitLabel}
                     </Text>
                   )}
                 </View>
@@ -511,8 +516,8 @@ export default function SessionScreen() {
             <Ionicons name="checkmark-circle" size={22} color="white" />
             <Text style={styles.ctaBtnText}>
               {currentSet >= totalSets && exIndex >= exercises.length - 1
-                ? "Finalizar entrenamiento"
-                : "Completar serie"}
+                ? t("session.finishWorkout")
+                : t("session.completeSet")}
             </Text>
           </TouchableOpacity>
         </View>

@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LanguageProvider } from '@/src/context/LanguageContext';
 import { SubscriptionProvider } from '@/src/context/SubscriptionContext';
+import { UnitsProvider } from '@/src/context/UnitsContext';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -26,6 +27,7 @@ export default function RootLayout() {
 
   return (
     <LanguageProvider>
+    <UnitsProvider>
     <SubscriptionProvider>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
@@ -51,6 +53,7 @@ export default function RootLayout() {
       <StatusBar style="light" />
     </ThemeProvider>
     </SubscriptionProvider>
+    </UnitsProvider>
     </LanguageProvider>
   );
 }

@@ -2,8 +2,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-nati
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, router } from "expo-router";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 export default function AboutScreen() {
+  const { t } = useLanguage();
 
   return (
 
@@ -16,33 +18,24 @@ export default function AboutScreen() {
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Sobre LiftyHub</Text>
+        <Text style={styles.headerTitle}>{t("about.title")}</Text>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
 
-        <Text style={styles.section}>Nuestra misión</Text>
-        <Text style={styles.text}>
-          LiftyHub nació con una sola idea: hacer que el entrenamiento sea más
-          inteligente. Creemos que cada persona merece herramientas reales para
-          planificar, registrar y visualizar su progreso físico — sin
-          complicaciones.
-        </Text>
+        <Text style={styles.section}>{t("about.missionTitle")}</Text>
+        <Text style={styles.text}>{t("about.missionText")}</Text>
 
-        <Text style={styles.section}>¿Qué es LiftyHub?</Text>
-        <Text style={styles.text}>
-          LiftyHub es una plataforma fitness completa que te permite crear tus
-          propias rutinas, registrar tus entrenamientos, llevar el control de tu
-          progreso y acceder a planes y rutinas diseñados por expertos.
-        </Text>
+        <Text style={styles.section}>{t("about.whatTitle")}</Text>
+        <Text style={styles.text}>{t("about.whatText")}</Text>
 
-        <Text style={styles.section}>El equipo</Text>
+        <Text style={styles.section}>{t("about.teamTitle")}</Text>
 
         <View style={styles.memberCard}>
           <Ionicons name="person-circle-outline" size={40} color="#3B82F6" />
           <View style={styles.memberInfo}>
             <Text style={styles.memberName}>Pamela Martinez Moreno</Text>
-            <Text style={styles.memberRole}>Desarrolladora</Text>
+            <Text style={styles.memberRole}>{t("about.developerF")}</Text>
           </View>
         </View>
 
@@ -50,15 +43,15 @@ export default function AboutScreen() {
           <Ionicons name="person-circle-outline" size={40} color="#3B82F6" />
           <View style={styles.memberInfo}>
             <Text style={styles.memberName}>Angel David Hinojos Vega</Text>
-            <Text style={styles.memberRole}>Desarrollador</Text>
+            <Text style={styles.memberRole}>{t("about.developer")}</Text>
           </View>
         </View>
 
-        <Text style={styles.section}>Contacto</Text>
+        <Text style={styles.section}>{t("about.contactTitle")}</Text>
         <Text style={styles.text}>support@liftyhub.app</Text>
 
-        <Text style={styles.version}>Versión 1.0.0</Text>
-        <Text style={styles.footer}>© 2026 LiftyHub. Todos los derechos reservados.</Text>
+        <Text style={styles.version}>{t("about.version")}</Text>
+        <Text style={styles.footer}>{t("about.copyright")}</Text>
 
       </ScrollView>
 

@@ -8,16 +8,17 @@ import SettingsSwitchItem from "@/src/components/settings/SettingsSwitchItem";
 import { deleteAccount, checkPassword } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
+import { useUnits } from "@/src/context/UnitsContext";
 import { colors, planColors } from "@/src/styles/globalstyles";
 
 export default function Settings() {
 
   const { t, language, changeLanguage } = useLanguage();
   const { plan, refresh: refreshSubscription } = useSubscription();
+  const { units, changeUnits } = useUnits();
 
   const planColor = plan ? (planColors[plan.name] ?? colors.primary) : "#A1A1A1";
   const [notifications, setNotifications] = useState(false);
-  const [units, setUnits] = useState("kg");
 
   // Dev mode
   const versionTaps = useRef(0);
@@ -124,22 +125,13 @@ export default function Settings() {
     }
   };
 
-  const saveUnits = async (value: string) => {
-    try {
-      setUnits(value);
-      await AsyncStorage.setItem("@liftyhub_units", value);
-    } catch (error) {
-      console.log("Error saving units", error);
-    }
-  };
-
   const handleUnits = () => {
     Alert.alert(
       t("settings.unitsTitle"),
       t("settings.unitsMessage"),
       [
-        { text: t("settings.unitsKg"), onPress: () => saveUnits("kg") },
-        { text: t("settings.unitsLb"), onPress: () => saveUnits("lb") },
+        { text: t("settings.unitsKg"), onPress: () => changeUnits("kg") },
+        { text: t("settings.unitsLb"), onPress: () => changeUnits("lb") },
         { text: t("settings.cancel"), style: "cancel" }
       ]
     );
@@ -171,18 +163,6 @@ export default function Settings() {
   const handleDeleteAccount = () => {
     setShowDeleteModal(true);
   };
-
-  useEffect(() => {
-    const loadPreferences = async () => {
-      try {
-        const savedUnits = await AsyncStorage.getItem("@liftyhub_units");
-        if (savedUnits !== null) setUnits(savedUnits);
-      } catch (error) {
-        console.log("Error loading preferences", error);
-      }
-    };
-    loadPreferences();
-  }, []);
 
   return (
     <View style={styles.container}>

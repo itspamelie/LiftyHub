@@ -8,6 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { getExerciseFiles } from "@/src/services/api";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const HERO_HEIGHT = 300;
@@ -55,6 +56,7 @@ export default function ExerciseDetail() {
     id: string; name: string; muscle: string; technique: string; categorie: string;
   }>();
 
+  const { t } = useLanguage();
   const [files, setFiles] = useState<ExerciseFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSlide, setActiveSlide] = useState(0);
@@ -151,12 +153,12 @@ export default function ExerciseDetail() {
           <View style={styles.infoGrid}>
             <View style={styles.infoCard}>
               <Ionicons name={muscleIcon} size={24} color={colors.primary} />
-              <Text style={styles.infoLabel}>Músculo</Text>
+              <Text style={styles.infoLabel}>{t("exerciseDetail.muscle")}</Text>
               <Text style={styles.infoValue}>{muscle || "—"}</Text>
             </View>
             <View style={styles.infoCard}>
               <Ionicons name={categoryIcon} size={24} color={colors.primary} />
-              <Text style={styles.infoLabel}>Categoría</Text>
+              <Text style={styles.infoLabel}>{t("exerciseDetail.category")}</Text>
               <Text style={styles.infoValue}>{categorie || "—"}</Text>
             </View>
           </View>
@@ -164,7 +166,7 @@ export default function ExerciseDetail() {
           {/* TÉCNICA */}
           <View style={styles.sectionHeader}>
             <View style={styles.sectionAccent} />
-            <Text style={styles.sectionTitle}>Cómo realizarlo</Text>
+            <Text style={styles.sectionTitle}>{t("exerciseDetail.howTo")}</Text>
           </View>
 
           {loading ? (
@@ -195,48 +197,48 @@ export default function ExerciseDetail() {
           ) : (
             <View style={styles.emptyBox}>
               <Ionicons name="clipboard-outline" size={40} color={colors.textSecondary} />
-              <Text style={styles.emptyText}>Sin descripción disponible</Text>
+              <Text style={styles.emptyText}>{t("exerciseDetail.noDescription")}</Text>
             </View>
           )}
 
           {/* CONSEJOS */}
           <View style={[styles.sectionHeader, { marginTop: 28 }]}>
             <View style={styles.sectionAccent} />
-            <Text style={styles.sectionTitle}>Consejos</Text>
+            <Text style={styles.sectionTitle}>{t("exerciseDetail.tipsSection")}</Text>
           </View>
 
           <View style={styles.tipsGrid}>
             <View style={styles.tipCard}>
               <Ionicons name="checkmark-circle-outline" size={22} color="#22C55E" />
-              <Text style={styles.tipTitle}>Postura</Text>
-              <Text style={styles.tipText}>Mantén la espalda recta y los pies firmes en el suelo durante todo el movimiento.</Text>
+              <Text style={styles.tipTitle}>{t("exerciseDetail.tip1Title")}</Text>
+              <Text style={styles.tipText}>{t("exerciseDetail.tip1Text")}</Text>
             </View>
             <View style={styles.tipCard}>
               <Ionicons name="checkmark-circle-outline" size={22} color="#22C55E" />
-              <Text style={styles.tipTitle}>Respiración</Text>
-              <Text style={styles.tipText}>Exhala en el esfuerzo, inhala en el retorno. Nunca contengas el aire.</Text>
+              <Text style={styles.tipTitle}>{t("exerciseDetail.tip2Title")}</Text>
+              <Text style={styles.tipText}>{t("exerciseDetail.tip2Text")}</Text>
             </View>
             <View style={styles.tipCard}>
               <Ionicons name="alert-circle-outline" size={22} color="#F59E0B" />
-              <Text style={styles.tipTitle}>Errores comunes</Text>
-              <Text style={styles.tipText}>Evita usar impulso o velocidad excesiva. Prioriza la técnica sobre el peso.</Text>
+              <Text style={styles.tipTitle}>{t("exerciseDetail.tip3Title")}</Text>
+              <Text style={styles.tipText}>{t("exerciseDetail.tip3Text")}</Text>
             </View>
           </View>
 
           {/* MÚSCULOS TRABAJADOS */}
           <View style={[styles.sectionHeader, { marginTop: 28 }]}>
             <View style={styles.sectionAccent} />
-            <Text style={styles.sectionTitle}>Músculos trabajados</Text>
+            <Text style={styles.sectionTitle}>{t("exerciseDetail.musclesWorked")}</Text>
           </View>
 
           <View style={styles.muscleRow}>
             <View style={styles.muscleTag}>
               <Ionicons name="star" size={13} color={colors.primary} />
-              <Text style={styles.muscleTagText}>Principal: {muscle || "—"}</Text>
+              <Text style={styles.muscleTagText}>{t("exerciseDetail.primaryMuscle")} {muscle || "—"}</Text>
             </View>
             <View style={[styles.muscleTag, styles.muscleTagSecondary]}>
               <Ionicons name="star-outline" size={13} color={colors.textSecondary} />
-              <Text style={[styles.muscleTagText, { color: colors.textSecondary }]}>Secundarios: Core, Estabilizadores</Text>
+              <Text style={[styles.muscleTagText, { color: colors.textSecondary }]}>{t("exerciseDetail.secondaryMuscles")}</Text>
             </View>
           </View>
 
