@@ -2,7 +2,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   Platform,
@@ -10,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Modal,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 
 import { useRouter, Stack } from "expo-router";
 import { useState } from "react";
@@ -25,14 +25,19 @@ export default function Personal() {
   const { t } = useLanguage();
 
   const [birthdate, setBirthdate] = useState<Date | null>(null);
-  const [tempDate, setTempDate] = useState(new Date());
+  const [tempDate, setTempDate] = useState(new Date(2025, 0, 1));
   const [showPicker, setShowPicker] = useState(false);
 
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
-  const [waist, setWaist] = useState("");
+  const [tempHeight, setTempHeight] = useState(170);
+  const [tempWeight, setTempWeight] = useState(70);
+  const [showHeightPicker, setShowHeightPicker] = useState(false);
+  const [showWeightPicker, setShowWeightPicker] = useState(false);
+
+  const HEIGHT_VALUES = Array.from({ length: 151 }, (_, i) => i + 100); // 100–250 cm
+  const WEIGHT_VALUES = Array.from({ length: 221 }, (_, i) => i + 30);  // 30–250 kg
   const [gender, setGender] = useState<string | null>(null);
-  const [somatotype, setSomatotype] = useState<string | null>(null);
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("es-MX", {
@@ -42,24 +47,12 @@ export default function Personal() {
     });
   };
 
-  const somatotypeMap: Record<string, number> = {
-    ectomorph: 1,
-    mesomorph: 2,
-    endomorph: 3,
-  };
-
   const genders = [
     { key: "Masculino", label: t("onboarding.male") },
     { key: "Femenino", label: t("onboarding.female") },
   ];
 
-  const somatotypes = [
-    { key: "ectomorph", label: t("onboarding.ectomorph") },
-    { key: "mesomorph", label: t("onboarding.mesomorph") },
-    { key: "endomorph", label: t("onboarding.endomorph") },
-  ];
-
-  const isComplete = !!birthdate && !!height && !!weight && !!waist && !!gender && !!somatotype;
+  const isComplete = !!birthdate && !!height && !!weight && !!gender;
 
   const handleNext = async () => {
     if (!isComplete) {
@@ -86,11 +79,10 @@ export default function Personal() {
     await AsyncStorage.setItem("@register_properties", JSON.stringify({
       height: parseFloat(height),
       weight: parseFloat(weight),
-      waist: parseFloat(waist),
-      somatotype_id: somatotypeMap[somatotype!],
+      waist: 0,
     }));
 
-    router.push("/onboarding/permissions" as any);
+    router.push("/onboarding/somatotype" as any);
   };
 
   return (
@@ -125,11 +117,21 @@ export default function Personal() {
             <Text style={[styles.input, { color: birthdate ? colors.text : colors.textSecondary }]}>
               {birthdate ? formatDate(birthdate) : t("onboarding.birthdate")}
             </Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <Modal visible={showPicker} transparent animationType="fade">
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.modalOverlay}
+              activeOpacity={1}
+              onPress={() => setShowPicker(false)}
+            >
+              <TouchableOpacity activeOpacity={1} onPress={() => {}} style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <TouchableOpacity onPress={() => setShowPicker(false)}>
+                    <Ionicons name="close" size={22} color={colors.textSecondary} />
+                  </TouchableOpacity>
+                </View>
                 <DateTimePicker
                   value={tempDate}
                   mode="date"
@@ -149,48 +151,89 @@ export default function Personal() {
                 >
                   <Text style={styles.confirmText}>{t("onboarding.birthdateConfirm")}</Text>
                 </TouchableOpacity>
-              </View>
-            </View>
+              </TouchableOpacity>
+            </TouchableOpacity>
           </Modal>
 
           {/* ESTATURA */}
-          <View style={styles.inputContainer}>
+          <TouchableOpacity
+            style={styles.inputContainer}
+            onPress={() => setShowHeightPicker(true)}
+          >
             <Ionicons name="resize-outline" size={20} color={colors.textSecondary} />
-            <TextInput
-              placeholder={t("onboarding.heightPlaceholder")}
-              placeholderTextColor={colors.textSecondary}
-              style={styles.input}
-              value={height}
-              onChangeText={setHeight}
-              keyboardType="numeric"
-            />
-          </View>
+            <Text style={[styles.input, { color: height ? colors.text : colors.textSecondary }]}>
+              {height ? `${height} cm` : t("onboarding.heightPlaceholder")}
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          <Modal visible={showHeightPicker} transparent animationType="fade">
+            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowHeightPicker(false)}>
+              <TouchableOpacity activeOpacity={1} onPress={() => {}} style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <TouchableOpacity onPress={() => setShowHeightPicker(false)}>
+                    <Ionicons name="close" size={22} color={colors.textSecondary} />
+                  </TouchableOpacity>
+                </View>
+                <Picker
+                  selectedValue={tempHeight}
+                  onValueChange={(val) => setTempHeight(val)}
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                >
+                  {HEIGHT_VALUES.map((h) => (
+                    <Picker.Item key={h} label={`${h} cm`} value={h} />
+                  ))}
+                </Picker>
+                <TouchableOpacity
+                  style={styles.confirmButton}
+                  onPress={() => { setHeight(tempHeight.toString()); setShowHeightPicker(false); }}
+                >
+                  <Text style={styles.confirmText}>{t("onboarding.birthdateConfirm")}</Text>
+                </TouchableOpacity>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </Modal>
 
           {/* PESO */}
-          <View style={styles.inputContainer}>
+          <TouchableOpacity
+            style={styles.inputContainer}
+            onPress={() => setShowWeightPicker(true)}
+          >
             <Ionicons name="barbell-outline" size={20} color={colors.textSecondary} />
-            <TextInput
-              placeholder={t("onboarding.weightPlaceholder")}
-              placeholderTextColor={colors.textSecondary}
-              style={styles.input}
-              value={weight}
-              onChangeText={setWeight}
-              keyboardType="numeric"
-            />
-          </View>
+            <Text style={[styles.input, { color: weight ? colors.text : colors.textSecondary }]}>
+              {weight ? `${weight} kg` : t("onboarding.weightPlaceholder")}
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+          </TouchableOpacity>
 
-          {/* CINTURA */}
-          <View style={styles.inputContainer}>
-            <Ionicons name="body-outline" size={20} color={colors.textSecondary} />
-            <TextInput
-              placeholder={t("onboarding.waistPlaceholder")}
-              placeholderTextColor={colors.textSecondary}
-              style={styles.input}
-              value={waist}
-              onChangeText={setWaist}
-              keyboardType="numeric"
-            />
-          </View>
+          <Modal visible={showWeightPicker} transparent animationType="fade">
+            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowWeightPicker(false)}>
+              <TouchableOpacity activeOpacity={1} onPress={() => {}} style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <TouchableOpacity onPress={() => setShowWeightPicker(false)}>
+                    <Ionicons name="close" size={22} color={colors.textSecondary} />
+                  </TouchableOpacity>
+                </View>
+                <Picker
+                  selectedValue={tempWeight}
+                  onValueChange={(val) => setTempWeight(val)}
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                >
+                  {WEIGHT_VALUES.map((w) => (
+                    <Picker.Item key={w} label={`${w} kg`} value={w} />
+                  ))}
+                </Picker>
+                <TouchableOpacity
+                  style={styles.confirmButton}
+                  onPress={() => { setWeight(tempWeight.toString()); setShowWeightPicker(false); }}
+                >
+                  <Text style={styles.confirmText}>{t("onboarding.birthdateConfirm")}</Text>
+                </TouchableOpacity>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </Modal>
 
           {/* GÉNERO */}
           <Text style={styles.sectionTitle}>{t("onboarding.genderTitle")}</Text>
@@ -202,25 +245,6 @@ export default function Personal() {
                   key={item.key}
                   style={[styles.selectorButton, isActive && styles.selectorButtonActive]}
                   onPress={() => setGender(item.key)}
-                >
-                  <Text style={[styles.selectorText, isActive && styles.selectorTextActive]}>
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          {/* SOMATOTIPO */}
-          <Text style={styles.sectionTitle}>{t("onboarding.somatotypeTitle")}</Text>
-          <View style={styles.selectorContainer}>
-            {somatotypes.map((item) => {
-              const isActive = somatotype === item.key;
-              return (
-                <TouchableOpacity
-                  key={item.key}
-                  style={[styles.selectorButton, isActive && styles.selectorButtonActive]}
-                  onPress={() => setSomatotype(item.key)}
                 >
                   <Text style={[styles.selectorText, isActive && styles.selectorTextActive]}>
                     {item.label}
@@ -368,6 +392,22 @@ const styles = StyleSheet.create({
     padding: 20,
     width: "85%",
     alignItems: "center",
+  },
+
+  modalHeader: {
+    width: "100%",
+    alignItems: "flex-end",
+    marginBottom: 4,
+  },
+
+  picker: {
+    width: "100%",
+    color: "white",
+  },
+
+  pickerItem: {
+    color: "white",
+    fontSize: 18,
   },
 
   confirmButton: {

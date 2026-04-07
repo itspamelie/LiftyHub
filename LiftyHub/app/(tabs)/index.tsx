@@ -1,4 +1,4 @@
-import { FlatList, View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl, Alert, Modal, Dimensions, ScrollView } from "react-native";
+import { FlatList, View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl, Alert, Modal, Dimensions, ScrollView, Linking } from "react-native";
 import RoutineCard from "@/src/components/routines/RoutineCard";
 import FilterButton from "@/src/components/exercises/FilterButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
@@ -12,6 +12,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { getRoutines, getUserRoutines, deleteUserRoutine, createUserRoutine } from "@/src/services/api";
 import { useToast } from "@/src/hooks/useToast";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
+import { saveCache, loadCache } from "@/src/utils/cache";
+import OfflineBanner from "@/src/components/OfflineBanner";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -75,6 +78,7 @@ export default function RoutinesScreen() {
   const { showToast, Toast } = useToast();
   const { t } = useLanguage();
   const { plan, loading: subLoading } = useSubscription();
+  const isConnected = useNetworkStatus();
   const hasAppAccess = plan?.name !== "Free";
   const listRef = useRef<FlatList>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -107,6 +111,7 @@ export default function RoutinesScreen() {
   const [scannerUsed, setScannerUsed] = useState(false);
   const [showScannerWarning, setShowScannerWarning] = useState(false);
   const [nextScanDate, setNextScanDate] = useState<Date | null>(null);
+  const [showCameraPermModal, setShowCameraPermModal] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem("@liftyhub_scanner_date").then((val) => {
@@ -122,15 +127,33 @@ export default function RoutinesScreen() {
   }, []);
 
   const openScannerCamera = async () => {
-    if (!cameraPermission?.granted) {
-      const { granted } = await requestCameraPermission();
-      if (!granted) {
-        showToast("Necesitamos acceso a la cámara para escanear el QR.", "error");
-        return;
-      }
+    if (cameraPermission?.granted) {
+      scanLock.current = false;
+      setShowScanner(true);
+      return;
     }
-    scanLock.current = false;
-    setShowScanner(true);
+    // Permiso denegado por el SO → no se puede volver a pedir, guiar a Ajustes
+    if (cameraPermission?.status === "denied") {
+      setShowCameraPermModal(true);
+      return;
+    }
+    // Permiso aún no solicitado → mostrar modal explicativo primero
+    setShowCameraPermModal(true);
+  };
+
+  const handleRequestCameraPermission = async () => {
+    setShowCameraPermModal(false);
+    if (cameraPermission?.status === "denied") {
+      Linking.openSettings();
+      return;
+    }
+    const { granted } = await requestCameraPermission();
+    if (granted) {
+      scanLock.current = false;
+      setShowScanner(true);
+    } else {
+      setShowCameraPermModal(true); // muestra modal de ajustes
+    }
   };
 
   const handleOpenScanner = () => {
@@ -234,10 +257,20 @@ export default function RoutinesScreen() {
         getUserRoutines(user.id, token),
       ]);
 
-      if (resRoutines?.data) setRoutines(resRoutines.data);
-      if (resUserRoutines?.data) setUserRoutines(resUserRoutines.data);
+      if (resRoutines?.data) {
+        setRoutines(resRoutines.data);
+        await saveCache("routines", resRoutines.data);
+      }
+      if (resUserRoutines?.data) {
+        setUserRoutines(resUserRoutines.data);
+        await saveCache("userRoutines", resUserRoutines.data);
+      }
     } catch {
-      showToast("Error al cargar las rutinas.", "error");
+      const cachedR = await loadCache<any[]>("routines");
+      const cachedU = await loadCache<any[]>("userRoutines");
+      if (cachedR) setRoutines(cachedR);
+      if (cachedU) setUserRoutines(cachedU);
+      if (!cachedR && !cachedU) showToast("Error al cargar las rutinas.", "error");
     } finally {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
@@ -321,6 +354,7 @@ export default function RoutinesScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      {!isConnected && <OfflineBanner />}
     <FlatList
       ref={listRef}
       style={styles.container}
@@ -357,7 +391,7 @@ export default function RoutinesScreen() {
             {activeTab === "mine" && (
               <View style={styles.headerButtons}>
                 <TouchableOpacity style={styles.iconButton} onPress={handleOpenScanner}>
-                  <Ionicons name="qr-code-outline" size={20} color="white" />
+                  <Ionicons name="qr-code" size={20} color="white" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.iconButton} onPress={() => router.push("/routines/new")}>
                   <Ionicons name="pencil" size={20} color="white" />
@@ -517,12 +551,46 @@ export default function RoutinesScreen() {
 
       {Toast}
 
+      {/* MODAL PERMISO CÁMARA */}
+      <Modal visible={showCameraPermModal} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowCameraPermModal(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+            <TouchableOpacity style={styles.modalClose} onPress={() => setShowCameraPermModal(false)}>
+              <Ionicons name="close" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+            <View style={styles.modalIcon}>
+              <Ionicons name="camera" size={32} color={colors.primary} />
+            </View>
+            <Text style={styles.modalTitle}>Permiso de cámara</Text>
+            <Text style={styles.modalSubtitle}>
+              {cameraPermission?.status === "denied"
+                ? "Bloqueaste el acceso a la cámara. Ve a Ajustes para habilitarlo y poder escanear rutinas por QR."
+                : "Necesitamos acceso a tu cámara para escanear códigos QR de rutinas."}
+            </Text>
+            <TouchableOpacity
+              style={[styles.planCard, { alignItems: "center", paddingVertical: 14, backgroundColor: colors.primary }]}
+              onPress={handleRequestCameraPermission}
+            >
+              <Text style={{ color: "white", fontWeight: "700" }}>
+                {cameraPermission?.status === "denied" ? "Abrir Ajustes" : "Permitir cámara"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.planCard, { alignItems: "center", paddingVertical: 14, borderColor: "#2C2C2E", borderWidth: 1, marginTop: 8 }]}
+              onPress={() => setShowCameraPermModal(false)}
+            >
+              <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>Cancelar</Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
       {/* MODAL ADVERTENCIA SCANNER FREE */}
       <Modal visible={showScannerWarning} transparent animationType="fade">
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowScannerWarning(false)}>
           <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
             <View style={styles.modalIcon}>
-              <Ionicons name="qr-code-outline" size={32} color={colors.primary} />
+              <Ionicons name="qr-code" size={32} color={colors.primary} />
             </View>
             <Text style={styles.modalTitle}>Escaneo mensual gratuito</Text>
             <Text style={styles.modalSubtitle}>

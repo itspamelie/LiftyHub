@@ -9,7 +9,7 @@ import { deleteAccount, checkPassword } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import { useUnits } from "@/src/context/UnitsContext";
-import { colors, planColors } from "@/src/styles/globalstyles";
+import { colors, spacing, planColors } from "@/src/styles/globalstyles";
 
 export default function Settings() {
 
@@ -85,10 +85,10 @@ export default function Settings() {
       if (res?.valid) {
         setDeletePasswordVerified(true);
       } else {
-        Alert.alert("Error", "La contraseña es incorrecta");
+        Alert.alert("Error", t("settings.errorVerifyPassword"));
       }
     } catch {
-      Alert.alert("Error", "No se pudo verificar la contraseña");
+      Alert.alert("Error", t("settings.errorVerifyFailed"));
     } finally {
       setVerifyingDelete(false);
     }
@@ -121,7 +121,7 @@ export default function Settings() {
       await AsyncStorage.removeItem("user");
       router.replace("/auth/login");
     } catch {
-      Alert.alert("Error", "No se pudo cerrar sesión. Intenta de nuevo.");
+      Alert.alert("Error", t("settings.errorLogout"));
     }
   };
 
@@ -183,14 +183,14 @@ export default function Settings() {
         <Text style={styles.section}>{t("settings.plan")}</Text>
         <View style={styles.card}>
           <SettingsItem
-            icon="diamond-outline"
+            icon="diamond"
             label={t("settings.myPlan")}
             value={plan?.name ?? t("settings.freePlan")}
             valueColor={planColor}
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="sparkles-outline"
+            icon="sparkles"
             label={t("settings.viewPlans")}
             showArrow
             onPress={() => router.push("/settings/plans")}
@@ -201,13 +201,13 @@ export default function Settings() {
         <Text style={styles.section}>{t("settings.preferences")}</Text>
         <View style={styles.card}>
           <SettingsItem
-            icon="moon-outline"
+            icon="moon"
             label={t("settings.theme")}
             value={t("settings.dark")}
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="barbell-outline"
+            icon="barbell"
             label={t("settings.units")}
             value={units}
             onPress={handleUnits}
@@ -215,7 +215,7 @@ export default function Settings() {
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="language-outline"
+            icon="language"
             label={t("settings.language")}
             value={language === "es" ? t("settings.langEs") : t("settings.langEn")}
             onPress={handleLanguage}
@@ -223,7 +223,7 @@ export default function Settings() {
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="shield-checkmark-outline"
+            icon="shield-checkmark"
             label={t("permissions.title")}
             showArrow
             onPress={() => router.push("/settings/permissions")}
@@ -234,14 +234,14 @@ export default function Settings() {
         <Text style={styles.section}>{t("settings.workout")}</Text>
         <View style={styles.card}>
           <SettingsSwitchItem
-            icon="notifications-outline"
+            icon="notifications"
             label={t("settings.reminders")}
             value={notifications}
             onChange={setNotifications}
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="volume-high-outline"
+            icon="volume-high"
             label={t("settings.workoutSounds")}
           />
         </View>
@@ -250,21 +250,21 @@ export default function Settings() {
         <Text style={styles.section}>{t("settings.about")}</Text>
         <View style={styles.card}>
           <SettingsItem
-            icon="information-circle-outline"
+            icon="information-circle"
             label={t("settings.aboutLiftyHub")}
             showArrow
             onPress={() => router.push("/settings/about")}
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="document-text-outline"
+            icon="document-text"
             label={t("settings.privacy")}
             showArrow
             onPress={() => router.push("/settings/privacy")}
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="code-outline"
+            icon="code"
             label={t("settings.version")}
             value="1.0.0"
             onPress={handleVersionTap}
@@ -275,14 +275,14 @@ export default function Settings() {
         <Text style={styles.section}>{t("settings.account")}</Text>
         <View style={styles.card}>
           <SettingsItem
-            icon="log-out-outline"
+            icon="log-out"
             label={t("settings.logout")}
             danger
             onPress={handleLogout}
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="trash-outline"
+            icon="trash"
             label={t("settings.deleteAccount")}
             danger
             onPress={handleDeleteAccount}
@@ -303,13 +303,13 @@ export default function Settings() {
                 {!deletePasswordVerified ? (
                   <>
                     <Text style={styles.modalSubtitle}>
-                      Verifica tu contraseña para continuar
+                      {t("settings.deleteVerifySubtitle")}
                     </Text>
 
                     <View style={styles.inputContainer}>
                       <TextInput
                         style={styles.modalInput}
-                        placeholder="Contraseña actual"
+                        placeholder={t("settings.deletePasswordPlaceholder")}
                         placeholderTextColor={colors.textSecondary}
                         secureTextEntry={!showDeletePassword}
                         value={deletePassword}
@@ -331,14 +331,14 @@ export default function Settings() {
                     >
                       {verifyingDelete
                         ? <ActivityIndicator color="white" />
-                        : <Text style={styles.modalButtonText}>Verificar</Text>
+                        : <Text style={styles.modalButtonText}>{t("settings.deleteVerifyBtn")}</Text>
                       }
                     </TouchableOpacity>
                   </>
                 ) : (
                   <>
                     <Text style={styles.modalSubtitle}>
-                      Esta acción es permanente y no se puede deshacer.
+                      {t("settings.deleteConfirmSubtitle")}
                     </Text>
 
                     <TouchableOpacity
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: "#0F0F10"
+    backgroundColor: colors.background
   },
 
   content: {
@@ -439,15 +439,15 @@ const styles = StyleSheet.create({
   },
 
   section: {
-    color: "#A1A1A1",
+    color: colors.textSecondary,
     marginTop: 20,
     marginBottom: 10,
     fontSize: 14
   },
 
   card: {
-    backgroundColor: "#1C1C1E",
-    borderRadius: 16,
+    backgroundColor: colors.card,
+    borderRadius: spacing.borderRadius,
     paddingVertical: 6
   },
 

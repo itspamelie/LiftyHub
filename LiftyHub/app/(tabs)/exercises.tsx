@@ -9,6 +9,9 @@ import { useLanguage } from "@/src/context/LanguageContext";
 import { getExercises, getUserRoutines, createUserRoutineExercise } from "@/src/services/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useToast } from "@/src/hooks/useToast";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
+import { saveCache, loadCache } from "@/src/utils/cache";
+import OfflineBanner from "@/src/components/OfflineBanner";
 
 type ExerciseFile = {
   file_path: string;
@@ -27,6 +30,7 @@ export default function ExercisesScreen() {
 
   const { t } = useLanguage();
   const { showToast, Toast } = useToast();
+  const isConnected = useNetworkStatus();
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("Todo");
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -88,9 +92,14 @@ export default function ExercisesScreen() {
       const token = await AsyncStorage.getItem("token");
       if (!token) return;
       const res = await getExercises(token);
-      if (res?.data) setExercises(res.data);
+      if (res?.data) {
+        setExercises(res.data);
+        await saveCache("exercises", res.data);
+      }
     } catch {
-      showToast("No se pudieron cargar los ejercicios.", "error");
+      const cached = await loadCache<any[]>("exercises");
+      if (cached) setExercises(cached);
+      else showToast("No se pudieron cargar los ejercicios.", "error");
     } finally {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
@@ -163,6 +172,7 @@ export default function ExercisesScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      {!isConnected && <OfflineBanner />}
       {Toast}
       <ScrollView
         style={styles.container}
@@ -246,7 +256,7 @@ export default function ExercisesScreen() {
                   <ActivityIndicator color={colors.primary} style={{ marginVertical: 30 }} />
                 ) : userRoutines.length === 0 ? (
                   <View style={styles.emptyRoutines}>
-                    <Ionicons name="barbell-outline" size={36} color={colors.textSecondary} />
+                    <Ionicons name="barbell" size={36} color={colors.textSecondary} />
                     <Text style={styles.emptyRoutinesText}>No tienes rutinas creadas.</Text>
                   </View>
                 ) : (

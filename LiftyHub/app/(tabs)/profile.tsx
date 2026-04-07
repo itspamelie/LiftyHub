@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, RefreshControl, Modal, Dimensions, TextInput, Alert } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, RefreshControl, Modal, Dimensions, TextInput, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, planColors } from "@/src/styles/globalstyles";
 import ProgressCard from "@/src/components/profile/ProgressCard";
@@ -12,6 +12,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getUser, getUserProperties, getUserStreak, getUserRoutinesCount, getUserRoutineSessions, getExerciseLogs } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
+import { useToast } from "@/src/hooks/useToast";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
+import { saveCache, loadCache } from "@/src/utils/cache";
+import OfflineBanner from "@/src/components/OfflineBanner";
 import { BlurView } from "expo-blur";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -20,7 +24,7 @@ const STATS_PLAN_OPTIONS = [
   {
     name: "Basic",
     price: "$99/mes",
-    color: "#3B82F6",
+    color: colors.primary,
     features: ["Estadísticas avanzadas", "Actividad semanal", "Records personales", "Hasta 20 rutinas propias"],
   },
   {
@@ -58,6 +62,10 @@ export default function ProfileScreen() {
   const planColor = planColors[plan?.name ?? "Free"] ?? "#A1A1A1";
   const hasStatsAccess = plan?.name === "Basic" || plan?.name === "Pro";
 
+  const { showToast, Toast } = useToast();
+  const isConnected = useNetworkStatus();
+
+  const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"perfil" | "stats">("perfil");
@@ -154,15 +162,15 @@ export default function ProfileScreen() {
         weeklySets,
       });
 
-      setStats({
-        workouts:    routinesCount,
-        streak:      currentStreak,
-        totalTime:   0,
-        totalWeight: 0,
-      });
+      const statsData = { workouts: routinesCount, streak: currentStreak, totalTime: 0, totalWeight: 0 };
+      setStats(statsData);
+      await saveCache("profile", { profile: { name: user.name, age: user.birthdate ? calculateAge(user.birthdate) : "N/A", routinesCount, streak: currentStreak, weight: props?.weight ? parseFloat(props.weight).toString() : "0", height: props?.stature ? parseFloat(props.stature).toString() : "0", somatotype: props?.somatotype?.type ?? "N/A", goal: props?.objective ?? "N/A", weeklyWorkouts, weeklyProgress, weeklyReps, weeklySets }, stats: statsData, sessions: rawSessions, logs: rawLogs });
     } catch {
-      Alert.alert("Error", "No se pudo cargar tu perfil. Verifica tu conexión.");
+      const cached = await loadCache<any>("profile");
+      if (cached) { setProfile({ ...cached.profile, avatar: require("@/src/assets/defaultd.png") }); setStats(cached.stats); setAllSessions(cached.sessions); setAllLogs(cached.logs); }
+      showToast(t("profile.errorLoad"), "error");
     } finally {
+      setLoading(false);
       if (isRefresh) setRefreshing(false);
     }
   };
@@ -176,16 +184,17 @@ export default function ProfileScreen() {
   }, []);
 
 
-  if (!profile) {
+  if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ color: "white" }}>{t("profile.loading")}</Text>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
   return (
 
     <View style={styles.container}>
+      {!isConnected && <OfflineBanner />}
 
 
 
@@ -247,7 +256,7 @@ export default function ProfileScreen() {
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
                 {!hasStatsAccess && (
-                  <Ionicons name="lock-closed" size={11} color={activeTab === "stats" ? "white" : "#A1A1A1"} />
+                  <Ionicons name="lock-closed" size={11} color={activeTab === "stats" ? "white" : colors.textSecondary} />
                 )}
                 <Text style={[styles.tabBtnText, activeTab === "stats" && styles.tabBtnTextActive]}>{t("profile.tabStats")}</Text>
               </View>
@@ -421,6 +430,7 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </Modal>
 
+      {Toast}
     </View>
   );
 }
@@ -567,7 +577,7 @@ const styles = StyleSheet.create({
 
   tabRow: {
     flexDirection: "row",
-    backgroundColor: "#1C1C1E",
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 4,
     marginTop: 16,
@@ -582,11 +592,11 @@ const styles = StyleSheet.create({
   },
 
   tabBtnActive: {
-    backgroundColor: "#3B82F6"
+    backgroundColor: colors.primary
   },
 
   tabBtnText: {
-    color: "#A1A1A1",
+    color: colors.textSecondary,
     fontSize: 14,
     fontWeight: "600"
   },
@@ -596,14 +606,14 @@ const styles = StyleSheet.create({
   },
 
   settingsSection: {
-    color: "#A1A1A1",
+    color: colors.textSecondary,
     marginTop: 20,
     marginBottom: 10,
     fontSize: 14
   },
 
   settingsCard: {
-    backgroundColor: "#1C1C1E",
+    backgroundColor: colors.card,
     borderRadius: 16,
     paddingVertical: 6
   },

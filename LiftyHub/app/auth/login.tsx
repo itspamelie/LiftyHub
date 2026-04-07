@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loginRequest } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
+import { colors, spacing } from "@/src/styles/globalstyles";
 
 export default function Login() {
 
@@ -21,7 +22,7 @@ export default function Login() {
     const checkLogin = async () => {
       const token = await AsyncStorage.getItem("token");
       if (token) {
-        router.replace("/(tabs)" as any);
+        router.replace("/(tabs)/profile" as any);
       }
     };
     checkLogin();
@@ -41,7 +42,7 @@ export default function Login() {
         await AsyncStorage.setItem("token", data.token);
         await AsyncStorage.setItem("user", JSON.stringify(data.user));
         await refresh();
-        router.replace("/(tabs)" as any);
+        router.replace("/(tabs)/profile" as any);
       } else {
         setError(t("login.errorInvalid"));
       }
@@ -60,7 +61,7 @@ export default function Login() {
           <Stack.Screen options={{ headerShown: false }} />
 
           <View style={styles.header}>
-            <Ionicons name="barbell" size={60} color="#3B82F6" />
+            <Ionicons name="barbell" size={60} color={colors.primary} />
             <Text style={styles.title}>LiftyHub</Text>
             <Text style={styles.subtitle}>{t("login.subtitle")}</Text>
           </View>
@@ -70,10 +71,10 @@ export default function Login() {
             <Text style={styles.cardTitle}>{t("login.title")}</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={20} color="#A1A1A1" />
+              <Ionicons name="mail-outline" size={20} color={colors.textSecondary} />
               <TextInput
                 placeholder={t("login.email")}
-                placeholderTextColor="#A1A1A1"
+                placeholderTextColor={colors.textSecondary}
                 style={styles.input}
                 value={email}
                 onChangeText={setEmail}
@@ -83,10 +84,10 @@ export default function Login() {
             </View>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color="#A1A1A1" />
+              <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />
               <TextInput
                 placeholder={t("login.password")}
-                placeholderTextColor="#A1A1A1"
+                placeholderTextColor={colors.textSecondary}
                 secureTextEntry
                 style={styles.input}
                 value={password}
@@ -94,6 +95,13 @@ export default function Login() {
                 autoCapitalize="none"
               />
             </View>
+
+            <TouchableOpacity
+              style={styles.forgotBtn}
+              onPress={() => Alert.alert(t("login.forgotPasswordSoon"), t("login.forgotPasswordSoonMsg"))}
+            >
+              <Text style={styles.forgotText}>{t("login.forgotPassword")}</Text>
+            </TouchableOpacity>
 
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -137,7 +145,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: "#0F0F10",
+    backgroundColor: colors.background,
     justifyContent: "center",
     padding: 24
   },
@@ -155,7 +163,7 @@ const styles = StyleSheet.create({
   },
 
   subtitle: {
-    color: "#A1A1A1",
+    color: colors.textSecondary,
     marginTop: 4
   },
 
@@ -189,7 +197,7 @@ const styles = StyleSheet.create({
   },
 
   loginButton: {
-    backgroundColor: "#3B82F6",
+    backgroundColor: colors.primary,
     borderRadius: 30,
     height: 50,
     justifyContent: "center",
@@ -204,18 +212,28 @@ const styles = StyleSheet.create({
   },
 
   register: {
-    color: "#A1A1A1",
+    color: colors.textSecondary,
     textAlign: "center",
     marginTop: 18
   },
 
   registerHighlight: {
-    color: "#3B82F6",
+    color: colors.primary,
     fontWeight: "600"
   },
 
+  forgotBtn: {
+    alignSelf: "flex-end",
+    marginBottom: 4,
+  },
+
+  forgotText: {
+    color: colors.primary,
+    fontSize: 13,
+  },
+
   errorText: {
-    color: "#EF4444",
+    color: colors.danger,
     fontSize: 13,
     marginBottom: 10,
     textAlign: "center"
@@ -236,7 +254,7 @@ const styles = StyleSheet.create({
   },
 
   separatorText: {
-    color: "#A1A1A1",
+    color: colors.textSecondary,
     fontSize: 12,
   },
 

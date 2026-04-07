@@ -1,4 +1,4 @@
-import { ScrollView, Text, StyleSheet, View, ActivityIndicator, RefreshControl, Alert } from "react-native";
+import { ScrollView, Text, StyleSheet, View, ActivityIndicator, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -6,6 +6,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { getUserStreak, getUserRoutineSessions, getExerciseLogs } from "@/src/services/api";
+import { useToast } from "@/src/hooks/useToast";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
+import { saveCache, loadCache } from "@/src/utils/cache";
+import OfflineBanner from "@/src/components/OfflineBanner";
 
 import StatsSummaryGrid from "@/src/components/stats/StatsSummaryGrid";
 import WeeklyActivityChart from "@/src/components/stats/WeeklyActivityChart";
@@ -14,6 +18,8 @@ import PersonalRecords from "@/src/components/stats/PersonalRecords";
 export default function StatsScreen() {
 
   const { t } = useLanguage();
+  const { showToast, Toast } = useToast();
+  const isConnected = useNetworkStatus();
   const [stats, setStats] = useState<any>(null);
   const [sessions, setSessions] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
@@ -58,16 +64,20 @@ export default function StatsScreen() {
         return sum + (parseFloat(l.weight_lifted) || 0) * (l.sets ?? 1) * (l.repetitions ?? 1);
       }, 0);
 
-      setStats({
+      const statsData = {
         workouts: allSessions.length,
         streak: streak?.current_streak ?? 0,
         totalTime: totalHours,
         totalWeight: Math.round(totalWeight),
-      });
+      };
+      setStats(statsData);
       setSessions(allSessions);
       setLogs(allLogs);
+      await saveCache("stats", { stats: statsData, sessions: allSessions, logs: allLogs });
     } catch {
-      Alert.alert("Error", t("statsScreen.errorLoad"));
+      const cached = await loadCache<any>("stats");
+      if (cached) { setStats(cached.stats); setSessions(cached.sessions); setLogs(cached.logs); }
+      else showToast(t("statsScreen.errorLoad"), "error");
     } finally {
       setLoading(false);
     }
@@ -94,6 +104,7 @@ export default function StatsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {!isConnected && <OfflineBanner />}
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -114,6 +125,7 @@ export default function StatsScreen() {
         <PersonalRecords logs={logs} />
 
       </ScrollView>
+      {Toast}
     </SafeAreaView>
   );
 }

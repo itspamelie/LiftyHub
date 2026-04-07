@@ -83,7 +83,7 @@ export default function Register() {
 
             {/* Nombre */}
             <View style={styles.inputContainer}>
-              <Ionicons name="person-outline" size={20} color={colors.textSecondary} />
+              <Ionicons name="person" size={20} color={colors.textSecondary} />
               <TextInput
                 placeholder={t("register.name")}
                 placeholderTextColor={colors.textSecondary}
@@ -95,7 +95,7 @@ export default function Register() {
 
             {/* Email */}
             <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={20} color={colors.textSecondary} />
+              <Ionicons name="mail" size={20} color={colors.textSecondary} />
               <TextInput
                 placeholder={t("register.email")}
                 placeholderTextColor={colors.textSecondary}
@@ -109,7 +109,7 @@ export default function Register() {
 
             {/* Password */}
             <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />
+              <Ionicons name="lock-closed" size={20} color={colors.textSecondary} />
               <TextInput
                 placeholder={t("register.password")}
                 placeholderTextColor={colors.textSecondary}
@@ -129,7 +129,7 @@ export default function Register() {
 
             {/* Confirm Password */}
             <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />
+              <Ionicons name="lock-closed" size={20} color={colors.textSecondary} />
               <TextInput
                 placeholder={t("register.confirmPassword")}
                 placeholderTextColor={colors.textSecondary}

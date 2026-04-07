@@ -240,7 +240,7 @@ export default function EditProfileScreen() {
         <View style={styles.card}>
           <View style={styles.row}>
             <View style={styles.rowLeft}>
-              <Ionicons name="person-outline" size={20} color={colors.text} />
+              <Ionicons name="person" size={20} color={colors.text} />
               <Text style={styles.label}>{t("editProfile.name")}</Text>
             </View>
             <TextInput
@@ -260,7 +260,7 @@ export default function EditProfileScreen() {
         <View style={styles.card}>
           <View style={styles.row}>
             <View style={styles.rowLeft}>
-              <Ionicons name="resize-outline" size={20} color={colors.text} />
+              <Ionicons name="resize" size={20} color={colors.text} />
               <Text style={styles.label}>{t("editProfile.height")}</Text>
             </View>
             <TextInput
@@ -278,7 +278,7 @@ export default function EditProfileScreen() {
         <View style={styles.card}>
           <View style={styles.row}>
             <View style={styles.rowLeft}>
-              <Ionicons name="barbell-outline" size={20} color={colors.text} />
+              <Ionicons name="barbell" size={20} color={colors.text} />
               <Text style={styles.label}>{t("editProfile.weight")}</Text>
             </View>
             <TextInput
@@ -296,7 +296,7 @@ export default function EditProfileScreen() {
         <View style={styles.card}>
           <View style={styles.rowColumn}>
             <View style={styles.rowLeft}>
-              <Ionicons name="body-outline" size={20} color={colors.text} />
+              <Ionicons name="body" size={20} color={colors.text} />
               <Text style={styles.label}>{t("editProfile.somatotype")}</Text>
             </View>
             <View style={styles.selectorContainer}>
@@ -319,7 +319,7 @@ export default function EditProfileScreen() {
         <View style={styles.card}>
           <View style={styles.rowColumn}>
             <View style={styles.rowLeft}>
-              <Ionicons name="flag-outline" size={20} color={colors.text} />
+              <Ionicons name="flag" size={20} color={colors.text} />
               <Text style={styles.label}>{t("editProfile.goal")}</Text>
             </View>
             <View style={styles.selectorContainer}>
@@ -349,7 +349,7 @@ export default function EditProfileScreen() {
           style={styles.passwordButton}
           onPress={() => setShowPasswordModal(true)}
         >
-          <Ionicons name="lock-closed-outline" size={18} color={colors.primary} />
+          <Ionicons name="lock-closed" size={18} color={colors.primary} />
           <Text style={styles.passwordButtonText}>{t("editProfile.changePassword")}</Text>
         </TouchableOpacity>
 

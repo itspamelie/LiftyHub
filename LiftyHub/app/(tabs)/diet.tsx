@@ -18,6 +18,10 @@ import { useSubscription } from "@/src/context/SubscriptionContext";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getDietPlans } from "@/src/services/api";
+import { useToast } from "@/src/hooks/useToast";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
+import { saveCache, loadCache } from "@/src/utils/cache";
+import OfflineBanner from "@/src/components/OfflineBanner";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -40,7 +44,9 @@ const PLAN_OPTIONS = [
 export default function DietScreen() {
 
   const { t } = useLanguage();
+  const { showToast, Toast } = useToast();
   const { planLevel, loading: subLoading } = useSubscription();
+  const isConnected = useNetworkStatus();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -49,18 +55,23 @@ export default function DietScreen() {
   const hasAccess = planLevel >= 2;
 
   const loadDietPlan = useCallback(async (isRefresh = false) => {
+    let userId: number | null = null;
     try {
       const token = await AsyncStorage.getItem("token");
       const userStorage = await AsyncStorage.getItem("user");
       if (!token || !userStorage) return;
 
       const user = JSON.parse(userStorage);
+      userId = user.id;
       const data = await getDietPlans(token);
       const plans = data?.data ?? [];
       const userPlan = plans.find((p: any) => p.user_id === user.id) ?? null;
       setDietPlan(userPlan);
+      await saveCache("dietPlan_" + user.id, userPlan);
     } catch {
-      // sin plan
+      const cached = userId ? await loadCache<any>("dietPlan_" + userId) : null;
+      if (cached !== null) setDietPlan(cached);
+      else showToast(t("diet.errorLoad"), "error");
     } finally {
       setLoading(false);
       if (isRefresh) setRefreshing(false);
@@ -88,6 +99,7 @@ export default function DietScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      {!isConnected && <OfflineBanner />}
 
       <ScrollView
         style={styles.container}
@@ -107,30 +119,30 @@ export default function DietScreen() {
           <TouchableOpacity style={styles.planCard} onPress={() => router.push("/diet/plan")}>
             <View style={styles.planCardHeader}>
               <Ionicons name="nutrition" size={24} color={colors.primary} />
-              <Text style={styles.planCardTitle}>Tu plan de dieta</Text>
+              <Text style={styles.planCardTitle}>{t("diet.planTitle")}</Text>
               <View style={styles.planStatusBadge}>
                 <Text style={styles.planStatusText}>{dietPlan.status}</Text>
               </View>
             </View>
             <View style={styles.divider} />
             <View style={styles.planRow}>
-              <Ionicons name="flag-outline" size={16} color={colors.textSecondary} />
-              <Text style={styles.planLabel}>Objetivo</Text>
+              <Ionicons name="flag" size={16} color={colors.textSecondary} />
+              <Text style={styles.planLabel}>{t("diet.goal")}</Text>
               <Text style={styles.planValue}>{dietPlan.goal}</Text>
             </View>
             <View style={styles.planRow}>
-              <Ionicons name="calendar-outline" size={16} color={colors.textSecondary} />
-              <Text style={styles.planLabel}>Duración</Text>
-              <Text style={styles.planValue}>{dietPlan.duration_days} días</Text>
+              <Ionicons name="calendar" size={16} color={colors.textSecondary} />
+              <Text style={styles.planLabel}>{t("diet.duration")}</Text>
+              <Text style={styles.planValue}>{dietPlan.duration_days} {t("diet.days")}</Text>
             </View>
             {dietPlan.notes ? (
               <View style={styles.notesBox}>
-                <Text style={styles.notesLabel}>Notas del nutriólogo</Text>
+                <Text style={styles.notesLabel}>{t("diet.nutritionistNotes")}</Text>
                 <Text style={styles.notesText}>{dietPlan.notes}</Text>
               </View>
             ) : null}
             <View style={styles.seeDetailRow}>
-              <Text style={styles.seeDetailText}>Ver detalles</Text>
+              <Text style={styles.seeDetailText}>{t("diet.seeDetail")}</Text>
               <Ionicons name="arrow-forward" size={16} color={colors.primary} />
             </View>
           </TouchableOpacity>
@@ -138,18 +150,16 @@ export default function DietScreen() {
           /* ── SIN PLAN — EMPTY STATE ── */
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconBg}>
-              <Ionicons name="nutrition-outline" size={40} color={colors.primary} />
+              <Ionicons name="nutrition" size={40} color={colors.primary} />
             </View>
-            <Text style={styles.emptyTitle}>Aún no tienes un plan de dieta</Text>
-            <Text style={styles.emptySubtitle}>
-              Elige un nutriólogo y recibe un plan personalizado según tus objetivos.
-            </Text>
+            <Text style={styles.emptyTitle}>{t("diet.emptyTitle")}</Text>
+            <Text style={styles.emptySubtitle}>{t("diet.emptySubtitle")}</Text>
             <TouchableOpacity
               style={styles.chooseBtn}
               onPress={() => router.push("/diet/nutritionists")}
             >
-              <Ionicons name="person-add-outline" size={18} color="white" />
-              <Text style={styles.chooseBtnText}>Escógete tu nutriólogo</Text>
+              <Ionicons name="person-add" size={18} color="white" />
+              <Text style={styles.chooseBtnText}>{t("diet.chooseNutritionist")}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -165,7 +175,7 @@ export default function DietScreen() {
         <View style={styles.unlockBar}>
           <TouchableOpacity style={styles.unlockButton} onPress={() => setShowUpgradeModal(true)}>
             <Ionicons name="lock-closed" size={16} color="white" />
-            <Text style={styles.unlockText}>Desbloquear Nutrición</Text>
+            <Text style={styles.unlockText}>{t("diet.unlockBtn")}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -180,10 +190,8 @@ export default function DietScreen() {
             <View style={styles.modalIcon}>
               <Ionicons name="nutrition" size={32} color={colors.primary} />
             </View>
-            <Text style={styles.modalTitle}>Desbloquea Nutrición</Text>
-            <Text style={styles.modalSubtitle}>
-              Accede a tu nutriólogo personal, plan de dieta y suplementos recomendados.
-            </Text>
+            <Text style={styles.modalTitle}>{t("diet.upgradeTitle")}</Text>
+            <Text style={styles.modalSubtitle}>{t("diet.upgradeSubtitle")}</Text>
             <ScrollView showsVerticalScrollIndicator={false}>
               {PLAN_OPTIONS.map((plan) => (
                 <TouchableOpacity
@@ -193,7 +201,7 @@ export default function DietScreen() {
                 >
                   {plan.highlighted && (
                     <View style={[styles.planBadge, { backgroundColor: plan.color }]}>
-                      <Text style={styles.planBadgeText}>Recomendado</Text>
+                      <Text style={styles.planBadgeText}>{t("diet.recommended")}</Text>
                     </View>
                   )}
                   <View style={styles.planHeader}>
@@ -208,12 +216,13 @@ export default function DietScreen() {
                   ))}
                 </TouchableOpacity>
               ))}
-              <Text style={styles.modalNote}>Contacta a un administrador para actualizar tu plan.</Text>
+              <Text style={styles.modalNote}>{t("diet.upgradeNote")}</Text>
             </ScrollView>
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
 
+      {Toast}
     </View>
   );
 }
@@ -222,18 +231,18 @@ const styles = StyleSheet.create({
 
   loadingContainer: {
     flex: 1,
-    backgroundColor: "#0F0F10",
+    backgroundColor: colors.background,
     justifyContent: "center",
     alignItems: "center",
   },
 
   container: {
     flex: 1,
-    backgroundColor: "#0F0F10",
+    backgroundColor: colors.background,
   },
 
   content: {
-    padding: 20,
+    padding: spacing.screenPadding,
     paddingTop: 60,
     paddingBottom: 100,
     flexGrow: 1,

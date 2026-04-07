@@ -1,5 +1,16 @@
 export const translations = {
   es: {
+    // Offline
+    offline: {
+      banner: "Sin conexión — mostrando datos guardados",
+      workoutTitle: "Sin conexión",
+      workoutMsg: "No hay internet. Tu sesión se guardará localmente y se sincronizará cuando recuperes conexión.",
+      continueAnyway: "Continuar de todas formas",
+      cancel: "Cancelar",
+      sessionNotSaved: "Sin conexión — la sesión no se guardó",
+      sessionSavedLocally: "Sesión guardada. Se sincronizará al recuperar conexión",
+    },
+
     // Tabs
     tabs: {
       routines: "Rutinas",
@@ -25,6 +36,9 @@ export const translations = {
       googleButton: "Continuar con Google",
       googleSoon: "Próximamente",
       googleSoonMsg: "El inicio de sesión con Google estará disponible pronto.",
+      forgotPassword: "¿Olvidaste tu contraseña?",
+      forgotPasswordSoon: "Próximamente",
+      forgotPasswordSoonMsg: "La recuperación de contraseña estará disponible pronto. Contacta al administrador si necesitas ayuda.",
     },
 
     // Auth - Register
@@ -121,11 +135,27 @@ export const translations = {
       mealPlan: "Plan alimenticio",
       supplements: "Suplementos",
       tips: "Recomendaciones",
+      errorLoad: "No se pudo cargar el plan de dieta. Verifica tu conexión.",
+      planTitle: "Tu plan de dieta",
+      goal: "Objetivo",
+      duration: "Duración",
+      days: "días",
+      nutritionistNotes: "Notas del nutriólogo",
+      seeDetail: "Ver detalles",
+      emptyTitle: "Aún no tienes un plan de dieta",
+      emptySubtitle: "Elige un nutriólogo y recibe un plan personalizado según tus objetivos.",
+      chooseNutritionist: "Escógete tu nutriólogo",
+      unlockBtn: "Desbloquear Nutrición",
+      upgradeTitle: "Desbloquea Nutrición",
+      upgradeSubtitle: "Accede a tu nutriólogo personal, plan de dieta y suplementos recomendados.",
+      recommended: "Recomendado",
+      upgradeNote: "Contacta a un administrador para actualizar tu plan.",
     },
 
     // Profile
     profile: {
       loading: "Cargando perfil...",
+      errorLoad: "No se pudo cargar tu perfil. Verifica tu conexión.",
       years: "años",
       tabProfile: "Perfil",
       tabStats: "Estadísticas",
@@ -177,6 +207,13 @@ export const translations = {
       deleteBtn: "Eliminar",
       cancel: "Cancelar",
       errorDelete: "No se pudo eliminar la cuenta",
+      errorLogout: "No se pudo cerrar sesión. Intenta de nuevo.",
+      deleteVerifySubtitle: "Verifica tu contraseña para continuar",
+      deletePasswordPlaceholder: "Contraseña actual",
+      deleteVerifyBtn: "Verificar",
+      deleteConfirmSubtitle: "Esta acción es permanente y no se puede deshacer.",
+      errorVerifyPassword: "La contraseña es incorrecta",
+      errorVerifyFailed: "No se pudo verificar la contraseña",
     },
 
     // Permissions
@@ -519,10 +556,42 @@ export const translations = {
       loadingAccount: "Creando cuenta...",
       errorIncomplete: "Datos incompletos, vuelve a intentarlo",
       errorGeneral: "Ocurrió un problema, intenta de nuevo",
+      somatotypeSubtitle: "Elige la opción que mejor describe tu complexión natural",
+      accept: "Aceptar",
+      decline: "No por ahora",
+      ectomorphTitle: "Ectomorfo",
+      ectomorphSubtitle: "Complexión delgada",
+      ectomorphDesc: "Tienes un metabolismo muy activo y te cuesta subir de peso. Eres naturalmente delgado/a, con hombros y caderas más estrechas. Puede costarte ganar músculo, pero tienes buena resistencia.",
+      ectomorphTrait1: "Delgado naturalmente",
+      ectomorphTrait2: "Metabolismo acelerado",
+      ectomorphTrait3: "Difícil ganar peso o músculo",
+      mesomorphTitle: "Mesomorfo",
+      mesomorphSubtitle: "Complexión atlética",
+      mesomorphDesc: "Tu cuerpo responde muy bien al ejercicio. Ganas músculo y pierdes grasa con relativa facilidad. Tienes una estructura ósea media y una figura más atlética de forma natural.",
+      mesomorphTrait1: "Cuerpo atlético",
+      mesomorphTrait2: "Gana músculo fácilmente",
+      mesomorphTrait3: "Metabolismo equilibrado",
+      endomorphTitle: "Endomorfo",
+      endomorphSubtitle: "Complexión robusta",
+      endomorphDesc: "Tienes una complexión más amplia y mayor tendencia a acumular grasa. Tu metabolismo es más lento, pero también tienes más facilidad para ganar fuerza y volumen muscular.",
+      endomorphTrait1: "Estructura más amplia",
+      endomorphTrait2: "Mayor tendencia a acumular grasa",
+      endomorphTrait3: "Fácil ganar fuerza",
     },
   },
 
   en: {
+    // Offline
+    offline: {
+      banner: "No connection — showing saved data",
+      workoutTitle: "No connection",
+      workoutMsg: "No internet. Your session will be saved locally and synced when you reconnect.",
+      continueAnyway: "Continue anyway",
+      cancel: "Cancel",
+      sessionNotSaved: "No connection — session was not saved",
+      sessionSavedLocally: "Session saved. Will sync when you reconnect",
+    },
+
     // Tabs
     tabs: {
       routines: "Routines",
@@ -548,6 +617,9 @@ export const translations = {
       googleButton: "Continue with Google",
       googleSoon: "Coming soon",
       googleSoonMsg: "Google sign-in will be available soon.",
+      forgotPassword: "Forgot your password?",
+      forgotPasswordSoon: "Coming soon",
+      forgotPasswordSoonMsg: "Password recovery will be available soon. Contact the administrator if you need help.",
     },
 
     // Auth - Register
@@ -644,11 +716,27 @@ export const translations = {
       mealPlan: "Meal plan",
       supplements: "Supplements",
       tips: "Tips",
+      errorLoad: "Could not load diet plan. Check your connection.",
+      planTitle: "Your diet plan",
+      goal: "Goal",
+      duration: "Duration",
+      days: "days",
+      nutritionistNotes: "Nutritionist notes",
+      seeDetail: "See details",
+      emptyTitle: "You don't have a diet plan yet",
+      emptySubtitle: "Choose a nutritionist and get a personalized plan based on your goals.",
+      chooseNutritionist: "Choose your nutritionist",
+      unlockBtn: "Unlock Nutrition",
+      upgradeTitle: "Unlock Nutrition",
+      upgradeSubtitle: "Access your personal nutritionist, diet plan and recommended supplements.",
+      recommended: "Recommended",
+      upgradeNote: "Contact an administrator to upgrade your plan.",
     },
 
     // Profile
     profile: {
       loading: "Loading profile...",
+      errorLoad: "Could not load your profile. Check your connection.",
       years: "years old",
       tabProfile: "Profile",
       tabStats: "Statistics",
@@ -700,6 +788,13 @@ export const translations = {
       deleteBtn: "Delete",
       cancel: "Cancel",
       errorDelete: "Could not delete account",
+      errorLogout: "Could not log out. Please try again.",
+      deleteVerifySubtitle: "Verify your password to continue",
+      deletePasswordPlaceholder: "Current password",
+      deleteVerifyBtn: "Verify",
+      deleteConfirmSubtitle: "This action is permanent and cannot be undone.",
+      errorVerifyPassword: "Incorrect password",
+      errorVerifyFailed: "Could not verify password",
     },
 
     // Permissions
@@ -1042,6 +1137,27 @@ export const translations = {
       loadingAccount: "Creating account...",
       errorIncomplete: "Incomplete data, please try again",
       errorGeneral: "Something went wrong, please try again",
+      somatotypeSubtitle: "Choose the option that best describes your natural body type",
+      accept: "Accept",
+      decline: "Not now",
+      ectomorphTitle: "Ectomorph",
+      ectomorphSubtitle: "Slim build",
+      ectomorphDesc: "You have a very active metabolism and struggle to gain weight. You are naturally slim, with narrower shoulders and hips. Building muscle may be challenging, but you have good endurance.",
+      ectomorphTrait1: "Naturally slim",
+      ectomorphTrait2: "Fast metabolism",
+      ectomorphTrait3: "Hard to gain weight or muscle",
+      mesomorphTitle: "Mesomorph",
+      mesomorphSubtitle: "Athletic build",
+      mesomorphDesc: "Your body responds very well to exercise. You gain muscle and lose fat with relative ease. You have a medium bone structure and a naturally more athletic figure.",
+      mesomorphTrait1: "Athletic body",
+      mesomorphTrait2: "Gains muscle easily",
+      mesomorphTrait3: "Balanced metabolism",
+      endomorphTitle: "Endomorph",
+      endomorphSubtitle: "Robust build",
+      endomorphDesc: "You have a broader build and a greater tendency to store fat. Your metabolism is slower, but you also find it easier to gain strength and muscle volume.",
+      endomorphTrait1: "Broader frame",
+      endomorphTrait2: "Greater tendency to store fat",
+      endomorphTrait3: "Gains strength easily",
     },
   },
 };

@@ -16,6 +16,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useUnits } from "@/src/context/UnitsContext";
+import { useToast } from "@/src/hooks/useToast";
+import NetInfo from "@react-native-community/netinfo";
+import { saveCache, loadCache } from "@/src/utils/cache";
+import { savePendingWorkout } from "@/src/utils/pendingSync";
 import {
   getRoutineExercises,
   getUserRoutineExercises,
@@ -53,6 +57,7 @@ export default function SessionScreen() {
 
   const { t } = useLanguage();
   const { unitLabel, toKg } = useUnits();
+  const { showToast, Toast } = useToast();
   const [exercises, setExercises] = useState<ExerciseEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -105,12 +110,13 @@ export default function SessionScreen() {
   useEffect(() => {
     const load = async () => {
       startedAt.current = toMySQLDate(new Date());
+      const isUser = isUserRoutine === "true";
+      const cacheKey = `exercises_${isUser ? "user" : "app"}_${id}`;
       try {
         const token = await AsyncStorage.getItem("token");
         const userRaw = await AsyncStorage.getItem("user");
         if (!token || !id) return;
 
-        const isUser = isUserRoutine === "true";
         const res = isUser
           ? await getUserRoutineExercises(Number(id), token)
           : await getRoutineExercises(Number(id), token);
@@ -123,8 +129,6 @@ export default function SessionScreen() {
           else if (Array.isArray(res?.data)) exs = res.data;
         }
         setExercises(exs);
-
-        // initialize weight matrix: exs.length x sets (filled with "0")
         setSetWeights(exs.map((ex) => Array(ex.sets ?? 3).fill("0")));
 
         // try to create session (route may not be registered yet)
@@ -145,7 +149,14 @@ export default function SessionScreen() {
             // route not available — continue in local mode
           }
         }
-      } catch {}
+      } catch {
+        // offline or API error — fall back to cached exercises
+        const cached = await loadCache<ExerciseEntry[]>(cacheKey);
+        if (cached && cached.length > 0) {
+          setExercises(cached);
+          setSetWeights(cached.map((ex) => Array(ex.sets ?? 3).fill("0")));
+        }
+      }
       finally { setLoading(false); }
     };
     load();
@@ -229,6 +240,46 @@ export default function SessionScreen() {
 
   const handleFinish = async () => {
     setSaving(true);
+    const net = await NetInfo.fetch();
+    if (!net.isConnected) {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const userRaw = await AsyncStorage.getItem("user");
+        if (token && userRaw) {
+          const user = JSON.parse(userRaw);
+          const isUser = isUserRoutine === "true";
+          const workoutDate = today();
+          const finishedAt = toMySQLDate(new Date());
+          const logs = exercises.flatMap((ex, i) => {
+            const exId = ex.exercise?.id;
+            if (!exId) return [];
+            const weights = setWeights[i] ?? [];
+            const avgDisplay = weights.reduce((s, w) => s + (parseFloat(w) || 0), 0) / (weights.length || 1);
+            const avgWeight = toKg(avgDisplay);
+            return [{
+              exerciseId: exId,
+              exerciseRoutineId: ex.id,
+              weightLifted: parseFloat(avgWeight.toFixed(2)),
+              repetitions: ex.repetitions ?? 12,
+              sets: ex.sets ?? 3,
+              workoutDate,
+            }];
+          });
+          await savePendingWorkout({
+            routineId: isUser ? null : Number(id),
+            userRoutineId: isUser ? Number(id) : null,
+            startedAt: startedAt.current,
+            finishedAt,
+            userId: user.id,
+            logs,
+          });
+          showToast(t("offline.sessionSavedLocally"), "success");
+        }
+      } catch {}
+      setSaving(false);
+      setTimeout(() => router.back(), 1800);
+      return;
+    }
     try {
       const token = await AsyncStorage.getItem("token");
       const userRaw = await AsyncStorage.getItem("user");
@@ -523,6 +574,7 @@ export default function SessionScreen() {
         </View>
 
       </View>
+      {Toast}
     </KeyboardAvoidingView>
   );
 }
