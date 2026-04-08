@@ -2,10 +2,21 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const TIMEOUT_MS = 10000;
+
+const fetchWithTimeout = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(id);
+  }
+};
 
 // Función centralizada — si el token es inválido, limpia y manda al login
 const apiFetch = async (url: string, options: RequestInit = {}) => {
-  const res = await fetch(url, options);
+  const res = await fetchWithTimeout(url, options);
   const data = await res.json();
 
   if (data.error === "Unauthorized" || res.status === 401) {
@@ -21,7 +32,7 @@ const apiFetch = async (url: string, options: RequestInit = {}) => {
 // 🔐 LOGIN
 export const loginRequest = async (email: string, password: string) => {
   try {
-    const res = await fetch(`${API_URL}/login`, {
+    const res = await fetchWithTimeout(`${API_URL}/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -29,12 +40,9 @@ export const loginRequest = async (email: string, password: string) => {
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await res.json();
-    console.log("RESPUESTA DEL BACKEND:", data);
-    return data;
+    return await res.json();
 
   } catch (error) {
-    console.log("Error en loginRequest:", error);
     throw error;
   }
 };
@@ -48,7 +56,7 @@ export const registerRequest = async (data: {
   birthdate: string;
 }) => {
   try {
-    const res = await fetch(`${API_URL}/register`, {
+    const res = await fetchWithTimeout(`${API_URL}/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -57,10 +65,8 @@ export const registerRequest = async (data: {
       body: JSON.stringify(data),
     });
     const text = await res.text();
-    console.log("REGISTER RESPONSE:", text);
     return JSON.parse(text);
   } catch (error) {
-    console.log("Error en registerRequest:", error);
     throw error;
   }
 };

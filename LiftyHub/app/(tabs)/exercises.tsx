@@ -99,7 +99,7 @@ export default function ExercisesScreen() {
     } catch {
       const cached = await loadCache<any[]>("exercises");
       if (cached) setExercises(cached);
-      else showToast("No se pudieron cargar los ejercicios.", "error");
+      else showToast(t("exercises.errorLoad"), "error");
     } finally {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
@@ -227,7 +227,7 @@ export default function ExercisesScreen() {
               />
             ))}
             {filteredExercises.length === 0 && (
-              <Text style={styles.empty}>No se encontraron ejercicios</Text>
+              <Text style={styles.empty}>{t("exercises.empty")}</Text>
             )}
           </View>
         )}

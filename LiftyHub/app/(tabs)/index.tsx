@@ -479,7 +479,7 @@ export default function RoutinesScreen() {
         <View style={styles.unlockBar}>
           <TouchableOpacity style={styles.unlockButton} onPress={() => setShowUpgradeModal(true)}>
             <Ionicons name="lock-closed" size={16} color="white" />
-            <Text style={styles.unlockText}>Desbloquear Rutinas App</Text>
+            <Text style={styles.unlockText}>{t("routines.unlockButton")}</Text>
           </TouchableOpacity>
         </View>
       )}

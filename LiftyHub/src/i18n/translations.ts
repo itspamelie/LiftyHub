@@ -98,12 +98,27 @@ export const translations = {
         repetitions: "Repeticiones",
         rest: "Descanso (seg)",
         confirm: "Agregar",
+        headerTitle: "Crear rutina",
+        step1Desc: "Dale un nombre a tu rutina y cuéntanos qué quieres lograr",
+        step2Desc: "¿Cuál es tu nivel de experiencia?",
+        step3Desc: "Elige la categoría y cuánto tiempo tienes disponible",
+        step4Title: "Detalles",
+        step4Desc: "Configura los descansos y agrega una imagen a tu rutina",
+        step5Desc: "Agrega los ejercicios que formarán tu rutina",
+        restQuestion: "¿Descanso entre series?",
+        restPickerTitle: "Descanso entre series",
+        yes: "Sí",
+        no: "No",
+        done: "Listo",
+        errorCreate: "No se pudo crear la rutina.",
+        back: "Atrás",
       },
       levels: {
         beginner: "Principiante",
         intermediate: "Intermedio",
         advanced: "Avanzado",
       },
+      unlockButton: "Desbloquear Rutinas App",
     },
 
     // Exercises
@@ -127,6 +142,8 @@ export const translations = {
         calf: "Pantorrilla",
         cardio: "Cardio",
       },
+      errorLoad: "No se pudieron cargar los ejercicios.",
+      empty: "No se encontraron ejercicios",
     },
 
     // Diet
@@ -167,6 +184,7 @@ export const translations = {
       height: "Altura",
       somatotype: "Somatotipo",
       goal: "Objetivo",
+      converterTitle: "Calculadora kg / lbs",
     },
 
     // Settings
@@ -679,12 +697,27 @@ export const translations = {
         repetitions: "Reps",
         rest: "Rest (sec)",
         confirm: "Add",
+        headerTitle: "Create routine",
+        step1Desc: "Give your routine a name and tell us what you want to achieve",
+        step2Desc: "What is your experience level?",
+        step3Desc: "Choose the category and how much time you have available",
+        step4Title: "Details",
+        step4Desc: "Set up rest periods and add an image to your routine",
+        step5Desc: "Add the exercises that will make up your routine",
+        restQuestion: "Rest between sets?",
+        restPickerTitle: "Rest between sets",
+        yes: "Yes",
+        no: "No",
+        done: "Done",
+        errorCreate: "Could not create the routine.",
+        back: "Back",
       },
       levels: {
         beginner: "Beginner",
         intermediate: "Intermediate",
         advanced: "Advanced",
       },
+      unlockButton: "Unlock App Routines",
     },
 
     // Exercises
@@ -708,6 +741,8 @@ export const translations = {
         calf: "Calf",
         cardio: "Cardio",
       },
+      errorLoad: "Could not load exercises.",
+      empty: "No exercises found",
     },
 
     // Diet
@@ -748,6 +783,7 @@ export const translations = {
       height: "Height",
       somatotype: "Somatotype",
       goal: "Goal",
+      converterTitle: "kg / lbs Calculator",
     },
 
     // Settings

@@ -325,7 +325,7 @@ export default function ProfileScreen() {
                 onPress={() => { setConverterValue(""); setShowConverterModal(true); }}
               >
                 <Ionicons name="swap-horizontal-outline" size={20} color={colors.textSecondary} />
-                <Text style={styles.settingsButtonText}>Calculadora kg / lbs</Text>
+                <Text style={styles.settingsButtonText}>{t("profile.converterTitle")}</Text>
                 <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
               </TouchableOpacity>
             </>
