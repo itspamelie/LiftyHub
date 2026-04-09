@@ -184,14 +184,14 @@ export default function RoutinesScreen() {
     try {
       const parsed = JSON.parse(data);
       if (parsed?.app !== "liftyhub") {
-        showToast("Este código no es una rutina de LiftyHub.", "error");
+        showToast(t("routines.qrInvalid"), "error");
         return;
       }
       scanLock.current = true;
       setShowScanner(false);
       setScannedData(parsed);
     } catch {
-      showToast("No se pudo leer el código QR.", "error");
+      showToast(t("routines.qrError"), "error");
     }
   };
 
@@ -215,9 +215,9 @@ export default function RoutinesScreen() {
 
       setScannedData(null);
       fetchAll();
-      showToast(`"${scannedData.name}" fue agregada a tus rutinas.`, "success");
+      showToast(t("routines.importSuccess", { name: scannedData.name }), "success");
     } catch {
-      showToast("No se pudo importar la rutina.", "error");
+      showToast(t("routines.importError"), "error");
     } finally {
       setImporting(false);
     }
@@ -270,7 +270,7 @@ export default function RoutinesScreen() {
       const cachedU = await loadCache<any[]>("userRoutines");
       if (cachedR) setRoutines(cachedR);
       if (cachedU) setUserRoutines(cachedU);
-      if (!cachedR && !cachedU) showToast("Error al cargar las rutinas.", "error");
+      if (!cachedR && !cachedU) showToast(t("routines.errorLoad"), "error");
     } finally {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
@@ -321,12 +321,12 @@ export default function RoutinesScreen() {
 
   const handleDeleteRoutine = (id: number) => {
     Alert.alert(
-      "Eliminar rutina",
-      "¿Estás seguro de que quieres eliminar esta rutina?",
+      t("routines.deleteTitle"),
+      t("routines.deleteMessage"),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t("routines.cancel"), style: "cancel" },
         {
-          text: "Eliminar",
+          text: t("routines.deleteConfirm"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -334,9 +334,9 @@ export default function RoutinesScreen() {
               if (!token) return;
               await deleteUserRoutine(id, token);
               setUserRoutines((prev) => prev.filter((r) => r.id !== id));
-              showToast("Rutina eliminada.", "success");
+              showToast(t("routines.deleteSuccess"), "success");
             } catch {
-              showToast("No se pudo eliminar la rutina.", "error");
+              showToast(t("routines.deleteError"), "error");
             }
           }
         }
@@ -394,7 +394,7 @@ export default function RoutinesScreen() {
                   <Ionicons name="qr-code" size={20} color="white" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.iconButton} onPress={() => router.push("/routines/new")}>
-                  <Ionicons name="pencil" size={20} color="white" />
+                  <Ionicons name="add" size={26} color="white" />
                 </TouchableOpacity>
               </View>
             )}
@@ -660,7 +660,7 @@ export default function RoutinesScreen() {
             >
               {importing
                 ? <ActivityIndicator color="white" />
-                : <Text style={styles.importButtonText}>Agregar a mis rutinas</Text>
+                : <Text style={styles.importButtonText}>{t("routines.addButton")}</Text>
               }
             </TouchableOpacity>
           </View>

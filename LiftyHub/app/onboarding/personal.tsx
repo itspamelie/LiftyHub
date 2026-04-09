@@ -60,6 +60,19 @@ export default function Personal() {
       return;
     }
 
+    const today = new Date();
+    const age = today.getFullYear() - birthdate!.getFullYear() -
+      (today < new Date(today.getFullYear(), birthdate!.getMonth(), birthdate!.getDate()) ? 1 : 0);
+
+    if (age < 13) {
+      Alert.alert("Error", t("onboarding.errorAgeTooYoung"));
+      return;
+    }
+    if (age > 100) {
+      Alert.alert("Error", t("onboarding.errorAgeTooOld"));
+      return;
+    }
+
     const registerDataRaw = await AsyncStorage.getItem("@register_data");
     if (!registerDataRaw) {
       Alert.alert("Error", t("onboarding.errorData"));

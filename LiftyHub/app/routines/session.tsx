@@ -8,6 +8,7 @@ import {
   TextInput,
   Platform,
   KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -17,6 +18,7 @@ import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useUnits } from "@/src/context/UnitsContext";
 import { useToast } from "@/src/hooks/useToast";
+import { useWorkout, SessionSnapshot } from "@/src/context/WorkoutContext";
 import NetInfo from "@react-native-community/netinfo";
 import { saveCache, loadCache } from "@/src/utils/cache";
 import { savePendingWorkout } from "@/src/utils/pendingSync";
@@ -58,6 +60,8 @@ export default function SessionScreen() {
   const { t } = useLanguage();
   const { unitLabel, toKg } = useUnits();
   const { showToast, Toast } = useToast();
+  const { isActive, elapsedSecs, snapshot: ctxSnapshot, startWorkout, minimizeWorkout, restoreWorkout, endWorkout } = useWorkout();
+
   const [exercises, setExercises] = useState<ExerciseEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -72,20 +76,16 @@ export default function SessionScreen() {
   const [phase, setPhase] = useState<Phase>("exercise");
   const [restLeft, setRestLeft] = useState(0);
 
-  // timers
-  const [elapsedSecs, setElapsedSecs] = useState(0);
+  // rest countdown timer only (elapsed is handled by WorkoutContext)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // weight tracking: setWeights[exIndex][setIndex] = weight string
   const [setWeights, setSetWeights] = useState<string[][]>([]);
   const [currentWeight, setCurrentWeight] = useState("0");
 
-  // elapsed clock
-  useEffect(() => {
-    elapsedRef.current = setInterval(() => setElapsedSecs((s) => s + 1), 1000);
-    return () => { if (elapsedRef.current) clearInterval(elapsedRef.current); };
-  }, []);
+  // Capture context state at mount to detect resume vs fresh start
+  const initIsActive = useRef(isActive);
+  const initCtxSnapshot = useRef(ctxSnapshot);
 
   // rest countdown
   useEffect(() => {
@@ -106,12 +106,35 @@ export default function SessionScreen() {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [phase]);
 
-  // load exercises + create session
+  // load exercises + create session (or restore from context if resuming)
   useEffect(() => {
     const load = async () => {
+      const snap = initCtxSnapshot.current;
+      const active = initIsActive.current;
+
+      // ── RESUME: workout was minimized, restore from context ──
+      if (active && snap?.routineId === id) {
+        setExercises(snap.exercises as ExerciseEntry[]);
+        setExIndex(snap.exIndex);
+        setCurrentSet(snap.currentSet);
+        setPhase(snap.phase as Phase);
+        setRestLeft(snap.restLeft);
+        setSetWeights(snap.setWeights);
+        setCurrentWeight(snap.currentWeight);
+        if (snap.sessionId) setSessionId(snap.sessionId);
+        startedAt.current = snap.startedAt;
+        restoreWorkout();
+        setLoading(false);
+        return;
+      }
+
+      // ── FRESH START ──
       startedAt.current = toMySQLDate(new Date());
       const isUser = isUserRoutine === "true";
       const cacheKey = `exercises_${isUser ? "user" : "app"}_${id}`;
+      let exs: ExerciseEntry[] = [];
+      let newSessionId: number | null = null;
+
       try {
         const token = await AsyncStorage.getItem("token");
         const userRaw = await AsyncStorage.getItem("user");
@@ -121,7 +144,6 @@ export default function SessionScreen() {
           ? await getUserRoutineExercises(Number(id), token)
           : await getRoutineExercises(Number(id), token);
 
-        let exs: ExerciseEntry[] = [];
         if (isUser) {
           if (Array.isArray(res?.data)) exs = res.data;
         } else {
@@ -131,7 +153,6 @@ export default function SessionScreen() {
         setExercises(exs);
         setSetWeights(exs.map((ex) => Array(ex.sets ?? 3).fill("0")));
 
-        // try to create session (route may not be registered yet)
         if (userRaw) {
           const user = JSON.parse(userRaw);
           try {
@@ -144,20 +165,40 @@ export default function SessionScreen() {
               },
               token
             );
-            if (sessionRes?.data?.id) setSessionId(sessionRes.data.id);
+            if (sessionRes?.data?.id) {
+              newSessionId = sessionRes.data.id;
+              setSessionId(newSessionId);
+            }
           } catch {
             // route not available — continue in local mode
           }
         }
       } catch {
-        // offline or API error — fall back to cached exercises
         const cached = await loadCache<ExerciseEntry[]>(cacheKey);
         if (cached && cached.length > 0) {
-          setExercises(cached);
-          setSetWeights(cached.map((ex) => Array(ex.sets ?? 3).fill("0")));
+          exs = cached;
+          setExercises(exs);
+          setSetWeights(exs.map((ex) => Array(ex.sets ?? 3).fill("0")));
         }
+      } finally {
+        setLoading(false);
       }
-      finally { setLoading(false); }
+
+      // Register fresh session in context so mini player can show
+      startWorkout({
+        routineId: id ?? "",
+        routineName: name ?? "",
+        isUserRoutine: isUserRoutine ?? "false",
+        exercises: exs,
+        exIndex: 0,
+        currentSet: 1,
+        phase: "exercise",
+        restLeft: 0,
+        setWeights: exs.map((ex) => Array(ex.sets ?? 3).fill("0")),
+        currentWeight: "0",
+        sessionId: newSessionId,
+        startedAt: startedAt.current,
+      });
     };
     load();
   }, [id]);
@@ -168,7 +209,7 @@ export default function SessionScreen() {
   const totalSets  = currentEx?.sets ?? 3;
   const reps       = currentEx?.repetitions ?? 12;
   const restSecs   = currentEx?.seconds_rest ?? 60;
-  const exName     = currentEx?.exercise?.name ?? currentEx?.name ?? "Ejercicio";
+  const exName     = currentEx?.exercise?.name ?? currentEx?.name ?? t("session.exerciseFallback");
   const exMuscle   = currentEx?.exercise?.muscle ?? currentEx?.muscle ?? "";
 
   const formatTime = (secs: number) => {
@@ -196,7 +237,6 @@ export default function SessionScreen() {
     if (nextSet > totalSets) {
       const nextEx = exIndex + 1;
       if (nextEx >= exercises.length) {
-        if (elapsedRef.current) clearInterval(elapsedRef.current);
         setPhase("done");
       } else {
         setExIndex(nextEx);
@@ -218,7 +258,6 @@ export default function SessionScreen() {
     const isLastEx  = exIndex >= exercises.length - 1;
 
     if (isLastSet && isLastEx) {
-      if (elapsedRef.current) clearInterval(elapsedRef.current);
       setPhase("done");
       return;
     }
@@ -234,6 +273,31 @@ export default function SessionScreen() {
   const handleSkipRest = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     advanceAfterRest();
+  };
+
+  const handleMinimize = () => {
+    minimizeWorkout({
+      routineId: id ?? "",
+      routineName: name ?? "",
+      isUserRoutine: isUserRoutine ?? "false",
+      exercises,
+      exIndex,
+      currentSet,
+      phase,
+      restLeft,
+      setWeights,
+      currentWeight,
+      sessionId,
+      startedAt: startedAt.current,
+    });
+    router.navigate("/(tabs)" as any);
+  };
+
+  const handleEndWorkout = () => {
+    Alert.alert(t("session.cancelTitle"), t("session.cancelMessage"), [
+      { text: t("offline.cancel"), style: "cancel" },
+      { text: t("session.cancelConfirm"), style: "destructive", onPress: () => { endWorkout(); router.navigate("/(tabs)" as any); } },
+    ]);
   };
 
   // ── finish: save logs + streak ───────────────────────────────────────────
@@ -277,6 +341,7 @@ export default function SessionScreen() {
         }
       } catch {}
       setSaving(false);
+      endWorkout();
       setTimeout(() => router.back(), 1800);
       return;
     }
@@ -350,7 +415,18 @@ export default function SessionScreen() {
 
     } catch {}
     finally {
+      // Save completed date locally so the calendar can show it reliably
+      try {
+        const dateStr = today();
+        const raw = await AsyncStorage.getItem("completedWorkoutDates");
+        const dates: string[] = raw ? JSON.parse(raw) : [];
+        if (!dates.includes(dateStr)) {
+          dates.push(dateStr);
+          await AsyncStorage.setItem("completedWorkoutDates", JSON.stringify(dates));
+        }
+      } catch {}
       setSaving(false);
+      endWorkout();
       router.back();
     }
   };
@@ -471,11 +547,16 @@ export default function SessionScreen() {
 
         {/* header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.headerBtn} onPress={handleMinimize}>
+            <Ionicons name="chevron-down" size={20} color="white" />
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Text style={styles.elapsed}>{formatTime(elapsedSecs)}</Text>
+            <Text style={styles.progress}>{exIndex + 1} / {exercises.length}</Text>
+          </View>
+          <TouchableOpacity style={styles.headerBtnEnd} onPress={handleEndWorkout}>
             <Ionicons name="close" size={20} color="white" />
           </TouchableOpacity>
-          <Text style={styles.elapsed}>{formatTime(elapsedSecs)}</Text>
-          <Text style={styles.progress}>{exIndex + 1} / {exercises.length}</Text>
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -617,10 +698,21 @@ const styles = StyleSheet.create({
     borderBottomColor: "#2A2A2A",
   },
 
-  closeBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: "#2C2C2E",
+  headerBtn: {
+    width: 42, height: 42, borderRadius: 21,
+    backgroundColor: colors.primary,
     justifyContent: "center", alignItems: "center",
+  },
+
+  headerBtnEnd: {
+    width: 42, height: 42, borderRadius: 21,
+    backgroundColor: "#EF4444",
+    justifyContent: "center", alignItems: "center",
+  },
+
+  headerCenter: {
+    alignItems: "center",
+    gap: 2,
   },
 
   elapsed: { color: colors.text, fontSize: 18, fontWeight: "700", fontVariant: ["tabular-nums"] },

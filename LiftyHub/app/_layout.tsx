@@ -10,6 +10,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LanguageProvider } from '@/src/context/LanguageContext';
 import { SubscriptionProvider } from '@/src/context/SubscriptionContext';
 import { UnitsProvider } from '@/src/context/UnitsContext';
+import { WorkoutProvider } from '@/src/context/WorkoutContext';
 import { syncPendingWorkouts } from '@/src/utils/pendingSync';
 
 export default function RootLayout() {
@@ -45,6 +46,7 @@ export default function RootLayout() {
     <LanguageProvider>
     <UnitsProvider>
     <SubscriptionProvider>
+    <WorkoutProvider>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -68,6 +70,7 @@ export default function RootLayout() {
       </Stack>
       <StatusBar style="light" />
     </ThemeProvider>
+    </WorkoutProvider>
     </SubscriptionProvider>
     </UnitsProvider>
     </LanguageProvider>

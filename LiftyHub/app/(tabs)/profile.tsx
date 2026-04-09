@@ -16,6 +16,7 @@ import { useToast } from "@/src/hooks/useToast";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { saveCache, loadCache } from "@/src/utils/cache";
 import OfflineBanner from "@/src/components/OfflineBanner";
+import { loadWeekPlan } from "@/src/utils/calendarPlan";
 import { BlurView } from "expo-blur";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -90,7 +91,7 @@ export default function ProfileScreen() {
       const token = await AsyncStorage.getItem("token");
       const userStorage = await AsyncStorage.getItem("user");
 
-      if (!token || !userStorage) return;
+      if (!token || !userStorage) { setLoading(false); return; }
 
       const userParsed = JSON.parse(userStorage);
 
@@ -110,35 +111,68 @@ export default function ProfileScreen() {
       const routinesCount = routinesCountData?.count ?? 0;
       const currentStreak = streak?.current_streak ?? 0;
 
-      // Calcular inicio y fin de la semana actual (lunes–domingo)
-      const now = new Date();
-      const dayOfWeek = now.getDay(); // 0=Dom, 1=Lun...
-      const diffToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
-      const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() + diffToMonday);
-      weekStart.setHours(0, 0, 0, 0);
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 6);
-      weekEnd.setHours(23, 59, 59, 999);
+      // Helper: parse "YYYY-MM-DD HH:mm:ss" or ISO string as local date (no timezone shift)
+      const parseLocalDate = (str: string): Date => {
+        const datePart = str.split(" ")[0].split("T")[0];
+        const [y, m, d] = datePart.split("-").map(Number);
+        return new Date(y, m - 1, d);
+      };
 
-      // Sesiones de esta semana del usuario
+      // Semana actual (lunes–domingo) en fecha local
+      const now = new Date();
+      const dow = now.getDay();
+      const diffToMon = dow === 0 ? -6 : 1 - dow;
+      const weekDates = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon + i);
+        return d;
+      });
+      const weekDateStrings = new Set(weekDates.map(d => d.toDateString()));
+
+      // Sesiones completadas del usuario (solo las que tienen finished_at)
       const rawSessions: any[] = (sessionsData?.data ?? []).filter(
         (s: any) => Number(s.user_id) === Number(userParsed.id)
       );
-      const weeklySessions = rawSessions.filter((s: any) => {
-        const d = new Date((s.started_at ?? "").replace(" ", "T"));
-        return d >= weekStart && d <= weekEnd;
+      const completedApiDates = rawSessions
+        .filter((s: any) => s.finished_at && s.started_at)
+        .map((s: any) => parseLocalDate(s.started_at));
+
+      // Merge con fechas locales guardadas en AsyncStorage
+      const localRaw = await AsyncStorage.getItem("completedWorkoutDates");
+      const localDates: Date[] = localRaw
+        ? (JSON.parse(localRaw) as string[]).map(s => parseLocalDate(s))
+        : [];
+      const seen = new Set<string>();
+      const allCompletedDates = [...completedApiDates, ...localDates].filter(d => {
+        const key = d.toDateString();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
       });
-      const weeklyWorkouts = weeklySessions.length;
-      const weeklyProgress = Math.min(Math.round((weeklyWorkouts / 7) * 100), 100);
+
+      // Sesiones completadas esta semana
+      const completedThisWeek = allCompletedDates.filter(d => weekDateStrings.has(d.toDateString()));
+      const weeklyWorkouts = completedThisWeek.length;
+
+      // Progreso basado en el plan del calendario
+      const calendarPlan = await loadWeekPlan();
+      const plannedDays = Object.values(calendarPlan).filter(p => p?.type === "routine").length;
+      const completedPlannedDays = weekDates.filter((date, i) => {
+        if (calendarPlan[i]?.type !== "routine") return false;
+        return allCompletedDates.some(cd => cd.toDateString() === date.toDateString());
+      }).length;
+
+      const weeklyProgress = plannedDays > 0
+        ? Math.min(Math.round((completedPlannedDays / plannedDays) * 100), 100)
+        : weeklyWorkouts > 0 ? Math.min(Math.round((weeklyWorkouts / 5) * 100), 100) : 0;
 
       // Logs de ejercicio de esta semana del usuario
       const rawLogs: any[] = (logsData?.data ?? []).filter(
         (l: any) => Number(l.user_id) === Number(userParsed.id)
       );
       const weeklyLogs = rawLogs.filter((l: any) => {
-        const d = new Date((l.workout_date ?? "").replace(" ", "T"));
-        return d >= weekStart && d <= weekEnd;
+        if (!l.workout_date) return false;
+        const d = parseLocalDate(l.workout_date);
+        return weekDateStrings.has(d.toDateString());
       });
       const weeklyReps = weeklyLogs.reduce((sum: number, l: any) => sum + (l.repetitions ?? 0), 0);
       const weeklySets = weeklyLogs.reduce((sum: number, l: any) => sum + (l.sets ?? 0), 0);
@@ -148,14 +182,14 @@ export default function ProfileScreen() {
 
       setProfile({
         name:            user.name,
-        age:             user.birthdate ? calculateAge(user.birthdate) : "N/A",
+        age:             user.birthdate ? calculateAge(user.birthdate) : t("profile.na"),
         avatar:          require("@/src/assets/defaultd.png"),
         routinesCount,
         streak:          currentStreak,
         weight:          props?.weight ? parseFloat(props.weight).toString() : "0",
         height:          props?.stature ? parseFloat(props.stature).toString() : "0",
-        somatotype:      props?.somatotype?.type ?? "N/A",
-        goal:            props?.objective ?? "N/A",
+        somatotype:      props?.somatotype?.type ?? t("profile.na"),
+        goal:            props?.objective ?? t("profile.na"),
         weeklyWorkouts,
         weeklyProgress,
         weeklyReps,
@@ -164,7 +198,7 @@ export default function ProfileScreen() {
 
       const statsData = { workouts: routinesCount, streak: currentStreak, totalTime: 0, totalWeight: 0 };
       setStats(statsData);
-      await saveCache("profile", { profile: { name: user.name, age: user.birthdate ? calculateAge(user.birthdate) : "N/A", routinesCount, streak: currentStreak, weight: props?.weight ? parseFloat(props.weight).toString() : "0", height: props?.stature ? parseFloat(props.stature).toString() : "0", somatotype: props?.somatotype?.type ?? "N/A", goal: props?.objective ?? "N/A", weeklyWorkouts, weeklyProgress, weeklyReps, weeklySets }, stats: statsData, sessions: rawSessions, logs: rawLogs });
+      await saveCache("profile", { profile: { name: user.name, age: user.birthdate ? calculateAge(user.birthdate) : t("profile.na"), routinesCount, streak: currentStreak, weight: props?.weight ? parseFloat(props.weight).toString() : "0", height: props?.stature ? parseFloat(props.stature).toString() : "0", somatotype: props?.somatotype?.type ?? t("profile.na"), goal: props?.objective ?? t("profile.na"), weeklyWorkouts, weeklyProgress, weeklyReps, weeklySets }, stats: statsData, sessions: rawSessions, logs: rawLogs });
     } catch {
       const cached = await loadCache<any>("profile");
       if (cached) { setProfile({ ...cached.profile, avatar: require("@/src/assets/defaultd.png") }); setStats(cached.stats); setAllSessions(cached.sessions); setAllLogs(cached.logs); }
@@ -191,20 +225,21 @@ export default function ProfileScreen() {
       </View>
     );
   }
+
+  if (!profile) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
 
     <View style={styles.container}>
       {!isConnected && <OfflineBanner />}
 
 
-
-      {/* BOTÓN EDITAR */}
-      <TouchableOpacity
-        style={styles.editButton}
-        onPress={() => router.push("/edit-profile")}
-      >
-        <Ionicons name="pencil" size={20} color="white" />
-      </TouchableOpacity>
 
       <ScrollView
         refreshControl={
@@ -345,7 +380,7 @@ export default function ProfileScreen() {
             <View style={styles.modalIcon}>
               <Ionicons name="swap-horizontal-outline" size={32} color={colors.primary} />
             </View>
-            <Text style={styles.modalTitle}>Calculadora kg / lbs</Text>
+            <Text style={styles.modalTitle}>{t("profile.converterTitle")}</Text>
 
             {/* TOGGLE MODO */}
             <View style={styles.converterToggle}>
@@ -431,6 +466,7 @@ export default function ProfileScreen() {
       </Modal>
 
       {Toast}
+
     </View>
   );
 }
@@ -444,19 +480,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background
-  },
-
-  editButton: {
-    position: "absolute",
-    top: 60,
-    right: 20,
-    width: 45,
-    height: 45,
-    borderRadius: 25,
-    backgroundColor: colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 20
   },
 
   cover: {

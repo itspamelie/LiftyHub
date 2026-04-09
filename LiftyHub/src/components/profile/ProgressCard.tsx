@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 type Props = {
   progress: number;
@@ -14,32 +15,34 @@ export default function ProgressCard({
   reps,
   sets
 }: Props) {
+  const { t } = useLanguage();
+
   return (
     <View style={styles.card}>
 
-      <Text style={styles.title}>Progreso semanal</Text>
+      <Text style={styles.title}>{t("stats.weeklyProgress")}</Text>
 
       {/* Círculo simple */}
       <View style={[styles.circle, progress === 0 && styles.circleEmpty]}>
         <Text style={styles.percent}>{progress > 0 ? `${progress}%` : "—"}</Text>
-        <Text style={styles.week}>de la semana</Text>
+        <Text style={styles.week}>{t("stats.ofTheWeek")}</Text>
       </View>
 
       <View style={styles.stats}>
 
         <View style={styles.stat}>
           <Text style={styles.number}>{workouts > 0 ? workouts : "—"}</Text>
-          <Text style={styles.label}>Entrenos</Text>
+          <Text style={styles.label}>{t("stats.workouts")}</Text>
         </View>
 
         <View style={styles.stat}>
           <Text style={styles.number}>{reps > 0 ? reps : "—"}</Text>
-          <Text style={styles.label}>Reps</Text>
+          <Text style={styles.label}>{t("stats.reps")}</Text>
         </View>
 
         <View style={styles.stat}>
           <Text style={styles.number}>{sets > 0 ? sets : "—"}</Text>
-          <Text style={styles.label}>Series</Text>
+          <Text style={styles.label}>{t("stats.sets")}</Text>
         </View>
 
       </View>

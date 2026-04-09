@@ -37,6 +37,7 @@ export default function EditProfileScreen() {
   const planColor = planColors[plan?.name ?? "Free"] ?? "#A1A1A1";
 
   const [name, setName]           = useState("");
+  const [email, setEmail]         = useState("");
   const [height, setHeight]       = useState("");
   const [weight, setWeight]       = useState("");
   const [somatotype, setSomatotype] = useState("Mesomorfo");
@@ -73,6 +74,7 @@ export default function EditProfileScreen() {
       setToken(storedToken);
       setUserId(user.id);
       setName(user.name ?? "");
+      setEmail(user.email ?? "");
 
       const props = await getUserProperties(user.id, storedToken);
       if (props?.data) {
@@ -250,6 +252,14 @@ export default function EditProfileScreen() {
               placeholder={t("editProfile.name")}
               placeholderTextColor={colors.textSecondary}
             />
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.row}>
+            <View style={styles.rowLeft}>
+              <Ionicons name="mail" size={20} color={colors.textSecondary} />
+              <Text style={styles.label}>{t("editProfile.email")}</Text>
+            </View>
+            <Text style={styles.emailValue}>{email}</Text>
           </View>
         </View>
 
@@ -582,6 +592,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     width: 120,
     textAlign: "right"
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: colors.background,
+    marginHorizontal: 18,
+  },
+
+  emailValue: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    flexShrink: 1,
+    textAlign: "right",
   },
 
   selectorContainer: {

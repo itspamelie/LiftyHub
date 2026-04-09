@@ -39,6 +39,12 @@ export default function Register() {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert(t("register.errorEmail"));
+      return;
+    }
+
     if (password.length < 6) {
       alert(t("register.errorPasswordLength"));
       return;

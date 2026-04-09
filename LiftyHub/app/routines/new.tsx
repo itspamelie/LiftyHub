@@ -10,6 +10,7 @@ import {
   Platform,
   Modal,
   FlatList,
+  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect, useRef } from "react";
@@ -40,6 +41,43 @@ type SelectedExercise = {
 };
 
 const TOTAL_STEPS = 5;
+
+function StepDot({ active }: { active: boolean }) {
+  const fill = useRef(new Animated.Value(active ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.spring(fill, {
+      toValue: active ? 1 : 0,
+      useNativeDriver: true,
+      damping: 12,
+      stiffness: 180,
+    }).start();
+  }, [active]);
+
+  return (
+    <View style={dotStyles.outer}>
+      <Animated.View style={[dotStyles.inner, { transform: [{ scale: fill }] }]} />
+    </View>
+  );
+}
+
+const dotStyles = StyleSheet.create({
+  outer: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  inner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.primary,
+  },
+});
 
 export default function NewRoutineScreen() {
   const { showToast, Toast } = useToast();
@@ -383,7 +421,7 @@ export default function NewRoutineScreen() {
               <ActivityIndicator color="white" />
             ) : (
               <Text style={styles.continueText}>
-                {step < TOTAL_STEPS ? t("onboarding.personalContinue") : t("routines.modal.button")}
+                {step < TOTAL_STEPS ? t("routines.modal.continue") : t("routines.modal.button")}
               </Text>
             )}
           </TouchableOpacity>
@@ -394,10 +432,7 @@ export default function NewRoutineScreen() {
       <View style={styles.bottomBar}>
         <View style={styles.progressBarContainer}>
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-            <View
-              key={i}
-              style={[styles.progressSegment, i < step && styles.progressSegmentActive]}
-            />
+            <StepDot key={i} active={i < step} />
           ))}
         </View>
         <Text style={styles.stepCounter}>{step}/{TOTAL_STEPS}</Text>
@@ -583,7 +618,6 @@ const styles = StyleSheet.create({
   },
 
   bottomBar: {
-    flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: spacing.screenPadding,
     paddingVertical: 14,
@@ -591,25 +625,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderTopWidth: 1,
     borderTopColor: colors.card,
-    gap: 10,
+    gap: 12,
   },
 
   progressBarContainer: {
-    flex: 1,
     flexDirection: "row",
-    gap: 6,
+    gap: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
-  progressSegment: {
-    flex: 1,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.card,
-  },
-
-  progressSegmentActive: {
-    backgroundColor: colors.primary,
-  },
 
   stepCounter: {
     color: colors.textSecondary,

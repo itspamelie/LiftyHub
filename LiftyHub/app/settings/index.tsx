@@ -7,6 +7,7 @@ import SettingsItem from "@/src/components/settings/SettingsItem";
 import SettingsSwitchItem from "@/src/components/settings/SettingsSwitchItem";
 import { deleteAccount, checkPassword } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
+import { useToast } from "@/src/hooks/useToast";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import { useUnits } from "@/src/context/UnitsContext";
 import { colors, spacing, planColors } from "@/src/styles/globalstyles";
@@ -16,6 +17,7 @@ export default function Settings() {
   const { t, language, changeLanguage } = useLanguage();
   const { plan, refresh: refreshSubscription } = useSubscription();
   const { units, changeUnits } = useUnits();
+  const { showToast, Toast } = useToast();
 
   const planColor = plan ? (planColors[plan.name] ?? colors.primary) : "#A1A1A1";
   const [notifications, setNotifications] = useState(false);
@@ -85,10 +87,10 @@ export default function Settings() {
       if (res?.valid) {
         setDeletePasswordVerified(true);
       } else {
-        Alert.alert("Error", t("settings.errorVerifyPassword"));
+        showToast(t("settings.errorVerifyPassword"), "error");
       }
     } catch {
-      Alert.alert("Error", t("settings.errorVerifyFailed"));
+      showToast(t("settings.errorVerifyFailed"), "error");
     } finally {
       setVerifyingDelete(false);
     }
@@ -106,6 +108,8 @@ export default function Settings() {
 
       await AsyncStorage.removeItem("token");
       await AsyncStorage.removeItem("user");
+      await AsyncStorage.removeItem("@liftyhub_dev_plan");
+      await AsyncStorage.removeItem("@liftyhub_calendar_plan");
       router.replace("/auth/login");
     } catch {
       Alert.alert("Error", t("settings.errorDelete"));
@@ -119,9 +123,11 @@ export default function Settings() {
     try {
       await AsyncStorage.removeItem("token");
       await AsyncStorage.removeItem("user");
+      await AsyncStorage.removeItem("@liftyhub_dev_plan");
+      await AsyncStorage.removeItem("@liftyhub_calendar_plan");
       router.replace("/auth/login");
     } catch {
-      Alert.alert("Error", t("settings.errorLogout"));
+      showToast(t("settings.errorLogout"), "error");
     }
   };
 
@@ -363,6 +369,8 @@ export default function Settings() {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+
+      {Toast}
 
       {/* MODAL DEV — plan override */}
       <Modal visible={showDevModal} transparent animationType="fade">
