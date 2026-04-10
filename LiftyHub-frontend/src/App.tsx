@@ -14,7 +14,7 @@ import RoutineDetail from './components/routines/RoutineDetail'
 import AddExerciseToRoutine from './components/routines/AddExerciseRoutine';
 import AddRoutineToExercise from './components/exercises/AddRoutineExercise';
 import NutritionistDetail from './components/nutritionist/NutritionistDetail'
-
+import NutritionistJoin from './views/homenutritionist';
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
@@ -27,6 +27,7 @@ function App() {
 
         <Route path="/" element={<Home/>}/>
         <Route path="/login" element={<Login/>}/>
+        <Route path="/Liftyhub-Experts" element={<NutritionistJoin/>}/>
 
         {/* RUTAS DEL DASHBOARD */}
         <Route path="/dashboard" element={<PrivateRoute><Dashboard/></PrivateRoute>}>

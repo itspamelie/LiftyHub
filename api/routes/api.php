@@ -65,4 +65,6 @@ Route::get('/exercise-files/{id}', [ExerciseFilesController::class, 'getByExerci
 Route::get('/routines/{id}/exercises', [ExerciseRoutinesController::class, 'getByRoutine']);
 Route::get('/userroutines/{id}/exercises', [UserRoutineExercisesController::class, 'getByRoutine']);
 Route::resource('userRoutineSessions', UserRoutineSessionsController::class); 
+Route::get('/userWeekPlan', [UserWeekPlanController::class, 'index']);
+Route::put('/userWeekPlan', [UserWeekPlanController::class, 'update']);
 });
