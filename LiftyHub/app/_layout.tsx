@@ -2,16 +2,21 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LanguageProvider } from '@/src/context/LanguageContext';
 import { SubscriptionProvider } from '@/src/context/SubscriptionContext';
+import { UnitsProvider } from '@/src/context/UnitsContext';
+import { WorkoutProvider } from '@/src/context/WorkoutContext';
+import { syncPendingWorkouts } from '@/src/utils/pendingSync';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
+  const prevConnected = useRef<boolean | null>(null);
 
   useEffect(() => {
     const checkToken = async () => {
@@ -24,9 +29,24 @@ export default function RootLayout() {
     checkToken();
   }, []);
 
+  // Auto-sync pending workouts when connectivity is restored
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(async (state) => {
+      const isNowConnected = state.isConnected ?? false;
+      if (isNowConnected && prevConnected.current === false) {
+        const token = await AsyncStorage.getItem('token');
+        if (token) syncPendingWorkouts(token);
+      }
+      prevConnected.current = isNowConnected;
+    });
+    return unsubscribe;
+  }, []);
+
   return (
     <LanguageProvider>
+    <UnitsProvider>
     <SubscriptionProvider>
+    <WorkoutProvider>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -44,12 +64,15 @@ export default function RootLayout() {
         <Stack.Screen name="routines/new" options={{ headerShown: false }} />
         <Stack.Screen name="routines/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="routines/session" options={{ headerShown: false }} />
+        <Stack.Screen name="routines/edit/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="diet/nutritionists" options={{ headerShown: false }} />
         <Stack.Screen name="diet/plan" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="light" />
     </ThemeProvider>
+    </WorkoutProvider>
     </SubscriptionProvider>
+    </UnitsProvider>
     </LanguageProvider>
   );
 }

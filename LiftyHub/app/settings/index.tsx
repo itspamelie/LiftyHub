@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, Modal, TextInput, ActivityIndicator, TouchableWithoutFeedback, Keyboard } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
@@ -7,17 +7,60 @@ import SettingsItem from "@/src/components/settings/SettingsItem";
 import SettingsSwitchItem from "@/src/components/settings/SettingsSwitchItem";
 import { deleteAccount, checkPassword } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
+import { useToast } from "@/src/hooks/useToast";
 import { useSubscription } from "@/src/context/SubscriptionContext";
-import { colors, planColors } from "@/src/styles/globalstyles";
+import { useUnits } from "@/src/context/UnitsContext";
+import { colors, spacing, planColors } from "@/src/styles/globalstyles";
 
 export default function Settings() {
 
   const { t, language, changeLanguage } = useLanguage();
-  const { plan } = useSubscription();
+  const { plan, refresh: refreshSubscription } = useSubscription();
+  const { units, changeUnits } = useUnits();
+  const { showToast, Toast } = useToast();
 
   const planColor = plan ? (planColors[plan.name] ?? colors.primary) : "#A1A1A1";
   const [notifications, setNotifications] = useState(false);
-  const [units, setUnits] = useState("kg");
+
+  // Dev mode
+  const versionTaps = useRef(0);
+  const [showDevModal, setShowDevModal] = useState(false);
+  const [devActivePlan, setDevActivePlan] = useState<string | null>(null);
+
+  const DEV_PLANS = [
+    { id: 1, name: "Free",  level: 0, price: 0,   description: "Acceso limitado" },
+    { id: 2, name: "Basic", level: 1, price: 99,  description: "Plan básico" },
+    { id: 3, name: "Meal",  level: 2, price: 400, description: "Plan nutrición" },
+    { id: 4, name: "Pro",   level: 2, price: 600, description: "Plan completo" },
+  ] as const;
+
+  useEffect(() => {
+    AsyncStorage.getItem("@liftyhub_dev_plan").then((val) => {
+      if (val) setDevActivePlan(JSON.parse(val).name);
+    });
+  }, []);
+
+  const handleVersionTap = () => {
+    versionTaps.current += 1;
+    if (versionTaps.current >= 5) {
+      versionTaps.current = 0;
+      setShowDevModal(true);
+    }
+  };
+
+  const handleSetDevPlan = async (p: typeof DEV_PLANS[number]) => {
+    await AsyncStorage.setItem("@liftyhub_dev_plan", JSON.stringify(p));
+    setDevActivePlan(p.name);
+    await refreshSubscription();
+    setShowDevModal(false);
+  };
+
+  const handleClearDevPlan = async () => {
+    await AsyncStorage.removeItem("@liftyhub_dev_plan");
+    setDevActivePlan(null);
+    await refreshSubscription();
+    setShowDevModal(false);
+  };
 
   // Modal eliminar cuenta
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -44,10 +87,10 @@ export default function Settings() {
       if (res?.valid) {
         setDeletePasswordVerified(true);
       } else {
-        Alert.alert("Error", "La contraseña es incorrecta");
+        showToast(t("settings.errorVerifyPassword"), "error");
       }
     } catch {
-      Alert.alert("Error", "No se pudo verificar la contraseña");
+      showToast(t("settings.errorVerifyFailed"), "error");
     } finally {
       setVerifyingDelete(false);
     }
@@ -65,6 +108,8 @@ export default function Settings() {
 
       await AsyncStorage.removeItem("token");
       await AsyncStorage.removeItem("user");
+      await AsyncStorage.removeItem("@liftyhub_dev_plan");
+      await AsyncStorage.removeItem("@liftyhub_calendar_plan");
       router.replace("/auth/login");
     } catch {
       Alert.alert("Error", t("settings.errorDelete"));
@@ -78,18 +123,11 @@ export default function Settings() {
     try {
       await AsyncStorage.removeItem("token");
       await AsyncStorage.removeItem("user");
+      await AsyncStorage.removeItem("@liftyhub_dev_plan");
+      await AsyncStorage.removeItem("@liftyhub_calendar_plan");
       router.replace("/auth/login");
-    } catch (error) {
-      console.log("Error al cerrar sesión:", error);
-    }
-  };
-
-  const saveUnits = async (value: string) => {
-    try {
-      setUnits(value);
-      await AsyncStorage.setItem("@liftyhub_units", value);
-    } catch (error) {
-      console.log("Error saving units", error);
+    } catch {
+      showToast(t("settings.errorLogout"), "error");
     }
   };
 
@@ -98,8 +136,8 @@ export default function Settings() {
       t("settings.unitsTitle"),
       t("settings.unitsMessage"),
       [
-        { text: t("settings.unitsKg"), onPress: () => saveUnits("kg") },
-        { text: t("settings.unitsLb"), onPress: () => saveUnits("lb") },
+        { text: t("settings.unitsKg"), onPress: () => changeUnits("kg") },
+        { text: t("settings.unitsLb"), onPress: () => changeUnits("lb") },
         { text: t("settings.cancel"), style: "cancel" }
       ]
     );
@@ -132,18 +170,6 @@ export default function Settings() {
     setShowDeleteModal(true);
   };
 
-  useEffect(() => {
-    const loadPreferences = async () => {
-      try {
-        const savedUnits = await AsyncStorage.getItem("@liftyhub_units");
-        if (savedUnits !== null) setUnits(savedUnits);
-      } catch (error) {
-        console.log("Error loading preferences", error);
-      }
-    };
-    loadPreferences();
-  }, []);
-
   return (
     <View style={styles.container}>
 
@@ -163,14 +189,14 @@ export default function Settings() {
         <Text style={styles.section}>{t("settings.plan")}</Text>
         <View style={styles.card}>
           <SettingsItem
-            icon="diamond-outline"
+            icon="diamond"
             label={t("settings.myPlan")}
             value={plan?.name ?? t("settings.freePlan")}
             valueColor={planColor}
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="sparkles-outline"
+            icon="sparkles"
             label={t("settings.viewPlans")}
             showArrow
             onPress={() => router.push("/settings/plans")}
@@ -181,13 +207,13 @@ export default function Settings() {
         <Text style={styles.section}>{t("settings.preferences")}</Text>
         <View style={styles.card}>
           <SettingsItem
-            icon="moon-outline"
+            icon="moon"
             label={t("settings.theme")}
             value={t("settings.dark")}
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="barbell-outline"
+            icon="barbell"
             label={t("settings.units")}
             value={units}
             onPress={handleUnits}
@@ -195,7 +221,7 @@ export default function Settings() {
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="language-outline"
+            icon="language"
             label={t("settings.language")}
             value={language === "es" ? t("settings.langEs") : t("settings.langEn")}
             onPress={handleLanguage}
@@ -203,7 +229,7 @@ export default function Settings() {
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="shield-checkmark-outline"
+            icon="shield-checkmark"
             label={t("permissions.title")}
             showArrow
             onPress={() => router.push("/settings/permissions")}
@@ -214,14 +240,14 @@ export default function Settings() {
         <Text style={styles.section}>{t("settings.workout")}</Text>
         <View style={styles.card}>
           <SettingsSwitchItem
-            icon="notifications-outline"
+            icon="notifications"
             label={t("settings.reminders")}
             value={notifications}
             onChange={setNotifications}
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="volume-high-outline"
+            icon="volume-high"
             label={t("settings.workoutSounds")}
           />
         </View>
@@ -230,23 +256,24 @@ export default function Settings() {
         <Text style={styles.section}>{t("settings.about")}</Text>
         <View style={styles.card}>
           <SettingsItem
-            icon="information-circle-outline"
+            icon="information-circle"
             label={t("settings.aboutLiftyHub")}
             showArrow
             onPress={() => router.push("/settings/about")}
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="document-text-outline"
+            icon="document-text"
             label={t("settings.privacy")}
             showArrow
             onPress={() => router.push("/settings/privacy")}
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="code-outline"
+            icon="code"
             label={t("settings.version")}
             value="1.0.0"
+            onPress={handleVersionTap}
           />
         </View>
 
@@ -254,14 +281,14 @@ export default function Settings() {
         <Text style={styles.section}>{t("settings.account")}</Text>
         <View style={styles.card}>
           <SettingsItem
-            icon="log-out-outline"
+            icon="log-out"
             label={t("settings.logout")}
             danger
             onPress={handleLogout}
           />
           <View style={styles.divider} />
           <SettingsItem
-            icon="trash-outline"
+            icon="trash"
             label={t("settings.deleteAccount")}
             danger
             onPress={handleDeleteAccount}
@@ -282,13 +309,13 @@ export default function Settings() {
                 {!deletePasswordVerified ? (
                   <>
                     <Text style={styles.modalSubtitle}>
-                      Verifica tu contraseña para continuar
+                      {t("settings.deleteVerifySubtitle")}
                     </Text>
 
                     <View style={styles.inputContainer}>
                       <TextInput
                         style={styles.modalInput}
-                        placeholder="Contraseña actual"
+                        placeholder={t("settings.deletePasswordPlaceholder")}
                         placeholderTextColor={colors.textSecondary}
                         secureTextEntry={!showDeletePassword}
                         value={deletePassword}
@@ -310,14 +337,14 @@ export default function Settings() {
                     >
                       {verifyingDelete
                         ? <ActivityIndicator color="white" />
-                        : <Text style={styles.modalButtonText}>Verificar</Text>
+                        : <Text style={styles.modalButtonText}>{t("settings.deleteVerifyBtn")}</Text>
                       }
                     </TouchableOpacity>
                   </>
                 ) : (
                   <>
                     <Text style={styles.modalSubtitle}>
-                      Esta acción es permanente y no se puede deshacer.
+                      {t("settings.deleteConfirmSubtitle")}
                     </Text>
 
                     <TouchableOpacity
@@ -343,6 +370,40 @@ export default function Settings() {
         </TouchableWithoutFeedback>
       </Modal>
 
+      {Toast}
+
+      {/* MODAL DEV — plan override */}
+      <Modal visible={showDevModal} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowDevModal(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+            <Text style={styles.modalTitle}>🛠 Dev — Cambiar plan</Text>
+            <Text style={styles.modalSubtitle}>
+              Plan activo: <Text style={{ color: "white", fontWeight: "700" }}>{devActivePlan ?? plan?.name ?? "Free"}</Text>
+            </Text>
+            {DEV_PLANS.map((p) => (
+              <TouchableOpacity
+                key={p.name}
+                style={[
+                  styles.modalButtonDanger,
+                  { backgroundColor: colors.primary },
+                  devActivePlan === p.name && { opacity: 0.5 },
+                  { marginBottom: 8 },
+                ]}
+                onPress={() => handleSetDevPlan(p)}
+                disabled={devActivePlan === p.name}
+              >
+                <Text style={styles.modalButtonText}>{p.name}</Text>
+              </TouchableOpacity>
+            ))}
+            {devActivePlan && (
+              <TouchableOpacity style={[styles.modalCancel, { marginTop: 4 }]} onPress={handleClearDevPlan}>
+                <Text style={styles.modalCancelText}>Usar plan real del servidor</Text>
+              </TouchableOpacity>
+            )}
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
     </View>
   );
 }
@@ -351,7 +412,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: "#0F0F10"
+    backgroundColor: colors.background
   },
 
   content: {
@@ -386,15 +447,15 @@ const styles = StyleSheet.create({
   },
 
   section: {
-    color: "#A1A1A1",
+    color: colors.textSecondary,
     marginTop: 20,
     marginBottom: 10,
     fontSize: 14
   },
 
   card: {
-    backgroundColor: "#1C1C1E",
-    borderRadius: 16,
+    backgroundColor: colors.card,
+    borderRadius: spacing.borderRadius,
     paddingVertical: 6
   },
 

@@ -10,6 +10,7 @@ import {
   Platform,
   Modal,
   FlatList,
+  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect, useRef } from "react";
@@ -40,6 +41,43 @@ type SelectedExercise = {
 };
 
 const TOTAL_STEPS = 5;
+
+function StepDot({ active }: { active: boolean }) {
+  const fill = useRef(new Animated.Value(active ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.spring(fill, {
+      toValue: active ? 1 : 0,
+      useNativeDriver: true,
+      damping: 12,
+      stiffness: 180,
+    }).start();
+  }, [active]);
+
+  return (
+    <View style={dotStyles.outer}>
+      <Animated.View style={[dotStyles.inner, { transform: [{ scale: fill }] }]} />
+    </View>
+  );
+}
+
+const dotStyles = StyleSheet.create({
+  outer: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  inner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.primary,
+  },
+});
 
 export default function NewRoutineScreen() {
   const { showToast, Toast } = useToast();
@@ -166,18 +204,18 @@ export default function NewRoutineScreen() {
 
       router.back();
     } catch {
-      showToast("No se pudo crear la rutina.", "error");
+      showToast(t("routines.modal.errorCreate"), "error");
     } finally {
       setSaving(false);
     }
   };
 
   const stepConfig = [
-    { icon: "barbell-outline" as const,     title: t("routines.modal.title"),     desc: "Dale un nombre a tu rutina y cuéntanos qué quieres lograr" },
-    { icon: "stats-chart-outline" as const, title: t("routines.modal.level"),     desc: "¿Cuál es tu nivel de experiencia?" },
-    { icon: "grid-outline" as const,        title: t("routines.modal.type"),      desc: "Elige la categoría y cuánto tiempo tienes disponible" },
-    { icon: "timer-outline" as const,       title: "Detalles",                    desc: "Configura los descansos y agrega una imagen a tu rutina" },
-    { icon: "list-outline" as const,        title: t("routines.modal.exercises"), desc: "Agrega los ejercicios que formarán tu rutina" },
+    { icon: "barbell-outline" as const,     title: t("routines.modal.title"),     desc: t("routines.modal.step1Desc") },
+    { icon: "stats-chart-outline" as const, title: t("routines.modal.level"),     desc: t("routines.modal.step2Desc") },
+    { icon: "grid-outline" as const,        title: t("routines.modal.type"),      desc: t("routines.modal.step3Desc") },
+    { icon: "timer-outline" as const,       title: t("routines.modal.step4Title"), desc: t("routines.modal.step4Desc") },
+    { icon: "list-outline" as const,        title: t("routines.modal.exercises"), desc: t("routines.modal.step5Desc") },
   ];
 
   return (
@@ -193,7 +231,7 @@ export default function NewRoutineScreen() {
         >
           <Ionicons name="arrow-back" size={20} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Crear rutina</Text>
+        <Text style={styles.headerTitle}>{t("routines.modal.headerTitle")}</Text>
       </View>
       <View style={styles.headerDivider} />
 
@@ -296,21 +334,21 @@ export default function NewRoutineScreen() {
           {/* PASO 4: descanso + imagen */}
           {step === 4 && (
             <View style={styles.stepContent}>
-              <Text style={styles.sectionLabel}>¿Descanso entre series?</Text>
+              <Text style={styles.sectionLabel}>{t("routines.modal.restQuestion")}</Text>
               <View style={styles.restToggleRow}>
                 <TouchableOpacity
                   style={[styles.restToggleButton, restEnabled === true && styles.restToggleActive]}
                   onPress={() => setRestEnabled(true)}
                 >
                   <Ionicons name="checkmark-circle-outline" size={18} color={restEnabled === true ? colors.primary : colors.textSecondary} />
-                  <Text style={[styles.restToggleText, restEnabled === true && styles.restToggleTextActive]}>Sí</Text>
+                  <Text style={[styles.restToggleText, restEnabled === true && styles.restToggleTextActive]}>{t("routines.modal.yes")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.restToggleButton, restEnabled === false && styles.restToggleActive]}
                   onPress={() => setRestEnabled(false)}
                 >
                   <Ionicons name="close-circle-outline" size={18} color={restEnabled === false ? colors.primary : colors.textSecondary} />
-                  <Text style={[styles.restToggleText, restEnabled === false && styles.restToggleTextActive]}>No</Text>
+                  <Text style={[styles.restToggleText, restEnabled === false && styles.restToggleTextActive]}>{t("routines.modal.no")}</Text>
                 </TouchableOpacity>
               </View>
               {restEnabled === true && (
@@ -383,7 +421,7 @@ export default function NewRoutineScreen() {
               <ActivityIndicator color="white" />
             ) : (
               <Text style={styles.continueText}>
-                {step < TOTAL_STEPS ? t("onboarding.personalContinue") : t("routines.modal.button")}
+                {step < TOTAL_STEPS ? t("routines.modal.continue") : t("routines.modal.button")}
               </Text>
             )}
           </TouchableOpacity>
@@ -394,10 +432,7 @@ export default function NewRoutineScreen() {
       <View style={styles.bottomBar}>
         <View style={styles.progressBarContainer}>
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-            <View
-              key={i}
-              style={[styles.progressSegment, i < step && styles.progressSegmentActive]}
-            />
+            <StepDot key={i} active={i < step} />
           ))}
         </View>
         <Text style={styles.stepCounter}>{step}/{TOTAL_STEPS}</Text>
@@ -452,9 +487,9 @@ export default function NewRoutineScreen() {
           <TouchableOpacity style={StyleSheet.absoluteFill} onPress={() => setShowRestPicker(false)} />
           <View style={styles.restPickerSheet}>
             <View style={styles.restPickerHeader}>
-              <Text style={styles.restPickerTitle}>Descanso entre series</Text>
+              <Text style={styles.restPickerTitle}>{t("routines.modal.restPickerTitle")}</Text>
               <TouchableOpacity onPress={() => setShowRestPicker(false)}>
-                <Text style={styles.restPickerDoneText}>Listo</Text>
+                <Text style={styles.restPickerDoneText}>{t("routines.modal.done")}</Text>
               </TouchableOpacity>
             </View>
 
@@ -583,7 +618,6 @@ const styles = StyleSheet.create({
   },
 
   bottomBar: {
-    flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: spacing.screenPadding,
     paddingVertical: 14,
@@ -591,25 +625,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderTopWidth: 1,
     borderTopColor: colors.card,
-    gap: 10,
+    gap: 12,
   },
 
   progressBarContainer: {
-    flex: 1,
     flexDirection: "row",
-    gap: 6,
+    gap: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
-  progressSegment: {
-    flex: 1,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.card,
-  },
-
-  progressSegmentActive: {
-    backgroundColor: colors.primary,
-  },
 
   stepCounter: {
     color: colors.textSecondary,

@@ -10,6 +10,7 @@ import {
   Platform,
   Modal,
   Share,
+  Alert,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { useLocalSearchParams, router } from "expo-router";
@@ -18,6 +19,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { getRoutineExercises, getUserRoutineExercises } from "@/src/services/api";
+import { useLanguage } from "@/src/context/LanguageContext";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
+import { saveCache, loadCache } from "@/src/utils/cache";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const HERO_HEIGHT = 240;
@@ -46,17 +50,17 @@ const LEVEL_COLORS: Record<string, string> = {
 };
 
 const LEVEL_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-  Principiante: "leaf-outline",
-  Intermedio:   "flame-outline",
-  Avanzado:     "skull-outline",
+  Principiante: "leaf",
+  Intermedio:   "flame",
+  Avanzado:     "trending-up",
 };
 
 const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-  Fuerza:    "barbell-outline",
-  Movilidad: "body-outline",
-  Cardio:    "heart-outline",
-  HIIT:      "flash-outline",
-  "Full Body": "fitness-outline",
+  Fuerza:      "barbell",
+  Movilidad:   "body",
+  Cardio:      "heart",
+  HIIT:        "flash",
+  "Full Body": "fitness",
 };
 
 export default function RoutineDetail() {
@@ -72,28 +76,56 @@ export default function RoutineDetail() {
       isUserRoutine: string;
     }>();
 
+  const { t } = useLanguage();
+  const isConnected = useNetworkStatus();
   const [exercises, setExercises] = useState<ExerciseEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [showQR, setShowQR] = useState(false);
 
+  const handleStartWorkout = () => {
+    if (!isConnected) {
+      Alert.alert(
+        t("offline.workoutTitle"),
+        t("offline.workoutMsg"),
+        [
+          { text: t("offline.cancel"), style: "cancel" },
+          {
+            text: t("offline.continueAnyway"),
+            onPress: () => router.push({ pathname: "/routines/session", params: { id, name, isUserRoutine } }),
+          },
+        ]
+      );
+      return;
+    }
+    router.push({ pathname: "/routines/session", params: { id, name, isUserRoutine } });
+  };
+
   useEffect(() => {
     const load = async () => {
+      const isUser = isUserRoutine === "true";
+      const cacheKey = `exercises_${isUser ? "user" : "app"}_${id}`;
       try {
         const token = await AsyncStorage.getItem("token");
         if (!token || !id) return;
-        const isUser = isUserRoutine === "true";
         const res = isUser
           ? await getUserRoutineExercises(Number(id), token)
           : await getRoutineExercises(Number(id), token);
-        console.log("RES EJERCICIOS:", JSON.stringify(res));
+        let exs: ExerciseEntry[] = [];
         if (isUser) {
-          if (Array.isArray(res?.data)) setExercises(res.data);
+          if (Array.isArray(res?.data)) exs = res.data;
         } else {
-          if (Array.isArray(res?.exercises)) setExercises(res.exercises);
-          else if (Array.isArray(res?.data)) setExercises(res.data);
+          if (Array.isArray(res?.exercises)) exs = res.exercises;
+          else if (Array.isArray(res?.data)) exs = res.data;
         }
-      } catch (e) {
-        console.log("Error cargando ejercicios de rutina:", e);
+        setExercises(exs);
+        await saveCache(cacheKey, exs);
+      } catch {
+        const cached = await loadCache<ExerciseEntry[]>(cacheKey);
+        if (cached && cached.length > 0) {
+          setExercises(cached);
+        } else {
+          Alert.alert("Error", t("routineDetail.errorLoad"));
+        }
       } finally {
         setLoading(false);
       }
@@ -149,17 +181,17 @@ export default function RoutineDetail() {
           </TouchableOpacity>
           {isUserRoutine === "true" && (
             <TouchableOpacity
-              style={[styles.shareButton, { right: 60 }]}
+              style={[styles.shareButton, { right: 70 }]}
               onPress={() => router.push({
                 pathname: "/routines/edit/[id]",
                 params: { id, name, objective, level, category, duration: duration.replace(" min", ""), img: image ?? "" },
               })}
             >
-              <Ionicons name="pencil-outline" size={20} color="white" />
+              <Ionicons name="pencil" size={20} color="white" />
             </TouchableOpacity>
           )}
           <TouchableOpacity style={styles.shareButton} onPress={() => setShowQR(true)}>
-            <Ionicons name="qr-code-outline" size={20} color="white" />
+            <Ionicons name="qr-code" size={20} color="white" />
           </TouchableOpacity>
           {/* arco inferior para transición suave */}
           <View style={styles.heroArc} />
@@ -186,10 +218,10 @@ export default function RoutineDetail() {
           <View style={styles.statRow}>
             <View style={styles.statCard}>
               <View style={[styles.statIconBg, { backgroundColor: "rgba(59,130,246,0.15)" }]}>
-                <Ionicons name="time-outline" size={20} color={colors.primary} />
+                <Ionicons name="time" size={20} color={colors.primary} />
               </View>
               <Text style={styles.statValue}>{durationNum}</Text>
-              <Text style={styles.statLabel}>minutos</Text>
+              <Text style={styles.statLabel}>{t("routineDetail.minutes")}</Text>
             </View>
 
             <View style={styles.statCard}>
@@ -197,40 +229,40 @@ export default function RoutineDetail() {
                 <Ionicons name={levelIcon} size={20} color={levelColor} />
               </View>
               <Text style={[styles.statValue, { color: levelColor }]}>{level}</Text>
-              <Text style={styles.statLabel}>nivel</Text>
+              <Text style={styles.statLabel}>{t("routineDetail.level")}</Text>
             </View>
 
             <View style={styles.statCard}>
-              <View style={[styles.statIconBg, { backgroundColor: "rgba(167,139,250,0.15)" }]}>
-                <Ionicons name="barbell-outline" size={20} color="#A78BFA" />
+              <View style={[styles.statIconBg, { backgroundColor: "rgba(59,130,246,0.15)" }]}>
+                <Ionicons name="barbell" size={20} color={colors.primary} />
               </View>
-              <Text style={[styles.statValue, { color: "#A78BFA" }]}>
+              <Text style={styles.statValue}>
                 {loading ? "—" : exercises.length}
               </Text>
-              <Text style={styles.statLabel}>ejercicios</Text>
+              <Text style={styles.statLabel}>{t("routineDetail.exercises")}</Text>
             </View>
           </View>
 
           {/* ── OBJETIVO ── */}
           {!!objective && (
             <>
-              <SectionHeader title="Objetivo" />
+              <SectionHeader title={t("routineDetail.objective")} />
               <View style={styles.objectiveBox}>
-                <Ionicons name="flag-outline" size={18} color={colors.primary} />
+                <Ionicons name="flag" size={18} color={colors.primary} />
                 <Text style={styles.objectiveText}>{objective}</Text>
               </View>
             </>
           )}
 
           {/* ── EJERCICIOS ── */}
-          <SectionHeader title="Ejercicios" style={{ marginTop: 28 }} />
+          <SectionHeader title={t("routineDetail.exercisesSection")} style={{ marginTop: 28 }} />
 
           {loading ? (
             <ActivityIndicator color={colors.primary} style={{ marginTop: 20, marginBottom: 20 }} />
           ) : exercises.length === 0 ? (
             <View style={styles.emptyBox}>
-              <Ionicons name="barbell-outline" size={44} color={colors.textSecondary} />
-              <Text style={styles.emptyText}>No hay ejercicios en esta rutina</Text>
+              <Ionicons name="barbell" size={44} color={colors.textSecondary} />
+              <Text style={styles.emptyText}>{t("routineDetail.noExercises")}</Text>
             </View>
           ) : (
             <View style={styles.exerciseList}>
@@ -284,9 +316,9 @@ export default function RoutineDetail() {
                             )}
                             {hasSets && (
                               <View style={styles.metaRow}>
-                                <MetaChip icon="repeat-outline" label={`${item.sets} series`} />
-                                <MetaChip icon="return-down-forward-outline" label={`${item.repetitions} reps`} />
-                                <MetaChip icon="timer-outline" label={`${item.seconds_rest}s`} />
+                                <MetaChip icon="layers" label={`${item.sets} series`} />
+                                <MetaChip icon="repeat" label={`${item.repetitions} reps`} />
+                                <MetaChip icon="timer" label={`${item.seconds_rest}s`} />
                               </View>
                             )}
                           </View>
@@ -300,8 +332,8 @@ export default function RoutineDetail() {
                     {/* DESCANSO entre ejercicios */}
                     {showRest && (
                       <View style={styles.restRow}>
-                        <Ionicons name="timer-outline" size={13} color={colors.textSecondary} />
-                        <Text style={styles.restText}>{restSecs}s descanso</Text>
+                        <Ionicons name="timer" size={13} color={colors.textSecondary} />
+                        <Text style={styles.restText}>{restSecs}{t("routineDetail.restSeconds")}</Text>
                       </View>
                     )}
                   </View>
@@ -318,13 +350,10 @@ export default function RoutineDetail() {
         <TouchableOpacity
           style={styles.ctaButton}
           activeOpacity={0.85}
-          onPress={() => router.push({
-            pathname: "/routines/session",
-            params: { id, name, isUserRoutine },
-          })}
+          onPress={handleStartWorkout}
         >
-          <Ionicons name="play-circle-outline" size={22} color="white" />
-          <Text style={styles.ctaText}>Iniciar Entrenamiento</Text>
+          <Ionicons name="play-circle" size={22} color="white" />
+          <Text style={styles.ctaText}>{t("routineDetail.startWorkout")}</Text>
         </TouchableOpacity>
       </View>
 
@@ -344,15 +373,15 @@ export default function RoutineDetail() {
               />
             </View>
 
-            <Text style={styles.qrHint}>Escanea este código para importar la rutina</Text>
+            <Text style={styles.qrHint}>{t("routineDetail.qrHint")}</Text>
 
             <TouchableOpacity style={styles.qrShareButton} onPress={handleShareText}>
-              <Ionicons name="share-outline" size={18} color="white" />
-              <Text style={styles.qrShareText}>Compartir como texto</Text>
+              <Ionicons name="share" size={18} color="white" />
+              <Text style={styles.qrShareText}>{t("routineDetail.shareAsText")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.qrCloseButton} onPress={() => setShowQR(false)}>
-              <Text style={styles.qrCloseText}>Cerrar</Text>
+              <Text style={styles.qrCloseText}>{t("routineDetail.close")}</Text>
             </TouchableOpacity>
           </View>
         </View>

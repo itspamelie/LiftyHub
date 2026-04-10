@@ -1,4 +1,4 @@
-import { FlatList, View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl, Alert, Modal, Dimensions, ScrollView } from "react-native";
+import { FlatList, View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl, Alert, Modal, Dimensions, ScrollView, Linking } from "react-native";
 import RoutineCard from "@/src/components/routines/RoutineCard";
 import FilterButton from "@/src/components/exercises/FilterButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
@@ -12,6 +12,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { getRoutines, getUserRoutines, deleteUserRoutine, createUserRoutine } from "@/src/services/api";
 import { useToast } from "@/src/hooks/useToast";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
+import { saveCache, loadCache } from "@/src/utils/cache";
+import OfflineBanner from "@/src/components/OfflineBanner";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -75,6 +78,7 @@ export default function RoutinesScreen() {
   const { showToast, Toast } = useToast();
   const { t } = useLanguage();
   const { plan, loading: subLoading } = useSubscription();
+  const isConnected = useNetworkStatus();
   const hasAppAccess = plan?.name !== "Free";
   const listRef = useRef<FlatList>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -104,17 +108,75 @@ export default function RoutinesScreen() {
   const [scannedData, setScannedData] = useState<any>(null);
   const [importing, setImporting] = useState(false);
   const scanLock = useRef(false);
+  const [scannerUsed, setScannerUsed] = useState(false);
+  const [showScannerWarning, setShowScannerWarning] = useState(false);
+  const [nextScanDate, setNextScanDate] = useState<Date | null>(null);
+  const [showCameraPermModal, setShowCameraPermModal] = useState(false);
 
-  const handleOpenScanner = async () => {
-    if (!cameraPermission?.granted) {
-      const { granted } = await requestCameraPermission();
-      if (!granted) {
-        showToast("Necesitamos acceso a la cámara para escanear el QR.", "error");
-        return;
+  useEffect(() => {
+    AsyncStorage.getItem("@liftyhub_scanner_date").then((val) => {
+      if (!val) return;
+      const last = new Date(val);
+      const next = new Date(last);
+      next.setMonth(next.getMonth() + 1);
+      if (new Date() < next) {
+        setScannerUsed(true);
+        setNextScanDate(next);
       }
+    });
+  }, []);
+
+  const openScannerCamera = async () => {
+    if (cameraPermission?.granted) {
+      scanLock.current = false;
+      setShowScanner(true);
+      return;
     }
-    scanLock.current = false;
-    setShowScanner(true);
+    // Permiso denegado por el SO → no se puede volver a pedir, guiar a Ajustes
+    if (cameraPermission?.status === "denied") {
+      setShowCameraPermModal(true);
+      return;
+    }
+    // Permiso aún no solicitado → mostrar modal explicativo primero
+    setShowCameraPermModal(true);
+  };
+
+  const handleRequestCameraPermission = async () => {
+    setShowCameraPermModal(false);
+    if (cameraPermission?.status === "denied") {
+      Linking.openSettings();
+      return;
+    }
+    const { granted } = await requestCameraPermission();
+    if (granted) {
+      scanLock.current = false;
+      setShowScanner(true);
+    } else {
+      setShowCameraPermModal(true); // muestra modal de ajustes
+    }
+  };
+
+  const handleOpenScanner = () => {
+    if (!hasAppAccess) {
+      if (scannerUsed) {
+        setShowUpgradeModal(true);
+      } else {
+        setShowScannerWarning(true);
+      }
+      return;
+    }
+    openScannerCamera();
+  };
+
+  const handleScannerWarningConfirm = async () => {
+    setShowScannerWarning(false);
+    const now = new Date().toISOString();
+    await AsyncStorage.setItem("@liftyhub_scanner_date", now);
+    setScannerUsed(true);
+    const next = new Date();
+    next.setMonth(next.getMonth() + 1);
+    setNextScanDate(next);
+    openScannerCamera();
   };
 
   const handleBarCodeScanned = ({ data }: { data: string }) => {
@@ -122,14 +184,14 @@ export default function RoutinesScreen() {
     try {
       const parsed = JSON.parse(data);
       if (parsed?.app !== "liftyhub") {
-        showToast("Este código no es una rutina de LiftyHub.", "error");
+        showToast(t("routines.qrInvalid"), "error");
         return;
       }
       scanLock.current = true;
       setShowScanner(false);
       setScannedData(parsed);
     } catch {
-      showToast("No se pudo leer el código QR.", "error");
+      showToast(t("routines.qrError"), "error");
     }
   };
 
@@ -153,9 +215,9 @@ export default function RoutinesScreen() {
 
       setScannedData(null);
       fetchAll();
-      showToast(`"${scannedData.name}" fue agregada a tus rutinas.`, "success");
+      showToast(t("routines.importSuccess", { name: scannedData.name }), "success");
     } catch {
-      showToast("No se pudo importar la rutina.", "error");
+      showToast(t("routines.importError"), "error");
     } finally {
       setImporting(false);
     }
@@ -195,10 +257,20 @@ export default function RoutinesScreen() {
         getUserRoutines(user.id, token),
       ]);
 
-      if (resRoutines?.data) setRoutines(resRoutines.data);
-      if (resUserRoutines?.data) setUserRoutines(resUserRoutines.data);
+      if (resRoutines?.data) {
+        setRoutines(resRoutines.data);
+        await saveCache("routines", resRoutines.data);
+      }
+      if (resUserRoutines?.data) {
+        setUserRoutines(resUserRoutines.data);
+        await saveCache("userRoutines", resUserRoutines.data);
+      }
     } catch {
-      showToast("Error al cargar las rutinas.", "error");
+      const cachedR = await loadCache<any[]>("routines");
+      const cachedU = await loadCache<any[]>("userRoutines");
+      if (cachedR) setRoutines(cachedR);
+      if (cachedU) setUserRoutines(cachedU);
+      if (!cachedR && !cachedU) showToast(t("routines.errorLoad"), "error");
     } finally {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
@@ -249,12 +321,12 @@ export default function RoutinesScreen() {
 
   const handleDeleteRoutine = (id: number) => {
     Alert.alert(
-      "Eliminar rutina",
-      "¿Estás seguro de que quieres eliminar esta rutina?",
+      t("routines.deleteTitle"),
+      t("routines.deleteMessage"),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t("routines.cancel"), style: "cancel" },
         {
-          text: "Eliminar",
+          text: t("routines.deleteConfirm"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -262,9 +334,9 @@ export default function RoutinesScreen() {
               if (!token) return;
               await deleteUserRoutine(id, token);
               setUserRoutines((prev) => prev.filter((r) => r.id !== id));
-              showToast("Rutina eliminada.", "success");
+              showToast(t("routines.deleteSuccess"), "success");
             } catch {
-              showToast("No se pudo eliminar la rutina.", "error");
+              showToast(t("routines.deleteError"), "error");
             }
           }
         }
@@ -282,6 +354,7 @@ export default function RoutinesScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      {!isConnected && <OfflineBanner />}
     <FlatList
       ref={listRef}
       style={styles.container}
@@ -318,10 +391,10 @@ export default function RoutinesScreen() {
             {activeTab === "mine" && (
               <View style={styles.headerButtons}>
                 <TouchableOpacity style={styles.iconButton} onPress={handleOpenScanner}>
-                  <Ionicons name="qr-code-outline" size={20} color="white" />
+                  <Ionicons name="qr-code" size={20} color="white" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.iconButton} onPress={() => router.push("/routines/new")}>
-                  <Ionicons name="pencil" size={20} color="white" />
+                  <Ionicons name="add" size={26} color="white" />
                 </TouchableOpacity>
               </View>
             )}
@@ -406,15 +479,15 @@ export default function RoutinesScreen() {
         <View style={styles.unlockBar}>
           <TouchableOpacity style={styles.unlockButton} onPress={() => setShowUpgradeModal(true)}>
             <Ionicons name="lock-closed" size={16} color="white" />
-            <Text style={styles.unlockText}>Desbloquear Rutinas App</Text>
+            <Text style={styles.unlockText}>{t("routines.unlockButton")}</Text>
           </TouchableOpacity>
         </View>
       )}
 
       {/* MODAL UPGRADE */}
       <Modal visible={showUpgradeModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowUpgradeModal(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
             <TouchableOpacity style={styles.modalClose} onPress={() => setShowUpgradeModal(false)}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
             </TouchableOpacity>
@@ -423,7 +496,9 @@ export default function RoutinesScreen() {
             </View>
             <Text style={styles.modalTitle}>Desbloquea las Rutinas App</Text>
             <Text style={styles.modalSubtitle}>
-              Accede a todas las rutinas diseñadas por expertos con cualquier plan de pago.
+              {scannerUsed && nextScanDate
+                ? `Ya usaste tu escaneo mensual gratuito. Se renueva el ${nextScanDate.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}. Actualiza tu plan para escanear sin límites.`
+                : "Accede a todas las rutinas diseñadas por expertos con cualquier plan de pago."}
             </Text>
             <ScrollView showsVerticalScrollIndicator={false}>
               {PLAN_OPTIONS.map((plan) => (
@@ -451,8 +526,8 @@ export default function RoutinesScreen() {
               ))}
               <Text style={styles.modalNote}>Contacta a un administrador para actualizar tu plan.</Text>
             </ScrollView>
-          </View>
-        </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
 
       {/* MODAL SCANNER QR */}
@@ -475,6 +550,74 @@ export default function RoutinesScreen() {
       </Modal>
 
       {Toast}
+
+      {/* MODAL PERMISO CÁMARA */}
+      <Modal visible={showCameraPermModal} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowCameraPermModal(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+            <TouchableOpacity style={styles.modalClose} onPress={() => setShowCameraPermModal(false)}>
+              <Ionicons name="close" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+            <View style={styles.modalIcon}>
+              <Ionicons name="camera" size={32} color={colors.primary} />
+            </View>
+            <Text style={styles.modalTitle}>Permiso de cámara</Text>
+            <Text style={styles.modalSubtitle}>
+              {cameraPermission?.status === "denied"
+                ? "Bloqueaste el acceso a la cámara. Ve a Ajustes para habilitarlo y poder escanear rutinas por QR."
+                : "Necesitamos acceso a tu cámara para escanear códigos QR de rutinas."}
+            </Text>
+            <TouchableOpacity
+              style={[styles.planCard, { alignItems: "center", paddingVertical: 14, backgroundColor: colors.primary }]}
+              onPress={handleRequestCameraPermission}
+            >
+              <Text style={{ color: "white", fontWeight: "700" }}>
+                {cameraPermission?.status === "denied" ? "Abrir Ajustes" : "Permitir cámara"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.planCard, { alignItems: "center", paddingVertical: 14, borderColor: "#2C2C2E", borderWidth: 1, marginTop: 8 }]}
+              onPress={() => setShowCameraPermModal(false)}
+            >
+              <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>Cancelar</Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* MODAL ADVERTENCIA SCANNER FREE */}
+      <Modal visible={showScannerWarning} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowScannerWarning(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+            <View style={styles.modalIcon}>
+              <Ionicons name="qr-code" size={32} color={colors.primary} />
+            </View>
+            <Text style={styles.modalTitle}>Escaneo mensual gratuito</Text>
+            <Text style={styles.modalSubtitle}>
+              Con el plan Free puedes escanear una rutina por QR cada mes. Tu próximo escaneo estará disponible el{" "}
+              {(() => {
+                const next = new Date();
+                next.setMonth(next.getMonth() + 1);
+                return next.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
+              })()}.
+            </Text>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <TouchableOpacity
+                style={[styles.planCard, { flex: 1, alignItems: "center", paddingVertical: 14, borderColor: "#2C2C2E", borderWidth: 1 }]}
+                onPress={() => setShowScannerWarning(false)}
+              >
+                <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.planCard, { flex: 1, alignItems: "center", paddingVertical: 14, backgroundColor: colors.primary }]}
+                onPress={handleScannerWarningConfirm}
+              >
+                <Text style={{ color: "white", fontWeight: "700" }}>Escanear</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
 
       {/* MODAL CONFIRMACIÓN IMPORTAR */}
       <Modal visible={!!scannedData} transparent animationType="slide" onRequestClose={() => setScannedData(null)}>
@@ -517,7 +660,7 @@ export default function RoutinesScreen() {
             >
               {importing
                 ? <ActivityIndicator color="white" />
-                : <Text style={styles.importButtonText}>Agregar a mis rutinas</Text>
+                : <Text style={styles.importButtonText}>{t("routines.addButton")}</Text>
               }
             </TouchableOpacity>
           </View>
@@ -652,11 +795,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: spacing.borderRadius,
     gap: 8,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
   },
 
   unlockText: {

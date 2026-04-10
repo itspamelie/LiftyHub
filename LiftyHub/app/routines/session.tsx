@@ -8,12 +8,20 @@ import {
   TextInput,
   Platform,
   KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
+import { useUnits } from "@/src/context/UnitsContext";
+import { useToast } from "@/src/hooks/useToast";
+import { useWorkout, SessionSnapshot } from "@/src/context/WorkoutContext";
+import NetInfo from "@react-native-community/netinfo";
+import { saveCache, loadCache } from "@/src/utils/cache";
+import { savePendingWorkout } from "@/src/utils/pendingSync";
 import {
   getRoutineExercises,
   getUserRoutineExercises,
@@ -21,6 +29,7 @@ import {
   createUserStreak,
   updateUserStreak,
   createUserRoutineSession,
+  updateUserRoutineSession,
   createExerciseLog,
 } from "@/src/services/api";
 
@@ -36,6 +45,11 @@ type ExerciseEntry = {
 
 type Phase = "exercise" | "rest" | "done";
 
+const toMySQLDate = (d: Date) => {
+  const p = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+};
+
 export default function SessionScreen() {
   const { id, name, isUserRoutine } = useLocalSearchParams<{
     id: string;
@@ -43,13 +57,18 @@ export default function SessionScreen() {
     isUserRoutine: string;
   }>();
 
+  const { t } = useLanguage();
+  const { unitLabel, toKg } = useUnits();
+  const { showToast, Toast } = useToast();
+  const { isActive, elapsedSecs, snapshot: ctxSnapshot, startWorkout, minimizeWorkout, restoreWorkout, endWorkout } = useWorkout();
+
   const [exercises, setExercises] = useState<ExerciseEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   // session
   const [sessionId, setSessionId] = useState<number | null>(null);
-  const startedAt = useRef<string>(new Date().toISOString());
+  const startedAt = useRef<string>("");
 
   // navigation
   const [exIndex, setExIndex] = useState(0);
@@ -57,20 +76,16 @@ export default function SessionScreen() {
   const [phase, setPhase] = useState<Phase>("exercise");
   const [restLeft, setRestLeft] = useState(0);
 
-  // timers
-  const [elapsedSecs, setElapsedSecs] = useState(0);
+  // rest countdown timer only (elapsed is handled by WorkoutContext)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // weight tracking: setWeights[exIndex][setIndex] = weight string
   const [setWeights, setSetWeights] = useState<string[][]>([]);
   const [currentWeight, setCurrentWeight] = useState("0");
 
-  // elapsed clock
-  useEffect(() => {
-    elapsedRef.current = setInterval(() => setElapsedSecs((s) => s + 1), 1000);
-    return () => { if (elapsedRef.current) clearInterval(elapsedRef.current); };
-  }, []);
+  // Capture context state at mount to detect resume vs fresh start
+  const initIsActive = useRef(isActive);
+  const initCtxSnapshot = useRef(ctxSnapshot);
 
   // rest countdown
   useEffect(() => {
@@ -91,20 +106,44 @@ export default function SessionScreen() {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [phase]);
 
-  // load exercises + create session
+  // load exercises + create session (or restore from context if resuming)
   useEffect(() => {
     const load = async () => {
+      const snap = initCtxSnapshot.current;
+      const active = initIsActive.current;
+
+      // ── RESUME: workout was minimized, restore from context ──
+      if (active && snap?.routineId === id) {
+        setExercises(snap.exercises as ExerciseEntry[]);
+        setExIndex(snap.exIndex);
+        setCurrentSet(snap.currentSet);
+        setPhase(snap.phase as Phase);
+        setRestLeft(snap.restLeft);
+        setSetWeights(snap.setWeights);
+        setCurrentWeight(snap.currentWeight);
+        if (snap.sessionId) setSessionId(snap.sessionId);
+        startedAt.current = snap.startedAt;
+        restoreWorkout();
+        setLoading(false);
+        return;
+      }
+
+      // ── FRESH START ──
+      startedAt.current = toMySQLDate(new Date());
+      const isUser = isUserRoutine === "true";
+      const cacheKey = `exercises_${isUser ? "user" : "app"}_${id}`;
+      let exs: ExerciseEntry[] = [];
+      let newSessionId: number | null = null;
+
       try {
         const token = await AsyncStorage.getItem("token");
         const userRaw = await AsyncStorage.getItem("user");
         if (!token || !id) return;
 
-        const isUser = isUserRoutine === "true";
         const res = isUser
           ? await getUserRoutineExercises(Number(id), token)
           : await getRoutineExercises(Number(id), token);
 
-        let exs: ExerciseEntry[] = [];
         if (isUser) {
           if (Array.isArray(res?.data)) exs = res.data;
         } else {
@@ -112,11 +151,8 @@ export default function SessionScreen() {
           else if (Array.isArray(res?.data)) exs = res.data;
         }
         setExercises(exs);
-
-        // initialize weight matrix: exs.length x sets (filled with "0")
         setSetWeights(exs.map((ex) => Array(ex.sets ?? 3).fill("0")));
 
-        // try to create session (route may not be registered yet)
         if (userRaw) {
           const user = JSON.parse(userRaw);
           try {
@@ -129,13 +165,40 @@ export default function SessionScreen() {
               },
               token
             );
-            if (sessionRes?.data?.id) setSessionId(sessionRes.data.id);
+            if (sessionRes?.data?.id) {
+              newSessionId = sessionRes.data.id;
+              setSessionId(newSessionId);
+            }
           } catch {
-            // route not available yet — continue in local mode
+            // route not available — continue in local mode
           }
         }
-      } catch {}
-      finally { setLoading(false); }
+      } catch {
+        const cached = await loadCache<ExerciseEntry[]>(cacheKey);
+        if (cached && cached.length > 0) {
+          exs = cached;
+          setExercises(exs);
+          setSetWeights(exs.map((ex) => Array(ex.sets ?? 3).fill("0")));
+        }
+      } finally {
+        setLoading(false);
+      }
+
+      // Register fresh session in context so mini player can show
+      startWorkout({
+        routineId: id ?? "",
+        routineName: name ?? "",
+        isUserRoutine: isUserRoutine ?? "false",
+        exercises: exs,
+        exIndex: 0,
+        currentSet: 1,
+        phase: "exercise",
+        restLeft: 0,
+        setWeights: exs.map((ex) => Array(ex.sets ?? 3).fill("0")),
+        currentWeight: "0",
+        sessionId: newSessionId,
+        startedAt: startedAt.current,
+      });
     };
     load();
   }, [id]);
@@ -146,7 +209,7 @@ export default function SessionScreen() {
   const totalSets  = currentEx?.sets ?? 3;
   const reps       = currentEx?.repetitions ?? 12;
   const restSecs   = currentEx?.seconds_rest ?? 60;
-  const exName     = currentEx?.exercise?.name ?? currentEx?.name ?? "Ejercicio";
+  const exName     = currentEx?.exercise?.name ?? currentEx?.name ?? t("session.exerciseFallback");
   const exMuscle   = currentEx?.exercise?.muscle ?? currentEx?.muscle ?? "";
 
   const formatTime = (secs: number) => {
@@ -174,7 +237,6 @@ export default function SessionScreen() {
     if (nextSet > totalSets) {
       const nextEx = exIndex + 1;
       if (nextEx >= exercises.length) {
-        if (elapsedRef.current) clearInterval(elapsedRef.current);
         setPhase("done");
       } else {
         setExIndex(nextEx);
@@ -196,7 +258,6 @@ export default function SessionScreen() {
     const isLastEx  = exIndex >= exercises.length - 1;
 
     if (isLastSet && isLastEx) {
-      if (elapsedRef.current) clearInterval(elapsedRef.current);
       setPhase("done");
       return;
     }
@@ -214,24 +275,96 @@ export default function SessionScreen() {
     advanceAfterRest();
   };
 
+  const handleMinimize = () => {
+    minimizeWorkout({
+      routineId: id ?? "",
+      routineName: name ?? "",
+      isUserRoutine: isUserRoutine ?? "false",
+      exercises,
+      exIndex,
+      currentSet,
+      phase,
+      restLeft,
+      setWeights,
+      currentWeight,
+      sessionId,
+      startedAt: startedAt.current,
+    });
+    router.navigate("/(tabs)" as any);
+  };
+
+  const handleEndWorkout = () => {
+    Alert.alert(t("session.cancelTitle"), t("session.cancelMessage"), [
+      { text: t("offline.cancel"), style: "cancel" },
+      { text: t("session.cancelConfirm"), style: "destructive", onPress: () => { endWorkout(); router.navigate("/(tabs)" as any); } },
+    ]);
+  };
+
   // ── finish: save logs + streak ───────────────────────────────────────────
 
   const handleFinish = async () => {
     setSaving(true);
+    const net = await NetInfo.fetch();
+    if (!net.isConnected) {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const userRaw = await AsyncStorage.getItem("user");
+        if (token && userRaw) {
+          const user = JSON.parse(userRaw);
+          const isUser = isUserRoutine === "true";
+          const workoutDate = today();
+          const finishedAt = toMySQLDate(new Date());
+          const logs = exercises.flatMap((ex, i) => {
+            const exId = ex.exercise?.id;
+            if (!exId) return [];
+            const weights = setWeights[i] ?? [];
+            const avgDisplay = weights.reduce((s, w) => s + (parseFloat(w) || 0), 0) / (weights.length || 1);
+            const avgWeight = toKg(avgDisplay);
+            return [{
+              exerciseId: exId,
+              exerciseRoutineId: ex.id,
+              weightLifted: parseFloat(avgWeight.toFixed(2)),
+              repetitions: ex.repetitions ?? 12,
+              sets: ex.sets ?? 3,
+              workoutDate,
+            }];
+          });
+          await savePendingWorkout({
+            routineId: isUser ? null : Number(id),
+            userRoutineId: isUser ? Number(id) : null,
+            startedAt: startedAt.current,
+            finishedAt,
+            userId: user.id,
+            logs,
+          });
+          showToast(t("offline.sessionSavedLocally"), "success");
+        }
+      } catch {}
+      setSaving(false);
+      endWorkout();
+      setTimeout(() => router.back(), 1800);
+      return;
+    }
     try {
       const token = await AsyncStorage.getItem("token");
       const userRaw = await AsyncStorage.getItem("user");
       if (!token || !userRaw) { router.back(); return; }
       const user = JSON.parse(userRaw);
-      const finishedAt = new Date().toISOString();
+      const finishedAt = toMySQLDate(new Date());
 
-      // 1) save exercise logs
+      // 1) close session
+      if (sessionId) {
+        await updateUserRoutineSession(sessionId, { finished_at: finishedAt }, token).catch(() => {});
+      }
+
+      // 2) save exercise logs
       if (sessionId) {
         const workoutDate = today();
         for (let i = 0; i < exercises.length; i++) {
           const ex = exercises[i];
           const weights = setWeights[i] ?? [];
-          const avgWeight = weights.reduce((sum, w) => sum + (parseFloat(w) || 0), 0) / (weights.length || 1);
+          const avgDisplay = weights.reduce((sum, w) => sum + (parseFloat(w) || 0), 0) / (weights.length || 1);
+          const avgWeight = toKg(avgDisplay);
           const exId = ex.exercise?.id;
           if (!exId) continue;
           try {
@@ -282,7 +415,18 @@ export default function SessionScreen() {
 
     } catch {}
     finally {
+      // Save completed date locally so the calendar can show it reliably
+      try {
+        const dateStr = today();
+        const raw = await AsyncStorage.getItem("completedWorkoutDates");
+        const dates: string[] = raw ? JSON.parse(raw) : [];
+        if (!dates.includes(dateStr)) {
+          dates.push(dateStr);
+          await AsyncStorage.setItem("completedWorkoutDates", JSON.stringify(dates));
+        }
+      } catch {}
       setSaving(false);
+      endWorkout();
       router.back();
     }
   };
@@ -301,9 +445,9 @@ export default function SessionScreen() {
     return (
       <View style={styles.centered}>
         <Ionicons name="barbell-outline" size={44} color={colors.textSecondary} />
-        <Text style={styles.emptyText}>Esta rutina no tiene ejercicios.</Text>
+        <Text style={styles.emptyText}>{t("session.noExercises")}</Text>
         <TouchableOpacity style={styles.solidBtn} onPress={() => router.back()}>
-          <Text style={styles.solidBtnText}>Volver</Text>
+          <Text style={styles.solidBtnText}>{t("session.back")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -320,20 +464,20 @@ export default function SessionScreen() {
           <View style={styles.doneIconBg}>
             <Ionicons name="trophy" size={44} color="#F59E0B" />
           </View>
-          <Text style={styles.doneTitle}>¡Entrenamiento completado!</Text>
+          <Text style={styles.doneTitle}>{t("session.completed")}</Text>
           <Text style={styles.doneSub}>{name}</Text>
 
           <View style={styles.doneStat}>
             <Ionicons name="time-outline" size={20} color={colors.primary} />
-            <Text style={styles.doneStatText}>Duración: {formatTime(elapsedSecs)}</Text>
+            <Text style={styles.doneStatText}>{t("session.duration")} {formatTime(elapsedSecs)}</Text>
           </View>
           <View style={styles.doneStat}>
             <Ionicons name="barbell-outline" size={20} color={colors.primary} />
-            <Text style={styles.doneStatText}>{totalExercises} ejercicios · {totalSetsAll} series</Text>
+            <Text style={styles.doneStatText}>{totalExercises} {t("session.exercisesStat")} · {totalSetsAll} {t("session.setsStat")}</Text>
           </View>
           <View style={styles.doneStat}>
             <Ionicons name="flame-outline" size={20} color="#F59E0B" />
-            <Text style={styles.doneStatText}>¡Racha diaria completada!</Text>
+            <Text style={styles.doneStatText}>{t("session.streakDone")}</Text>
           </View>
 
           {/* weight summary */}
@@ -345,7 +489,7 @@ export default function SessionScreen() {
               return (
                 <View key={ex.id} style={styles.doneExRow}>
                   <Text style={styles.doneExName}>{n}</Text>
-                  <Text style={styles.doneExWeight}>{maxW > 0 ? `${maxW} kg` : "—"}</Text>
+                  <Text style={styles.doneExWeight}>{maxW > 0 ? `${maxW} ${unitLabel}` : "—"}</Text>
                 </View>
               );
             })}
@@ -358,7 +502,7 @@ export default function SessionScreen() {
           >
             {saving
               ? <ActivityIndicator color="white" />
-              : <Text style={styles.solidBtnText}>Guardar y finalizar</Text>
+              : <Text style={styles.solidBtnText}>{t("session.saveAndFinish")}</Text>
             }
           </TouchableOpacity>
         </View>
@@ -376,7 +520,7 @@ export default function SessionScreen() {
 
     return (
       <View style={styles.restRoot}>
-        <Text style={styles.restLabel}>Descanso</Text>
+        <Text style={styles.restLabel}>{t("session.rest")}</Text>
         <Text style={styles.restTimer}>{formatTime(restLeft)}</Text>
 
         <View style={styles.restProgressBar}>
@@ -385,12 +529,12 @@ export default function SessionScreen() {
 
         <Text style={styles.restNext}>
           {nextName
-            ? `Siguiente: ${nextName}`
-            : `Siguiente: serie ${currentSet + 1} de ${totalSets}`}
+            ? `${t("session.nextExercise")} ${nextName}`
+            : `${t("session.nextExercise")} ${t("session.setOf")} ${currentSet + 1} ${t("session.of")} ${totalSets}`}
         </Text>
 
         <TouchableOpacity style={styles.skipBtn} onPress={handleSkipRest}>
-          <Text style={styles.skipBtnText}>Saltar descanso</Text>
+          <Text style={styles.skipBtnText}>{t("session.skipRest")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -403,11 +547,16 @@ export default function SessionScreen() {
 
         {/* header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.headerBtn} onPress={handleMinimize}>
+            <Ionicons name="chevron-down" size={20} color="white" />
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Text style={styles.elapsed}>{formatTime(elapsedSecs)}</Text>
+            <Text style={styles.progress}>{exIndex + 1} / {exercises.length}</Text>
+          </View>
+          <TouchableOpacity style={styles.headerBtnEnd} onPress={handleEndWorkout}>
             <Ionicons name="close" size={20} color="white" />
           </TouchableOpacity>
-          <Text style={styles.elapsed}>{formatTime(elapsedSecs)}</Text>
-          <Text style={styles.progress}>{exIndex + 1} / {exercises.length}</Text>
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -419,7 +568,7 @@ export default function SessionScreen() {
           </View>
 
           {/* set dots */}
-          <Text style={styles.setLabel}>Serie {currentSet} de {totalSets}</Text>
+          <Text style={styles.setLabel}>{t("session.setOf")} {currentSet} {t("session.of")} {totalSets}</Text>
           <View style={styles.setDots}>
             {Array.from({ length: totalSets }).map((_, i) => (
               <View
@@ -440,13 +589,13 @@ export default function SessionScreen() {
           {/* reps */}
           <View style={styles.repsCard}>
             <Text style={styles.repsNum}>{reps}</Text>
-            <Text style={styles.repsLabel}>repeticiones</Text>
+            <Text style={styles.repsLabel}>{t("session.reps")}</Text>
           </View>
 
           {/* weight input */}
           <View style={styles.weightCard}>
             <Ionicons name="barbell-outline" size={18} color={colors.textSecondary} />
-            <Text style={styles.weightLabel}>Peso (kg)</Text>
+            <Text style={styles.weightLabel}>{t("session.weightLabel", { unit: unitLabel })}</Text>
             <TextInput
               style={styles.weightInput}
               value={currentWeight}
@@ -462,7 +611,7 @@ export default function SessionScreen() {
           {restSecs > 0 && (
             <View style={styles.restInfo}>
               <Ionicons name="timer-outline" size={14} color={colors.textSecondary} />
-              <Text style={styles.restInfoText}>{restSecs}s de descanso al completar</Text>
+              <Text style={styles.restInfoText}>{restSecs}{t("session.restAfterSet")}</Text>
             </View>
           )}
 
@@ -483,7 +632,7 @@ export default function SessionScreen() {
                   </Text>
                   {done && setWeights[i] && (
                     <Text style={styles.miniWeight}>
-                      {Math.max(...(setWeights[i]?.map((w) => parseFloat(w) || 0) ?? [0]))} kg
+                      {Math.max(...(setWeights[i]?.map((w) => parseFloat(w) || 0) ?? [0]))} {unitLabel}
                     </Text>
                   )}
                 </View>
@@ -499,13 +648,14 @@ export default function SessionScreen() {
             <Ionicons name="checkmark-circle" size={22} color="white" />
             <Text style={styles.ctaBtnText}>
               {currentSet >= totalSets && exIndex >= exercises.length - 1
-                ? "Finalizar entrenamiento"
-                : "Completar serie"}
+                ? t("session.finishWorkout")
+                : t("session.completeSet")}
             </Text>
           </TouchableOpacity>
         </View>
 
       </View>
+      {Toast}
     </KeyboardAvoidingView>
   );
 }
@@ -548,10 +698,21 @@ const styles = StyleSheet.create({
     borderBottomColor: "#2A2A2A",
   },
 
-  closeBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: "#2C2C2E",
+  headerBtn: {
+    width: 42, height: 42, borderRadius: 21,
+    backgroundColor: colors.primary,
     justifyContent: "center", alignItems: "center",
+  },
+
+  headerBtnEnd: {
+    width: 42, height: 42, borderRadius: 21,
+    backgroundColor: "#EF4444",
+    justifyContent: "center", alignItems: "center",
+  },
+
+  headerCenter: {
+    alignItems: "center",
+    gap: 2,
   },
 
   elapsed: { color: colors.text, fontSize: 18, fontWeight: "700", fontVariant: ["tabular-nums"] },

@@ -37,6 +37,7 @@ export default function EditProfileScreen() {
   const planColor = planColors[plan?.name ?? "Free"] ?? "#A1A1A1";
 
   const [name, setName]           = useState("");
+  const [email, setEmail]         = useState("");
   const [height, setHeight]       = useState("");
   const [weight, setWeight]       = useState("");
   const [somatotype, setSomatotype] = useState("Mesomorfo");
@@ -73,6 +74,7 @@ export default function EditProfileScreen() {
       setToken(storedToken);
       setUserId(user.id);
       setName(user.name ?? "");
+      setEmail(user.email ?? "");
 
       const props = await getUserProperties(user.id, storedToken);
       if (props?.data) {
@@ -83,8 +85,8 @@ export default function EditProfileScreen() {
         setGoal(d.objective ?? "Ganar músculo");
         setSomatotype(d.somatotype?.type ?? "Mesomorfo");
       }
-    } catch (e) {
-      console.log("Error cargando datos:", e);
+    } catch {
+      Alert.alert("Error", "No se pudieron cargar tus datos. Verifica tu conexión.");
     } finally {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
@@ -240,7 +242,7 @@ export default function EditProfileScreen() {
         <View style={styles.card}>
           <View style={styles.row}>
             <View style={styles.rowLeft}>
-              <Ionicons name="person-outline" size={20} color={colors.text} />
+              <Ionicons name="person" size={20} color={colors.text} />
               <Text style={styles.label}>{t("editProfile.name")}</Text>
             </View>
             <TextInput
@@ -251,6 +253,14 @@ export default function EditProfileScreen() {
               placeholderTextColor={colors.textSecondary}
             />
           </View>
+          <View style={styles.divider} />
+          <View style={styles.row}>
+            <View style={styles.rowLeft}>
+              <Ionicons name="mail" size={20} color={colors.textSecondary} />
+              <Text style={styles.label}>{t("editProfile.email")}</Text>
+            </View>
+            <Text style={styles.emailValue}>{email}</Text>
+          </View>
         </View>
 
         {/* INFORMACIÓN FÍSICA */}
@@ -260,7 +270,7 @@ export default function EditProfileScreen() {
         <View style={styles.card}>
           <View style={styles.row}>
             <View style={styles.rowLeft}>
-              <Ionicons name="resize-outline" size={20} color={colors.text} />
+              <Ionicons name="resize" size={20} color={colors.text} />
               <Text style={styles.label}>{t("editProfile.height")}</Text>
             </View>
             <TextInput
@@ -278,7 +288,7 @@ export default function EditProfileScreen() {
         <View style={styles.card}>
           <View style={styles.row}>
             <View style={styles.rowLeft}>
-              <Ionicons name="barbell-outline" size={20} color={colors.text} />
+              <Ionicons name="barbell" size={20} color={colors.text} />
               <Text style={styles.label}>{t("editProfile.weight")}</Text>
             </View>
             <TextInput
@@ -296,7 +306,7 @@ export default function EditProfileScreen() {
         <View style={styles.card}>
           <View style={styles.rowColumn}>
             <View style={styles.rowLeft}>
-              <Ionicons name="body-outline" size={20} color={colors.text} />
+              <Ionicons name="body" size={20} color={colors.text} />
               <Text style={styles.label}>{t("editProfile.somatotype")}</Text>
             </View>
             <View style={styles.selectorContainer}>
@@ -319,7 +329,7 @@ export default function EditProfileScreen() {
         <View style={styles.card}>
           <View style={styles.rowColumn}>
             <View style={styles.rowLeft}>
-              <Ionicons name="flag-outline" size={20} color={colors.text} />
+              <Ionicons name="flag" size={20} color={colors.text} />
               <Text style={styles.label}>{t("editProfile.goal")}</Text>
             </View>
             <View style={styles.selectorContainer}>
@@ -349,7 +359,7 @@ export default function EditProfileScreen() {
           style={styles.passwordButton}
           onPress={() => setShowPasswordModal(true)}
         >
-          <Ionicons name="lock-closed-outline" size={18} color={colors.primary} />
+          <Ionicons name="lock-closed" size={18} color={colors.primary} />
           <Text style={styles.passwordButtonText}>{t("editProfile.changePassword")}</Text>
         </TouchableOpacity>
 
@@ -582,6 +592,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     width: 120,
     textAlign: "right"
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: colors.background,
+    marginHorizontal: 18,
+  },
+
+  emailValue: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    flexShrink: 1,
+    textAlign: "right",
   },
 
   selectorContainer: {

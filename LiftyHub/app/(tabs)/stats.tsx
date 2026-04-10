@@ -1,8 +1,15 @@
 import { ScrollView, Text, StyleSheet, View, ActivityIndicator, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect, useCallback } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
+import { getUserStreak, getUserRoutineSessions, getExerciseLogs } from "@/src/services/api";
+import { useToast } from "@/src/hooks/useToast";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
+import { saveCache, loadCache } from "@/src/utils/cache";
+import OfflineBanner from "@/src/components/OfflineBanner";
 
 import StatsSummaryGrid from "@/src/components/stats/StatsSummaryGrid";
 import WeeklyActivityChart from "@/src/components/stats/WeeklyActivityChart";
@@ -10,42 +17,78 @@ import PersonalRecords from "@/src/components/stats/PersonalRecords";
 
 export default function StatsScreen() {
 
+  const { t } = useLanguage();
+  const { showToast, Toast } = useToast();
+  const isConnected = useNetworkStatus();
   const [stats, setStats] = useState<any>(null);
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [animationTrigger, setAnimationTrigger] = useState(0);
 
-  const fetchStats = async () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          workouts: 24,
-          streak: 5,
-          totalTime: 18,
-          totalWeight: 12450
-        });
-      }, 800);
-    });
+  const loadData = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const userRaw = await AsyncStorage.getItem("user");
+      if (!token || !userRaw) return;
+
+      const user = JSON.parse(userRaw);
+      const userId = Number(user.id);
+
+      const [streakRes, sessionsRes, logsRes] = await Promise.all([
+        getUserStreak(userId, token),
+        getUserRoutineSessions(token),
+        getExerciseLogs(token),
+      ]);
+
+      const streak = streakRes?.data;
+      const allSessions: any[] = (sessionsRes?.data ?? []).filter(
+        (s: any) => Number(s.user_id) === userId
+      );
+      const allLogs: any[] = (logsRes?.data ?? []).filter(
+        (l: any) => Number(l.user_id) === userId
+      );
+
+      // Tiempo total en horas (suma de duración de sesiones con started_at y finished_at)
+      const totalMinutes = allSessions.reduce((sum: number, s: any) => {
+        if (!s.started_at || !s.finished_at) return sum;
+        const start = new Date(s.started_at.replace(" ", "T"));
+        const end = new Date(s.finished_at.replace(" ", "T"));
+        return sum + (end.getTime() - start.getTime()) / 60000;
+      }, 0);
+      const totalHours = Math.round(totalMinutes / 60);
+
+      // Peso total levantado
+      const totalWeight = allLogs.reduce((sum: number, l: any) => {
+        return sum + (parseFloat(l.weight_lifted) || 0) * (l.sets ?? 1) * (l.repetitions ?? 1);
+      }, 0);
+
+      const statsData = {
+        workouts: allSessions.length,
+        streak: streak?.current_streak ?? 0,
+        totalTime: totalHours,
+        totalWeight: Math.round(totalWeight),
+      };
+      setStats(statsData);
+      setSessions(allSessions);
+      setLogs(allLogs);
+      await saveCache("stats", { stats: statsData, sessions: allSessions, logs: allLogs });
+    } catch {
+      const cached = await loadCache<any>("stats");
+      if (cached) { setStats(cached.stats); setSessions(cached.sessions); setLogs(cached.logs); }
+      else showToast(t("statsScreen.errorLoad"), "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const loadStats = async () => {
-    const data: any = await fetchStats();
-    setStats(data);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    loadStats();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-
-    const data: any = await fetchStats();
-    setStats(data);
-
+    await loadData();
     setAnimationTrigger(prev => prev + 1);
-
     setRefreshing(false);
   }, []);
 
@@ -61,7 +104,7 @@ export default function StatsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-
+      {!isConnected && <OfflineBanner />}
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -73,17 +116,16 @@ export default function StatsScreen() {
           />
         }
       >
+        <Text style={styles.title}>{t("statsScreen.title")}</Text>
+        <Text style={styles.subtitle}>{t("statsScreen.subtitle")}</Text>
 
-        <Text style={styles.title}>Estadísticas</Text>
-        <Text style={styles.subtitle}>Resumen de tu entrenamiento</Text>
+        {stats && <StatsSummaryGrid stats={stats} trigger={animationTrigger} />}
 
-        <StatsSummaryGrid stats={stats} trigger={animationTrigger} />
-
-<WeeklyActivityChart />
-        <PersonalRecords />
+        <WeeklyActivityChart sessions={sessions} />
+        <PersonalRecords logs={logs} />
 
       </ScrollView>
-
+      {Toast}
     </SafeAreaView>
   );
 }

@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, RefreshControl, Modal, Dimensions, TextInput } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, RefreshControl, Modal, Dimensions, TextInput, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, planColors } from "@/src/styles/globalstyles";
 import ProgressCard from "@/src/components/profile/ProgressCard";
@@ -9,9 +9,14 @@ import PersonalRecords from "@/src/components/stats/PersonalRecords";
 import { router } from "expo-router";
 import { useEffect, useState, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getUser, getUserProperties, getUserStreak, getUserRoutinesCount } from "@/src/services/api";
+import { getUser, getUserProperties, getUserStreak, getUserRoutinesCount, getUserRoutineSessions, getExerciseLogs } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
+import { useToast } from "@/src/hooks/useToast";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
+import { saveCache, loadCache } from "@/src/utils/cache";
+import OfflineBanner from "@/src/components/OfflineBanner";
+import { loadWeekPlan } from "@/src/utils/calendarPlan";
 import { BlurView } from "expo-blur";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -20,7 +25,7 @@ const STATS_PLAN_OPTIONS = [
   {
     name: "Basic",
     price: "$99/mes",
-    color: "#3B82F6",
+    color: colors.primary,
     features: ["Estadísticas avanzadas", "Actividad semanal", "Records personales", "Hasta 20 rutinas propias"],
   },
   {
@@ -58,10 +63,16 @@ export default function ProfileScreen() {
   const planColor = planColors[plan?.name ?? "Free"] ?? "#A1A1A1";
   const hasStatsAccess = plan?.name === "Basic" || plan?.name === "Pro";
 
+  const { showToast, Toast } = useToast();
+  const isConnected = useNetworkStatus();
+
+  const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"perfil" | "stats">("perfil");
   const [stats, setStats] = useState<any>(null);
+  const [allSessions, setAllSessions] = useState<any[]>([]);
+  const [allLogs, setAllLogs] = useState<any[]>([]);
   const [animationTrigger, setAnimationTrigger] = useState(0);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showConverterModal, setShowConverterModal] = useState(false);
@@ -80,14 +91,18 @@ export default function ProfileScreen() {
       const token = await AsyncStorage.getItem("token");
       const userStorage = await AsyncStorage.getItem("user");
 
-      if (!token || !userStorage) return;
+      if (!token || !userStorage) { setLoading(false); return; }
 
       const userParsed = JSON.parse(userStorage);
 
-      const userData         = await getUser(userParsed.id, token);
-      const propsData        = await getUserProperties(userParsed.id, token);
-      const streakData       = await getUserStreak(userParsed.id, token);
-      const routinesCountData = await getUserRoutinesCount(userParsed.id, token);
+      const [userData, propsData, streakData, routinesCountData, sessionsData, logsData] = await Promise.all([
+        getUser(userParsed.id, token),
+        getUserProperties(userParsed.id, token),
+        getUserStreak(userParsed.id, token),
+        getUserRoutinesCount(userParsed.id, token),
+        getUserRoutineSessions(token),
+        getExerciseLogs(token),
+      ]);
 
       const user   = userData.data ?? userData;
       const props  = propsData.data ?? propsData;
@@ -96,27 +111,100 @@ export default function ProfileScreen() {
       const routinesCount = routinesCountData?.count ?? 0;
       const currentStreak = streak?.current_streak ?? 0;
 
-      setProfile({
-        name:          user.name,
-        age:           user.birthdate ? calculateAge(user.birthdate) : "N/A",
-        avatar:        require("@/src/assets/defaultd.png"),
-        routinesCount,
-        streak:        currentStreak,
-        weight:        props?.weight ? parseFloat(props.weight).toString() : "0",
-        height:        props?.stature ? parseFloat(props.stature).toString() : "0",
-        somatotype:    props?.somatotype?.type ?? "N/A",
-        goal:          props?.objective ?? "N/A",
+      // Helper: parse "YYYY-MM-DD HH:mm:ss" or ISO string as local date (no timezone shift)
+      const parseLocalDate = (str: string): Date => {
+        const datePart = str.split(" ")[0].split("T")[0];
+        const [y, m, d] = datePart.split("-").map(Number);
+        return new Date(y, m - 1, d);
+      };
+
+      // Semana actual (lunes–domingo) en fecha local
+      const now = new Date();
+      const dow = now.getDay();
+      const diffToMon = dow === 0 ? -6 : 1 - dow;
+      const weekDates = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon + i);
+        return d;
+      });
+      const weekDateStrings = new Set(weekDates.map(d => d.toDateString()));
+
+      // Sesiones completadas del usuario (solo las que tienen finished_at)
+      const rawSessions: any[] = (sessionsData?.data ?? []).filter(
+        (s: any) => Number(s.user_id) === Number(userParsed.id)
+      );
+      const completedApiDates = rawSessions
+        .filter((s: any) => s.finished_at && s.started_at)
+        .map((s: any) => parseLocalDate(s.started_at));
+
+      // Merge con fechas locales guardadas en AsyncStorage
+      const localRaw = await AsyncStorage.getItem("completedWorkoutDates");
+      const localDates: Date[] = localRaw
+        ? (JSON.parse(localRaw) as string[]).map(s => parseLocalDate(s))
+        : [];
+      const seen = new Set<string>();
+      const allCompletedDates = [...completedApiDates, ...localDates].filter(d => {
+        const key = d.toDateString();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
       });
 
-      setStats({
-        workouts:    routinesCount,
-        streak:      currentStreak,
-        totalTime:   0,
-        totalWeight: 0,
+      // Sesiones completadas esta semana
+      const completedThisWeek = allCompletedDates.filter(d => weekDateStrings.has(d.toDateString()));
+      const weeklyWorkouts = completedThisWeek.length;
+
+      // Progreso basado en el plan del calendario
+      const calendarPlan = await loadWeekPlan();
+      const plannedDays = Object.values(calendarPlan).filter(p => p?.type === "routine").length;
+      const completedPlannedDays = weekDates.filter((date, i) => {
+        if (calendarPlan[i]?.type !== "routine") return false;
+        return allCompletedDates.some(cd => cd.toDateString() === date.toDateString());
+      }).length;
+
+      const weeklyProgress = plannedDays > 0
+        ? Math.min(Math.round((completedPlannedDays / plannedDays) * 100), 100)
+        : weeklyWorkouts > 0 ? Math.min(Math.round((weeklyWorkouts / 5) * 100), 100) : 0;
+
+      // Logs de ejercicio de esta semana del usuario
+      const rawLogs: any[] = (logsData?.data ?? []).filter(
+        (l: any) => Number(l.user_id) === Number(userParsed.id)
+      );
+      const weeklyLogs = rawLogs.filter((l: any) => {
+        if (!l.workout_date) return false;
+        const d = parseLocalDate(l.workout_date);
+        return weekDateStrings.has(d.toDateString());
       });
-    } catch (error) {
-      console.log("ERROR:", error);
+      const weeklyReps = weeklyLogs.reduce((sum: number, l: any) => sum + (l.repetitions ?? 0), 0);
+      const weeklySets = weeklyLogs.reduce((sum: number, l: any) => sum + (l.sets ?? 0), 0);
+
+      setAllSessions(rawSessions);
+      setAllLogs(rawLogs);
+
+      setProfile({
+        name:            user.name,
+        age:             user.birthdate ? calculateAge(user.birthdate) : t("profile.na"),
+        avatar:          require("@/src/assets/defaultd.png"),
+        routinesCount,
+        streak:          currentStreak,
+        weight:          props?.weight ? parseFloat(props.weight).toString() : "0",
+        height:          props?.stature ? parseFloat(props.stature).toString() : "0",
+        somatotype:      props?.somatotype?.type ?? t("profile.na"),
+        goal:            props?.objective ?? t("profile.na"),
+        weeklyWorkouts,
+        weeklyProgress,
+        weeklyReps,
+        weeklySets,
+      });
+
+      const statsData = { workouts: routinesCount, streak: currentStreak, totalTime: 0, totalWeight: 0 };
+      setStats(statsData);
+      await saveCache("profile", { profile: { name: user.name, age: user.birthdate ? calculateAge(user.birthdate) : t("profile.na"), routinesCount, streak: currentStreak, weight: props?.weight ? parseFloat(props.weight).toString() : "0", height: props?.stature ? parseFloat(props.stature).toString() : "0", somatotype: props?.somatotype?.type ?? t("profile.na"), goal: props?.objective ?? t("profile.na"), weeklyWorkouts, weeklyProgress, weeklyReps, weeklySets }, stats: statsData, sessions: rawSessions, logs: rawLogs });
+    } catch {
+      const cached = await loadCache<any>("profile");
+      if (cached) { setProfile({ ...cached.profile, avatar: require("@/src/assets/defaultd.png") }); setStats(cached.stats); setAllSessions(cached.sessions); setAllLogs(cached.logs); }
+      showToast(t("profile.errorLoad"), "error");
     } finally {
+      setLoading(false);
       if (isRefresh) setRefreshing(false);
     }
   };
@@ -130,26 +218,28 @@ export default function ProfileScreen() {
   }, []);
 
 
-  if (!profile) {
+  if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ color: "white" }}>{t("profile.loading")}</Text>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
+
+  if (!profile) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
 
     <View style={styles.container}>
+      {!isConnected && <OfflineBanner />}
 
 
-
-      {/* BOTÓN EDITAR */}
-      <TouchableOpacity
-        style={styles.editButton}
-        onPress={() => router.push("/edit-profile")}
-      >
-        <Ionicons name="pencil" size={20} color="white" />
-      </TouchableOpacity>
 
       <ScrollView
         refreshControl={
@@ -201,7 +291,7 @@ export default function ProfileScreen() {
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
                 {!hasStatsAccess && (
-                  <Ionicons name="lock-closed" size={11} color={activeTab === "stats" ? "white" : "#A1A1A1"} />
+                  <Ionicons name="lock-closed" size={11} color={activeTab === "stats" ? "white" : colors.textSecondary} />
                 )}
                 <Text style={[styles.tabBtnText, activeTab === "stats" && styles.tabBtnTextActive]}>{t("profile.tabStats")}</Text>
               </View>
@@ -212,8 +302,8 @@ export default function ProfileScreen() {
             hasStatsAccess ? (
               <View style={{ marginTop: 20 }}>
                 {stats && <StatsSummaryGrid stats={stats} trigger={animationTrigger} />}
-                <WeeklyActivityChart />
-                <PersonalRecords />
+                <WeeklyActivityChart sessions={allSessions} />
+                <PersonalRecords logs={allLogs} />
               </View>
             ) : null
           ) : (
@@ -222,29 +312,34 @@ export default function ProfileScreen() {
               <View style={styles.statsCard}>
                 <View style={styles.stat}>
                   <Ionicons name="barbell" size={24} color={colors.text} />
-                  <Text style={styles.statNumber}>{profile.routinesCount}</Text>
+                  <Text style={styles.statNumber}>{profile.routinesCount > 0 ? profile.routinesCount : "—"}</Text>
                   <Text style={styles.statLabel}>{t("profile.routines")}</Text>
                 </View>
                 <View style={styles.stat}>
                   <Ionicons name="scale" size={24} color={colors.text} />
-                  <Text style={styles.statNumber}>{profile.weight} kg</Text>
+                  <Text style={styles.statNumber}>{profile.weight !== "0" ? `${profile.weight} kg` : "—"}</Text>
                   <Text style={styles.statLabel}>{t("profile.weight")}</Text>
                 </View>
                 <View style={styles.stat}>
                   <Ionicons name="flame" size={24} color={colors.text} />
-                  <Text style={styles.statNumber}>{profile.streak}</Text>
+                  <Text style={styles.statNumber}>{profile.streak > 0 ? profile.streak : "—"}</Text>
                   <Text style={styles.statLabel}>{t("profile.streak")}</Text>
                 </View>
               </View>
 
               {/* PROGRESO */}
-              <ProgressCard progress={75} workouts={6} reps={420} sets={45} />
+              <ProgressCard
+                progress={profile.weeklyProgress ?? 0}
+                workouts={profile.weeklyWorkouts ?? 0}
+                reps={profile.weeklyReps ?? 0}
+                sets={profile.weeklySets ?? 0}
+              />
 
               {/* INFORMACIÓN FÍSICA */}
               <Text style={styles.title}>{t("profile.physicalInfo")}</Text>
               <View style={styles.infoGrid}>
-                <InfoStatCard icon="resize" label={t("profile.height")} value={`${profile.height} cm`} />
-                <InfoStatCard icon="scale" label={t("profile.weight")} value={`${profile.weight} kg`} />
+                <InfoStatCard icon="resize" label={t("profile.height")} value={profile.height !== "0" ? `${profile.height} cm` : "—"} />
+                <InfoStatCard icon="scale" label={t("profile.weight")} value={profile.weight !== "0" ? `${profile.weight} kg` : "—"} />
                 <InfoStatCard icon="body" label={t("profile.somatotype")} value={profile.somatotype} />
                 <InfoStatCard icon="flag" label={t("profile.goal")} value={profile.goal} />
               </View>
@@ -265,7 +360,7 @@ export default function ProfileScreen() {
                 onPress={() => { setConverterValue(""); setShowConverterModal(true); }}
               >
                 <Ionicons name="swap-horizontal-outline" size={20} color={colors.textSecondary} />
-                <Text style={styles.settingsButtonText}>Calculadora kg / lbs</Text>
+                <Text style={styles.settingsButtonText}>{t("profile.converterTitle")}</Text>
                 <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
               </TouchableOpacity>
             </>
@@ -285,7 +380,7 @@ export default function ProfileScreen() {
             <View style={styles.modalIcon}>
               <Ionicons name="swap-horizontal-outline" size={32} color={colors.primary} />
             </View>
-            <Text style={styles.modalTitle}>Calculadora kg / lbs</Text>
+            <Text style={styles.modalTitle}>{t("profile.converterTitle")}</Text>
 
             {/* TOGGLE MODO */}
             <View style={styles.converterToggle}>
@@ -328,8 +423,8 @@ export default function ProfileScreen() {
 
       {/* MODAL UPGRADE STATS */}
       <Modal visible={showStatsModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowStatsModal(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
             <TouchableOpacity style={styles.modalClose} onPress={() => setShowStatsModal(false)}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
             </TouchableOpacity>
@@ -366,9 +461,11 @@ export default function ProfileScreen() {
               ))}
               <Text style={styles.modalNote}>Contacta a un administrador para actualizar tu plan.</Text>
             </ScrollView>
-          </View>
-        </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
+
+      {Toast}
 
     </View>
   );
@@ -383,19 +480,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background
-  },
-
-  editButton: {
-    position: "absolute",
-    top: 60,
-    right: 20,
-    width: 45,
-    height: 45,
-    borderRadius: 25,
-    backgroundColor: colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 20
   },
 
   cover: {
@@ -516,7 +600,7 @@ const styles = StyleSheet.create({
 
   tabRow: {
     flexDirection: "row",
-    backgroundColor: "#1C1C1E",
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 4,
     marginTop: 16,
@@ -531,11 +615,11 @@ const styles = StyleSheet.create({
   },
 
   tabBtnActive: {
-    backgroundColor: "#3B82F6"
+    backgroundColor: colors.primary
   },
 
   tabBtnText: {
-    color: "#A1A1A1",
+    color: colors.textSecondary,
     fontSize: 14,
     fontWeight: "600"
   },
@@ -545,14 +629,14 @@ const styles = StyleSheet.create({
   },
 
   settingsSection: {
-    color: "#A1A1A1",
+    color: colors.textSecondary,
     marginTop: 20,
     marginBottom: 10,
     fontSize: 14
   },
 
   settingsCard: {
-    backgroundColor: "#1C1C1E",
+    backgroundColor: colors.card,
     borderRadius: 16,
     paddingVertical: 6
   },

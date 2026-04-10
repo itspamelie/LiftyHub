@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getDietPlans, getNutritionistProfiles } from "@/src/services/api";
+import { useLanguage } from "@/src/context/LanguageContext";
 import NutritionistCard from "@/src/components/diet/NutritionistCard";
 import DietTipCard from "@/src/components/diet/DietTipCard";
 import BackButton from "@/src/components/buttons/backButton";
@@ -23,7 +24,9 @@ const TIPS = [
 
 export default function DietPlanScreen() {
 
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [plan, setPlan] = useState<any>(null);
   const [nutritionist, setNutritionist] = useState<any>(null);
 
@@ -47,7 +50,7 @@ export default function DietPlanScreen() {
           setNutritionist(match);
         }
       } catch {
-        // error silencioso
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -63,12 +66,23 @@ export default function DietPlanScreen() {
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Ionicons name="cloud-offline-outline" size={48} color={colors.textSecondary} />
+        <Text style={{ color: colors.textSecondary, marginTop: 12, fontSize: 15, textAlign: "center" }}>
+          {t("dietPlan.errorLoad")}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
 
       <View style={styles.header}>
         <BackButton />
-        <Text style={styles.headerTitle}>Mi plan de dieta</Text>
+        <Text style={styles.headerTitle}>{t("dietPlan.title")}</Text>
       </View>
 
       <View style={styles.divider} />
@@ -89,25 +103,25 @@ export default function DietPlanScreen() {
         {/* DETALLES DEL PLAN */}
         {plan && (
           <View style={styles.planCard}>
-            <Text style={styles.section}>Detalles del plan</Text>
+            <Text style={styles.section}>{t("dietPlan.planDetails")}</Text>
             <View style={styles.row}>
               <Ionicons name="flag-outline" size={16} color={colors.textSecondary} />
-              <Text style={styles.rowLabel}>Objetivo</Text>
+              <Text style={styles.rowLabel}>{t("dietPlan.goal")}</Text>
               <Text style={styles.rowValue}>{plan.goal}</Text>
             </View>
             <View style={styles.row}>
               <Ionicons name="calendar-outline" size={16} color={colors.textSecondary} />
-              <Text style={styles.rowLabel}>Duración</Text>
-              <Text style={styles.rowValue}>{plan.duration_days} días</Text>
+              <Text style={styles.rowLabel}>{t("dietPlan.duration")}</Text>
+              <Text style={styles.rowValue}>{plan.duration_days} {t("dietPlan.days")}</Text>
             </View>
             <View style={styles.row}>
               <Ionicons name="stats-chart-outline" size={16} color={colors.textSecondary} />
-              <Text style={styles.rowLabel}>Tipo</Text>
-              <Text style={styles.rowValue}>{plan.is_monodiet ? "Monodieta" : "Dieta variada"}</Text>
+              <Text style={styles.rowLabel}>{t("dietPlan.type")}</Text>
+              <Text style={styles.rowValue}>{plan.is_monodiet ? t("dietPlan.monodiet") : t("dietPlan.variedDiet")}</Text>
             </View>
             {plan.notes ? (
               <View style={styles.notesBox}>
-                <Text style={styles.notesLabel}>Notas del nutriólogo</Text>
+                <Text style={styles.notesLabel}>{t("dietPlan.nutritionistNotes")}</Text>
                 <Text style={styles.notesText}>{plan.notes}</Text>
               </View>
             ) : null}
@@ -115,21 +129,21 @@ export default function DietPlanScreen() {
         )}
 
         {/* PLAN DE COMIDAS — pendiente de backend */}
-        <Text style={styles.section}>Plan de comidas</Text>
+        <Text style={styles.section}>{t("dietPlan.mealPlan")}</Text>
         <View style={styles.emptySection}>
           <Ionicons name="restaurant-outline" size={32} color={colors.textSecondary} />
-          <Text style={styles.emptyText}>Tu nutriólogo aún no ha cargado las comidas del plan.</Text>
+          <Text style={styles.emptyText}>{t("dietPlan.mealPlanEmpty")}</Text>
         </View>
 
         {/* SUPLEMENTOS — pendiente de backend */}
-        <Text style={styles.section}>Suplementos</Text>
+        <Text style={styles.section}>{t("dietPlan.supplements")}</Text>
         <View style={styles.emptySection}>
           <Ionicons name="flask-outline" size={32} color={colors.textSecondary} />
-          <Text style={styles.emptyText}>Tu nutriólogo aún no ha asignado suplementos.</Text>
+          <Text style={styles.emptyText}>{t("dietPlan.supplementsEmpty")}</Text>
         </View>
 
         {/* TIPS */}
-        <Text style={styles.section}>Consejos</Text>
+        <Text style={styles.section}>{t("dietPlan.tipsSection")}</Text>
         <DietTipCard tips={TIPS} />
 
       </ScrollView>

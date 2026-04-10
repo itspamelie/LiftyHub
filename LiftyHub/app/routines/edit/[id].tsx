@@ -16,6 +16,7 @@ import { useState, useEffect, useRef } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 import {
   updateUserRoutine,
   createUserRoutineExercise,
@@ -62,6 +63,7 @@ function formatRest(secs: number): string {
 }
 
 export default function EditRoutineScreen() {
+  const { t } = useLanguage();
   const { showToast, Toast } = useToast();
   const params = useLocalSearchParams<{
     id: string;
@@ -221,18 +223,18 @@ export default function EditRoutineScreen() {
 
       router.back();
     } catch {
-      showToast("No se pudo guardar los cambios.", "error");
+      showToast(t("editRoutine.errorSave"), "error");
     } finally {
       setSaving(false);
     }
   };
 
   const stepConfig = [
-    { icon: "barbell-outline" as const,     title: "Nombre y objetivo",  desc: "Edita el nombre de tu rutina y qué quieres lograr" },
-    { icon: "stats-chart-outline" as const, title: "Nivel",              desc: "¿Cuál es el nivel de dificultad?" },
-    { icon: "grid-outline" as const,        title: "Tipo y duración",    desc: "Categoría y tiempo disponible" },
-    { icon: "timer-outline" as const,       title: "Detalles",           desc: "Configura los descansos e imagen" },
-    { icon: "list-outline" as const,        title: "Ejercicios",         desc: "Agrega o elimina ejercicios de tu rutina" },
+    { icon: "barbell-outline" as const,     title: t("editRoutine.step1Title"), desc: t("editRoutine.step1Desc") },
+    { icon: "stats-chart-outline" as const, title: t("editRoutine.step2Title"), desc: t("editRoutine.step2Desc") },
+    { icon: "grid-outline" as const,        title: t("editRoutine.step3Title"), desc: t("editRoutine.step3Desc") },
+    { icon: "timer-outline" as const,       title: t("editRoutine.step4Title"), desc: t("editRoutine.step4Desc") },
+    { icon: "list-outline" as const,        title: t("editRoutine.step5Title"), desc: t("editRoutine.step5Desc") },
   ];
 
   if (loadingExercises) {
@@ -256,15 +258,9 @@ export default function EditRoutineScreen() {
         >
           <Ionicons name="arrow-back" size={20} color="white" />
         </TouchableOpacity>
-
-        <View style={styles.progressBar}>
-          {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-            <View key={i} style={[styles.progressSegment, i < step && styles.progressSegmentActive]} />
-          ))}
-        </View>
-
-        <Text style={styles.stepCounter}>{step}/{TOTAL_STEPS}</Text>
+        <Text style={styles.headerTitle}>{t("editRoutine.title")}</Text>
       </View>
+      <View style={styles.headerDivider} />
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.card}>
@@ -280,14 +276,14 @@ export default function EditRoutineScreen() {
           {step === 1 && (
             <View style={styles.stepContent}>
               <TextInput
-                placeholder="Nombre de la rutina"
+                placeholder={t("editRoutine.namePlaceholder")}
                 placeholderTextColor={colors.textSecondary}
                 value={form.name}
                 onChangeText={(v) => setForm({ ...form, name: v })}
                 style={styles.input}
               />
               <TextInput
-                placeholder="Objetivo"
+                placeholder={t("editRoutine.objectivePlaceholder")}
                 placeholderTextColor={colors.textSecondary}
                 value={form.objective}
                 onChangeText={(v) => setForm({ ...form, objective: v })}
@@ -324,7 +320,7 @@ export default function EditRoutineScreen() {
           {/* PASO 3 */}
           {step === 3 && (
             <View style={styles.stepContent}>
-              <Text style={styles.sectionLabel}>Categoría</Text>
+              <Text style={styles.sectionLabel}>{t("editRoutine.categoryLabel")}</Text>
               <View style={styles.categoryGrid}>
                 {filters.map((cat) => {
                   const active = form.category === cat.key;
@@ -339,9 +335,9 @@ export default function EditRoutineScreen() {
                   );
                 })}
               </View>
-              <Text style={styles.sectionLabel}>Duración (minutos)</Text>
+              <Text style={styles.sectionLabel}>{t("editRoutine.durationLabel")}</Text>
               <TextInput
-                placeholder="ej. 45"
+                placeholder={t("editRoutine.durationPlaceholder")}
                 placeholderTextColor={colors.textSecondary}
                 keyboardType="numeric"
                 value={form.duration}
@@ -354,21 +350,21 @@ export default function EditRoutineScreen() {
           {/* PASO 4 */}
           {step === 4 && (
             <View style={styles.stepContent}>
-              <Text style={styles.sectionLabel}>¿Descanso entre series?</Text>
+              <Text style={styles.sectionLabel}>{t("editRoutine.restQuestion")}</Text>
               <View style={styles.restToggleRow}>
                 <TouchableOpacity
                   style={[styles.restToggleButton, restEnabled === true && styles.restToggleActive]}
                   onPress={() => setRestEnabled(true)}
                 >
                   <Ionicons name="checkmark-circle-outline" size={18} color={restEnabled === true ? colors.primary : colors.textSecondary} />
-                  <Text style={[styles.restToggleText, restEnabled === true && styles.restToggleTextActive]}>Sí</Text>
+                  <Text style={[styles.restToggleText, restEnabled === true && styles.restToggleTextActive]}>{t("editRoutine.yes")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.restToggleButton, restEnabled === false && styles.restToggleActive]}
                   onPress={() => setRestEnabled(false)}
                 >
                   <Ionicons name="close-circle-outline" size={18} color={restEnabled === false ? colors.primary : colors.textSecondary} />
-                  <Text style={[styles.restToggleText, restEnabled === false && styles.restToggleTextActive]}>No</Text>
+                  <Text style={[styles.restToggleText, restEnabled === false && styles.restToggleTextActive]}>{t("editRoutine.no")}</Text>
                 </TouchableOpacity>
               </View>
               {restEnabled === true && (
@@ -387,7 +383,7 @@ export default function EditRoutineScreen() {
                   <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
                 </TouchableOpacity>
               )}
-              <Text style={styles.sectionLabel}>Imagen (URL)</Text>
+              <Text style={styles.sectionLabel}>{t("editRoutine.imageLabel")}</Text>
               <TextInput
                 placeholder="https://..."
                 placeholderTextColor={colors.textSecondary}
@@ -403,7 +399,7 @@ export default function EditRoutineScreen() {
           {step === 5 && (
             <View style={styles.stepContent}>
               {selectedExercises.length === 0 && (
-                <Text style={styles.emptyHint}>Sin ejercicios. Agrega los que quieras.</Text>
+                <Text style={styles.emptyHint}>{t("editRoutine.noExercises")}</Text>
               )}
               {selectedExercises.map((sel) => (
                 <View key={sel.uid} style={styles.exerciseCard}>
@@ -423,23 +419,32 @@ export default function EditRoutineScreen() {
                 onPress={() => { setSearchQuery(""); setShowPicker(true); }}
               >
                 <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
-                <Text style={styles.addExerciseText}>Agregar ejercicio</Text>
+                <Text style={styles.addExerciseText}>{t("editRoutine.addExercise")}</Text>
               </TouchableOpacity>
             </View>
           )}
+          <TouchableOpacity
+            style={[styles.continueButton, (!canContinue() || saving) && { opacity: 0.5 }]}
+            onPress={step < TOTAL_STEPS ? () => setStep(step + 1) : handleSave}
+            disabled={!canContinue() || saving}
+          >
+            {saving
+              ? <ActivityIndicator color="white" />
+              : <Text style={styles.continueText}>{step < TOTAL_STEPS ? t("editRoutine.continue") : t("editRoutine.saveChanges")}</Text>
+            }
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity
-          style={[styles.continueButton, (!canContinue() || saving) && { opacity: 0.5 }]}
-          onPress={step < TOTAL_STEPS ? () => setStep(step + 1) : handleSave}
-          disabled={!canContinue() || saving}
-        >
-          {saving
-            ? <ActivityIndicator color="white" />
-            : <Text style={styles.continueText}>{step < TOTAL_STEPS ? "Continuar" : "Guardar cambios"}</Text>
-          }
-        </TouchableOpacity>
       </ScrollView>
+
+      {/* PROGRESS BAR FIJA ABAJO */}
+      <View style={styles.bottomBar}>
+        <View style={styles.progressBarContainer}>
+          {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+            <View key={i} style={[styles.progressSegment, i < step && styles.progressSegmentActive]} />
+          ))}
+        </View>
+        <Text style={styles.stepCounter}>{step}/{TOTAL_STEPS}</Text>
+      </View>
 
       {Toast}
 
@@ -450,13 +455,13 @@ export default function EditRoutineScreen() {
             <TouchableOpacity style={styles.backButton} onPress={() => setShowPicker(false)}>
               <Ionicons name="arrow-back" size={20} color="white" />
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Seleccionar ejercicio</Text>
+            <Text style={styles.modalTitle}>{t("editRoutine.selectExercise")}</Text>
           </View>
           <View style={styles.searchContainer}>
             <Ionicons name="search" size={18} color={colors.textSecondary} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Buscar ejercicio..."
+              placeholder={t("editRoutine.searchExercise")}
               placeholderTextColor={colors.textSecondary}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -474,7 +479,7 @@ export default function EditRoutineScreen() {
                 <Ionicons name="add-circle-outline" size={22} color={colors.primary} />
               </TouchableOpacity>
             )}
-            ListEmptyComponent={<Text style={styles.emptyText}>Sin resultados</Text>}
+            ListEmptyComponent={<Text style={styles.emptyText}>{t("editRoutine.noResults")}</Text>}
             contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
           />
         </View>
@@ -486,9 +491,9 @@ export default function EditRoutineScreen() {
           <TouchableOpacity style={StyleSheet.absoluteFill} onPress={() => setShowRestPicker(false)} />
           <View style={styles.restPickerSheet}>
             <View style={styles.restPickerHeader}>
-              <Text style={styles.restPickerTitle}>Descanso entre series</Text>
+              <Text style={styles.restPickerTitle}>{t("editRoutine.restBetweenSets")}</Text>
               <TouchableOpacity onPress={() => setShowRestPicker(false)}>
-                <Text style={styles.restPickerDoneText}>Listo</Text>
+                <Text style={styles.restPickerDoneText}>{t("editRoutine.done")}</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.restPickerBody}>
@@ -535,9 +540,9 @@ export default function EditRoutineScreen() {
             <Text style={styles.configSubtitle}>{pendingExercise?.muscle}</Text>
             <View style={styles.configRow}>
               {[
-                { label: "Series", value: pendingSets, setter: setPendingSets },
-                { label: "Reps", value: pendingReps, setter: setPendingReps },
-                { label: "Descanso (s)", value: pendingRest, setter: setPendingRest },
+                { label: t("editRoutine.sets"), value: pendingSets, setter: setPendingSets },
+                { label: t("editRoutine.reps"), value: pendingReps, setter: setPendingReps },
+                { label: t("editRoutine.restSecs"), value: pendingRest, setter: setPendingRest },
               ].map(({ label, value, setter }) => (
                 <View key={label} style={styles.configField}>
                   <Text style={styles.configLabel}>{label}</Text>
@@ -552,10 +557,10 @@ export default function EditRoutineScreen() {
               ))}
             </View>
             <TouchableOpacity style={styles.saveButton} onPress={handleConfirmExercise}>
-              <Text style={styles.saveButtonText}>Confirmar</Text>
+              <Text style={styles.saveButtonText}>{t("editRoutine.confirm")}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cancelButton} onPress={() => setPendingExercise(null)}>
-              <Text style={styles.cancelButtonText}>Cancelar</Text>
+              <Text style={styles.cancelButtonText}>{t("editRoutine.cancel")}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -565,7 +570,9 @@ export default function EditRoutineScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: "row", alignItems: "center", paddingTop: 60, paddingBottom: 16, paddingHorizontal: spacing.screenPadding, backgroundColor: colors.background, gap: 12 },
+  header: { flexDirection: "row", alignItems: "center", paddingTop: 60, paddingBottom: 12, paddingHorizontal: spacing.screenPadding, backgroundColor: colors.background, gap: 12 },
+  headerTitle: { flex: 1, color: colors.text, fontSize: 20, fontWeight: "700" },
+  headerDivider: { height: 1, backgroundColor: "#2A2A2A" },
   backButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: "center", alignItems: "center" },
   progressBar: { flex: 1, flexDirection: "row", gap: 6 },
   progressSegment: { flex: 1, height: 4, borderRadius: 2, backgroundColor: colors.card },
@@ -607,6 +614,8 @@ const styles = StyleSheet.create({
   addExerciseText: { color: colors.primary, fontSize: 15, fontWeight: "600" },
   continueButton: { backgroundColor: colors.primary, borderRadius: 30, paddingVertical: 16, alignItems: "center", marginTop: 28 },
   continueText: { color: "white", fontSize: 16, fontWeight: "bold" },
+  bottomBar: { flexDirection: "row", alignItems: "center", paddingHorizontal: spacing.screenPadding, paddingVertical: 14, paddingBottom: 32, backgroundColor: colors.background, borderTopWidth: 1, borderTopColor: colors.card, gap: 10 },
+  progressBarContainer: { flex: 1, flexDirection: "row", gap: 6 },
   modalContainer: { flex: 1, backgroundColor: colors.background },
   modalHeader: { flexDirection: "row", alignItems: "center", paddingTop: 60, paddingBottom: 16, paddingHorizontal: spacing.screenPadding, borderBottomWidth: 1, borderBottomColor: colors.card, gap: 12 },
   modalTitle: { color: colors.text, fontSize: 20, fontWeight: "bold" },

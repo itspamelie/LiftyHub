@@ -9,6 +9,9 @@ import { useLanguage } from "@/src/context/LanguageContext";
 import { getExercises, getUserRoutines, createUserRoutineExercise } from "@/src/services/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useToast } from "@/src/hooks/useToast";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
+import { saveCache, loadCache } from "@/src/utils/cache";
+import OfflineBanner from "@/src/components/OfflineBanner";
 
 type ExerciseFile = {
   file_path: string;
@@ -27,6 +30,7 @@ export default function ExercisesScreen() {
 
   const { t } = useLanguage();
   const { showToast, Toast } = useToast();
+  const isConnected = useNetworkStatus();
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("Todo");
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -88,9 +92,14 @@ export default function ExercisesScreen() {
       const token = await AsyncStorage.getItem("token");
       if (!token) return;
       const res = await getExercises(token);
-      if (res?.data) setExercises(res.data);
-    } catch (error) {
-      console.log("Error cargando ejercicios:", error);
+      if (res?.data) {
+        setExercises(res.data);
+        await saveCache("exercises", res.data);
+      }
+    } catch {
+      const cached = await loadCache<any[]>("exercises");
+      if (cached) setExercises(cached);
+      else showToast(t("exercises.errorLoad"), "error");
     } finally {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
@@ -144,9 +153,9 @@ export default function ExercisesScreen() {
         token
       );
       setAddModalVisible(false);
-      showToast(`${selectedExercise.name} agregado a ${selectedRoutine.name}`, "success");
+      showToast(t("exercises.addedSuccess", { exercise: selectedExercise.name, routine: selectedRoutine.name }), "success");
     } catch {
-      showToast("No se pudo agregar el ejercicio", "error");
+      showToast(t("exercises.addError"), "error");
     } finally {
       setAdding(false);
     }
@@ -163,6 +172,7 @@ export default function ExercisesScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      {!isConnected && <OfflineBanner />}
       {Toast}
       <ScrollView
         style={styles.container}
@@ -217,7 +227,7 @@ export default function ExercisesScreen() {
               />
             ))}
             {filteredExercises.length === 0 && (
-              <Text style={styles.empty}>No se encontraron ejercicios</Text>
+              <Text style={styles.empty}>{t("exercises.empty")}</Text>
             )}
           </View>
         )}
@@ -233,7 +243,7 @@ export default function ExercisesScreen() {
               {/* Cabecera */}
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>
-                  {addStep === "pick" ? "Agregar a rutina" : selectedRoutine?.name ?? "Configurar"}
+                  {addStep === "pick" ? t("exercises.addToRoutine") : selectedRoutine?.name ?? t("exercises.addToRoutine")}
                 </Text>
                 <TouchableOpacity onPress={() => setAddModalVisible(false)}>
                   <Ionicons name="close" size={22} color={colors.textSecondary} />
@@ -246,8 +256,8 @@ export default function ExercisesScreen() {
                   <ActivityIndicator color={colors.primary} style={{ marginVertical: 30 }} />
                 ) : userRoutines.length === 0 ? (
                   <View style={styles.emptyRoutines}>
-                    <Ionicons name="barbell-outline" size={36} color={colors.textSecondary} />
-                    <Text style={styles.emptyRoutinesText}>No tienes rutinas creadas.</Text>
+                    <Ionicons name="barbell" size={36} color={colors.textSecondary} />
+                    <Text style={styles.emptyRoutinesText}>{t("exercises.noRoutines")}</Text>
                   </View>
                 ) : (
                   <FlatList
@@ -280,7 +290,7 @@ export default function ExercisesScreen() {
                   <Text style={styles.configExName}>{selectedExercise?.name}</Text>
 
                   <View style={styles.configRow}>
-                    <Text style={styles.configLabel}>Series</Text>
+                    <Text style={styles.configLabel}>{t("exercises.sets")}</Text>
                     <TextInput
                       style={styles.configInput}
                       value={addSets}
@@ -290,7 +300,7 @@ export default function ExercisesScreen() {
                     />
                   </View>
                   <View style={styles.configRow}>
-                    <Text style={styles.configLabel}>Repeticiones</Text>
+                    <Text style={styles.configLabel}>{t("exercises.reps")}</Text>
                     <TextInput
                       style={styles.configInput}
                       value={addReps}
@@ -300,7 +310,7 @@ export default function ExercisesScreen() {
                     />
                   </View>
                   <View style={styles.configRow}>
-                    <Text style={styles.configLabel}>Descanso (seg)</Text>
+                    <Text style={styles.configLabel}>{t("exercises.restLabel")}</Text>
                     <TextInput
                       style={styles.configInput}
                       value={addRest}
@@ -312,7 +322,7 @@ export default function ExercisesScreen() {
 
                   <View style={styles.modalBtns}>
                     <TouchableOpacity style={styles.backBtn} onPress={() => setAddStep("pick")}>
-                      <Text style={styles.backBtnText}>Atrás</Text>
+                      <Text style={styles.backBtnText}>{t("exercises.back")}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.confirmBtn, adding && { opacity: 0.6 }]}
@@ -321,7 +331,7 @@ export default function ExercisesScreen() {
                     >
                       {adding
                         ? <ActivityIndicator color="white" />
-                        : <Text style={styles.confirmBtnText}>Agregar</Text>
+                        : <Text style={styles.confirmBtnText}>{t("exercises.add")}</Text>
                       }
                     </TouchableOpacity>
                   </View>

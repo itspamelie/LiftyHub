@@ -50,6 +50,14 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const fetchSubscription = useCallback(async () => {
     try {
+      // Dev override: permite cambiar plan sin tocar el backend
+      const devOverride = await AsyncStorage.getItem("@liftyhub_dev_plan");
+      if (devOverride) {
+        setPlan(JSON.parse(devOverride));
+        setLoading(false);
+        return;
+      }
+
       const token = await AsyncStorage.getItem("token");
       const userRaw = await AsyncStorage.getItem("user");
       if (!token || !userRaw) {

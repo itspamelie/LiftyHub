@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getNutritionistProfiles } from "@/src/services/api";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 import BackButton from "@/src/components/buttons/backButton";
 
 type Nutritionist = {
@@ -32,8 +33,10 @@ type Nutritionist = {
 
 export default function NutritionistsScreen() {
 
+  const { t } = useLanguage();
   const [nutritionists, setNutritionists] = useState<Nutritionist[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [selected, setSelected] = useState<Nutritionist | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -47,7 +50,7 @@ export default function NutritionistsScreen() {
         const all: Nutritionist[] = data?.data ?? [];
         setNutritionists(all.filter((n) => n.is_active));
       } catch {
-        // error silencioso
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -78,28 +81,37 @@ export default function NutritionistsScreen() {
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Ionicons name="cloud-offline-outline" size={48} color={colors.textSecondary} />
+        <Text style={{ color: colors.textSecondary, marginTop: 12, fontSize: 15, textAlign: "center" }}>
+          {t("nutritionists.errorLoad")}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
 
       <View style={styles.header}>
         <BackButton />
-        <Text style={styles.headerTitle}>Nutriólogos disponibles</Text>
+        <Text style={styles.headerTitle}>{t("nutritionists.title")}</Text>
       </View>
       <View style={styles.headerDivider} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.subtitle}>
-          Elige el nutriólogo que más se adapte a tus objetivos y estilo de vida.
-        </Text>
+        <Text style={styles.subtitle}>{t("nutritionists.subtitle")}</Text>
 
         {nutritionists.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Ionicons name="person-outline" size={40} color={colors.textSecondary} />
-            <Text style={styles.emptyText}>No hay nutriólogos disponibles por el momento.</Text>
+            <Text style={styles.emptyText}>{t("nutritionists.empty")}</Text>
           </View>
         ) : (
           nutritionists.map((n) => (
-            <TouchableOpacity key={n.id} style={styles.card} onPress={() => handleSelect(n)}>
+            <View key={n.id} style={styles.card}>
 
               <View style={styles.cardTop}>
                 {n.profile_pic ? (
@@ -110,7 +122,7 @@ export default function NutritionistsScreen() {
                   </View>
                 )}
                 <View style={styles.cardInfo}>
-                  <Text style={styles.cardName}>{n.user?.name ?? "Nutriólogo"}</Text>
+                  <Text style={styles.cardName}>{n.user?.name ?? t("nutritionists.fallbackName")}</Text>
                   <Text style={styles.cardSpecialty}>{n.specialty}</Text>
                   <View style={styles.ratingRow}>
                     <Ionicons name="star" size={13} color="#F59E0B" />
@@ -124,12 +136,31 @@ export default function NutritionistsScreen() {
                 <Text style={styles.bio} numberOfLines={2}>{n.bio}</Text>
               ) : null}
 
-              <View style={styles.selectRow}>
-                <Text style={styles.selectText}>Seleccionar</Text>
-                <Ionicons name="arrow-forward" size={16} color={colors.primary} />
+              <View style={styles.actionsRow}>
+                <TouchableOpacity
+                  style={styles.viewBtn}
+                  onPress={() => router.push({
+                    pathname: "/nutritionist-profile",
+                    params: {
+                      name: n.user?.name ?? "Nutriólogo",
+                      specialty: n.specialty,
+                      bio: n.bio ?? "",
+                      rating: n.rating,
+                      location: n.location ?? "",
+                      profile_pic: n.profile_pic ?? "",
+                    },
+                  } as any)}
+                >
+                  <Ionicons name="person-outline" size={15} color={colors.primary} />
+                  <Text style={styles.viewBtnText}>{t("nutritionists.viewProfile")}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.selectBtn} onPress={() => handleSelect(n)}>
+                  <Text style={styles.selectBtnText}>{t("nutritionists.select")}</Text>
+                  <Ionicons name="arrow-forward" size={15} color="white" />
+                </TouchableOpacity>
               </View>
 
-            </TouchableOpacity>
+            </View>
           ))
         )}
       </ScrollView>
@@ -138,20 +169,20 @@ export default function NutritionistsScreen() {
       <Modal visible={showConfirm} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>¿Confirmar selección?</Text>
+            <Text style={styles.modalTitle}>{t("nutritionists.confirmTitle")}</Text>
             <Text style={styles.modalSubtitle}>
-              Enviarás una solicitud a{" "}
+              {t("nutritionists.confirmSubtitle")}{" "}
               <Text style={{ color: "white", fontWeight: "700" }}>
-                {selected?.user?.name ?? "este nutriólogo"}
+                {selected?.user?.name ?? t("nutritionists.fallbackName")}
               </Text>
-              . Recibirás tu plan de dieta una vez que sea aceptada.
+              {t("nutritionists.confirmSubtitle2")}
             </Text>
             <View style={styles.modalBtns}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowConfirm(false)}>
-                <Text style={styles.cancelBtnText}>Cancelar</Text>
+                <Text style={styles.cancelBtnText}>{t("nutritionists.cancel")}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
-                <Text style={styles.confirmBtnText}>Confirmar</Text>
+                <Text style={styles.confirmBtnText}>{t("nutritionists.confirm")}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -165,12 +196,10 @@ export default function NutritionistsScreen() {
             <View style={styles.successIcon}>
               <Ionicons name="checkmark-circle" size={48} color="#16a34a" />
             </View>
-            <Text style={styles.modalTitle}>¡Solicitud enviada!</Text>
-            <Text style={styles.modalSubtitle}>
-              Tu nutriólogo revisará tu solicitud y te asignará un plan personalizado pronto.
-            </Text>
+            <Text style={styles.modalTitle}>{t("nutritionists.successTitle")}</Text>
+            <Text style={styles.modalSubtitle}>{t("nutritionists.successSubtitle")}</Text>
             <TouchableOpacity style={styles.confirmBtn} onPress={handleSuccessClose}>
-              <Text style={styles.confirmBtnText}>Entendido</Text>
+              <Text style={styles.confirmBtnText}>{t("nutritionists.understood")}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -318,6 +347,47 @@ const styles = StyleSheet.create({
 
   selectText: {
     color: colors.primary,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  actionsRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 4,
+  },
+
+  viewBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    borderRadius: spacing.borderRadius,
+    paddingVertical: 10,
+  },
+
+  viewBtnText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  selectBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: colors.primary,
+    borderRadius: spacing.borderRadius,
+    paddingVertical: 10,
+  },
+
+  selectBtnText: {
+    color: "white",
     fontSize: 14,
     fontWeight: "600",
   },
