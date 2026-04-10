@@ -1,16 +1,9 @@
-import {
-  ScrollView,
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  ImageBackground,
-  TouchableOpacity,
-} from "react-native";
+import { ScrollView, View, Text, StyleSheet, Image, ImageBackground,  } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 const COVER_URL = "https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=900&q=80";
 
@@ -40,9 +33,9 @@ export default function NutritionistProfileScreen() {
         source={{ uri: "https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=900&q=80" }}
         style={styles.cover}
       >
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <HapticButton style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={22} color="white" />
-        </TouchableOpacity>
+        </HapticButton>
       </ImageBackground>
 
       {/* SECCIÓN PRINCIPAL */}

@@ -1,14 +1,4 @@
-import {
-  Text,
-  StyleSheet,
-  ScrollView,
-  RefreshControl,
-  View,
-  ActivityIndicator,
-  Modal,
-  TouchableOpacity,
-  Dimensions,
-} from "react-native";
+import { Text, StyleSheet, ScrollView, RefreshControl, View, ActivityIndicator, Modal, Dimensions,  } from "react-native";
 import { router } from "expo-router";
 import { useState, useEffect, useCallback } from "react";
 import { BlurView } from "expo-blur";
@@ -22,6 +12,7 @@ import { useToast } from "@/src/hooks/useToast";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { saveCache, loadCache } from "@/src/utils/cache";
 import OfflineBanner from "@/src/components/OfflineBanner";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -116,7 +107,7 @@ export default function DietScreen() {
 
         {dietPlan ? (
           /* ── TIENE PLAN ASIGNADO ── */
-          <TouchableOpacity style={styles.planCard} onPress={() => router.push("/diet/plan")}>
+          <HapticButton style={styles.planCard} onPress={() => router.push("/diet/plan")}>
             <View style={styles.planCardHeader}>
               <Ionicons name="nutrition" size={24} color={colors.primary} />
               <Text style={styles.planCardTitle}>{t("diet.planTitle")}</Text>
@@ -145,7 +136,7 @@ export default function DietScreen() {
               <Text style={styles.seeDetailText}>{t("diet.seeDetail")}</Text>
               <Ionicons name="arrow-forward" size={16} color={colors.primary} />
             </View>
-          </TouchableOpacity>
+          </HapticButton>
         ) : (
           /* ── SIN PLAN — EMPTY STATE ── */
           <View style={styles.emptyContainer}>
@@ -154,13 +145,13 @@ export default function DietScreen() {
             </View>
             <Text style={styles.emptyTitle}>{t("diet.emptyTitle")}</Text>
             <Text style={styles.emptySubtitle}>{t("diet.emptySubtitle")}</Text>
-            <TouchableOpacity
+            <HapticButton
               style={styles.chooseBtn}
               onPress={() => router.push("/diet/nutritionists")}
             >
               <Ionicons name="person-add" size={18} color="white" />
               <Text style={styles.chooseBtnText}>{t("diet.chooseNutritionist")}</Text>
-            </TouchableOpacity>
+            </HapticButton>
           </View>
         )}
 
@@ -173,20 +164,20 @@ export default function DietScreen() {
 
       {!hasAccess && !showUpgradeModal && (
         <View style={styles.unlockBar}>
-          <TouchableOpacity style={styles.unlockButton} onPress={() => setShowUpgradeModal(true)}>
+          <HapticButton style={styles.unlockButton} onPress={() => setShowUpgradeModal(true)}>
             <Ionicons name="lock-closed" size={16} color="white" />
             <Text style={styles.unlockText}>{t("diet.unlockBtn")}</Text>
-          </TouchableOpacity>
+          </HapticButton>
         </View>
       )}
 
       {/* MODAL UPGRADE */}
       <Modal visible={showUpgradeModal} transparent animationType="slide">
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowUpgradeModal(false)}>
-          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
-            <TouchableOpacity style={styles.modalClose} onPress={() => setShowUpgradeModal(false)}>
+        <HapticButton style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowUpgradeModal(false)}>
+          <HapticButton activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+            <HapticButton style={styles.modalClose} onPress={() => setShowUpgradeModal(false)}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
-            </TouchableOpacity>
+            </HapticButton>
             <View style={styles.modalIcon}>
               <Ionicons name="nutrition" size={32} color={colors.primary} />
             </View>
@@ -194,7 +185,7 @@ export default function DietScreen() {
             <Text style={styles.modalSubtitle}>{t("diet.upgradeSubtitle")}</Text>
             <ScrollView showsVerticalScrollIndicator={false}>
               {PLAN_OPTIONS.map((plan) => (
-                <TouchableOpacity
+                <HapticButton
                   key={plan.name}
                   style={[styles.planOptionCard, plan.highlighted && { borderColor: plan.color, borderWidth: 2 }]}
                   onPress={() => { setShowUpgradeModal(false); router.push("/settings/plans"); }}
@@ -214,12 +205,12 @@ export default function DietScreen() {
                       <Text style={styles.planFeatureText}>{f}</Text>
                     </View>
                   ))}
-                </TouchableOpacity>
+                </HapticButton>
               ))}
               <Text style={styles.modalNote}>{t("diet.upgradeNote")}</Text>
             </ScrollView>
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </HapticButton>
+        </HapticButton>
       </Modal>
 
       {Toast}

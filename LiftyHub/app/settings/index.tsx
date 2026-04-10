@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, Modal, TextInput, ActivityIndicator, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Alert, Modal, TextInput, ActivityIndicator, TouchableWithoutFeedback, Keyboard } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,6 +11,7 @@ import { useToast } from "@/src/hooks/useToast";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import { useUnits } from "@/src/context/UnitsContext";
 import { colors, spacing, planColors } from "@/src/styles/globalstyles";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 export default function Settings() {
 
@@ -118,7 +119,6 @@ export default function Settings() {
     }
   };
 
-
   const logout = async () => {
     try {
       await AsyncStorage.removeItem("token");
@@ -174,9 +174,9 @@ export default function Settings() {
     <View style={styles.container}>
 
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <HapticButton onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={22} color="white" />
-        </TouchableOpacity>
+        </HapticButton>
         <Text style={styles.title}>{t("settings.title")}</Text>
       </View>
 
@@ -321,16 +321,16 @@ export default function Settings() {
                         value={deletePassword}
                         onChangeText={setDeletePassword}
                       />
-                      <TouchableOpacity onPress={() => setShowDeletePassword(!showDeletePassword)}>
+                      <HapticButton onPress={() => setShowDeletePassword(!showDeletePassword)}>
                         <Ionicons
                           name={showDeletePassword ? "eye-off" : "eye"}
                           size={20}
                           color={colors.textSecondary}
                         />
-                      </TouchableOpacity>
+                      </HapticButton>
                     </View>
 
-                    <TouchableOpacity
+                    <HapticButton
                       style={[styles.modalButton, (!deletePassword || verifyingDelete) && styles.disabled]}
                       onPress={handleVerifyDeletePassword}
                       disabled={!deletePassword || verifyingDelete}
@@ -339,7 +339,7 @@ export default function Settings() {
                         ? <ActivityIndicator color="white" />
                         : <Text style={styles.modalButtonText}>{t("settings.deleteVerifyBtn")}</Text>
                       }
-                    </TouchableOpacity>
+                    </HapticButton>
                   </>
                 ) : (
                   <>
@@ -347,7 +347,7 @@ export default function Settings() {
                       {t("settings.deleteConfirmSubtitle")}
                     </Text>
 
-                    <TouchableOpacity
+                    <HapticButton
                       style={[styles.modalButtonDanger, deletingAccount && styles.disabled]}
                       onPress={handleConfirmDelete}
                       disabled={deletingAccount}
@@ -356,13 +356,13 @@ export default function Settings() {
                         ? <ActivityIndicator color="white" />
                         : <Text style={styles.modalButtonText}>{t("settings.deleteBtn")}</Text>
                       }
-                    </TouchableOpacity>
+                    </HapticButton>
                   </>
                 )}
 
-                <TouchableOpacity style={styles.modalCancel} onPress={resetDeleteModal}>
+                <HapticButton style={styles.modalCancel} onPress={resetDeleteModal}>
                   <Text style={styles.modalCancelText}>{t("settings.cancel")}</Text>
-                </TouchableOpacity>
+                </HapticButton>
 
               </View>
             </TouchableWithoutFeedback>
@@ -374,14 +374,14 @@ export default function Settings() {
 
       {/* MODAL DEV — plan override */}
       <Modal visible={showDevModal} transparent animationType="fade">
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowDevModal(false)}>
-          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+        <HapticButton style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowDevModal(false)}>
+          <HapticButton activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
             <Text style={styles.modalTitle}>🛠 Dev — Cambiar plan</Text>
             <Text style={styles.modalSubtitle}>
               Plan activo: <Text style={{ color: "white", fontWeight: "700" }}>{devActivePlan ?? plan?.name ?? "Free"}</Text>
             </Text>
             {DEV_PLANS.map((p) => (
-              <TouchableOpacity
+              <HapticButton
                 key={p.name}
                 style={[
                   styles.modalButtonDanger,
@@ -393,15 +393,15 @@ export default function Settings() {
                 disabled={devActivePlan === p.name}
               >
                 <Text style={styles.modalButtonText}>{p.name}</Text>
-              </TouchableOpacity>
+              </HapticButton>
             ))}
             {devActivePlan && (
-              <TouchableOpacity style={[styles.modalCancel, { marginTop: 4 }]} onPress={handleClearDevPlan}>
+              <HapticButton style={[styles.modalCancel, { marginTop: 4 }]} onPress={handleClearDevPlan}>
                 <Text style={styles.modalCancelText}>Usar plan real del servidor</Text>
-              </TouchableOpacity>
+              </HapticButton>
             )}
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </HapticButton>
+        </HapticButton>
       </Modal>
 
     </View>

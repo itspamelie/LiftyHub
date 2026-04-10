@@ -1,4 +1,4 @@
-import { Tabs, usePathname, router } from "expo-router";
+import { Tabs, useSegments, router } from "expo-router";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -27,7 +27,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
   return (
     <View style={[tabStyles.container, { paddingBottom: insets.bottom, height: 70 + insets.bottom }]}>
-      {visibleRoutes.map((route) => {
+{visibleRoutes.map((route) => {
         const { options } = descriptors[route.key];
         const isFocused = state.index === state.routes.findIndex(r => r.key === route.key);
         const isCenter = route.name === "profile";
@@ -76,9 +76,9 @@ export default function TabLayout() {
   const { language } = useLanguage();
   const { plan } = useSubscription();
   const membershipColor = planColors[plan?.name ?? "Free"];
-  const pathname = usePathname();
   const insets = useSafeAreaInsets();
-  const isProfile = pathname === "/profile" || pathname === "/(tabs)/profile";
+  const segments = useSegments();
+  const isProfile = segments[segments.length - 1] === "profile";
 
 
   return (
@@ -137,28 +137,29 @@ export default function TabLayout() {
 
       </Tabs>
 
-      {isProfile && (
-        <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
-          <TouchableOpacity
-            style={[overlayStyles.floatBtn, { top: insets.top + 12, left: 20 }]}
-            onPress={() => router.push("/friends")}
-          >
-            <Ionicons name="people" size={20} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[overlayStyles.floatBtn, { top: insets.top + 12, right: 20 }]}
-            onPress={() => router.push("/edit-profile")}
-          >
-            <Ionicons name="pencil" size={20} color="white" />
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* BOTÓN AVATAR CORPORAL - visible en todos los tabs */}
+      {/* OVERLAY GLOBAL - botones flotantes */}
       <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+        {/* Botones de perfil: solo visibles en la pestaña de perfil */}
+        {isProfile && (
+          <>
+            <TouchableOpacity
+              style={[overlayStyles.floatBtn, { top: insets.top + 12, left: 20 }]}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/friends"); }}
+            >
+              <Ionicons name="people" size={20} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[overlayStyles.floatBtn, { top: insets.top + 12, right: 20 }]}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/edit-profile"); }}
+            >
+              <Ionicons name="pencil" size={20} color="white" />
+            </TouchableOpacity>
+          </>
+        )}
+        {/* Botón avatar corporal: visible en todos los tabs */}
         <TouchableOpacity
-          style={[overlayStyles.bodyBtn, { bottom: 70 + insets.bottom + 12, right: 20 }]}
-          onPress={() => router.push("/body-avatar")}
+          style={[overlayStyles.bodyBtn, { bottom: 70 + insets.bottom + 12, right: 20, backgroundColor: membershipColor }]}
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/body-avatar"); }}
           activeOpacity={0.85}
         >
           <Ionicons name="body" size={22} color="white" />
@@ -213,15 +214,13 @@ const overlayStyles = StyleSheet.create({
     backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 999,
   },
   bodyBtn: {
     position: "absolute",
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#2C2C2E",
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: "#3A3A3C",
     justifyContent: "center",
     alignItems: "center",

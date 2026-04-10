@@ -1,17 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  ActivityIndicator,
-  Dimensions,
-  Platform,
-  Modal,
-  Share,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, Dimensions, Platform, Modal, Share, Alert,  } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -22,6 +9,7 @@ import { getRoutineExercises, getUserRoutineExercises } from "@/src/services/api
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { saveCache, loadCache } from "@/src/utils/cache";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const HERO_HEIGHT = 240;
@@ -176,11 +164,11 @@ export default function RoutineDetail() {
         <View style={styles.heroWrapper}>
           <Image source={{ uri: image ?? "" }} style={styles.heroImage} resizeMode="cover" />
           <View style={styles.heroOverlay} />
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <HapticButton style={styles.backButton} onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={20} color="white" />
-          </TouchableOpacity>
+          </HapticButton>
           {isUserRoutine === "true" && (
-            <TouchableOpacity
+            <HapticButton
               style={[styles.shareButton, { right: 70 }]}
               onPress={() => router.push({
                 pathname: "/routines/edit/[id]",
@@ -188,11 +176,11 @@ export default function RoutineDetail() {
               })}
             >
               <Ionicons name="pencil" size={20} color="white" />
-            </TouchableOpacity>
+            </HapticButton>
           )}
-          <TouchableOpacity style={styles.shareButton} onPress={() => setShowQR(true)}>
+          <HapticButton style={styles.shareButton} onPress={() => setShowQR(true)}>
             <Ionicons name="qr-code" size={20} color="white" />
-          </TouchableOpacity>
+          </HapticButton>
           {/* arco inferior para transición suave */}
           <View style={styles.heroArc} />
         </View>
@@ -289,7 +277,7 @@ export default function RoutineDetail() {
                         <Text style={styles.indexBadgeText}>{index + 1}</Text>
                       </View>
 
-                      <TouchableOpacity
+                      <HapticButton
                         style={styles.exerciseCard}
                         activeOpacity={canNavigate ? 0.75 : 1}
                         onPress={() => {
@@ -326,7 +314,7 @@ export default function RoutineDetail() {
                             <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
                           )}
                         </View>
-                      </TouchableOpacity>
+                      </HapticButton>
                     </View>
 
                     {/* DESCANSO entre ejercicios */}
@@ -347,14 +335,14 @@ export default function RoutineDetail() {
 
       {/* ── CTA STICKY ── */}
       <View style={styles.ctaWrapper}>
-        <TouchableOpacity
+        <HapticButton
           style={styles.ctaButton}
           activeOpacity={0.85}
           onPress={handleStartWorkout}
         >
           <Ionicons name="play-circle" size={22} color="white" />
           <Text style={styles.ctaText}>{t("routineDetail.startWorkout")}</Text>
-        </TouchableOpacity>
+        </HapticButton>
       </View>
 
       {/* ── MODAL QR ── */}
@@ -375,14 +363,14 @@ export default function RoutineDetail() {
 
             <Text style={styles.qrHint}>{t("routineDetail.qrHint")}</Text>
 
-            <TouchableOpacity style={styles.qrShareButton} onPress={handleShareText}>
+            <HapticButton style={styles.qrShareButton} onPress={handleShareText}>
               <Ionicons name="share" size={18} color="white" />
               <Text style={styles.qrShareText}>{t("routineDetail.shareAsText")}</Text>
-            </TouchableOpacity>
+            </HapticButton>
 
-            <TouchableOpacity style={styles.qrCloseButton} onPress={() => setShowQR(false)}>
+            <HapticButton style={styles.qrCloseButton} onPress={() => setShowQR(false)}>
               <Text style={styles.qrCloseText}>{t("routineDetail.close")}</Text>
-            </TouchableOpacity>
+            </HapticButton>
           </View>
         </View>
       </Modal>

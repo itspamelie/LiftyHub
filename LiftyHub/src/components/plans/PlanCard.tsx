@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 type Feature = {
   label: string;
@@ -81,12 +82,12 @@ export default function PlanCard({
       {onSelect && !isCurrent && (
         <>
           <View style={styles.divider} />
-          <TouchableOpacity
+          <HapticButton
             style={[styles.selectBtn, { backgroundColor: accentColor }]}
             onPress={onSelect}
           >
             <Text style={styles.selectBtnText}>{t("payment.selectPlan")}</Text>
-          </TouchableOpacity>
+          </HapticButton>
         </>
       )}
 

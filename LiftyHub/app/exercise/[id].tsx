@@ -1,7 +1,4 @@
-import {
-  View, Text, StyleSheet, ScrollView, FlatList, Image,
-  ActivityIndicator, TouchableOpacity, Platform, Dimensions, NativeSyntheticEvent, NativeScrollEvent
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, FlatList, Image, ActivityIndicator, Platform, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -9,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { getExerciseFiles } from "@/src/services/api";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const HERO_HEIGHT = 300;
@@ -114,9 +112,9 @@ export default function ExerciseDetail() {
 
         <View style={styles.carouselOverlay} />
 
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <HapticButton style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color="white" />
-        </TouchableOpacity>
+        </HapticButton>
 
         {slides.length > 1 && (
           <View style={styles.dots}>

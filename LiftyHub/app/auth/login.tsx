@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, Alert } from "react-native";
+import { View, Text, StyleSheet, TextInput, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, Alert } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,6 +7,7 @@ import { loginRequest } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 export default function Login() {
 
@@ -96,24 +97,24 @@ export default function Login() {
               />
             </View>
 
-            <TouchableOpacity
+            <HapticButton
               style={styles.forgotBtn}
               onPress={() => Alert.alert(t("login.forgotPasswordSoon"), t("login.forgotPasswordSoonMsg"))}
             >
               <Text style={styles.forgotText}>{t("login.forgotPassword")}</Text>
-            </TouchableOpacity>
+            </HapticButton>
 
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-            <TouchableOpacity style={[styles.loginButton, loading && { opacity: 0.7 }]} onPress={handleLogin} disabled={loading}>
+            <HapticButton style={[styles.loginButton, loading && { opacity: 0.7 }]} onPress={handleLogin} disabled={loading}>
               <Text style={styles.loginText}>{loading ? t("login.loading") : t("login.button")}</Text>
-            </TouchableOpacity>
+            </HapticButton>
 
-            <TouchableOpacity onPress={() => router.push("/auth/register" as any)}>
+            <HapticButton onPress={() => router.push("/auth/register" as any)}>
               <Text style={styles.register}>
                 {t("login.noAccount")} <Text style={styles.registerHighlight}>{t("login.createAccount")}</Text>
               </Text>
-            </TouchableOpacity>
+            </HapticButton>
 
             {/* SEPARATOR */}
             <View style={styles.separator}>
@@ -123,7 +124,7 @@ export default function Login() {
             </View>
 
             {/* GOOGLE BUTTON */}
-            <TouchableOpacity
+            <HapticButton
               style={styles.googleBtn}
               onPress={() => Alert.alert(t("login.googleSoon"), t("login.googleSoonMsg"))}
             >
@@ -131,7 +132,7 @@ export default function Login() {
                 <Text style={styles.googleIconText}>G</Text>
               </View>
               <Text style={styles.googleBtnText}>{t("login.googleButton")}</Text>
-            </TouchableOpacity>
+            </HapticButton>
 
           </View>
 

@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack } from "expo-router";
@@ -6,6 +6,7 @@ import Body from "react-native-body-highlighter";
 import { colors } from "@/src/styles/globalstyles";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 export default function BodyAvatarScreen() {
   const [side, setSide] = useState<"front" | "back">("front");
@@ -25,27 +26,26 @@ export default function BodyAvatarScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <HapticButton style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color="white" />
-        </TouchableOpacity>
+        </HapticButton>
         <Text style={styles.headerTitle}>Mi cuerpo</Text>
-        <View style={{ width: 40 }} />
       </View>
 
       {/* Toggle */}
       <View style={styles.toggle}>
-        <TouchableOpacity
+        <HapticButton
           style={[styles.toggleBtn, side === "front" && styles.toggleBtnActive]}
           onPress={() => setSide("front")}
         >
           <Text style={[styles.toggleText, side === "front" && styles.toggleTextActive]}>Frente</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </HapticButton>
+        <HapticButton
           style={[styles.toggleBtn, side === "back" && styles.toggleBtnActive]}
           onPress={() => setSide("back")}
         >
           <Text style={[styles.toggleText, side === "back" && styles.toggleTextActive]}>Espalda</Text>
-        </TouchableOpacity>
+        </HapticButton>
       </View>
 
       {/* Avatar */}
@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 16,
+    gap: 14,
     borderBottomWidth: 1,
     borderBottomColor: colors.card,
   },
@@ -93,11 +94,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    flex: 1,
     color: colors.text,
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontSize: 22,
+    fontWeight: "700",
   },
   toggle: {
     flexDirection: "row",

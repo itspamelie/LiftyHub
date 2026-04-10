@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TextInput, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { colors } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 export default function PaymentScreen() {
 
@@ -25,12 +26,12 @@ export default function PaymentScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <View style={styles.header}>
-        <TouchableOpacity
+        <HapticButton
           style={[styles.backBtn, { backgroundColor: accentColor }]}
           onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={20} color="white" />
-        </TouchableOpacity>
+        </HapticButton>
         <Text style={styles.headerTitle}>{t("payment.title")}</Text>
       </View>
 
@@ -104,12 +105,12 @@ export default function PaymentScreen() {
         </View>
 
         {/* BOTON */}
-        <TouchableOpacity
+        <HapticButton
           style={[styles.payButton, { backgroundColor: accentColor }]}
           onPress={handlePay}
         >
           <Text style={styles.payButtonText}>{t("payment.payBtn")} {price}</Text>
-        </TouchableOpacity>
+        </HapticButton>
 
       </ScrollView>
 

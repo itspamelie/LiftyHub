@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, StyleSheet, TextInput, ActivityIndicator, RefreshControl, Modal, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform } from "react-native";
+import { ScrollView, View, Text, StyleSheet, TextInput, ActivityIndicator, RefreshControl, Modal, FlatList, KeyboardAvoidingView, Platform } from "react-native";
 import { useState, useEffect, useCallback } from "react";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -12,6 +12,7 @@ import { useToast } from "@/src/hooks/useToast";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { saveCache, loadCache } from "@/src/utils/cache";
 import OfflineBanner from "@/src/components/OfflineBanner";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 type ExerciseFile = {
   file_path: string;
@@ -245,9 +246,9 @@ export default function ExercisesScreen() {
                 <Text style={styles.modalTitle}>
                   {addStep === "pick" ? t("exercises.addToRoutine") : selectedRoutine?.name ?? t("exercises.addToRoutine")}
                 </Text>
-                <TouchableOpacity onPress={() => setAddModalVisible(false)}>
+                <HapticButton onPress={() => setAddModalVisible(false)}>
                   <Ionicons name="close" size={22} color={colors.textSecondary} />
-                </TouchableOpacity>
+                </HapticButton>
               </View>
 
               {addStep === "pick" ? (
@@ -265,7 +266,7 @@ export default function ExercisesScreen() {
                     keyExtractor={(item) => String(item.id)}
                     style={{ maxHeight: 320 }}
                     renderItem={({ item }) => (
-                      <TouchableOpacity
+                      <HapticButton
                         style={styles.routineRow}
                         onPress={() => { setSelectedRoutine(item); setAddStep("config"); }}
                       >
@@ -279,7 +280,7 @@ export default function ExercisesScreen() {
                           ) : null}
                         </View>
                         <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-                      </TouchableOpacity>
+                      </HapticButton>
                     )}
                     ItemSeparatorComponent={() => <View style={styles.separator} />}
                   />
@@ -321,10 +322,10 @@ export default function ExercisesScreen() {
                   </View>
 
                   <View style={styles.modalBtns}>
-                    <TouchableOpacity style={styles.backBtn} onPress={() => setAddStep("pick")}>
+                    <HapticButton style={styles.backBtn} onPress={() => setAddStep("pick")}>
                       <Text style={styles.backBtnText}>{t("exercises.back")}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
+                    </HapticButton>
+                    <HapticButton
                       style={[styles.confirmBtn, adding && { opacity: 0.6 }]}
                       onPress={handleConfirmAdd}
                       disabled={adding}
@@ -333,7 +334,7 @@ export default function ExercisesScreen() {
                         ? <ActivityIndicator color="white" />
                         : <Text style={styles.confirmBtnText}>{t("exercises.add")}</Text>
                       }
-                    </TouchableOpacity>
+                    </HapticButton>
                   </View>
                 </View>
               )}

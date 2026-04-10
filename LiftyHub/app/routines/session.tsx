@@ -1,15 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-  ScrollView,
-  TextInput,
-  Platform,
-  KeyboardAvoidingView,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TextInput, Platform, KeyboardAvoidingView, Alert,  } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -22,6 +11,7 @@ import { useWorkout, SessionSnapshot } from "@/src/context/WorkoutContext";
 import NetInfo from "@react-native-community/netinfo";
 import { saveCache, loadCache } from "@/src/utils/cache";
 import { savePendingWorkout } from "@/src/utils/pendingSync";
+import HapticButton from "@/src/components/buttons/HapticButton";
 import {
   getRoutineExercises,
   getUserRoutineExercises,
@@ -446,9 +436,9 @@ export default function SessionScreen() {
       <View style={styles.centered}>
         <Ionicons name="barbell-outline" size={44} color={colors.textSecondary} />
         <Text style={styles.emptyText}>{t("session.noExercises")}</Text>
-        <TouchableOpacity style={styles.solidBtn} onPress={() => router.back()}>
+        <HapticButton style={styles.solidBtn} onPress={() => router.back()}>
           <Text style={styles.solidBtnText}>{t("session.back")}</Text>
-        </TouchableOpacity>
+        </HapticButton>
       </View>
     );
   }
@@ -495,7 +485,7 @@ export default function SessionScreen() {
             })}
           </ScrollView>
 
-          <TouchableOpacity
+          <HapticButton
             style={[styles.solidBtn, { width: "100%", marginTop: 8 }, saving && { opacity: 0.6 }]}
             onPress={handleFinish}
             disabled={saving}
@@ -504,7 +494,7 @@ export default function SessionScreen() {
               ? <ActivityIndicator color="white" />
               : <Text style={styles.solidBtnText}>{t("session.saveAndFinish")}</Text>
             }
-          </TouchableOpacity>
+          </HapticButton>
         </View>
       </View>
     );
@@ -533,9 +523,9 @@ export default function SessionScreen() {
             : `${t("session.nextExercise")} ${t("session.setOf")} ${currentSet + 1} ${t("session.of")} ${totalSets}`}
         </Text>
 
-        <TouchableOpacity style={styles.skipBtn} onPress={handleSkipRest}>
+        <HapticButton style={styles.skipBtn} onPress={handleSkipRest}>
           <Text style={styles.skipBtnText}>{t("session.skipRest")}</Text>
-        </TouchableOpacity>
+        </HapticButton>
       </View>
     );
   }
@@ -547,16 +537,16 @@ export default function SessionScreen() {
 
         {/* header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.headerBtn} onPress={handleMinimize}>
+          <HapticButton style={styles.headerBtn} onPress={handleMinimize}>
             <Ionicons name="chevron-down" size={20} color="white" />
-          </TouchableOpacity>
+          </HapticButton>
           <View style={styles.headerCenter}>
             <Text style={styles.elapsed}>{formatTime(elapsedSecs)}</Text>
             <Text style={styles.progress}>{exIndex + 1} / {exercises.length}</Text>
           </View>
-          <TouchableOpacity style={styles.headerBtnEnd} onPress={handleEndWorkout}>
+          <HapticButton style={styles.headerBtnEnd} onPress={handleEndWorkout}>
             <Ionicons name="close" size={20} color="white" />
-          </TouchableOpacity>
+          </HapticButton>
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -644,14 +634,14 @@ export default function SessionScreen() {
 
         {/* CTA */}
         <View style={styles.ctaWrapper}>
-          <TouchableOpacity style={styles.ctaBtn} onPress={handleCompleteSet}>
+          <HapticButton style={styles.ctaBtn} onPress={handleCompleteSet}>
             <Ionicons name="checkmark-circle" size={22} color="white" />
             <Text style={styles.ctaBtnText}>
               {currentSet >= totalSets && exIndex >= exercises.length - 1
                 ? t("session.finishWorkout")
                 : t("session.completeSet")}
             </Text>
-          </TouchableOpacity>
+          </HapticButton>
         </View>
 
       </View>

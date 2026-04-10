@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack } from "expo-router";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 const FAKE_FRIENDS = [
   { id: 1, name: "Carlos Méndez",   streak: 12, workouts: 48, avatar: null },
@@ -32,13 +33,13 @@ export default function FriendsScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <HapticButton style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color="white" />
-        </TouchableOpacity>
+        </HapticButton>
         <Text style={styles.headerTitle}>Amigos</Text>
-        <TouchableOpacity style={styles.addBtn}>
+        <HapticButton style={styles.addBtn}>
           <Ionicons name="person-add" size={20} color={colors.primary} />
-        </TouchableOpacity>
+        </HapticButton>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -54,12 +55,12 @@ export default function FriendsScreen() {
                     <Avatar name={req.name} />
                     <Text style={styles.friendName}>{req.name}</Text>
                     <View style={styles.requestActions}>
-                      <TouchableOpacity style={styles.acceptBtn}>
+                      <HapticButton style={styles.acceptBtn}>
                         <Ionicons name="checkmark" size={18} color="white" />
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.rejectBtn}>
+                      </HapticButton>
+                      <HapticButton style={styles.rejectBtn}>
                         <Ionicons name="close" size={18} color={colors.textSecondary} />
-                      </TouchableOpacity>
+                      </HapticButton>
                     </View>
                   </View>
                   {i < FAKE_REQUESTS.length - 1 && <View style={styles.divider} />}
@@ -86,9 +87,9 @@ export default function FriendsScreen() {
                     <Text style={styles.friendStatText}>{friend.workouts} entrenos</Text>
                   </View>
                 </View>
-                <TouchableOpacity>
+                <HapticButton>
                   <Ionicons name="ellipsis-horizontal" size={20} color={colors.textSecondary} />
-                </TouchableOpacity>
+                </HapticButton>
               </View>
               {i < FAKE_FRIENDS.length - 1 && <View style={styles.divider} />}
             </View>

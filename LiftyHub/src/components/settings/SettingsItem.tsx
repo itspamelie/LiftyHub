@@ -1,6 +1,7 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/src/styles/globalstyles";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 type Props = {
   icon: any;
@@ -23,7 +24,7 @@ export default function SettingsItem({
 }: Props) {
 
   return (
-    <TouchableOpacity
+    <HapticButton
       style={styles.row}
       activeOpacity={onPress ? 0.7 : 1}
       onPress={onPress}
@@ -53,7 +54,7 @@ export default function SettingsItem({
         )}
       </View>
 
-    </TouchableOpacity>
+    </HapticButton>
   );
 }
 

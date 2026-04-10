@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 type ExerciseFile = {
   file_path: string;
@@ -42,7 +43,7 @@ export default function ExerciseCard({ exercise, isFavorite, onToggleFavorite, o
         <Text style={styles.title}>{exercise.name}</Text>
         <Text style={styles.muscle}>{exercise.muscle}</Text>
 
-        <TouchableOpacity
+        <HapticButton
           style={styles.previewButton}
           onPress={() => router.push({
             pathname: "/exercise/[id]",
@@ -56,21 +57,21 @@ export default function ExerciseCard({ exercise, isFavorite, onToggleFavorite, o
           })}
         >
           <Text style={styles.previewText}>Vista previa</Text>
-        </TouchableOpacity>
+        </HapticButton>
       </View>
 
       {/* ACCIONES */}
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.favoriteButton} onPress={onToggleFavorite}>
+        <HapticButton style={styles.favoriteButton} onPress={onToggleFavorite}>
           <Ionicons
             name={isFavorite ? "heart" : "heart-outline"}
             size={18}
             color={isFavorite ? "#EF4444" : "white"}
           />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.addButton} onPress={onAdd}>
+        </HapticButton>
+        <HapticButton style={styles.addButton} onPress={onAdd}>
           <Ionicons name="add" size={20} color="white" />
-        </TouchableOpacity>
+        </HapticButton>
       </View>
 
     </View>

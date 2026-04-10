@@ -1,15 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Platform,
-  ScrollView
-} from "react-native";
+import { View, Text, StyleSheet, TextInput, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, ScrollView } from "react-native";
 
 import { useRouter, Stack } from "expo-router";
 import { useState } from "react";
@@ -18,6 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import BackButton from "@/src/components/buttons/backButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 export default function Register() {
 
@@ -124,13 +114,13 @@ export default function Register() {
                 value={password}
                 onChangeText={setPassword}
               />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <HapticButton onPress={() => setShowPassword(!showPassword)}>
                 <Ionicons
                   name={showPassword ? "eye-off" : "eye"}
                   size={20}
                   color={colors.textSecondary}
                 />
-              </TouchableOpacity>
+              </HapticButton>
             </View>
 
             {/* Confirm Password */}
@@ -144,17 +134,17 @@ export default function Register() {
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
               />
-              <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+              <HapticButton onPress={() => setShowConfirm(!showConfirm)}>
                 <Ionicons
                   name={showConfirm ? "eye-off" : "eye"}
                   size={20}
                   color={colors.textSecondary}
                 />
-              </TouchableOpacity>
+              </HapticButton>
             </View>
 
             {/* BOTÓN */}
-            <TouchableOpacity
+            <HapticButton
               style={[
                 styles.loginButton,
                 (!name || !email || !password || !confirmPassword) && styles.disabled
@@ -163,15 +153,15 @@ export default function Register() {
               disabled={!name || !email || !password || !confirmPassword}
             >
               <Text style={styles.loginText}>{t("register.button")}</Text>
-            </TouchableOpacity>
+            </HapticButton>
 
             {/* LOGIN */}
-            <TouchableOpacity onPress={() => router.push("/auth/login" as any)}>
+            <HapticButton onPress={() => router.push("/auth/login" as any)}>
               <Text style={styles.register}>
                 {t("register.hasAccount")}{" "}
                 <Text style={styles.registerHighlight}>{t("register.login")}</Text>
               </Text>
-            </TouchableOpacity>
+            </HapticButton>
 
           </View>
 

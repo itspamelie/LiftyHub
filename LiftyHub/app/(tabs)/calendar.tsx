@@ -1,14 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Modal,
-  FlatList,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, Modal, FlatList, ActivityIndicator, Alert,  } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
@@ -22,6 +12,7 @@ import { getUserRoutines, getRoutines, getUserRoutineSessions } from "@/src/serv
 import { loadWeekPlan, saveWeekPlan, setDayPlan, WeekPlan, DayPlan } from "@/src/utils/calendarPlan";
 import OfflineBanner from "@/src/components/OfflineBanner";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 type Routine = { id: number; name: string; isUserRoutine: boolean };
 
@@ -251,13 +242,13 @@ export default function CalendarScreen() {
               </Text>
             </View>
             {Object.keys(weekPlan).length > 0 && (
-              <TouchableOpacity
+              <HapticButton
                 onPress={handleResetPlan}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 style={styles.resetBtn}
               >
                 <Ionicons name="trash-outline" size={18} color="#EF4444" />
-              </TouchableOpacity>
+              </HapticButton>
             )}
           </View>
 
@@ -267,7 +258,7 @@ export default function CalendarScreen() {
               const isRoutine = plan?.type === "routine";
               const isRest = plan?.type === "rest";
               return (
-                <TouchableOpacity
+                <HapticButton
                   key={i}
                   style={styles.scheduleDayCol}
                   onPress={() => handleOpenModal(i)}
@@ -298,7 +289,7 @@ export default function CalendarScreen() {
                   {isRest && (
                     <Text style={styles.scheduleRestLabel}>{t("calendar.restDay")}</Text>
                   )}
-                </TouchableOpacity>
+                </HapticButton>
               );
             })}
           </View>
@@ -323,13 +314,13 @@ export default function CalendarScreen() {
         {/* ── Monthly calendar ── */}
         <View style={styles.calCard}>
           <View style={styles.monthRow}>
-            <TouchableOpacity onPress={prevMonth} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <HapticButton onPress={prevMonth} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Ionicons name="chevron-back" size={22} color={colors.text} />
-            </TouchableOpacity>
+            </HapticButton>
             <Text style={styles.monthLabel}>{monthNames[viewMonth]} {viewYear}</Text>
-            <TouchableOpacity onPress={nextMonth} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <HapticButton onPress={nextMonth} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Ionicons name="chevron-forward" size={22} color={colors.text} />
-            </TouchableOpacity>
+            </HapticButton>
           </View>
 
           <View style={styles.dayHeaderRow}>
@@ -351,7 +342,7 @@ export default function CalendarScreen() {
                 const isCurrentMonth = date.getMonth() === viewMonth;
 
                 return (
-                  <TouchableOpacity
+                  <HapticButton
                     key={di}
                     style={styles.daySlot}
                     onPress={() => {
@@ -392,7 +383,7 @@ export default function CalendarScreen() {
                       )}
                     </View>
                     {isRoutine && !isCompleted && <View style={styles.planDot} />}
-                  </TouchableOpacity>
+                  </HapticButton>
                 );
               })}
             </View>
@@ -434,7 +425,7 @@ export default function CalendarScreen() {
                 })}
               </Text>
             )}
-            <TouchableOpacity
+            <HapticButton
               style={styles.startBtn}
               onPress={() => {
                 setStartModalVisible(false);
@@ -452,8 +443,8 @@ export default function CalendarScreen() {
             >
               <Ionicons name="play" size={18} color="white" />
               <Text style={styles.startBtnText}>{t("calendar.startWorkout")}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </HapticButton>
+            <HapticButton
               style={styles.startModalAssignBtn}
               onPress={() => {
                 setStartModalVisible(false);
@@ -461,10 +452,10 @@ export default function CalendarScreen() {
               }}
             >
               <Text style={styles.startModalAssignBtnText}>{t("calendar.changeRoutine")}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelBtn} onPress={() => setStartModalVisible(false)}>
+            </HapticButton>
+            <HapticButton style={styles.cancelBtn} onPress={() => setStartModalVisible(false)}>
               <Text style={styles.cancelBtnText}>{t("calendar.cancel")}</Text>
-            </TouchableOpacity>
+            </HapticButton>
           </View>
         </View>
       </Modal>
@@ -494,18 +485,18 @@ export default function CalendarScreen() {
                 <Text style={styles.currentPlanName} numberOfLines={1}>
                   {(selectedPlan as any).routineName}
                 </Text>
-                <TouchableOpacity onPress={handleRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <HapticButton onPress={handleRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                   <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                </TouchableOpacity>
+                </HapticButton>
               </View>
             )}
             {selectedIsRest && (
               <View style={styles.currentRestBox}>
                 <Ionicons name="moon" size={16} color="#A78BFA" />
                 <Text style={styles.currentRestText}>{t("calendar.restDay")}</Text>
-                <TouchableOpacity onPress={handleRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <HapticButton onPress={handleRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                   <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                </TouchableOpacity>
+                </HapticButton>
               </View>
             )}
 
@@ -519,7 +510,7 @@ export default function CalendarScreen() {
                 keyExtractor={(r) => `${r.isUserRoutine}-${r.id}`}
                 style={styles.routineList}
                 renderItem={({ item }) => (
-                  <TouchableOpacity style={styles.routineItem} onPress={() => handleAssign(item)}>
+                  <HapticButton style={styles.routineItem} onPress={() => handleAssign(item)}>
                     <View style={styles.routineItemLeft}>
                       <Ionicons name="barbell-outline" size={18} color={colors.primary} />
                       <Text style={styles.routineItemName}>{item.name}</Text>
@@ -529,30 +520,30 @@ export default function CalendarScreen() {
                         <Text style={styles.appBadgeText}>App</Text>
                       </View>
                     )}
-                  </TouchableOpacity>
+                  </HapticButton>
                 )}
                 ItemSeparatorComponent={() => <View style={styles.separator} />}
                 ListFooterComponent={
                   !selectedIsRest ? (
                     <>
                       <View style={styles.separator} />
-                      <TouchableOpacity style={styles.routineItem} onPress={handleMarkRest}>
+                      <HapticButton style={styles.routineItem} onPress={handleMarkRest}>
                         <View style={styles.routineItemLeft}>
                           <Ionicons name="moon-outline" size={18} color="#A78BFA" />
                           <Text style={[styles.routineItemName, { color: "#A78BFA" }]}>
                             {t("calendar.markRest")}
                           </Text>
                         </View>
-                      </TouchableOpacity>
+                      </HapticButton>
                     </>
                   ) : null
                 }
               />
             )}
 
-            <TouchableOpacity style={styles.cancelBtn} onPress={() => setModalVisible(false)}>
+            <HapticButton style={styles.cancelBtn} onPress={() => setModalVisible(false)}>
               <Text style={styles.cancelBtnText}>{t("calendar.cancel")}</Text>
-            </TouchableOpacity>
+            </HapticButton>
           </View>
         </View>
       </Modal>

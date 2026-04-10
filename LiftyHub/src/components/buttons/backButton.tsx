@@ -1,18 +1,19 @@
-import { TouchableOpacity, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { colors } from "@/src/styles/globalstyles";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 export default function BackButton() {
 
   return (
-    <TouchableOpacity
+    <HapticButton
       style={styles.button}
       onPress={() => router.back()}
       activeOpacity={0.7}
     >
       <Ionicons name="arrow-back" size={20} color="white" />
-    </TouchableOpacity>
+    </HapticButton>
   );
 }
 

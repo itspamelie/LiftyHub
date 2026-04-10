@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWorkout } from "@/src/context/WorkoutContext";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { colors } from "@/src/styles/globalstyles";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 const formatTime = (secs: number) => {
   const m = Math.floor(secs / 60).toString().padStart(2, "0");
@@ -42,7 +43,7 @@ export default function WorkoutMiniPlayer() {
   };
 
   return (
-    <TouchableOpacity style={[styles.container, { paddingTop: insets.top + 8 }]} onPress={handleResume} activeOpacity={0.85}>
+    <HapticButton style={[styles.container, { paddingTop: insets.top + 8 }]} onPress={handleResume} activeOpacity={0.85}>
       <View style={styles.left}>
         <View style={styles.iconBg}>
           <Ionicons name="barbell" size={16} color={colors.primary} />
@@ -55,14 +56,14 @@ export default function WorkoutMiniPlayer() {
 
       <View style={styles.right}>
         <Text style={styles.timer}>{formatTime(elapsedSecs)}</Text>
-        <TouchableOpacity
+        <HapticButton
           onPress={handleEnd}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Ionicons name="close-circle" size={26} color={colors.textSecondary} />
-        </TouchableOpacity>
+        </HapticButton>
       </View>
-    </TouchableOpacity>
+    </HapticButton>
   );
 }
 

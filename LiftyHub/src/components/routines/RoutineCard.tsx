@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 type Props = {
   title: string;
@@ -15,7 +16,7 @@ type Props = {
 
 export default function RoutineCard({ title, duration, level, category, image, isFavorite, onToggleFavorite, onDelete, onPress }: Props) {
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={onPress ? 0.85 : 1}>
+    <HapticButton style={styles.card} onPress={onPress} activeOpacity={onPress ? 0.85 : 1}>
 
       {/* CONTENEDOR DE IMAGEN */}
       <View style={styles.imageContainer}>
@@ -29,13 +30,13 @@ export default function RoutineCard({ title, duration, level, category, image, i
 
         {/* FAVORITO */}
         {onToggleFavorite && (
-          <TouchableOpacity style={styles.favoriteButton} onPress={onToggleFavorite}>
+          <HapticButton style={styles.favoriteButton} onPress={onToggleFavorite}>
             <Ionicons
               name={isFavorite ? "heart" : "heart-outline"}
               size={20}
               color={isFavorite ? "#EF4444" : "white"}
             />
-          </TouchableOpacity>
+          </HapticButton>
         )}
 
       </View>
@@ -52,18 +53,18 @@ export default function RoutineCard({ title, duration, level, category, image, i
 
         <View style={styles.actions}>
           {onDelete && (
-            <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
+            <HapticButton style={styles.deleteButton} onPress={onDelete}>
               <Ionicons name="trash-outline" size={18} color="white" />
-            </TouchableOpacity>
+            </HapticButton>
           )}
-          <TouchableOpacity style={styles.playButton}>
+          <HapticButton style={styles.playButton}>
             <Ionicons name="play" size={18} color="white" />
-          </TouchableOpacity>
+          </HapticButton>
         </View>
 
       </View>
 
-    </TouchableOpacity>
+    </HapticButton>
   );
 }
 

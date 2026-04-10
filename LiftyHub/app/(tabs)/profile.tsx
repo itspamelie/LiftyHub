@@ -1,4 +1,5 @@
-import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, RefreshControl, Modal, Dimensions, TextInput, ActivityIndicator } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, RefreshControl, Modal, Dimensions, TextInput, ActivityIndicator } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, planColors } from "@/src/styles/globalstyles";
 import ProgressCard from "@/src/components/profile/ProgressCard";
@@ -9,7 +10,7 @@ import PersonalRecords from "@/src/components/stats/PersonalRecords";
 import { router } from "expo-router";
 import { useEffect, useState, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getUser, getUserProperties, getUserStreak, getUserRoutinesCount, getUserRoutineSessions, getExerciseLogs } from "@/src/services/api";
+import { getUser, getUserProperties, getUserStreak, getUserRoutinesCount, getUserRoutineSessions, getExerciseLogs, updateUserProperties } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import { useToast } from "@/src/hooks/useToast";
@@ -18,6 +19,7 @@ import { saveCache, loadCache } from "@/src/utils/cache";
 import OfflineBanner from "@/src/components/OfflineBanner";
 import { loadWeekPlan } from "@/src/utils/calendarPlan";
 import { BlurView } from "expo-blur";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -37,8 +39,6 @@ const STATS_PLAN_OPTIONS = [
   },
 ];
 
-
-
 // función para calcular la edad
 const calculateAge = (birthdate: string) => {
   const today = new Date();
@@ -54,7 +54,6 @@ const calculateAge = (birthdate: string) => {
 
   return age;
 };
-
 
 export default function ProfileScreen() {
 
@@ -76,6 +75,17 @@ export default function ProfileScreen() {
   const [animationTrigger, setAnimationTrigger] = useState(0);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showConverterModal, setShowConverterModal] = useState(false);
+
+  const [profileToken, setProfileToken] = useState<string | null>(null);
+  const [profileUserId, setProfileUserId] = useState<number | null>(null);
+  const [profilePropertiesId, setProfilePropertiesId] = useState<number | null>(null);
+  const [showHeightEdit, setShowHeightEdit] = useState(false);
+  const [showWeightEdit, setShowWeightEdit] = useState(false);
+  const [tempHeightEdit, setTempHeightEdit] = useState(170);
+  const [tempWeightEdit, setTempWeightEdit] = useState(70);
+
+  const HEIGHT_VALUES = Array.from({ length: 151 }, (_, i) => i + 100);
+  const WEIGHT_VALUES = Array.from({ length: 221 }, (_, i) => i + 30);
   const [converterValue, setConverterValue] = useState("");
   const [converterMode, setConverterMode] = useState<"kg" | "lbs">("kg");
 
@@ -107,6 +117,10 @@ export default function ProfileScreen() {
       const user   = userData.data ?? userData;
       const props  = propsData.data ?? propsData;
       const streak = streakData.data ?? streakData;
+
+      setProfileToken(token);
+      setProfileUserId(userParsed.id);
+      setProfilePropertiesId(props?.id ?? null);
 
       const routinesCount = routinesCountData?.count ?? 0;
       const currentStreak = streak?.current_streak ?? 0;
@@ -217,6 +231,23 @@ export default function ProfileScreen() {
     loadUser(true);
   }, []);
 
+  const handleSaveHeight = async (val: number) => {
+    if (!profileToken || !profilePropertiesId || !profileUserId) return;
+    try {
+      await updateUserProperties(profilePropertiesId, { user_id: profileUserId, stature: val }, profileToken);
+      setProfile((prev: any) => prev ? { ...prev, height: val.toString() } : prev);
+      showToast(t("editProfile.successTitle"), "success");
+    } catch { showToast(t("profile.errorLoad"), "error"); }
+  };
+
+  const handleSaveWeight = async (val: number) => {
+    if (!profileToken || !profilePropertiesId || !profileUserId) return;
+    try {
+      await updateUserProperties(profilePropertiesId, { user_id: profileUserId, weight: val }, profileToken);
+      setProfile((prev: any) => prev ? { ...prev, weight: val.toString() } : prev);
+      showToast(t("editProfile.successTitle"), "success");
+    } catch { showToast(t("profile.errorLoad"), "error"); }
+  };
 
   if (loading) {
     return (
@@ -238,8 +269,6 @@ export default function ProfileScreen() {
 
     <View style={styles.container}>
       {!isConnected && <OfflineBanner />}
-
-
 
       <ScrollView
         refreshControl={
@@ -279,13 +308,13 @@ export default function ProfileScreen() {
 
           {/* TABS INTERNOS */}
           <View style={styles.tabRow}>
-            <TouchableOpacity
+            <HapticButton
               style={[styles.tabBtn, activeTab === "perfil" && styles.tabBtnActive]}
               onPress={() => setActiveTab("perfil")}
             >
               <Text style={[styles.tabBtnText, activeTab === "perfil" && styles.tabBtnTextActive]}>{t("profile.tabProfile")}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </HapticButton>
+            <HapticButton
               style={[styles.tabBtn, activeTab === "stats" && styles.tabBtnActive]}
               onPress={() => hasStatsAccess ? setActiveTab("stats") : setShowStatsModal(true)}
             >
@@ -295,7 +324,7 @@ export default function ProfileScreen() {
                 )}
                 <Text style={[styles.tabBtnText, activeTab === "stats" && styles.tabBtnTextActive]}>{t("profile.tabStats")}</Text>
               </View>
-            </TouchableOpacity>
+            </HapticButton>
           </View>
 
           {activeTab === "stats" ? (
@@ -338,31 +367,41 @@ export default function ProfileScreen() {
               {/* INFORMACIÓN FÍSICA */}
               <Text style={styles.title}>{t("profile.physicalInfo")}</Text>
               <View style={styles.infoGrid}>
-                <InfoStatCard icon="resize" label={t("profile.height")} value={profile.height !== "0" ? `${profile.height} cm` : "—"} />
-                <InfoStatCard icon="scale" label={t("profile.weight")} value={profile.weight !== "0" ? `${profile.weight} kg` : "—"} />
+                <InfoStatCard
+                  icon="resize"
+                  label={t("profile.height")}
+                  value={profile.height !== "0" ? `${profile.height} cm` : "—"}
+                  onPress={() => { setTempHeightEdit(profile.height !== "0" ? parseInt(profile.height) : 170); setShowHeightEdit(true); }}
+                />
+                <InfoStatCard
+                  icon="scale"
+                  label={t("profile.weight")}
+                  value={profile.weight !== "0" ? `${profile.weight} kg` : "—"}
+                  onPress={() => { setTempWeightEdit(profile.weight !== "0" ? parseInt(profile.weight) : 70); setShowWeightEdit(true); }}
+                />
                 <InfoStatCard icon="body" label={t("profile.somatotype")} value={profile.somatotype} />
                 <InfoStatCard icon="flag" label={t("profile.goal")} value={profile.goal} />
               </View>
 
               {/* BOTÓN CONFIGURACIÓN */}
-              <TouchableOpacity
+              <HapticButton
                 style={styles.settingsButton}
                 onPress={() => router.push("/settings")}
               >
                 <Ionicons name="settings-outline" size={20} color={colors.textSecondary} />
                 <Text style={styles.settingsButtonText}>{t("profile.settings")}</Text>
                 <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-              </TouchableOpacity>
+              </HapticButton>
 
               {/* BOTÓN CALCULADORA */}
-              <TouchableOpacity
+              <HapticButton
                 style={styles.settingsButton}
                 onPress={() => { setConverterValue(""); setShowConverterModal(true); }}
               >
                 <Ionicons name="swap-horizontal-outline" size={20} color={colors.textSecondary} />
                 <Text style={styles.settingsButtonText}>{t("profile.converterTitle")}</Text>
                 <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-              </TouchableOpacity>
+              </HapticButton>
             </>
           )}
 
@@ -374,9 +413,9 @@ export default function ProfileScreen() {
       <Modal visible={showConverterModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <TouchableOpacity style={styles.modalClose} onPress={() => setShowConverterModal(false)}>
+            <HapticButton style={styles.modalClose} onPress={() => setShowConverterModal(false)}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
-            </TouchableOpacity>
+            </HapticButton>
             <View style={styles.modalIcon}>
               <Ionicons name="swap-horizontal-outline" size={32} color={colors.primary} />
             </View>
@@ -384,18 +423,18 @@ export default function ProfileScreen() {
 
             {/* TOGGLE MODO */}
             <View style={styles.converterToggle}>
-              <TouchableOpacity
+              <HapticButton
                 style={[styles.converterToggleBtn, converterMode === "kg" && styles.converterToggleBtnActive]}
                 onPress={() => { setConverterMode("kg"); setConverterValue(""); }}
               >
                 <Text style={[styles.converterToggleText, converterMode === "kg" && styles.converterToggleTextActive]}>kg → lbs</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+              </HapticButton>
+              <HapticButton
                 style={[styles.converterToggleBtn, converterMode === "lbs" && styles.converterToggleBtnActive]}
                 onPress={() => { setConverterMode("lbs"); setConverterValue(""); }}
               >
                 <Text style={[styles.converterToggleText, converterMode === "lbs" && styles.converterToggleTextActive]}>lbs → kg</Text>
-              </TouchableOpacity>
+              </HapticButton>
             </View>
 
             {/* INPUT */}
@@ -421,13 +460,71 @@ export default function ProfileScreen() {
         </View>
       </Modal>
 
+      {/* MODAL EDITAR ALTURA */}
+      <Modal visible={showHeightEdit} transparent animationType="fade">
+        <HapticButton style={styles.pickerOverlay} activeOpacity={1} onPress={() => setShowHeightEdit(false)}>
+          <HapticButton activeOpacity={1} onPress={() => {}} style={styles.pickerContent}>
+            <View style={styles.pickerHeader}>
+              <HapticButton onPress={() => setShowHeightEdit(false)}>
+                <Ionicons name="close" size={22} color={colors.textSecondary} />
+              </HapticButton>
+            </View>
+            <Picker
+              selectedValue={tempHeightEdit}
+              onValueChange={(val) => setTempHeightEdit(val)}
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
+            >
+              {HEIGHT_VALUES.map((h) => (
+                <Picker.Item key={h} label={`${h} cm`} value={h} />
+              ))}
+            </Picker>
+            <HapticButton
+              style={styles.confirmButton}
+              onPress={() => { handleSaveHeight(tempHeightEdit); setShowHeightEdit(false); }}
+            >
+              <Text style={styles.confirmText}>{t("onboarding.birthdateConfirm")}</Text>
+            </HapticButton>
+          </HapticButton>
+        </HapticButton>
+      </Modal>
+
+      {/* MODAL EDITAR PESO */}
+      <Modal visible={showWeightEdit} transparent animationType="fade">
+        <HapticButton style={styles.pickerOverlay} activeOpacity={1} onPress={() => setShowWeightEdit(false)}>
+          <HapticButton activeOpacity={1} onPress={() => {}} style={styles.pickerContent}>
+            <View style={styles.pickerHeader}>
+              <HapticButton onPress={() => setShowWeightEdit(false)}>
+                <Ionicons name="close" size={22} color={colors.textSecondary} />
+              </HapticButton>
+            </View>
+            <Picker
+              selectedValue={tempWeightEdit}
+              onValueChange={(val) => setTempWeightEdit(val)}
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
+            >
+              {WEIGHT_VALUES.map((w) => (
+                <Picker.Item key={w} label={`${w} kg`} value={w} />
+              ))}
+            </Picker>
+            <HapticButton
+              style={styles.confirmButton}
+              onPress={() => { handleSaveWeight(tempWeightEdit); setShowWeightEdit(false); }}
+            >
+              <Text style={styles.confirmText}>{t("onboarding.birthdateConfirm")}</Text>
+            </HapticButton>
+          </HapticButton>
+        </HapticButton>
+      </Modal>
+
       {/* MODAL UPGRADE STATS */}
       <Modal visible={showStatsModal} transparent animationType="slide">
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowStatsModal(false)}>
-          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
-            <TouchableOpacity style={styles.modalClose} onPress={() => setShowStatsModal(false)}>
+        <HapticButton style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowStatsModal(false)}>
+          <HapticButton activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+            <HapticButton style={styles.modalClose} onPress={() => setShowStatsModal(false)}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
-            </TouchableOpacity>
+            </HapticButton>
             <View style={styles.modalIcon}>
               <Ionicons name="bar-chart-outline" size={32} color={colors.primary} />
             </View>
@@ -437,7 +534,7 @@ export default function ProfileScreen() {
             </Text>
             <ScrollView showsVerticalScrollIndicator={false}>
               {STATS_PLAN_OPTIONS.map((p) => (
-                <TouchableOpacity
+                <HapticButton
                   key={p.name}
                   style={[styles.planCard, p.highlighted && { borderColor: p.color, borderWidth: 2 }]}
                   onPress={() => { setShowStatsModal(false); router.push("/settings/plans"); }}
@@ -457,12 +554,12 @@ export default function ProfileScreen() {
                       <Text style={styles.planFeatureText}>{f}</Text>
                     </View>
                   ))}
-                </TouchableOpacity>
+                </HapticButton>
               ))}
               <Text style={styles.modalNote}>Contacta a un administrador para actualizar tu plan.</Text>
             </ScrollView>
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </HapticButton>
+        </HapticButton>
       </Modal>
 
       {Toast}
@@ -875,6 +972,51 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 32,
     fontWeight: "bold",
+  },
+
+  pickerOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  pickerContent: {
+    backgroundColor: "#1C1C1E",
+    borderRadius: 20,
+    padding: 20,
+    width: "85%",
+    alignItems: "center",
+  },
+
+  pickerHeader: {
+    width: "100%",
+    alignItems: "flex-end",
+    marginBottom: 4,
+  },
+
+  picker: {
+    width: "100%",
+    color: "white",
+  },
+
+  pickerItem: {
+    color: "white",
+    fontSize: 18,
+  },
+
+  confirmButton: {
+    marginTop: 10,
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 20,
+  },
+
+  confirmText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 15,
   },
 
 });

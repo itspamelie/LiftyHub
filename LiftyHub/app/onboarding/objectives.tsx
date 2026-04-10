@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView,  } from "react-native";
 
 import { useRouter, Stack } from "expo-router";
 import { useState } from "react";
@@ -13,6 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import BackButton from "@/src/components/buttons/backButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 export default function Objectives() {
   const router = useRouter();
@@ -46,7 +41,7 @@ export default function Objectives() {
           {objectives.map((item) => {
             const isActive = selected === item.key;
             return (
-              <TouchableOpacity
+              <HapticButton
                 key={item.key}
                 style={[styles.option, isActive && styles.optionActive]}
                 onPress={() => setSelected(item.key)}
@@ -59,18 +54,18 @@ export default function Objectives() {
                 <Text style={[styles.optionText, isActive && styles.optionTextActive]}>
                   {item.label}
                 </Text>
-              </TouchableOpacity>
+              </HapticButton>
             );
           })}
         </View>
 
-        <TouchableOpacity
+        <HapticButton
           style={[styles.button, !selected && styles.disabled]}
           onPress={handleNext}
           disabled={!selected}
         >
           <Text style={styles.buttonText}>{t("onboarding.objectiveContinue")}</Text>
-        </TouchableOpacity>
+        </HapticButton>
       </ScrollView>
     </View>
   );

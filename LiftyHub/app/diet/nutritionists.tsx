@@ -1,13 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  Modal,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, Modal,  } from "react-native";
 import { router } from "expo-router";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,6 +7,7 @@ import { getNutritionistProfiles } from "@/src/services/api";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
 import BackButton from "@/src/components/buttons/backButton";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 type Nutritionist = {
   id: number;
@@ -137,7 +129,7 @@ export default function NutritionistsScreen() {
               ) : null}
 
               <View style={styles.actionsRow}>
-                <TouchableOpacity
+                <HapticButton
                   style={styles.viewBtn}
                   onPress={() => router.push({
                     pathname: "/nutritionist-profile",
@@ -153,11 +145,11 @@ export default function NutritionistsScreen() {
                 >
                   <Ionicons name="person-outline" size={15} color={colors.primary} />
                   <Text style={styles.viewBtnText}>{t("nutritionists.viewProfile")}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.selectBtn} onPress={() => handleSelect(n)}>
+                </HapticButton>
+                <HapticButton style={styles.selectBtn} onPress={() => handleSelect(n)}>
                   <Text style={styles.selectBtnText}>{t("nutritionists.select")}</Text>
                   <Ionicons name="arrow-forward" size={15} color="white" />
-                </TouchableOpacity>
+                </HapticButton>
               </View>
 
             </View>
@@ -178,12 +170,12 @@ export default function NutritionistsScreen() {
               {t("nutritionists.confirmSubtitle2")}
             </Text>
             <View style={styles.modalBtns}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowConfirm(false)}>
+              <HapticButton style={styles.cancelBtn} onPress={() => setShowConfirm(false)}>
                 <Text style={styles.cancelBtnText}>{t("nutritionists.cancel")}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
+              </HapticButton>
+              <HapticButton style={styles.confirmBtn} onPress={handleConfirm}>
                 <Text style={styles.confirmBtnText}>{t("nutritionists.confirm")}</Text>
-              </TouchableOpacity>
+              </HapticButton>
             </View>
           </View>
         </View>
@@ -198,9 +190,9 @@ export default function NutritionistsScreen() {
             </View>
             <Text style={styles.modalTitle}>{t("nutritionists.successTitle")}</Text>
             <Text style={styles.modalSubtitle}>{t("nutritionists.successSubtitle")}</Text>
-            <TouchableOpacity style={styles.confirmBtn} onPress={handleSuccessClose}>
+            <HapticButton style={styles.confirmBtn} onPress={handleSuccessClose}>
               <Text style={styles.confirmBtnText}>{t("nutritionists.understood")}</Text>
-            </TouchableOpacity>
+            </HapticButton>
           </View>
         </View>
       </Modal>

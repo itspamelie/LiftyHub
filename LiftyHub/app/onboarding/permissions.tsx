@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, Alert, Modal, ActivityIndicator } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,6 +10,7 @@ import { registerRequest, createUserProperties } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import BackButton from "@/src/components/buttons/backButton";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 type PermissionStatus = "idle" | "granted" | "denied";
 
@@ -183,7 +184,7 @@ export default function Permissions() {
 
       <Text style={styles.hint}>{t("onboarding.permissionsHint")}</Text>
 
-      <TouchableOpacity
+      <HapticButton
         style={[styles.button, (!allStepsDone || loading) && styles.disabled]}
         onPress={handleFinish}
         disabled={!allStepsDone || loading}
@@ -195,7 +196,7 @@ export default function Permissions() {
             {allStepsDone ? t("onboarding.finish") : t("onboarding.loadingAccount")}
           </Text>
         )}
-      </TouchableOpacity>
+      </HapticButton>
 
       {/* MODAL AUTOMÁTICO DE PERMISOS */}
       <Modal visible={showModal && !allStepsDone} transparent animationType="fade">
@@ -230,7 +231,7 @@ export default function Permissions() {
               <Text style={styles.modalDesc}>{currentStep.description}</Text>
 
               {/* BOTONES */}
-              <TouchableOpacity
+              <HapticButton
                 style={[styles.acceptBtn, { backgroundColor: currentStep.color }, stepLoading && styles.disabled]}
                 onPress={handleAccept}
                 disabled={stepLoading}
@@ -238,15 +239,15 @@ export default function Permissions() {
                 {stepLoading
                   ? <ActivityIndicator color="white" />
                   : <Text style={styles.acceptText}>{t("onboarding.accept")}</Text>}
-              </TouchableOpacity>
+              </HapticButton>
 
-              <TouchableOpacity
+              <HapticButton
                 style={styles.declineBtn}
                 onPress={handleDecline}
                 disabled={stepLoading}
               >
                 <Text style={styles.declineText}>{t("onboarding.decline")}</Text>
-              </TouchableOpacity>
+              </HapticButton>
 
             </View>
           )}

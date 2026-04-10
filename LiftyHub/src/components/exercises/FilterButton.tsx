@@ -1,5 +1,6 @@
-import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { Text, StyleSheet } from "react-native";
 import { colors } from "@/src/styles/globalstyles";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 type Props = {
   label: string;
@@ -9,14 +10,14 @@ type Props = {
 
 export default function FilterButton({ label, active, onPress }: Props) {
   return (
-    <TouchableOpacity
+    <HapticButton
       style={[styles.button, active && styles.activeButton]}
       onPress={onPress}
     >
       <Text style={[styles.text, active && styles.activeText]}>
         {label}
       </Text>
-    </TouchableOpacity>
+    </HapticButton>
   );
 }
 

@@ -1,17 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Modal,
-  FlatList,
-  Animated,
-} from "react-native";
+import { View, Text, StyleSheet, TextInput, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Modal, FlatList, Animated,  } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect, useRef } from "react";
 import { router } from "expo-router";
@@ -20,6 +7,7 @@ import { useLanguage } from "@/src/context/LanguageContext";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { createUserRoutine, createUserRoutineExercise, getExercises } from "@/src/services/api";
 import { useToast } from "@/src/hooks/useToast";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 type Exercise = { id: number; name: string; muscle: string; categorie: string };
 
@@ -225,12 +213,12 @@ export default function NewRoutineScreen() {
     >
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity
+        <HapticButton
           style={styles.backButton}
           onPress={() => (step === 1 ? router.back() : setStep(step - 1))}
         >
           <Ionicons name="arrow-back" size={20} color="white" />
-        </TouchableOpacity>
+        </HapticButton>
         <Text style={styles.headerTitle}>{t("routines.modal.headerTitle")}</Text>
       </View>
       <View style={styles.headerDivider} />
@@ -280,7 +268,7 @@ export default function NewRoutineScreen() {
               {levels.map((nivel) => {
                 const active = form.level === nivel.key;
                 return (
-                  <TouchableOpacity
+                  <HapticButton
                     key={nivel.key}
                     style={[styles.optionCard, active && styles.optionCardActive]}
                     onPress={() => setForm({ ...form, level: nivel.key })}
@@ -292,7 +280,7 @@ export default function NewRoutineScreen() {
                       {nivel.label}
                     </Text>
                     {active && <Ionicons name="checkmark-circle" size={22} color={colors.primary} />}
-                  </TouchableOpacity>
+                  </HapticButton>
                 );
               })}
             </View>
@@ -306,7 +294,7 @@ export default function NewRoutineScreen() {
                 {filters.map((cat) => {
                   const active = form.category === cat.key;
                   return (
-                    <TouchableOpacity
+                    <HapticButton
                       key={cat.key}
                       style={[styles.categoryButton, active && styles.categoryButtonActive]}
                       onPress={() => setForm({ ...form, category: cat.key })}
@@ -314,7 +302,7 @@ export default function NewRoutineScreen() {
                       <Text style={[styles.categoryText, active && styles.categoryTextActive]}>
                         {cat.label}
                       </Text>
-                    </TouchableOpacity>
+                    </HapticButton>
                   );
                 })}
               </View>
@@ -336,23 +324,23 @@ export default function NewRoutineScreen() {
             <View style={styles.stepContent}>
               <Text style={styles.sectionLabel}>{t("routines.modal.restQuestion")}</Text>
               <View style={styles.restToggleRow}>
-                <TouchableOpacity
+                <HapticButton
                   style={[styles.restToggleButton, restEnabled === true && styles.restToggleActive]}
                   onPress={() => setRestEnabled(true)}
                 >
                   <Ionicons name="checkmark-circle-outline" size={18} color={restEnabled === true ? colors.primary : colors.textSecondary} />
                   <Text style={[styles.restToggleText, restEnabled === true && styles.restToggleTextActive]}>{t("routines.modal.yes")}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                </HapticButton>
+                <HapticButton
                   style={[styles.restToggleButton, restEnabled === false && styles.restToggleActive]}
                   onPress={() => setRestEnabled(false)}
                 >
                   <Ionicons name="close-circle-outline" size={18} color={restEnabled === false ? colors.primary : colors.textSecondary} />
                   <Text style={[styles.restToggleText, restEnabled === false && styles.restToggleTextActive]}>{t("routines.modal.no")}</Text>
-                </TouchableOpacity>
+                </HapticButton>
               </View>
               {restEnabled === true && (
-                <TouchableOpacity
+                <HapticButton
                   style={styles.restPickerTrigger}
                   onPress={() => {
                     setShowRestPicker(true);
@@ -366,7 +354,7 @@ export default function NewRoutineScreen() {
                   <Ionicons name="timer-outline" size={18} color={colors.primary} />
                   <Text style={styles.restPickerValue}>{formatRest(Number(defaultRest))}</Text>
                   <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
-                </TouchableOpacity>
+                </HapticButton>
               )}
 
               <Text style={styles.sectionLabel}>{t("routines.modal.image")}</Text>
@@ -396,23 +384,23 @@ export default function NewRoutineScreen() {
                       {sel.sets} series × {sel.repetitions} reps · {formatRest(Number(sel.seconds_rest))}
                     </Text>
                   </View>
-                  <TouchableOpacity onPress={() => handleRemoveExercise(sel.uid)}>
+                  <HapticButton onPress={() => handleRemoveExercise(sel.uid)}>
                     <Ionicons name="close-circle" size={22} color={colors.danger} />
-                  </TouchableOpacity>
+                  </HapticButton>
                 </View>
               ))}
 
-              <TouchableOpacity
+              <HapticButton
                 style={styles.addExerciseButton}
                 onPress={() => { setSearchQuery(""); setShowPicker(true); }}
               >
                 <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
                 <Text style={styles.addExerciseText}>{t("routines.modal.addExercise")}</Text>
-              </TouchableOpacity>
+              </HapticButton>
             </View>
           )}
           {/* BOTÓN CONTINUAR / CREAR */}
-          <TouchableOpacity
+          <HapticButton
             style={[styles.continueButton, (!canContinue() || saving) && { opacity: 0.5 }]}
             onPress={step < TOTAL_STEPS ? () => setStep(step + 1) : handleSave}
             disabled={!canContinue() || saving}
@@ -424,7 +412,7 @@ export default function NewRoutineScreen() {
                 {step < TOTAL_STEPS ? t("routines.modal.continue") : t("routines.modal.button")}
               </Text>
             )}
-          </TouchableOpacity>
+          </HapticButton>
         </View>
       </ScrollView>
 
@@ -444,9 +432,9 @@ export default function NewRoutineScreen() {
       <Modal visible={showPicker} animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity style={styles.backButton} onPress={() => setShowPicker(false)}>
+            <HapticButton style={styles.backButton} onPress={() => setShowPicker(false)}>
               <Ionicons name="arrow-back" size={20} color="white" />
-            </TouchableOpacity>
+            </HapticButton>
             <Text style={styles.modalTitle}>{t("routines.modal.selectExercise")}</Text>
           </View>
 
@@ -465,13 +453,13 @@ export default function NewRoutineScreen() {
             data={filteredExercises}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
-              <TouchableOpacity style={styles.exerciseItem} onPress={() => handleSelectExercise(item)}>
+              <HapticButton style={styles.exerciseItem} onPress={() => handleSelectExercise(item)}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.exerciseItemName}>{item.name}</Text>
                   <Text style={styles.exerciseItemMeta}>{item.muscle} · {item.categorie}</Text>
                 </View>
                 <Ionicons name="add-circle-outline" size={22} color={colors.primary} />
-              </TouchableOpacity>
+              </HapticButton>
             )}
             ListEmptyComponent={
               <Text style={styles.emptyText}>{t("routines.modal.noExercisesFound")}</Text>
@@ -484,13 +472,13 @@ export default function NewRoutineScreen() {
       {/* MODAL PICKER DESCANSO */}
       <Modal visible={showRestPicker} transparent animationType="slide">
         <View style={styles.restPickerOverlay}>
-          <TouchableOpacity style={StyleSheet.absoluteFill} onPress={() => setShowRestPicker(false)} />
+          <HapticButton style={StyleSheet.absoluteFill} onPress={() => setShowRestPicker(false)} />
           <View style={styles.restPickerSheet}>
             <View style={styles.restPickerHeader}>
               <Text style={styles.restPickerTitle}>{t("routines.modal.restPickerTitle")}</Text>
-              <TouchableOpacity onPress={() => setShowRestPicker(false)}>
+              <HapticButton onPress={() => setShowRestPicker(false)}>
                 <Text style={styles.restPickerDoneText}>{t("routines.modal.done")}</Text>
-              </TouchableOpacity>
+              </HapticButton>
             </View>
 
             <View style={styles.restPickerBody}>
@@ -510,7 +498,7 @@ export default function NewRoutineScreen() {
                 {REST_OPTIONS.map((secs) => {
                   const selected = secs.toString() === defaultRest;
                   return (
-                    <TouchableOpacity
+                    <HapticButton
                       key={secs}
                       style={styles.pickerItem}
                       onPress={() => {
@@ -522,7 +510,7 @@ export default function NewRoutineScreen() {
                       <Text style={[styles.pickerItemText, selected && styles.pickerItemTextSelected]}>
                         {formatRest(secs)}
                       </Text>
-                    </TouchableOpacity>
+                    </HapticButton>
                   );
                 })}
               </ScrollView>
@@ -571,13 +559,13 @@ export default function NewRoutineScreen() {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.saveButton} onPress={handleConfirmExercise}>
+            <HapticButton style={styles.saveButton} onPress={handleConfirmExercise}>
               <Text style={styles.saveButtonText}>{t("routines.modal.confirm")}</Text>
-            </TouchableOpacity>
+            </HapticButton>
 
-            <TouchableOpacity style={styles.cancelButton} onPress={() => setPendingExercise(null)}>
+            <HapticButton style={styles.cancelButton} onPress={() => setPendingExercise(null)}>
               <Text style={styles.cancelButtonText}>{t("settings.cancel")}</Text>
-            </TouchableOpacity>
+            </HapticButton>
           </View>
         </View>
       </Modal>
@@ -634,7 +622,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
 
   stepCounter: {
     color: colors.textSecondary,

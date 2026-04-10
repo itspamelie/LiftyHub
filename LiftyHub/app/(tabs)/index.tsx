@@ -1,4 +1,4 @@
-import { FlatList, View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl, Alert, Modal, Dimensions, ScrollView, Linking } from "react-native";
+import { FlatList, View, Text, StyleSheet, TextInput, ActivityIndicator, RefreshControl, Alert, Modal, Dimensions, ScrollView, Linking } from "react-native";
 import RoutineCard from "@/src/components/routines/RoutineCard";
 import FilterButton from "@/src/components/exercises/FilterButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
@@ -15,6 +15,7 @@ import { useToast } from "@/src/hooks/useToast";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { saveCache, loadCache } from "@/src/utils/cache";
 import OfflineBanner from "@/src/components/OfflineBanner";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -390,27 +391,27 @@ export default function RoutinesScreen() {
 
             {activeTab === "mine" && (
               <View style={styles.headerButtons}>
-                <TouchableOpacity style={styles.iconButton} onPress={handleOpenScanner}>
+                <HapticButton style={styles.iconButton} onPress={handleOpenScanner}>
                   <Ionicons name="qr-code" size={20} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconButton} onPress={() => router.push("/routines/new")}>
+                </HapticButton>
+                <HapticButton style={styles.iconButton} onPress={() => router.push("/routines/new")}>
                   <Ionicons name="add" size={26} color="white" />
-                </TouchableOpacity>
+                </HapticButton>
               </View>
             )}
           </View>
 
           {/* TAB SWITCH */}
           <View style={styles.tabRow}>
-            <TouchableOpacity
+            <HapticButton
               style={[styles.tabBtn, activeTab === "mine" && styles.tabBtnActive]}
               onPress={() => handleTabSwitch("mine")}
             >
               <Text style={[styles.tabBtnText, activeTab === "mine" && styles.tabBtnTextActive]}>
                 {t("routines.myRoutines")}
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </HapticButton>
+            <HapticButton
               style={[styles.tabBtn, activeTab === "app" && styles.tabBtnActive]}
               onPress={() => handleTabSwitch("app")}
             >
@@ -422,7 +423,7 @@ export default function RoutinesScreen() {
                   {t("routines.appRoutines")}
                 </Text>
               </View>
-            </TouchableOpacity>
+            </HapticButton>
           </View>
 
           {/* FILTROS */}
@@ -477,20 +478,20 @@ export default function RoutinesScreen() {
       {/* BOTÓN reabrir modal */}
       {activeTab === "app" && !hasAppAccess && !showUpgradeModal && (
         <View style={styles.unlockBar}>
-          <TouchableOpacity style={styles.unlockButton} onPress={() => setShowUpgradeModal(true)}>
+          <HapticButton style={styles.unlockButton} onPress={() => setShowUpgradeModal(true)}>
             <Ionicons name="lock-closed" size={16} color="white" />
             <Text style={styles.unlockText}>{t("routines.unlockButton")}</Text>
-          </TouchableOpacity>
+          </HapticButton>
         </View>
       )}
 
       {/* MODAL UPGRADE */}
       <Modal visible={showUpgradeModal} transparent animationType="slide">
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowUpgradeModal(false)}>
-          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
-            <TouchableOpacity style={styles.modalClose} onPress={() => setShowUpgradeModal(false)}>
+        <HapticButton style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowUpgradeModal(false)}>
+          <HapticButton activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+            <HapticButton style={styles.modalClose} onPress={() => setShowUpgradeModal(false)}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
-            </TouchableOpacity>
+            </HapticButton>
             <View style={styles.modalIcon}>
               <Ionicons name="barbell" size={32} color={colors.primary} />
             </View>
@@ -502,7 +503,7 @@ export default function RoutinesScreen() {
             </Text>
             <ScrollView showsVerticalScrollIndicator={false}>
               {PLAN_OPTIONS.map((plan) => (
-                <TouchableOpacity
+                <HapticButton
                   key={plan.name}
                   style={[styles.planCard, plan.highlighted && { borderColor: plan.color, borderWidth: 2 }]}
                   onPress={() => { setShowUpgradeModal(false); router.push("/settings/plans"); }}
@@ -522,12 +523,12 @@ export default function RoutinesScreen() {
                       <Text style={styles.planFeatureText}>{f}</Text>
                     </View>
                   ))}
-                </TouchableOpacity>
+                </HapticButton>
               ))}
               <Text style={styles.modalNote}>Contacta a un administrador para actualizar tu plan.</Text>
             </ScrollView>
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </HapticButton>
+        </HapticButton>
       </Modal>
 
       {/* MODAL SCANNER QR */}
@@ -543,9 +544,9 @@ export default function RoutinesScreen() {
             <View style={styles.scannerFrame} />
             <Text style={styles.scannerHint}>Apunta al QR de la rutina</Text>
           </View>
-          <TouchableOpacity style={styles.scannerClose} onPress={() => setShowScanner(false)}>
+          <HapticButton style={styles.scannerClose} onPress={() => setShowScanner(false)}>
             <Ionicons name="close" size={28} color="white" />
-          </TouchableOpacity>
+          </HapticButton>
         </View>
       </Modal>
 
@@ -553,11 +554,11 @@ export default function RoutinesScreen() {
 
       {/* MODAL PERMISO CÁMARA */}
       <Modal visible={showCameraPermModal} transparent animationType="fade">
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowCameraPermModal(false)}>
-          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
-            <TouchableOpacity style={styles.modalClose} onPress={() => setShowCameraPermModal(false)}>
+        <HapticButton style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowCameraPermModal(false)}>
+          <HapticButton activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+            <HapticButton style={styles.modalClose} onPress={() => setShowCameraPermModal(false)}>
               <Ionicons name="close" size={20} color={colors.textSecondary} />
-            </TouchableOpacity>
+            </HapticButton>
             <View style={styles.modalIcon}>
               <Ionicons name="camera" size={32} color={colors.primary} />
             </View>
@@ -567,28 +568,28 @@ export default function RoutinesScreen() {
                 ? "Bloqueaste el acceso a la cámara. Ve a Ajustes para habilitarlo y poder escanear rutinas por QR."
                 : "Necesitamos acceso a tu cámara para escanear códigos QR de rutinas."}
             </Text>
-            <TouchableOpacity
+            <HapticButton
               style={[styles.planCard, { alignItems: "center", paddingVertical: 14, backgroundColor: colors.primary }]}
               onPress={handleRequestCameraPermission}
             >
               <Text style={{ color: "white", fontWeight: "700" }}>
                 {cameraPermission?.status === "denied" ? "Abrir Ajustes" : "Permitir cámara"}
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </HapticButton>
+            <HapticButton
               style={[styles.planCard, { alignItems: "center", paddingVertical: 14, borderColor: "#2C2C2E", borderWidth: 1, marginTop: 8 }]}
               onPress={() => setShowCameraPermModal(false)}
             >
               <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>Cancelar</Text>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        </TouchableOpacity>
+            </HapticButton>
+          </HapticButton>
+        </HapticButton>
       </Modal>
 
       {/* MODAL ADVERTENCIA SCANNER FREE */}
       <Modal visible={showScannerWarning} transparent animationType="fade">
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowScannerWarning(false)}>
-          <TouchableOpacity activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+        <HapticButton style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowScannerWarning(false)}>
+          <HapticButton activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
             <View style={styles.modalIcon}>
               <Ionicons name="qr-code" size={32} color={colors.primary} />
             </View>
@@ -602,30 +603,30 @@ export default function RoutinesScreen() {
               })()}.
             </Text>
             <View style={{ flexDirection: "row", gap: 10 }}>
-              <TouchableOpacity
+              <HapticButton
                 style={[styles.planCard, { flex: 1, alignItems: "center", paddingVertical: 14, borderColor: "#2C2C2E", borderWidth: 1 }]}
                 onPress={() => setShowScannerWarning(false)}
               >
                 <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+              </HapticButton>
+              <HapticButton
                 style={[styles.planCard, { flex: 1, alignItems: "center", paddingVertical: 14, backgroundColor: colors.primary }]}
                 onPress={handleScannerWarningConfirm}
               >
                 <Text style={{ color: "white", fontWeight: "700" }}>Escanear</Text>
-              </TouchableOpacity>
+              </HapticButton>
             </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </HapticButton>
+        </HapticButton>
       </Modal>
 
       {/* MODAL CONFIRMACIÓN IMPORTAR */}
       <Modal visible={!!scannedData} transparent animationType="slide" onRequestClose={() => setScannedData(null)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <TouchableOpacity style={styles.modalClose} onPress={() => setScannedData(null)}>
+            <HapticButton style={styles.modalClose} onPress={() => setScannedData(null)}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
-            </TouchableOpacity>
+            </HapticButton>
 
             <View style={styles.modalIcon}>
               <Ionicons name="download-outline" size={32} color={colors.primary} />
@@ -653,7 +654,7 @@ export default function RoutinesScreen() {
               </View>
             )}
 
-            <TouchableOpacity
+            <HapticButton
               style={[styles.importButton, importing && { opacity: 0.6 }]}
               onPress={handleImportRoutine}
               disabled={importing}
@@ -662,7 +663,7 @@ export default function RoutinesScreen() {
                 ? <ActivityIndicator color="white" />
                 : <Text style={styles.importButtonText}>{t("routines.addButton")}</Text>
               }
-            </TouchableOpacity>
+            </HapticButton>
           </View>
         </View>
       </Modal>

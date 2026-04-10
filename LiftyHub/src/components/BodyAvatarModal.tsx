@@ -1,8 +1,9 @@
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Modal, View, Text, StyleSheet } from "react-native";
 import Body from "react-native-body-highlighter";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/src/styles/globalstyles";
 import { useState } from "react";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 type Props = {
   visible: boolean;
@@ -18,26 +19,26 @@ export default function BodyAvatarModal({ visible, onClose, gender }: Props) {
       <View style={styles.overlay}>
         <View style={styles.sheet}>
 
-          <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+          <HapticButton style={styles.closeBtn} onPress={onClose}>
             <Ionicons name="close" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
+          </HapticButton>
 
           <Text style={styles.title}>Mi cuerpo</Text>
 
           {/* Toggle frente / espalda */}
           <View style={styles.toggle}>
-            <TouchableOpacity
+            <HapticButton
               style={[styles.toggleBtn, side === "front" && styles.toggleBtnActive]}
               onPress={() => setSide("front")}
             >
               <Text style={[styles.toggleText, side === "front" && styles.toggleTextActive]}>Frente</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </HapticButton>
+            <HapticButton
               style={[styles.toggleBtn, side === "back" && styles.toggleBtnActive]}
               onPress={() => setSide("back")}
             >
               <Text style={[styles.toggleText, side === "back" && styles.toggleTextActive]}>Espalda</Text>
-            </TouchableOpacity>
+            </HapticButton>
           </View>
 
           {/* Avatar */}

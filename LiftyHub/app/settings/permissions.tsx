@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, Linking } from "react-native";
-import { TouchableOpacity } from "react-native";
+
 import { Ionicons } from "@expo/vector-icons";
 import { useCallback } from "react";
 import { router, useFocusEffect } from "expo-router";
@@ -9,6 +9,7 @@ import * as ImagePicker from "expo-image-picker";
 import SettingsItem from "@/src/components/settings/SettingsItem";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { colors } from "@/src/styles/globalstyles";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 export default function PermissionsScreen() {
   const { t } = useLanguage();
@@ -39,9 +40,9 @@ export default function PermissionsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <HapticButton style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color="white" />
-        </TouchableOpacity>
+        </HapticButton>
         <Text style={styles.title}>{t("permissions.title")}</Text>
       </View>
 

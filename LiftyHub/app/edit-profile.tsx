@@ -1,20 +1,5 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  TextInput,
-  Image,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Keyboard,
-  Platform,
-  Modal,
-  RefreshControl
-} from "react-native";
+import { View, Text, StyleSheet, TouchableWithoutFeedback, TextInput, Image, ScrollView, Alert, ActivityIndicator, KeyboardAvoidingView, Keyboard, Platform, Modal, RefreshControl } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import { Stack, router } from "expo-router";
@@ -23,6 +8,7 @@ import { colors, spacing, planColors } from "@/src/styles/globalstyles";
 import { getUserProperties, updateUser, updateUserProperties, checkPassword } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 const SOMATOTYPE_MAP: Record<string, number> = {
   "Ectomorfo": 1,
@@ -50,6 +36,14 @@ export default function EditProfileScreen() {
   const [loading, setLoading]     = useState(true);
   const [saving, setSaving]       = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  const [tempHeight, setTempHeight] = useState(170);
+  const [tempWeight, setTempWeight] = useState(70);
+  const [showHeightPicker, setShowHeightPicker] = useState(false);
+  const [showWeightPicker, setShowWeightPicker] = useState(false);
+
+  const HEIGHT_VALUES = Array.from({ length: 151 }, (_, i) => i + 100);
+  const WEIGHT_VALUES = Array.from({ length: 221 }, (_, i) => i + 30);
 
   // Modal contraseña
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -209,9 +203,9 @@ export default function EditProfileScreen() {
 
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <HapticButton style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color="white" />
-        </TouchableOpacity>
+        </HapticButton>
         <Text style={styles.headerTitle}>{t("editProfile.title")}</Text>
       </View>
 
@@ -230,10 +224,10 @@ export default function EditProfileScreen() {
             source={require("@/src/assets/defaultd.png")}
             style={[styles.avatar, { borderColor: planColor }]}
           />
-          <TouchableOpacity style={styles.changePhoto}>
+          <HapticButton style={styles.changePhoto}>
             <Ionicons name="camera" size={16} color="white" />
             <Text style={styles.changePhotoText}>{t("editProfile.changePhoto")}</Text>
-          </TouchableOpacity>
+          </HapticButton>
         </View>
 
         {/* DATOS PERSONALES */}
@@ -267,40 +261,42 @@ export default function EditProfileScreen() {
         <Text style={styles.section}>{t("editProfile.physicalInfo")}</Text>
 
         {/* ALTURA */}
-        <View style={styles.card}>
+        <HapticButton
+          style={styles.card}
+          onPress={() => { setTempHeight(height ? parseInt(height) : 170); setShowHeightPicker(true); }}
+        >
           <View style={styles.row}>
             <View style={styles.rowLeft}>
               <Ionicons name="resize" size={20} color={colors.text} />
               <Text style={styles.label}>{t("editProfile.height")}</Text>
             </View>
-            <TextInput
-              value={height}
-              onChangeText={setHeight}
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder="cm"
-              placeholderTextColor={colors.textSecondary}
-            />
+            <View style={styles.valueRow}>
+              <Text style={[styles.input, { color: height ? colors.text : colors.textSecondary }]}>
+                {height ? `${height} cm` : "—"}
+              </Text>
+              <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+            </View>
           </View>
-        </View>
+        </HapticButton>
 
         {/* PESO */}
-        <View style={styles.card}>
+        <HapticButton
+          style={styles.card}
+          onPress={() => { setTempWeight(weight ? parseInt(weight) : 70); setShowWeightPicker(true); }}
+        >
           <View style={styles.row}>
             <View style={styles.rowLeft}>
               <Ionicons name="barbell" size={20} color={colors.text} />
               <Text style={styles.label}>{t("editProfile.weight")}</Text>
             </View>
-            <TextInput
-              value={weight}
-              onChangeText={setWeight}
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder="kg"
-              placeholderTextColor={colors.textSecondary}
-            />
+            <View style={styles.valueRow}>
+              <Text style={[styles.input, { color: weight ? colors.text : colors.textSecondary }]}>
+                {weight ? `${weight} kg` : "—"}
+              </Text>
+              <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+            </View>
           </View>
-        </View>
+        </HapticButton>
 
         {/* SOMATOTIPO */}
         <View style={styles.card}>
@@ -311,7 +307,7 @@ export default function EditProfileScreen() {
             </View>
             <View style={styles.selectorContainer}>
               {["Ectomorfo", "Mesomorfo", "Endomorfo"].map((type) => (
-                <TouchableOpacity
+                <HapticButton
                   key={type}
                   style={[styles.selectorButton, somatotype === type && styles.selectorButtonActive]}
                   onPress={() => setSomatotype(type)}
@@ -319,7 +315,7 @@ export default function EditProfileScreen() {
                   <Text style={[styles.selectorText, somatotype === type && styles.selectorTextActive]}>
                     {type}
                   </Text>
-                </TouchableOpacity>
+                </HapticButton>
               ))}
             </View>
           </View>
@@ -340,7 +336,7 @@ export default function EditProfileScreen() {
                 "Mejorar resistencia",
                 "Mejorar fuerza"
               ].map((item) => (
-                <TouchableOpacity
+                <HapticButton
                   key={item}
                   style={[styles.selectorButton, goal === item && styles.selectorButtonActive]}
                   onPress={() => setGoal(item)}
@@ -348,23 +344,23 @@ export default function EditProfileScreen() {
                   <Text style={[styles.selectorText, goal === item && styles.selectorTextActive]}>
                     {item}
                   </Text>
-                </TouchableOpacity>
+                </HapticButton>
               ))}
             </View>
           </View>
         </View>
 
         {/* BOTÓN CAMBIAR CONTRASEÑA */}
-        <TouchableOpacity
+        <HapticButton
           style={styles.passwordButton}
           onPress={() => setShowPasswordModal(true)}
         >
           <Ionicons name="lock-closed" size={18} color={colors.primary} />
           <Text style={styles.passwordButtonText}>{t("editProfile.changePassword")}</Text>
-        </TouchableOpacity>
+        </HapticButton>
 
         {/* BOTÓN GUARDAR */}
-        <TouchableOpacity
+        <HapticButton
           style={[styles.saveButton, saving && styles.disabled]}
           onPress={handleSave}
           disabled={saving}
@@ -373,9 +369,67 @@ export default function EditProfileScreen() {
             ? <ActivityIndicator color="white" />
             : <Text style={styles.saveText}>{t("editProfile.saveChanges")}</Text>
           }
-        </TouchableOpacity>
+        </HapticButton>
 
       </ScrollView>
+
+      {/* MODAL ALTURA */}
+      <Modal visible={showHeightPicker} transparent animationType="fade">
+        <HapticButton style={styles.pickerOverlay} activeOpacity={1} onPress={() => setShowHeightPicker(false)}>
+          <HapticButton activeOpacity={1} onPress={() => {}} style={styles.pickerContent}>
+            <View style={styles.pickerHeader}>
+              <HapticButton onPress={() => setShowHeightPicker(false)}>
+                <Ionicons name="close" size={22} color={colors.textSecondary} />
+              </HapticButton>
+            </View>
+            <Picker
+              selectedValue={tempHeight}
+              onValueChange={(val) => setTempHeight(val)}
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
+            >
+              {HEIGHT_VALUES.map((h) => (
+                <Picker.Item key={h} label={`${h} cm`} value={h} />
+              ))}
+            </Picker>
+            <HapticButton
+              style={styles.confirmButton}
+              onPress={() => { setHeight(tempHeight.toString()); setShowHeightPicker(false); }}
+            >
+              <Text style={styles.confirmText}>{t("onboarding.birthdateConfirm")}</Text>
+            </HapticButton>
+          </HapticButton>
+        </HapticButton>
+      </Modal>
+
+      {/* MODAL PESO */}
+      <Modal visible={showWeightPicker} transparent animationType="fade">
+        <HapticButton style={styles.pickerOverlay} activeOpacity={1} onPress={() => setShowWeightPicker(false)}>
+          <HapticButton activeOpacity={1} onPress={() => {}} style={styles.pickerContent}>
+            <View style={styles.pickerHeader}>
+              <HapticButton onPress={() => setShowWeightPicker(false)}>
+                <Ionicons name="close" size={22} color={colors.textSecondary} />
+              </HapticButton>
+            </View>
+            <Picker
+              selectedValue={tempWeight}
+              onValueChange={(val) => setTempWeight(val)}
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
+            >
+              {WEIGHT_VALUES.map((w) => (
+                <Picker.Item key={w} label={`${w} kg`} value={w} />
+              ))}
+            </Picker>
+            <HapticButton
+              style={styles.confirmButton}
+              onPress={() => { setWeight(tempWeight.toString()); setShowWeightPicker(false); }}
+            >
+              <Text style={styles.confirmText}>{t("onboarding.birthdateConfirm")}</Text>
+            </HapticButton>
+          </HapticButton>
+        </HapticButton>
+      </Modal>
 
       {/* MODAL CONTRASEÑA */}
       <Modal visible={showPasswordModal} transparent animationType="fade">
@@ -399,12 +453,12 @@ export default function EditProfileScreen() {
                     value={currentPassword}
                     onChangeText={setCurrentPassword}
                   />
-                  <TouchableOpacity onPress={() => setShowCurrent(!showCurrent)}>
+                  <HapticButton onPress={() => setShowCurrent(!showCurrent)}>
                     <Ionicons name={showCurrent ? "eye-off" : "eye"} size={20} color={colors.textSecondary} />
-                  </TouchableOpacity>
+                  </HapticButton>
                 </View>
 
-                <TouchableOpacity
+                <HapticButton
                   style={[styles.modalButton, (!currentPassword || verifying) && styles.disabled]}
                   onPress={handleVerifyPassword}
                   disabled={!currentPassword || verifying}
@@ -413,7 +467,7 @@ export default function EditProfileScreen() {
                     ? <ActivityIndicator color="white" />
                     : <Text style={styles.modalButtonText}>{t("editProfile.modal.verify")}</Text>
                   }
-                </TouchableOpacity>
+                </HapticButton>
               </>
             ) : (
               <>
@@ -428,9 +482,9 @@ export default function EditProfileScreen() {
                     value={newPassword}
                     onChangeText={setNewPassword}
                   />
-                  <TouchableOpacity onPress={() => setShowNew(!showNew)}>
+                  <HapticButton onPress={() => setShowNew(!showNew)}>
                     <Ionicons name={showNew ? "eye-off" : "eye"} size={20} color={colors.textSecondary} />
-                  </TouchableOpacity>
+                  </HapticButton>
                 </View>
 
                 <View style={styles.inputContainer}>
@@ -442,12 +496,12 @@ export default function EditProfileScreen() {
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
                   />
-                  <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+                  <HapticButton onPress={() => setShowConfirm(!showConfirm)}>
                     <Ionicons name={showConfirm ? "eye-off" : "eye"} size={20} color={colors.textSecondary} />
-                  </TouchableOpacity>
+                  </HapticButton>
                 </View>
 
-                <TouchableOpacity
+                <HapticButton
                   style={[styles.modalButton, (!newPassword || !confirmPassword || changingPassword) && styles.disabled]}
                   onPress={handleChangePassword}
                   disabled={!newPassword || !confirmPassword || changingPassword}
@@ -456,13 +510,13 @@ export default function EditProfileScreen() {
                     ? <ActivityIndicator color="white" />
                     : <Text style={styles.modalButtonText}>{t("editProfile.modal.savePassword")}</Text>
                   }
-                </TouchableOpacity>
+                </HapticButton>
               </>
             )}
 
-            <TouchableOpacity style={styles.modalCancel} onPress={resetPasswordModal}>
+            <HapticButton style={styles.modalCancel} onPress={resetPasswordModal}>
               <Text style={styles.modalCancelText}>{t("editProfile.modal.cancel")}</Text>
-            </TouchableOpacity>
+            </HapticButton>
 
           </View>
           </TouchableWithoutFeedback>
@@ -740,6 +794,57 @@ const styles = StyleSheet.create({
   modalCancelText: {
     color: colors.textSecondary,
     fontSize: 14
-  }
+  },
+
+  valueRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+
+  pickerOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  pickerContent: {
+    backgroundColor: "#1C1C1E",
+    borderRadius: 20,
+    padding: 20,
+    width: "85%",
+    alignItems: "center",
+  },
+
+  pickerHeader: {
+    width: "100%",
+    alignItems: "flex-end",
+    marginBottom: 4,
+  },
+
+  picker: {
+    width: "100%",
+    color: "white",
+  },
+
+  pickerItem: {
+    color: "white",
+    fontSize: 18,
+  },
+
+  confirmButton: {
+    marginTop: 10,
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 20,
+  },
+
+  confirmText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 15,
+  },
 
 });

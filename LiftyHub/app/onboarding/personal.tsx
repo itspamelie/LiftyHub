@@ -1,14 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Platform,
-  Alert,
-  KeyboardAvoidingView,
-  Modal,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, Platform, Alert, KeyboardAvoidingView, Modal,  } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
 import { useRouter, Stack } from "expo-router";
@@ -19,6 +9,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import BackButton from "@/src/components/buttons/backButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 export default function Personal() {
   const router = useRouter();
@@ -122,7 +113,7 @@ export default function Personal() {
         <View style={styles.card}>
 
           {/* FECHA DE NACIMIENTO */}
-          <TouchableOpacity
+          <HapticButton
             style={styles.inputContainer}
             onPress={() => setShowPicker(true)}
           >
@@ -131,19 +122,19 @@ export default function Personal() {
               {birthdate ? formatDate(birthdate) : t("onboarding.birthdate")}
             </Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
-          </TouchableOpacity>
+          </HapticButton>
 
           <Modal visible={showPicker} transparent animationType="fade">
-            <TouchableOpacity
+            <HapticButton
               style={styles.modalOverlay}
               activeOpacity={1}
               onPress={() => setShowPicker(false)}
             >
-              <TouchableOpacity activeOpacity={1} onPress={() => {}} style={styles.modalContent}>
+              <HapticButton activeOpacity={1} onPress={() => {}} style={styles.modalContent}>
                 <View style={styles.modalHeader}>
-                  <TouchableOpacity onPress={() => setShowPicker(false)}>
+                  <HapticButton onPress={() => setShowPicker(false)}>
                     <Ionicons name="close" size={22} color={colors.textSecondary} />
-                  </TouchableOpacity>
+                  </HapticButton>
                 </View>
                 <DateTimePicker
                   value={tempDate}
@@ -155,7 +146,7 @@ export default function Personal() {
                     if (selectedDate) setTempDate(selectedDate);
                   }}
                 />
-                <TouchableOpacity
+                <HapticButton
                   style={styles.confirmButton}
                   onPress={() => {
                     setBirthdate(tempDate);
@@ -163,13 +154,13 @@ export default function Personal() {
                   }}
                 >
                   <Text style={styles.confirmText}>{t("onboarding.birthdateConfirm")}</Text>
-                </TouchableOpacity>
-              </TouchableOpacity>
-            </TouchableOpacity>
+                </HapticButton>
+              </HapticButton>
+            </HapticButton>
           </Modal>
 
           {/* ESTATURA */}
-          <TouchableOpacity
+          <HapticButton
             style={styles.inputContainer}
             onPress={() => setShowHeightPicker(true)}
           >
@@ -178,15 +169,15 @@ export default function Personal() {
               {height ? `${height} cm` : t("onboarding.heightPlaceholder")}
             </Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
-          </TouchableOpacity>
+          </HapticButton>
 
           <Modal visible={showHeightPicker} transparent animationType="fade">
-            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowHeightPicker(false)}>
-              <TouchableOpacity activeOpacity={1} onPress={() => {}} style={styles.modalContent}>
+            <HapticButton style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowHeightPicker(false)}>
+              <HapticButton activeOpacity={1} onPress={() => {}} style={styles.modalContent}>
                 <View style={styles.modalHeader}>
-                  <TouchableOpacity onPress={() => setShowHeightPicker(false)}>
+                  <HapticButton onPress={() => setShowHeightPicker(false)}>
                     <Ionicons name="close" size={22} color={colors.textSecondary} />
-                  </TouchableOpacity>
+                  </HapticButton>
                 </View>
                 <Picker
                   selectedValue={tempHeight}
@@ -198,18 +189,18 @@ export default function Personal() {
                     <Picker.Item key={h} label={`${h} cm`} value={h} />
                   ))}
                 </Picker>
-                <TouchableOpacity
+                <HapticButton
                   style={styles.confirmButton}
                   onPress={() => { setHeight(tempHeight.toString()); setShowHeightPicker(false); }}
                 >
                   <Text style={styles.confirmText}>{t("onboarding.birthdateConfirm")}</Text>
-                </TouchableOpacity>
-              </TouchableOpacity>
-            </TouchableOpacity>
+                </HapticButton>
+              </HapticButton>
+            </HapticButton>
           </Modal>
 
           {/* PESO */}
-          <TouchableOpacity
+          <HapticButton
             style={styles.inputContainer}
             onPress={() => setShowWeightPicker(true)}
           >
@@ -218,15 +209,15 @@ export default function Personal() {
               {weight ? `${weight} kg` : t("onboarding.weightPlaceholder")}
             </Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
-          </TouchableOpacity>
+          </HapticButton>
 
           <Modal visible={showWeightPicker} transparent animationType="fade">
-            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowWeightPicker(false)}>
-              <TouchableOpacity activeOpacity={1} onPress={() => {}} style={styles.modalContent}>
+            <HapticButton style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowWeightPicker(false)}>
+              <HapticButton activeOpacity={1} onPress={() => {}} style={styles.modalContent}>
                 <View style={styles.modalHeader}>
-                  <TouchableOpacity onPress={() => setShowWeightPicker(false)}>
+                  <HapticButton onPress={() => setShowWeightPicker(false)}>
                     <Ionicons name="close" size={22} color={colors.textSecondary} />
-                  </TouchableOpacity>
+                  </HapticButton>
                 </View>
                 <Picker
                   selectedValue={tempWeight}
@@ -238,14 +229,14 @@ export default function Personal() {
                     <Picker.Item key={w} label={`${w} kg`} value={w} />
                   ))}
                 </Picker>
-                <TouchableOpacity
+                <HapticButton
                   style={styles.confirmButton}
                   onPress={() => { setWeight(tempWeight.toString()); setShowWeightPicker(false); }}
                 >
                   <Text style={styles.confirmText}>{t("onboarding.birthdateConfirm")}</Text>
-                </TouchableOpacity>
-              </TouchableOpacity>
-            </TouchableOpacity>
+                </HapticButton>
+              </HapticButton>
+            </HapticButton>
           </Modal>
 
           {/* GÉNERO */}
@@ -254,7 +245,7 @@ export default function Personal() {
             {genders.map((item) => {
               const isActive = gender === item.key;
               return (
-                <TouchableOpacity
+                <HapticButton
                   key={item.key}
                   style={[styles.selectorButton, isActive && styles.selectorButtonActive]}
                   onPress={() => setGender(item.key)}
@@ -262,19 +253,19 @@ export default function Personal() {
                   <Text style={[styles.selectorText, isActive && styles.selectorTextActive]}>
                     {item.label}
                   </Text>
-                </TouchableOpacity>
+                </HapticButton>
               );
             })}
           </View>
 
           {/* BOTÓN */}
-          <TouchableOpacity
+          <HapticButton
             style={[styles.button, !isComplete && styles.disabled]}
             onPress={handleNext}
             disabled={!isComplete}
           >
             <Text style={styles.buttonText}>{t("onboarding.personalContinue")}</Text>
-          </TouchableOpacity>
+          </HapticButton>
 
         </View>
       </ScrollView>

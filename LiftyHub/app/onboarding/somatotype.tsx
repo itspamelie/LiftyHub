@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, Alert,  } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -13,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import BackButton from "@/src/components/buttons/backButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 const SOMATOTYPE_MAP: Record<string, number> = {
   ectomorph: 1,
@@ -83,7 +77,7 @@ export default function SomatotypeScreen() {
         {SOMATOTYPES.map((item) => {
           const isActive = selected === item.key;
           return (
-            <TouchableOpacity
+            <HapticButton
               key={item.key}
               style={[styles.card, isActive && { borderColor: item.color, borderWidth: 2 }]}
               onPress={() => setSelected(item.key)}
@@ -115,18 +109,18 @@ export default function SomatotypeScreen() {
                   </View>
                 ))}
               </View>
-            </TouchableOpacity>
+            </HapticButton>
           );
         })}
 
         {/* BOTÓN */}
-        <TouchableOpacity
+        <HapticButton
           style={[styles.button, !selected && styles.disabled]}
           onPress={handleContinue}
           disabled={!selected}
         >
           <Text style={styles.buttonText}>{t("onboarding.personalContinue")}</Text>
-        </TouchableOpacity>
+        </HapticButton>
       </ScrollView>
     </View>
   );

@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Stack, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import PlanCard from "@/src/components/plans/PlanCard";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import { colors, planColors } from "@/src/styles/globalstyles";
+import HapticButton from "@/src/components/buttons/HapticButton";
 
 export default function Plans() {
 
@@ -83,9 +84,9 @@ export default function Plans() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <HapticButton style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color="white" />
-        </TouchableOpacity>
+        </HapticButton>
         <Text style={styles.headerTitle}>{t("plans.title")}</Text>
       </View>
 
