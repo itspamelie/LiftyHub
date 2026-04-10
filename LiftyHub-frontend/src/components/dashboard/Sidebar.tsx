@@ -57,8 +57,13 @@ return (
   </Typography>
 </Box>
 
-       <List>
-
+<List
+  sx={{
+    display: "flex",
+    flexDirection: "column",
+    gap: 1 // separación uniforme
+  }}
+>
   {/* Dashboard */}
   <ListItemButton
   component={Link}
@@ -68,7 +73,7 @@ return (
       ? "linear-gradient(90deg,#3a8dff,#5da8ff)"
       : "transparent",
     borderRadius: "12px",
-    mb: 1
+
   }}
 >
     <ListItemIcon sx={{ color: "white" }}>
@@ -87,7 +92,7 @@ return (
       ? "linear-gradient(90deg,#3a8dff,#5da8ff)"
       : "transparent",
     borderRadius: "12px",
-    mb: 1
+   
   }}
 >    <ListItemIcon sx={{ color: "white" }}>
   <GroupIcon />
@@ -104,7 +109,7 @@ return (
       ? "linear-gradient(90deg,#3a8dff,#5da8ff)"
       : "transparent",
     borderRadius: "12px",
-    mb: 1
+
   }}
 >    <ListItemIcon sx={{ color: "white" }}>
   <AssignmentIcon />
@@ -129,7 +134,7 @@ return (
       ? "linear-gradient(90deg,#3a8dff,#5da8ff)"
       : "transparent",
     borderRadius: "12px",
-    mb: 1
+
   }}
 >    <ListItemIcon sx={{ color: "white" }}>
   <FitnessCenterIcon />
@@ -146,7 +151,7 @@ return (
       ? "linear-gradient(90deg,#3a8dff,#5da8ff)"
       : "transparent",
     borderRadius: "12px",
-    mb: 1
+
   }}
 >    <ListItemIcon sx={{ color: "white" }}>
   <SportsGymnasticsIcon />
@@ -163,7 +168,7 @@ return (
       ? "linear-gradient(90deg,#3a8dff,#5da8ff)"
       : "transparent",
     borderRadius: "12px",
-    mb: 1
+
   }}
 >    <ListItemIcon sx={{ color: "white" }}>
   <AnalyticsIcon />

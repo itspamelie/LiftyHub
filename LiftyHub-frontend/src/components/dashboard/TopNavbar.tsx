@@ -50,16 +50,13 @@ const getCurrentTitle = () => {
 
       {/* Right side */}
       <Box display="flex" alignItems="center" gap={2}>
-        <IconButton sx={{ color: "white" }}>
-          <AccountCircleIcon />
-        </IconButton>
-
-        <IconButton sx={{ color: "white" }}>
-          <SettingsIcon />
-        </IconButton>
-
+        
         <IconButton sx={{ color: "white" }}>
           <NotificationsIcon />
+        </IconButton>
+
+        <IconButton sx={{ color: "white" }}>
+          <AccountCircleIcon />
         </IconButton>
       </Box>
     </Box>
