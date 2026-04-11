@@ -17,6 +17,7 @@ import NutritionistDetail from './components/nutritionist/NutritionistDetail'
 import NutritionistJoin from './views/homenutritionist';
 import LoginPage from './components/nutritionist/loginNutritionist';
 import DashboardForExperts from './views/dashboardLiftyHubExperts';
+import HomeDashboard from './components/nutritionist/HomeDashboard';
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
@@ -31,7 +32,6 @@ function App() {
         <Route path="/login" element={<Login/>}/>
         <Route path="/Liftyhub-Experts" element={<NutritionistJoin/>}/>
         <Route path="/Liftyhub-Experts-Login" element={<LoginPage/>}/>
-        <Route path="/DashboardForExperts" element={<DashboardForExperts/>}/>
 
         {/*DASHBOARD*/}
         <Route path="/dashboard" element={<PrivateRoute><Dashboard/></PrivateRoute>}>
@@ -48,6 +48,12 @@ function App() {
 <Route path="routine/:id/add-routine-to-exercise"element={<AddRoutineToExercise />}/>
 <Route path="nutritionists/:id" element={<NutritionistDetail />} />
         </Route>
+
+
+   <Route path="/DashboardForExperts" element={<PrivateRoute><DashboardForExperts/></PrivateRoute>}>
+          <Route index element={<HomeDashboard/>}/>
+        </Route>
+
 
       </Routes>
     </BrowserRouter>

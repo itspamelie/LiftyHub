@@ -64,7 +64,7 @@ export default function LoginPage() {
             if (data.user.role === "user" || data.user.role === "admin") {
       navigate("/Liftyhub-Experts")
             } else {
-      navigate("/dashboard")
+      navigate("/DashboardForExperts")
             }
     
           } else {
