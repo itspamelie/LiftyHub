@@ -22,7 +22,10 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
 }
-
+function PrivateRouteExperts({ children }: { children: React.ReactNode }) {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/Liftyhub-Experts-Login" replace />;
+}
 function App() {
   return (
      <BrowserRouter>
@@ -50,7 +53,7 @@ function App() {
         </Route>
 
 
-   <Route path="/DashboardForExperts" element={<PrivateRoute><DashboardForExperts/></PrivateRoute>}>
+   <Route path="/DashboardForExperts" element={<PrivateRouteExperts><DashboardForExperts/></PrivateRouteExperts>}>
           <Route index element={<HomeDashboard/>}/>
         </Route>
 
