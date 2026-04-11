@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, FlatList, Image, ActivityIndicator, Platform, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { Ionicons } from "@expo/vector-icons";
 import { getExerciseFiles } from "@/src/services/api";
 import { colors, spacing } from "@/src/styles/globalstyles";
@@ -62,7 +62,7 @@ export default function ExerciseDetail() {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = await Storage.getItem("token");
         if (!token || !id) return;
         const res = await getExerciseFiles(Number(id), token);
         if (res?.data) setFiles(res.data);

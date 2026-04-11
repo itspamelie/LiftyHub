@@ -9,6 +9,7 @@ import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import { BlurView } from "expo-blur";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { getRoutines, getUserRoutines, deleteUserRoutine, createUserRoutine } from "@/src/services/api";
 import { useToast } from "@/src/hooks/useToast";
@@ -19,21 +20,6 @@ import HapticButton from "@/src/components/buttons/HapticButton";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-const PLAN_OPTIONS = [
-  {
-    name: "Basic",
-    price: "$99/mes",
-    color: "#3B82F6",
-    features: ["Rutinas de la app", "Hasta 20 rutinas propias", "Estadísticas avanzadas"],
-  },
-  {
-    name: "Pro",
-    price: "$600/mes",
-    color: "#F59E0B",
-    features: ["Todo lo de Basic", "Rutinas ilimitadas", "Compartir rutinas ilimitadas", "Nutriólogo personal", "Plan de dieta personalizado"],
-    highlighted: true,
-  },
-];
 
 const defaultImages = [
   "https://images.unsplash.com/photo-1599058917765-a780eda07a3e",
@@ -79,6 +65,22 @@ export default function RoutinesScreen() {
   const { showToast, Toast } = useToast();
   const { t } = useLanguage();
   const { plan, loading: subLoading } = useSubscription();
+
+  const PLAN_OPTIONS = [
+    {
+      name: "Basic",
+      price: "$99/mes",
+      color: "#3B82F6",
+      features: [t("plans.features.exercises"), t("plans.features.routines20"), t("plans.features.stats")],
+    },
+    {
+      name: "Pro",
+      price: "$600/mes",
+      color: "#F59E0B",
+      features: [t("plans.features.routinesUnlimited"), t("plans.features.shareRoutinesUnlimited"), t("plans.features.nutritionist"), t("plans.features.dietPlan")],
+      highlighted: true,
+    },
+  ];
   const isConnected = useNetworkStatus();
   const hasAppAccess = plan?.name !== "Free";
   const listRef = useRef<FlatList>(null);
@@ -200,8 +202,8 @@ export default function RoutinesScreen() {
     if (!scannedData) return;
     setImporting(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-      const userRaw = await AsyncStorage.getItem("user");
+      const token = await Storage.getItem("token");
+      const userRaw = await Storage.getItem("user");
       if (!token || !userRaw) return;
       const user = JSON.parse(userRaw);
 
@@ -247,8 +249,8 @@ export default function RoutinesScreen() {
 
   const fetchAll = useCallback(async (isRefresh = false) => {
     try {
-      const token = await AsyncStorage.getItem("token");
-      const userRaw = await AsyncStorage.getItem("user");
+      const token = await Storage.getItem("token");
+      const userRaw = await Storage.getItem("user");
       if (!token || !userRaw) return;
 
       const user = JSON.parse(userRaw);
@@ -331,7 +333,7 @@ export default function RoutinesScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              const token = await AsyncStorage.getItem("token");
+              const token = await Storage.getItem("token");
               if (!token) return;
               await deleteUserRoutine(id, token);
               setUserRoutines((prev) => prev.filter((r) => r.id !== id));
@@ -495,11 +497,11 @@ export default function RoutinesScreen() {
             <View style={styles.modalIcon}>
               <Ionicons name="barbell" size={32} color={colors.primary} />
             </View>
-            <Text style={styles.modalTitle}>Desbloquea las Rutinas App</Text>
+            <Text style={styles.modalTitle}>{t("routines.upgradeTitle")}</Text>
             <Text style={styles.modalSubtitle}>
               {scannerUsed && nextScanDate
-                ? `Ya usaste tu escaneo mensual gratuito. Se renueva el ${nextScanDate.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}. Actualiza tu plan para escanear sin límites.`
-                : "Accede a todas las rutinas diseñadas por expertos con cualquier plan de pago."}
+                ? t("routines.upgradeSubtitleScanner", { date: nextScanDate.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" }) })
+                : t("routines.upgradeSubtitleDefault")}
             </Text>
             <ScrollView showsVerticalScrollIndicator={false}>
               {PLAN_OPTIONS.map((plan) => (
@@ -510,7 +512,7 @@ export default function RoutinesScreen() {
                 >
                   {plan.highlighted && (
                     <View style={[styles.planBadge, { backgroundColor: plan.color }]}>
-                      <Text style={styles.planBadgeText}>Recomendado</Text>
+                      <Text style={styles.planBadgeText}>{t("routines.recommended")}</Text>
                     </View>
                   )}
                   <View style={styles.planHeader}>
@@ -525,7 +527,7 @@ export default function RoutinesScreen() {
                   ))}
                 </HapticButton>
               ))}
-              <Text style={styles.modalNote}>Contacta a un administrador para actualizar tu plan.</Text>
+              <Text style={styles.modalNote}>{t("routines.adminNote")}</Text>
             </ScrollView>
           </HapticButton>
         </HapticButton>
@@ -542,7 +544,7 @@ export default function RoutinesScreen() {
           />
           <View style={styles.scannerOverlay}>
             <View style={styles.scannerFrame} />
-            <Text style={styles.scannerHint}>Apunta al QR de la rutina</Text>
+            <Text style={styles.scannerHint}>{t("routines.scannerHint")}</Text>
           </View>
           <HapticButton style={styles.scannerClose} onPress={() => setShowScanner(false)}>
             <Ionicons name="close" size={28} color="white" />
@@ -562,25 +564,25 @@ export default function RoutinesScreen() {
             <View style={styles.modalIcon}>
               <Ionicons name="camera" size={32} color={colors.primary} />
             </View>
-            <Text style={styles.modalTitle}>Permiso de cámara</Text>
+            <Text style={styles.modalTitle}>{t("routines.cameraPermTitle")}</Text>
             <Text style={styles.modalSubtitle}>
               {cameraPermission?.status === "denied"
-                ? "Bloqueaste el acceso a la cámara. Ve a Ajustes para habilitarlo y poder escanear rutinas por QR."
-                : "Necesitamos acceso a tu cámara para escanear códigos QR de rutinas."}
+                ? t("routines.cameraPermDenied")
+                : t("routines.cameraPermRequest")}
             </Text>
             <HapticButton
               style={[styles.planCard, { alignItems: "center", paddingVertical: 14, backgroundColor: colors.primary }]}
               onPress={handleRequestCameraPermission}
             >
               <Text style={{ color: "white", fontWeight: "700" }}>
-                {cameraPermission?.status === "denied" ? "Abrir Ajustes" : "Permitir cámara"}
+                {cameraPermission?.status === "denied" ? t("routines.openSettings") : t("routines.allowCamera")}
               </Text>
             </HapticButton>
             <HapticButton
               style={[styles.planCard, { alignItems: "center", paddingVertical: 14, borderColor: "#2C2C2E", borderWidth: 1, marginTop: 8 }]}
               onPress={() => setShowCameraPermModal(false)}
             >
-              <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>Cancelar</Text>
+              <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>{t("routines.cancel")}</Text>
             </HapticButton>
           </HapticButton>
         </HapticButton>
@@ -593,27 +595,28 @@ export default function RoutinesScreen() {
             <View style={styles.modalIcon}>
               <Ionicons name="qr-code" size={32} color={colors.primary} />
             </View>
-            <Text style={styles.modalTitle}>Escaneo mensual gratuito</Text>
+            <Text style={styles.modalTitle}>{t("routines.freeScannerTitle")}</Text>
             <Text style={styles.modalSubtitle}>
-              Con el plan Free puedes escanear una rutina por QR cada mes. Tu próximo escaneo estará disponible el{" "}
-              {(() => {
-                const next = new Date();
-                next.setMonth(next.getMonth() + 1);
-                return next.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
-              })()}.
+              {t("routines.freeScannerSubtitle", {
+                date: (() => {
+                  const next = new Date();
+                  next.setMonth(next.getMonth() + 1);
+                  return next.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
+                })()
+              })}
             </Text>
             <View style={{ flexDirection: "row", gap: 10 }}>
               <HapticButton
                 style={[styles.planCard, { flex: 1, alignItems: "center", paddingVertical: 14, borderColor: "#2C2C2E", borderWidth: 1 }]}
                 onPress={() => setShowScannerWarning(false)}
               >
-                <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>Cancelar</Text>
+                <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>{t("routines.cancel")}</Text>
               </HapticButton>
               <HapticButton
                 style={[styles.planCard, { flex: 1, alignItems: "center", paddingVertical: 14, backgroundColor: colors.primary }]}
                 onPress={handleScannerWarningConfirm}
               >
-                <Text style={{ color: "white", fontWeight: "700" }}>Escanear</Text>
+                <Text style={{ color: "white", fontWeight: "700" }}>{t("routines.scan")}</Text>
               </HapticButton>
             </View>
           </HapticButton>
@@ -632,8 +635,8 @@ export default function RoutinesScreen() {
               <Ionicons name="download-outline" size={32} color={colors.primary} />
             </View>
 
-            <Text style={styles.modalTitle}>Importar rutina</Text>
-            <Text style={styles.modalSubtitle}>¿Quieres agregar esta rutina a tu lista?</Text>
+            <Text style={styles.modalTitle}>{t("routines.importTitle")}</Text>
+            <Text style={styles.modalSubtitle}>{t("routines.importSubtitle")}</Text>
 
             {scannedData && (
               <View style={styles.importCard}>
@@ -647,7 +650,7 @@ export default function RoutinesScreen() {
                       <Text key={i} style={styles.importExerciseItem}>• {ex.name}  ({ex.sets}×{ex.reps})</Text>
                     ))}
                     {scannedData.exercises.length > 4 && (
-                      <Text style={styles.importExerciseItem}>+{scannedData.exercises.length - 4} más...</Text>
+                      <Text style={styles.importExerciseItem}>{t("routines.importMore", { n: scannedData.exercises.length - 4 })}</Text>
                     )}
                   </View>
                 )}

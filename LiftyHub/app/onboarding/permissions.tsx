@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Notifications from "expo-notifications";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { registerRequest, createUserProperties } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
@@ -87,8 +88,8 @@ export default function Permissions() {
       const data = await registerRequest({ name, email, password, gender, birthdate });
 
       if (data?.token) {
-        await AsyncStorage.setItem("token", data.token);
-        await AsyncStorage.setItem("user", JSON.stringify(data.user));
+        await Storage.setItem("token", data.token);
+        await Storage.setItem("user", JSON.stringify(data.user));
         await refreshSubscription();
 
         await createUserProperties(

@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TextInput, ScrollView, ActivityIndicator, Keybo
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect, useRef } from "react";
 import { router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { createUserRoutine, createUserRoutineExercise, getExercises } from "@/src/services/api";
@@ -112,7 +112,7 @@ export default function NewRoutineScreen() {
 
   useEffect(() => {
     const load = async () => {
-      const token = await AsyncStorage.getItem("token");
+      const token = await Storage.getItem("token");
       if (!token) return;
       const res = await getExercises(token);
       setExercises(res?.data ?? []);
@@ -156,8 +156,8 @@ export default function NewRoutineScreen() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-      const userRaw = await AsyncStorage.getItem("user");
+      const token = await Storage.getItem("token");
+      const userRaw = await Storage.getItem("user");
       if (!token || !userRaw) return;
 
       const user = JSON.parse(userRaw);

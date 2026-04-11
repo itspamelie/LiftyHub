@@ -2,6 +2,7 @@ import { ScrollView, View, Text, StyleSheet, TextInput, ActivityIndicator, Refre
 import { useState, useEffect, useCallback } from "react";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import ExerciseCard from "@/src/components/exercises/ExerciseCard";
 import FilterButton from "@/src/components/exercises/FilterButton";
 import { colors, spacing } from "@/src/styles/globalstyles";
@@ -90,7 +91,7 @@ export default function ExercisesScreen() {
 
   const fetchExercises = useCallback(async (isRefresh = false) => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = await Storage.getItem("token");
       if (!token) return;
       const res = await getExercises(token);
       if (res?.data) {
@@ -124,8 +125,8 @@ export default function ExercisesScreen() {
     setAddModalVisible(true);
     setRoutinesLoading(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-      const userRaw = await AsyncStorage.getItem("user");
+      const token = await Storage.getItem("token");
+      const userRaw = await Storage.getItem("user");
       if (!token || !userRaw) return;
       const user = JSON.parse(userRaw);
       const res = await getUserRoutines(user.id, token);
@@ -141,7 +142,7 @@ export default function ExercisesScreen() {
     if (!selectedRoutine || !selectedExercise) return;
     setAdding(true);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = await Storage.getItem("token");
       if (!token) return;
       await createUserRoutineExercise(
         {

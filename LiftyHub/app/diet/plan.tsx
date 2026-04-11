@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { getDietPlans, getNutritionistProfiles } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import NutritionistCard from "@/src/components/diet/NutritionistCard";
@@ -33,8 +33,8 @@ export default function DietPlanScreen() {
   useEffect(() => {
     const load = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
-        const userStorage = await AsyncStorage.getItem("user");
+        const token = await Storage.getItem("token");
+        const userStorage = await Storage.getItem("user");
         if (!token || !userStorage) return;
 
         const user = JSON.parse(userStorage);

@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TextInput, KeyboardAvoidingView, TouchableWitho
 import { useRouter, Stack } from "expo-router";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { loginRequest } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
@@ -21,7 +21,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     const checkLogin = async () => {
-      const token = await AsyncStorage.getItem("token");
+      const token = await Storage.getItem("token");
       if (token) {
         router.replace("/(tabs)/profile" as any);
       }
@@ -40,8 +40,8 @@ export default function Login() {
           setError(t("login.errorNotAllowed"));
           return;
         }
-        await AsyncStorage.setItem("token", data.token);
-        await AsyncStorage.setItem("user", JSON.stringify(data.user));
+        await Storage.setItem("token", data.token);
+        await Storage.setItem("user", JSON.stringify(data.user));
         await refresh();
         router.replace("/(tabs)/profile" as any);
       } else {

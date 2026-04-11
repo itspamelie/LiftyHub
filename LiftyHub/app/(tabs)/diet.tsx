@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import { colors, spacing } from "@/src/styles/globalstyles";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { getDietPlans } from "@/src/services/api";
 import { useToast } from "@/src/hooks/useToast";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
@@ -48,8 +48,8 @@ export default function DietScreen() {
   const loadDietPlan = useCallback(async (isRefresh = false) => {
     let userId: number | null = null;
     try {
-      const token = await AsyncStorage.getItem("token");
-      const userStorage = await AsyncStorage.getItem("user");
+      const token = await Storage.getItem("token");
+      const userStorage = await Storage.getItem("user");
       if (!token || !userStorage) return;
 
       const user = JSON.parse(userStorage);

@@ -2,14 +2,14 @@ import { View, Text, StyleSheet, ScrollView, Modal, FlatList, ActivityIndicator,
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
-import { getUserRoutines, getRoutines, getUserRoutineSessions } from "@/src/services/api";
-import { loadWeekPlan, saveWeekPlan, setDayPlan, WeekPlan, DayPlan } from "@/src/utils/calendarPlan";
+import { getUserRoutines, getRoutines, getUserRoutineSessions, getUserWeekPlan, updateUserWeekPlan } from "@/src/services/api";
+import { WeekPlan, DayPlan } from "@/src/utils/calendarPlan";
 import OfflineBanner from "@/src/components/OfflineBanner";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import HapticButton from "@/src/components/buttons/HapticButton";
@@ -75,18 +75,32 @@ export default function CalendarScreen() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-      const userRaw = await AsyncStorage.getItem("user");
-      if (!token || !userRaw) return;
+      const tok = await Storage.getItem("token");
+      const userRaw = await Storage.getItem("user");
+      if (!tok || !userRaw) return;
       const user = JSON.parse(userRaw);
 
-      const [plan, userRoutinesRes, appRoutinesRes, sessionsRes] = await Promise.all([
-        loadWeekPlan(),
-        getUserRoutines(user.id, token),
-        getRoutines(token),
-        getUserRoutineSessions(token),
+      const [weekPlanRes, userRoutinesRes, appRoutinesRes, sessionsRes] = await Promise.all([
+        getUserWeekPlan(tok),
+        getUserRoutines(user.id, tok),
+        getRoutines(tok),
+        getUserRoutineSessions(tok),
       ]);
 
+      // Convertir array del API a WeekPlan map
+      const plan: WeekPlan = {};
+      for (const row of (weekPlanRes?.data ?? [])) {
+        if (row.type === "rest") {
+          plan[row.day_index] = { type: "rest" };
+        } else if (row.type === "routine") {
+          plan[row.day_index] = {
+            type: "routine",
+            routineId: String(row.user_routine_id ?? row.routine_id),
+            routineName: row.routine_name ?? "",
+            isUserRoutine: !!row.user_routine_id,
+          };
+        }
+      }
       setWeekPlanState(plan);
 
       const userR: Routine[] = (userRoutinesRes?.data ?? []).map((r: any) => ({
@@ -97,35 +111,17 @@ export default function CalendarScreen() {
       }));
       setRoutines([...userR, ...appR]);
 
-      const apiDates = (sessionsRes?.data ?? [])
+      const completedDatesFromApi = (sessionsRes?.data ?? [])
         .filter((s: any) => Number(s.user_id) === Number(user.id) && s.finished_at && s.started_at)
         .map((s: any) => {
           const datePart = (s.started_at as string).split(" ")[0].split("T")[0];
           const [y, m, d] = datePart.split("-").map(Number);
           return new Date(y, m - 1, d);
         });
-
-      // Also read locally saved completed dates as reliable fallback
-      const localRaw = await AsyncStorage.getItem("completedWorkoutDates");
-      const localDates: Date[] = localRaw
-        ? (JSON.parse(localRaw) as string[]).map((s) => {
-            const [y, m, d] = s.split("-").map(Number);
-            return new Date(y, m - 1, d);
-          })
-        : [];
-
-      // Merge, deduplicate by date string
-      const seen = new Set<string>();
-      const merged = [...apiDates, ...localDates].filter((d) => {
-        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-      setCompletedDates(merged);
+      setCompletedDates(completedDatesFromApi);
     } catch {
-      const plan = await loadWeekPlan();
-      setWeekPlanState(plan);
+      // sin conexión: dejar estado vacío
+      setWeekPlanState({});
     } finally {
       setLoading(false);
     }
@@ -148,12 +144,30 @@ export default function CalendarScreen() {
     setModalVisible(true);
   };
 
+  const syncDay = async (dayIndex: number, dayPlan: DayPlan) => {
+    const tok = await Storage.getItem("token");
+    if (!tok) return;
+    if (dayPlan === null) {
+      await updateUserWeekPlan([{ day_index: dayIndex, type: null }], tok);
+    } else if (dayPlan.type === "rest") {
+      await updateUserWeekPlan([{ day_index: dayIndex, type: "rest" }], tok);
+    } else {
+      await updateUserWeekPlan([{
+        day_index: dayIndex,
+        type: "routine",
+        routine_id: !dayPlan.isUserRoutine ? Number(dayPlan.routineId) : null,
+        user_routine_id: dayPlan.isUserRoutine ? Number(dayPlan.routineId) : null,
+        routine_name: dayPlan.routineName,
+      }], tok);
+    }
+  };
+
   const handleMarkRest = async () => {
     if (selectedDayIdx === null) return;
     const plan: DayPlan = { type: "rest" };
-    await setDayPlan(selectedDayIdx, plan);
     setWeekPlanState(prev => ({ ...prev, [selectedDayIdx]: plan }));
     setModalVisible(false);
+    await syncDay(selectedDayIdx, plan);
   };
 
   const handleAssign = async (routine: Routine) => {
@@ -164,16 +178,16 @@ export default function CalendarScreen() {
       routineName: routine.name,
       isUserRoutine: routine.isUserRoutine,
     };
-    await setDayPlan(selectedDayIdx, plan);
     setWeekPlanState(prev => ({ ...prev, [selectedDayIdx]: plan }));
     setModalVisible(false);
+    await syncDay(selectedDayIdx, plan);
   };
 
   const handleRemove = async () => {
     if (selectedDayIdx === null) return;
-    await setDayPlan(selectedDayIdx, null);
     setWeekPlanState(prev => ({ ...prev, [selectedDayIdx]: null }));
     setModalVisible(false);
+    await syncDay(selectedDayIdx, null);
   };
 
   const handleResetPlan = () => {
@@ -186,7 +200,10 @@ export default function CalendarScreen() {
           text: t("calendar.resetScheduleConfirm"),
           style: "destructive",
           onPress: async () => {
-            await saveWeekPlan({});
+            const tok = await Storage.getItem("token");
+            if (!tok) return;
+            const allDays = [0,1,2,3,4,5,6].map(i => ({ day_index: i, type: null as null }));
+            await updateUserWeekPlan(allDays, tok);
             setWeekPlanState({});
           },
         },
