@@ -3,7 +3,7 @@ import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import { Stack, router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { colors, spacing, planColors } from "@/src/styles/globalstyles";
 import { getUserProperties, updateUser, updateUserProperties, checkPassword } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
@@ -59,8 +59,8 @@ export default function EditProfileScreen() {
 
   const loadData = async (isRefresh = false) => {
     try {
-      const storedToken = await AsyncStorage.getItem("token");
-      const storedUser  = await AsyncStorage.getItem("user");
+      const storedToken = await Storage.getItem("token");
+      const storedUser  = await Storage.getItem("user");
 
       if (!storedToken || !storedUser) return;
 
@@ -80,7 +80,7 @@ export default function EditProfileScreen() {
         setSomatotype(d.somatotype?.type ?? "Mesomorfo");
       }
     } catch {
-      Alert.alert("Error", "No se pudieron cargar tus datos. Verifica tu conexión.");
+      Alert.alert(t("editProfile.errorTitle"), t("editProfile.errorLoad"));
     } finally {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
@@ -168,10 +168,10 @@ export default function EditProfileScreen() {
       }
 
       // Actualizar nombre en AsyncStorage
-      const storedUser = await AsyncStorage.getItem("user");
+      const storedUser = await Storage.getItem("user");
       if (storedUser) {
         const user = JSON.parse(storedUser);
-        await AsyncStorage.setItem("user", JSON.stringify({ ...user, name }));
+        await Storage.setItem("user", JSON.stringify({ ...user, name }));
       }
 
       Alert.alert(t("editProfile.successTitle"), t("editProfile.successSave"), [

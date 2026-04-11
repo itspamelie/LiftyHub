@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TextInput, Platf
 import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
@@ -126,8 +127,8 @@ export default function SessionScreen() {
       let newSessionId: number | null = null;
 
       try {
-        const token = await AsyncStorage.getItem("token");
-        const userRaw = await AsyncStorage.getItem("user");
+        const token = await Storage.getItem("token");
+        const userRaw = await Storage.getItem("user");
         if (!token || !id) return;
 
         const res = isUser
@@ -297,8 +298,8 @@ export default function SessionScreen() {
     const net = await NetInfo.fetch();
     if (!net.isConnected) {
       try {
-        const token = await AsyncStorage.getItem("token");
-        const userRaw = await AsyncStorage.getItem("user");
+        const token = await Storage.getItem("token");
+        const userRaw = await Storage.getItem("user");
         if (token && userRaw) {
           const user = JSON.parse(userRaw);
           const isUser = isUserRoutine === "true";
@@ -336,8 +337,8 @@ export default function SessionScreen() {
       return;
     }
     try {
-      const token = await AsyncStorage.getItem("token");
-      const userRaw = await AsyncStorage.getItem("user");
+      const token = await Storage.getItem("token");
+      const userRaw = await Storage.getItem("user");
       if (!token || !userRaw) { router.back(); return; }
       const user = JSON.parse(userRaw);
       const finishedAt = toMySQLDate(new Date());

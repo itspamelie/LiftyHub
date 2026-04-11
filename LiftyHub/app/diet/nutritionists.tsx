@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, Modal,  }
 import { router } from "expo-router";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { getNutritionistProfiles } from "@/src/services/api";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
@@ -36,7 +36,7 @@ export default function NutritionistsScreen() {
   useEffect(() => {
     const load = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = await Storage.getItem("token");
         if (!token) return;
         const data = await getNutritionistProfiles(token);
         const all: Nutritionist[] = data?.data ?? [];

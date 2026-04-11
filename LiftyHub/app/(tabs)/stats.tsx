@@ -1,7 +1,7 @@
 import { ScrollView, Text, StyleSheet, View, ActivityIndicator, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect, useCallback } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
@@ -29,8 +29,8 @@ export default function StatsScreen() {
 
   const loadData = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-      const userRaw = await AsyncStorage.getItem("user");
+      const token = await Storage.getItem("token");
+      const userRaw = await Storage.getItem("user");
       if (!token || !userRaw) return;
 
       const user = JSON.parse(userRaw);

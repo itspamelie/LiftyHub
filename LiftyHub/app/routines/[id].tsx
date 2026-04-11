@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, Dimension
 import QRCode from "react-native-qrcode-svg";
 import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { getRoutineExercises, getUserRoutineExercises } from "@/src/services/api";
@@ -93,7 +93,7 @@ export default function RoutineDetail() {
       const isUser = isUserRoutine === "true";
       const cacheKey = `exercises_${isUser ? "user" : "app"}_${id}`;
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = await Storage.getItem("token");
         if (!token || !id) return;
         const res = isUser
           ? await getUserRoutineExercises(Number(id), token)

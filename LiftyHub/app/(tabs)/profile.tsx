@@ -10,6 +10,7 @@ import PersonalRecords from "@/src/components/stats/PersonalRecords";
 import { router } from "expo-router";
 import { useEffect, useState, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { getUser, getUserProperties, getUserStreak, getUserRoutinesCount, getUserRoutineSessions, getExerciseLogs, updateUserProperties } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
@@ -23,21 +24,6 @@ import HapticButton from "@/src/components/buttons/HapticButton";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-const STATS_PLAN_OPTIONS = [
-  {
-    name: "Basic",
-    price: "$99/mes",
-    color: colors.primary,
-    features: ["Estadísticas avanzadas", "Actividad semanal", "Records personales", "Hasta 20 rutinas propias"],
-  },
-  {
-    name: "Pro",
-    price: "$600/mes",
-    color: "#F59E0B",
-    features: ["Todo lo de Basic", "Rutinas ilimitadas", "Nutriólogo personal", "Plan de dieta personalizado"],
-    highlighted: true,
-  },
-];
 
 // función para calcular la edad
 const calculateAge = (birthdate: string) => {
@@ -61,6 +47,22 @@ export default function ProfileScreen() {
   const { plan } = useSubscription();
   const planColor = planColors[plan?.name ?? "Free"] ?? "#A1A1A1";
   const hasStatsAccess = plan?.name === "Basic" || plan?.name === "Pro";
+
+  const STATS_PLAN_OPTIONS = [
+    {
+      name: "Basic",
+      price: "$99/mes",
+      color: colors.primary,
+      features: [t("plans.features.stats"), t("stats.weeklyActivity"), t("stats.personalRecords"), t("plans.features.routines20")],
+    },
+    {
+      name: "Pro",
+      price: "$600/mes",
+      color: "#F59E0B",
+      features: [t("plans.features.routinesUnlimited"), t("plans.features.nutritionist"), t("plans.features.dietPlan")],
+      highlighted: true,
+    },
+  ];
 
   const { showToast, Toast } = useToast();
   const isConnected = useNetworkStatus();
@@ -98,8 +100,8 @@ export default function ProfileScreen() {
 
   const loadUser = async (isRefresh = false) => {
     try {
-      const token = await AsyncStorage.getItem("token");
-      const userStorage = await AsyncStorage.getItem("user");
+      const token = await Storage.getItem("token");
+      const userStorage = await Storage.getItem("user");
 
       if (!token || !userStorage) { setLoading(false); return; }
 
@@ -441,7 +443,7 @@ export default function ProfileScreen() {
             <TextInput
               style={styles.converterInput}
               keyboardType="numeric"
-              placeholder={converterMode === "kg" ? "Ingresa kg" : "Ingresa lbs"}
+              placeholder={converterMode === "kg" ? t("profile.converterKgPlaceholder") : t("profile.converterLbsPlaceholder")}
               placeholderTextColor={colors.textSecondary}
               value={converterValue}
               onChangeText={setConverterValue}
@@ -450,7 +452,7 @@ export default function ProfileScreen() {
             {/* RESULTADO */}
             {convertedValue !== "" && (
               <View style={styles.converterResult}>
-                <Text style={styles.converterResultLabel}>{converterMode === "kg" ? "Libras" : "Kilogramos"}</Text>
+                <Text style={styles.converterResultLabel}>{converterMode === "kg" ? t("profile.converterLbsLabel") : t("profile.converterKgLabel")}</Text>
                 <Text style={styles.converterResultValue}>
                   {convertedValue} {converterMode === "kg" ? "lbs" : "kg"}
                 </Text>
@@ -528,10 +530,8 @@ export default function ProfileScreen() {
             <View style={styles.modalIcon}>
               <Ionicons name="bar-chart-outline" size={32} color={colors.primary} />
             </View>
-            <Text style={styles.modalTitle}>Desbloquea Estadísticas</Text>
-            <Text style={styles.modalSubtitle}>
-              Accede a tus estadísticas detalladas, actividad semanal y records personales.
-            </Text>
+            <Text style={styles.modalTitle}>{t("profile.upgradeStatsTitle")}</Text>
+            <Text style={styles.modalSubtitle}>{t("profile.upgradeStatsSubtitle")}</Text>
             <ScrollView showsVerticalScrollIndicator={false}>
               {STATS_PLAN_OPTIONS.map((p) => (
                 <HapticButton
@@ -541,7 +541,7 @@ export default function ProfileScreen() {
                 >
                   {p.highlighted && (
                     <View style={[styles.planBadge, { backgroundColor: p.color }]}>
-                      <Text style={styles.planBadgeText}>Recomendado</Text>
+                      <Text style={styles.planBadgeText}>{t("profile.recommended")}</Text>
                     </View>
                   )}
                   <View style={styles.planHeader}>
@@ -556,7 +556,7 @@ export default function ProfileScreen() {
                   ))}
                 </HapticButton>
               ))}
-              <Text style={styles.modalNote}>Contacta a un administrador para actualizar tu plan.</Text>
+              <Text style={styles.modalNote}>{t("profile.adminNote")}</Text>
             </ScrollView>
           </HapticButton>
         </HapticButton>

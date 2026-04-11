@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { getSubscriptions } from "@/src/services/api";
 
 export type PlanLevel = 0 | 1 | 2; // 0=Free, 1=Basic, 2=Pro
@@ -58,8 +59,8 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const token = await AsyncStorage.getItem("token");
-      const userRaw = await AsyncStorage.getItem("user");
+      const token = await Storage.getItem("token");
+      const userRaw = await Storage.getItem("user");
       if (!token || !userRaw) {
         setPlan(FREE_PLAN);
         return;

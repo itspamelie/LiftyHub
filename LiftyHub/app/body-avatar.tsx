@@ -5,7 +5,7 @@ import { router, Stack } from "expo-router";
 import Body from "react-native-body-highlighter";
 import { colors } from "@/src/styles/globalstyles";
 import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import HapticButton from "@/src/components/buttons/HapticButton";
 
 export default function BodyAvatarScreen() {
@@ -13,7 +13,7 @@ export default function BodyAvatarScreen() {
   const [gender, setGender] = useState<"male" | "female">("male");
 
   useEffect(() => {
-    AsyncStorage.getItem("user").then(raw => {
+    Storage.getItem("user").then(raw => {
       if (!raw) return;
       const u = JSON.parse(raw);
       setGender(u.gender === "Femenino" ? "female" : "male");

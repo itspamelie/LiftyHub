@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TextInput, ScrollView, ActivityIndicator, Keybo
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect, useRef } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
 import {
@@ -30,19 +30,6 @@ const REST_OPTIONS = [15, 30, 45, 60, 90, 120, 150, 180, 240, 300];
 const ITEM_HEIGHT = 60;
 const TOTAL_STEPS = 5;
 
-const filters = [
-  { key: "Fuerza",    label: "Fuerza" },
-  { key: "Movilidad", label: "Movilidad" },
-  { key: "Cardio",    label: "Cardio" },
-  { key: "HIIT",      label: "HIIT" },
-  { key: "Full Body", label: "Full Body" },
-];
-
-const levels = [
-  { key: "Principiante", label: "Principiante", icon: "leaf-outline" as const },
-  { key: "Intermedio",   label: "Intermedio",   icon: "flame-outline" as const },
-  { key: "Avanzado",     label: "Avanzado",     icon: "rocket-outline" as const },
-];
 
 function formatRest(secs: number): string {
   if (secs < 60) return `${secs} seg`;
@@ -54,6 +41,20 @@ function formatRest(secs: number): string {
 export default function EditRoutineScreen() {
   const { t } = useLanguage();
   const { showToast, Toast } = useToast();
+
+  const filters = [
+    { key: "Fuerza",    label: t("routines.categories.strength") },
+    { key: "Movilidad", label: t("routines.categories.mobility") },
+    { key: "Cardio",    label: t("routines.categories.cardio") },
+    { key: "HIIT",      label: t("routines.categories.hiit") },
+    { key: "Full Body", label: t("routines.categories.fullBody") },
+  ];
+
+  const levels = [
+    { key: "Principiante", label: t("routines.levels.beginner"),     icon: "leaf-outline" as const },
+    { key: "Intermedio",   label: t("routines.levels.intermediate"), icon: "flame-outline" as const },
+    { key: "Avanzado",     label: t("routines.levels.advanced"),     icon: "rocket-outline" as const },
+  ];
   const params = useLocalSearchParams<{
     id: string;
     name: string;
@@ -97,7 +98,7 @@ export default function EditRoutineScreen() {
   // Cargar ejercicios disponibles + ejercicios actuales de la rutina
   useEffect(() => {
     const load = async () => {
-      const token = await AsyncStorage.getItem("token");
+      const token = await Storage.getItem("token");
       if (!token) return;
 
       const [exRes, routineExRes] = await Promise.all([
@@ -173,7 +174,7 @@ export default function EditRoutineScreen() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = await Storage.getItem("token");
       if (!token) return;
 
       // 1. Actualizar metadata de la rutina

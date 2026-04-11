@@ -1,4 +1,4 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { router } from "expo-router";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -20,8 +20,8 @@ const apiFetch = async (url: string, options: RequestInit = {}) => {
   const data = await res.json();
 
   if (data.error === "Unauthorized" || res.status === 401) {
-    await AsyncStorage.removeItem("token");
-    await AsyncStorage.removeItem("user");
+    await Storage.removeItem("token");
+    await Storage.removeItem("user");
     router.replace("/auth/login");
     return null;
   }
@@ -479,6 +479,32 @@ export const getExerciseLogs = async (token: string) => {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
+  });
+};
+
+// 📅 OBTENER PLAN SEMANAL DEL USUARIO
+export const getUserWeekPlan = async (token: string) => {
+  return apiFetch(`${API_URL}/userWeekPlan`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+// 📅 ACTUALIZAR PLAN SEMANAL DEL USUARIO
+export const updateUserWeekPlan = async (
+  days: { day_index: number; type: string | null; routine_id?: number | null; user_routine_id?: number | null; routine_name?: string | null }[],
+  token: string
+) => {
+  return apiFetch(`${API_URL}/userWeekPlan`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ days }),
   });
 };
 

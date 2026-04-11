@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { View, Text, StyleSheet, ScrollView, Alert, Modal, TextInput, ActivityIndicator, TouchableWithoutFeedback, Keyboard } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "@/src/utils/storage";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import SettingsItem from "@/src/components/settings/SettingsItem";
@@ -82,7 +83,7 @@ export default function Settings() {
     if (!deletePassword) return;
     setVerifyingDelete(true);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = await Storage.getItem("token");
       if (!token) return;
       const res = await checkPassword(deletePassword, token);
       if (res?.valid) {
@@ -100,15 +101,15 @@ export default function Settings() {
   const handleConfirmDelete = async () => {
     setDeletingAccount(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-      const userRaw = await AsyncStorage.getItem("user");
+      const token = await Storage.getItem("token");
+      const userRaw = await Storage.getItem("user");
       if (!token || !userRaw) return;
 
       const user = JSON.parse(userRaw);
       await deleteAccount(user.id, token);
 
-      await AsyncStorage.removeItem("token");
-      await AsyncStorage.removeItem("user");
+      await Storage.removeItem("token");
+      await Storage.removeItem("user");
       await AsyncStorage.removeItem("@liftyhub_dev_plan");
       await AsyncStorage.removeItem("@liftyhub_calendar_plan");
       router.replace("/auth/login");
@@ -121,8 +122,8 @@ export default function Settings() {
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem("token");
-      await AsyncStorage.removeItem("user");
+      await Storage.removeItem("token");
+      await Storage.removeItem("user");
       await AsyncStorage.removeItem("@liftyhub_dev_plan");
       await AsyncStorage.removeItem("@liftyhub_calendar_plan");
       router.replace("/auth/login");
