@@ -25,6 +25,8 @@ use App\Http\Controllers\UserStreaksController;
 use App\Http\Controllers\UserRoutineExercisesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserRoutineSessionsController;
+use App\Http\Controllers\UserWeekPlanController;
+
 
 
 //RUTA DEL LOGIN
