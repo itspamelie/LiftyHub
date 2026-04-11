@@ -29,6 +29,23 @@ const apiFetch = async (url: string, options: RequestInit = {}) => {
   return data;
 };
 
+// 🔐 GOOGLE LOGIN
+export const googleLoginRequest = async (idToken: string) => {
+  try {
+    const res = await fetchWithTimeout(`${API_URL}/auth/google`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ id_token: idToken }),
+    });
+    return await res.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
 // 🔐 LOGIN
 export const loginRequest = async (email: string, password: string) => {
   try {
