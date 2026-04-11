@@ -83,7 +83,7 @@ class UserRoutineSessionsController extends Controller
     public function update(Request $request, string $id)
     {
          $validated = $request->validate([
-            'user_id'=>'required',
+            'user_id'=>'nullable',
             'routine_id'=>'nullable',
             'user_routine_id'=>'nullable',
             'started_at'=>'required|date',
@@ -92,7 +92,7 @@ class UserRoutineSessionsController extends Controller
 
         //metodo si los campos se llaman igual que en la base de datos
         $data = UserRoutineSession::findOrFail($id);
-        $data->update($validated);
+$data->update(array_filter($validated, fn($v) => $v !== null));
           return response()->json([
             "status"=>"ok",
             "mesage"=>"Registro actualizado correctamente.",
