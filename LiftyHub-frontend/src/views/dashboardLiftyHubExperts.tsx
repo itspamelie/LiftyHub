@@ -16,13 +16,21 @@ function isTokenExpired(token: string) {
 
 const Dashboard: React.FC = () => {
 
-  const token = localStorage.getItem("token")
-    const user = localStorage.getItem("user")
   
-    if (!token || !user || isTokenExpired(token)) {
-      localStorage.clear()
-      return <Navigate to="/Liftyhub-Experts-Login" replace />
-    }
+  const token = localStorage.getItem("token")
+  const userString = localStorage.getItem("user")
+
+  if (!token || !userString || isTokenExpired(token)) {
+    localStorage.clear()
+    return <Navigate to="/Liftyhub-Experts-Login" replace />
+  }
+
+  const user = JSON.parse(userString)
+
+  //
+  if (user.role !== "nutritionist") {
+    return <Navigate to="/" replace />
+  }
   return (
     <Box sx={{ display: "flex", bgcolor: "#0e0e0e", minHeight: "100vh", color: "white" }}>
       

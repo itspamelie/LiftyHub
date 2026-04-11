@@ -86,7 +86,7 @@ class UserRoutineSessionsController extends Controller
             'user_id'=>'nullable',
             'routine_id'=>'nullable',
             'user_routine_id'=>'nullable',
-            'started_at'=>'required|date',
+            'started_at'=>'nullable|date',
             'finished_at'=>'nullable|date',
         ]);
 
