@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('gender');
             $table->string('img');
             $table->date('birthdate');
+            $table->string('google_id'->nullable());
             $table->enum('role', ['admin', 'user', 'nutritionist'])->default('user');
             $table->rememberToken();
             $table->timestamps();

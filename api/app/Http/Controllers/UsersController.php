@@ -50,6 +50,7 @@ class UsersController extends Controller
          'password'=>'required|min:6', 
          'gender'=>'required|string',
           'img'=>'nullable|image', 
+          'google_id'=>'nullable|string', 
           'birthdate'=>'required|date', 
           'role'=>'required|string' ]);
            if($request->hasFile('img')){

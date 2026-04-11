@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\User;
+use Illuminate\Support\Facades\Http;
+
 
 class AuthController extends Controller
 {
@@ -74,4 +76,31 @@ class AuthController extends Controller
                 ]);
         }
     }
+    public function googleLogin(Request $request)
+{
+    $request->validate(['id_token' => 'required|string']);
+
+    $response = Http::get('https://oauth2.googleapis.com/tokeninfo', [
+        'id_token' => $request->id_token,
+    ]);
+
+    if (!$response->successful() || $response->json('aud') !== env('GOOGLE_CLIENT_ID')) {
+        return response()->json(['error' => 'Token inválido'], 401);
+    }
+
+    $payload = $response->json();
+
+    $user = User::firstOrCreate(
+        ['email' => $payload['email']],
+        [
+            'name'      => $payload['name'] ?? $payload['email'],
+            'password'  => bcrypt(str()->random(24)),
+            'google_id' => $payload['sub'],
+        ]
+    );
+
+    $token = JWTAuth::fromUser($user);
+
+    return response()->json(['token' => $token, 'user' => $user]);
+}
 }
