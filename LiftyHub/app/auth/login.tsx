@@ -48,7 +48,7 @@ export default function Login() {
         await Storage.setItem("token", data.token);
         await Storage.setItem("user", JSON.stringify(data.user));
         await refresh();
-        router.replace("/(tabs)/profile" as any);
+        router.replace("/(tabs)/profile");
       } else {
         setError(t("login.errorInvalid"));
       }
@@ -63,7 +63,7 @@ export default function Login() {
     const checkLogin = async () => {
       const token = await Storage.getItem("token");
       if (token) {
-        router.replace("/(tabs)/profile" as any);
+        router.replace("/(tabs)/profile");
       }
     };
     checkLogin();
@@ -83,7 +83,7 @@ export default function Login() {
         await Storage.setItem("token", data.token);
         await Storage.setItem("user", JSON.stringify(data.user));
         await refresh();
-        router.replace("/(tabs)/profile" as any);
+        router.replace("/(tabs)/profile");
       } else {
         setError(t("login.errorInvalid"));
       }

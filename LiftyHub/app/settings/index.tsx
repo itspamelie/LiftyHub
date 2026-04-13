@@ -37,9 +37,13 @@ export default function Settings() {
   ] as const;
 
   useEffect(() => {
-    AsyncStorage.getItem("@liftyhub_dev_plan").then((val) => {
-      if (val) setDevActivePlan(JSON.parse(val).name);
-    });
+    const load = async () => {
+      try {
+        const val = await AsyncStorage.getItem("@liftyhub_dev_plan");
+        if (val) setDevActivePlan(JSON.parse(val).name);
+      } catch {}
+    };
+    load();
   }, []);
 
   const handleVersionTap = () => {

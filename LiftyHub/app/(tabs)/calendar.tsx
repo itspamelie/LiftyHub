@@ -80,12 +80,17 @@ export default function CalendarScreen() {
       if (!tok || !userRaw) return;
       const user = JSON.parse(userRaw);
 
-      const [weekPlanRes, userRoutinesRes, appRoutinesRes, sessionsRes] = await Promise.all([
+      const [weekPlanResult, userRoutinesResult, appRoutinesResult, sessionsResult] = await Promise.allSettled([
         getUserWeekPlan(tok),
         getUserRoutines(user.id, tok),
         getRoutines(tok),
         getUserRoutineSessions(tok),
       ]);
+
+      const weekPlanRes     = weekPlanResult.status     === "fulfilled" ? weekPlanResult.value     : null;
+      const userRoutinesRes = userRoutinesResult.status === "fulfilled" ? userRoutinesResult.value : null;
+      const appRoutinesRes  = appRoutinesResult.status  === "fulfilled" ? appRoutinesResult.value  : null;
+      const sessionsRes     = sessionsResult.status     === "fulfilled" ? sessionsResult.value     : null;
 
       // Convertir array del API a WeekPlan map
       const plan: WeekPlan = {};
@@ -298,9 +303,9 @@ export default function CalendarScreen() {
                     {isRest && <Ionicons name="moon" size={13} color="white" />}
                     {!plan && <Ionicons name="add" size={16} color={colors.textSecondary} />}
                   </View>
-                  {isRoutine && (
+                  {plan?.type === "routine" && (
                     <Text style={styles.scheduleRoutineName} numberOfLines={1}>
-                      {(plan as any).routineName}
+                      {plan.routineName}
                     </Text>
                   )}
                   {isRest && (
@@ -363,11 +368,11 @@ export default function CalendarScreen() {
                     key={di}
                     style={styles.daySlot}
                     onPress={() => {
-                      if (isRoutine) {
+                      if (plan?.type === "routine") {
                         setStartModalRoutine({
-                          id: String((plan as any).routineId),
-                          name: (plan as any).routineName,
-                          isUserRoutine: (plan as any).isUserRoutine,
+                          id: String(plan.routineId),
+                          name: plan.routineName,
+                          isUserRoutine: plan.isUserRoutine,
                         });
                         setStartModalDate(date);
                         setStartModalVisible(true);
@@ -496,11 +501,11 @@ export default function CalendarScreen() {
             </Text>
 
             {/* Estado actual del día */}
-            {selectedIsRoutine && (
+            {selectedPlan?.type === "routine" && (
               <View style={styles.currentPlanBox}>
                 <Ionicons name="barbell" size={16} color={colors.primary} />
                 <Text style={styles.currentPlanName} numberOfLines={1}>
-                  {(selectedPlan as any).routineName}
+                  {selectedPlan.routineName}
                 </Text>
                 <HapticButton onPress={handleRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                   <Ionicons name="trash-outline" size={18} color="#EF4444" />

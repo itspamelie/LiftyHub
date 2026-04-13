@@ -13,11 +13,15 @@ export default function BodyAvatarScreen() {
   const [gender, setGender] = useState<"male" | "female">("male");
 
   useEffect(() => {
-    Storage.getItem("user").then(raw => {
-      if (!raw) return;
-      const u = JSON.parse(raw);
-      setGender(u.gender === "Femenino" ? "female" : "male");
-    });
+    const load = async () => {
+      try {
+        const raw = await Storage.getItem("user");
+        if (!raw) return;
+        const u = JSON.parse(raw);
+        setGender(u.gender === "Femenino" ? "female" : "male");
+      } catch {}
+    };
+    load();
   }, []);
 
   return (

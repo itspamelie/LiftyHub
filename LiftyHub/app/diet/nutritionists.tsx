@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, Modal,  } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, Modal, Alert } from "react-native";
 import { router } from "expo-router";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -57,7 +57,11 @@ export default function NutritionistsScreen() {
 
   const handleConfirm = () => {
     setShowConfirm(false);
-    setShowSuccess(true);
+    Alert.alert(
+      t("nutritionists.comingSoonTitle"),
+      t("nutritionists.comingSoonMessage"),
+      [{ text: "OK", onPress: () => router.back() }]
+    );
   };
 
   const handleSuccessClose = () => {

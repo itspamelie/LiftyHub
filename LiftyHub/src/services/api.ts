@@ -525,6 +525,51 @@ export const updateUserWeekPlan = async (
   });
 };
 
+// 👥 OBTENER AMIGOS
+export const getFriends = async (token: string) => {
+  return apiFetch(`${API_URL}/friends`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+};
+
+// 👥 OBTENER SOLICITUDES DE AMISTAD PENDIENTES
+export const getFriendRequests = async (token: string) => {
+  return apiFetch(`${API_URL}/friends/requests`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+};
+
+// 👥 ENVIAR SOLICITUD DE AMISTAD
+export const sendFriendRequest = async (userId: number, token: string) => {
+  return apiFetch(`${API_URL}/friends/request/${userId}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+};
+
+// 👥 ACEPTAR SOLICITUD DE AMISTAD
+export const acceptFriendRequest = async (id: number, token: string) => {
+  return apiFetch(`${API_URL}/friends/accept/${id}`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+};
+
+// 👥 RECHAZAR / ELIMINAR AMISTAD
+export const removeFriend = async (id: number, token: string) => {
+  return apiFetch(`${API_URL}/friends/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+};
+
+// 🔍 BUSCAR USUARIOS
+export const searchUsers = async (query: string, token: string) => {
+  return apiFetch(`${API_URL}/search-users?search=${encodeURIComponent(query)}`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+};
+
 // 🔥 CREAR RACHA DEL USUARIO (si no existe)
 export const createUserStreak = async (
   data: {

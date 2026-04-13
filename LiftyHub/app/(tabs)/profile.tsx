@@ -19,7 +19,6 @@ import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { saveCache, loadCache } from "@/src/utils/cache";
 import OfflineBanner from "@/src/components/OfflineBanner";
 import { loadWeekPlan } from "@/src/utils/calendarPlan";
-import { BlurView } from "expo-blur";
 import HapticButton from "@/src/components/buttons/HapticButton";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -40,6 +39,25 @@ const calculateAge = (birthdate: string) => {
 
   return age;
 };
+
+type Profile = {
+  name: string;
+  age: number | string;
+  avatar: number;
+  routinesCount: number;
+  streak: number;
+  weight: string;
+  height: string;
+  somatotype: string;
+  goal: string;
+  weeklyWorkouts: number;
+  weeklyProgress: number;
+  weeklyReps: number;
+  weeklySets: number;
+};
+type Stats = { workouts: number; streak: number; totalTime: number; totalWeight: number };
+type Session = { user_id: number; started_at: string; finished_at?: string };
+type ExerciseLog = { user_id: number; workout_date: string; repetitions: number; sets: number };
 
 export default function ProfileScreen() {
 
@@ -68,12 +86,12 @@ export default function ProfileScreen() {
   const isConnected = useNetworkStatus();
 
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"perfil" | "stats">("perfil");
-  const [stats, setStats] = useState<any>(null);
-  const [allSessions, setAllSessions] = useState<any[]>([]);
-  const [allLogs, setAllLogs] = useState<any[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [allSessions, setAllSessions] = useState<Session[]>([]);
+  const [allLogs, setAllLogs] = useState<ExerciseLog[]>([]);
   const [animationTrigger, setAnimationTrigger] = useState(0);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showConverterModal, setShowConverterModal] = useState(false);
@@ -107,7 +125,7 @@ export default function ProfileScreen() {
 
       const userParsed = JSON.parse(userStorage);
 
-      const [userData, propsData, streakData, routinesCountData, sessionsData, logsData] = await Promise.all([
+      const [userRes, propsRes, streakRes, routinesCountRes, sessionsRes, logsRes] = await Promise.allSettled([
         getUser(userParsed.id, token),
         getUserProperties(userParsed.id, token),
         getUserStreak(userParsed.id, token),
@@ -115,6 +133,13 @@ export default function ProfileScreen() {
         getUserRoutineSessions(token),
         getExerciseLogs(token),
       ]);
+
+      const userData        = userRes.status         === "fulfilled" ? userRes.value         : null;
+      const propsData       = propsRes.status        === "fulfilled" ? propsRes.value        : null;
+      const streakData      = streakRes.status       === "fulfilled" ? streakRes.value       : null;
+      const routinesCountData = routinesCountRes.status === "fulfilled" ? routinesCountRes.value : null;
+      const sessionsData    = sessionsRes.status     === "fulfilled" ? sessionsRes.value     : null;
+      const logsData        = logsRes.status         === "fulfilled" ? logsRes.value         : null;
 
       const user   = userData.data ?? userData;
       const props  = propsData.data ?? propsData;
