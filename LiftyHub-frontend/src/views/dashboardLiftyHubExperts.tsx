@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import Sidebar from "../components/dashboard-nutritionists/sidebar";
 import Topbar from "../components/dashboard-nutritionists/topbar";
 import { Outlet, Navigate } from "react-router-dom";

@@ -7,8 +7,7 @@ import CreateExerciseFileModal from "./CreateExerciseFileModal"
 import { useNavigate } from "react-router-dom";
 
 export default function ExercisesCard({ data, onDelete, onEdit }: any){
-const [openViewer, setOpenViewer] = useState(false)
-const [selectedExercise, setSelectedExercise] = useState<any>(null)
+const [selectedExercise] = useState<any>(null)
 const [openUpload, setOpenUpload] = useState(false)
 const navigate = useNavigate();
   return (

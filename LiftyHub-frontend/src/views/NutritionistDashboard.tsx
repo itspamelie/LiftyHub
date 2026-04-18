@@ -2,7 +2,6 @@ import {
   Box,
   TextField,
   Card,
-  CardContent,
   Typography,
   Avatar,
   Chip,
@@ -14,8 +13,6 @@ import { apiFetch } from "../services/api";
 import TopNavbar from "../components/dashboard/TopNavbar";
 import SearchIcon from "@mui/icons-material/Search";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { getImageUrl
  } from "../services/api";
 import { useNavigate } from "react-router-dom";
