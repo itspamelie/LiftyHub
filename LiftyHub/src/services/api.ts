@@ -29,6 +29,23 @@ const apiFetch = async (url: string, options: RequestInit = {}) => {
   return data;
 };
 
+// 🔐 GOOGLE LOGIN
+export const googleLoginRequest = async (idToken: string) => {
+  try {
+    const res = await fetchWithTimeout(`${API_URL}/auth/google`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ id_token: idToken }),
+    });
+    return await res.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
 // 🔐 LOGIN
 export const loginRequest = async (email: string, password: string) => {
   try {
@@ -505,6 +522,51 @@ export const updateUserWeekPlan = async (
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ days }),
+  });
+};
+
+// 👥 OBTENER AMIGOS
+export const getFriends = async (token: string) => {
+  return apiFetch(`${API_URL}/friends`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+};
+
+// 👥 OBTENER SOLICITUDES DE AMISTAD PENDIENTES
+export const getFriendRequests = async (token: string) => {
+  return apiFetch(`${API_URL}/friends/requests`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+};
+
+// 👥 ENVIAR SOLICITUD DE AMISTAD
+export const sendFriendRequest = async (userId: number, token: string) => {
+  return apiFetch(`${API_URL}/friends/request/${userId}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+};
+
+// 👥 ACEPTAR SOLICITUD DE AMISTAD
+export const acceptFriendRequest = async (id: number, token: string) => {
+  return apiFetch(`${API_URL}/friends/accept/${id}`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+};
+
+// 👥 RECHAZAR / ELIMINAR AMISTAD
+export const removeFriend = async (id: number, token: string) => {
+  return apiFetch(`${API_URL}/friends/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+};
+
+// 🔍 BUSCAR USUARIOS
+export const searchUsers = async (query: string, token: string) => {
+  return apiFetch(`${API_URL}/search-users?search=${encodeURIComponent(query)}`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
   });
 };
 

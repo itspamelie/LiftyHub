@@ -178,7 +178,6 @@ export default function EditProfileScreen() {
         { text: "OK", onPress: () => router.back() }
       ]);
     } catch (e) {
-      console.log("Error guardando:", e);
       Alert.alert(t("editProfile.errorTitle"), t("editProfile.errorSave"));
     } finally {
       setSaving(false);

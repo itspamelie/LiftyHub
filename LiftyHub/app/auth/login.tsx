@@ -3,11 +3,15 @@ import { useRouter, Stack } from "expo-router";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import * as Storage from "@/src/utils/storage";
-import { loginRequest } from "@/src/services/api";
+import { loginRequest, googleLoginRequest } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
-import { colors, spacing } from "@/src/styles/globalstyles";
+import { colors } from "@/src/styles/globalstyles";
 import HapticButton from "@/src/components/buttons/HapticButton";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function Login() {
 
@@ -19,11 +23,47 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+  });
+
+  useEffect(() => {
+    if (response?.type === "success") {
+      const idToken = response.authentication?.idToken;
+      if (idToken) handleGoogleLogin(idToken);
+    }
+  }, [response]);
+
+  const handleGoogleLogin = async (idToken: string) => {
+    setGoogleLoading(true);
+    try {
+      const data = await googleLoginRequest(idToken);
+      if (data?.token) {
+        if (data.user?.role !== "user") {
+          setError(t("login.errorNotAllowed"));
+          return;
+        }
+        await Storage.setItem("token", data.token);
+        await Storage.setItem("user", JSON.stringify(data.user));
+        await refresh();
+        router.replace("/(tabs)/profile");
+      } else {
+        setError(t("login.errorInvalid"));
+      }
+    } catch {
+      setError(t("login.errorInvalid"));
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   useEffect(() => {
     const checkLogin = async () => {
       const token = await Storage.getItem("token");
       if (token) {
-        router.replace("/(tabs)/profile" as any);
+        router.replace("/(tabs)/profile");
       }
     };
     checkLogin();
@@ -43,7 +83,7 @@ export default function Login() {
         await Storage.setItem("token", data.token);
         await Storage.setItem("user", JSON.stringify(data.user));
         await refresh();
-        router.replace("/(tabs)/profile" as any);
+        router.replace("/(tabs)/profile");
       } else {
         setError(t("login.errorInvalid"));
       }
@@ -125,13 +165,16 @@ export default function Login() {
 
             {/* GOOGLE BUTTON */}
             <HapticButton
-              style={styles.googleBtn}
-              onPress={() => Alert.alert(t("login.googleSoon"), t("login.googleSoonMsg"))}
+              style={[styles.googleBtn, (googleLoading || !request) && { opacity: 0.6 }]}
+              onPress={() => promptAsync()}
+              disabled={googleLoading || !request}
             >
               <View style={styles.googleIconCircle}>
                 <Text style={styles.googleIconText}>G</Text>
               </View>
-              <Text style={styles.googleBtnText}>{t("login.googleButton")}</Text>
+              <Text style={styles.googleBtnText}>
+                {googleLoading ? t("login.loading") : t("login.googleButton")}
+              </Text>
             </HapticButton>
 
           </View>

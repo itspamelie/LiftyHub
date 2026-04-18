@@ -15,14 +15,18 @@ import StatsSummaryGrid from "@/src/components/stats/StatsSummaryGrid";
 import WeeklyActivityChart from "@/src/components/stats/WeeklyActivityChart";
 import PersonalRecords from "@/src/components/stats/PersonalRecords";
 
+type Stats = { workouts: number; streak: number; totalTime: number; totalWeight: number };
+type Session = { user_id: number; started_at: string; finished_at?: string };
+type ExerciseLog = { user_id: number; workout_date: string; weight_lifted: string; sets: number; repetitions: number };
+
 export default function StatsScreen() {
 
   const { t } = useLanguage();
   const { showToast, Toast } = useToast();
   const isConnected = useNetworkStatus();
-  const [stats, setStats] = useState<any>(null);
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [logs, setLogs] = useState<any[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [logs, setLogs] = useState<ExerciseLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [animationTrigger, setAnimationTrigger] = useState(0);
@@ -43,15 +47,15 @@ export default function StatsScreen() {
       ]);
 
       const streak = streakRes?.data;
-      const allSessions: any[] = (sessionsRes?.data ?? []).filter(
-        (s: any) => Number(s.user_id) === userId
+      const allSessions: Session[] = (sessionsRes?.data ?? []).filter(
+        (s: Session) => Number(s.user_id) === userId
       );
-      const allLogs: any[] = (logsRes?.data ?? []).filter(
-        (l: any) => Number(l.user_id) === userId
+      const allLogs: ExerciseLog[] = (logsRes?.data ?? []).filter(
+        (l: ExerciseLog) => Number(l.user_id) === userId
       );
 
       // Tiempo total en horas (suma de duración de sesiones con started_at y finished_at)
-      const totalMinutes = allSessions.reduce((sum: number, s: any) => {
+      const totalMinutes = allSessions.reduce((sum: number, s: Session) => {
         if (!s.started_at || !s.finished_at) return sum;
         const start = new Date(s.started_at.replace(" ", "T"));
         const end = new Date(s.finished_at.replace(" ", "T"));
@@ -60,7 +64,7 @@ export default function StatsScreen() {
       const totalHours = Math.round(totalMinutes / 60);
 
       // Peso total levantado
-      const totalWeight = allLogs.reduce((sum: number, l: any) => {
+      const totalWeight = allLogs.reduce((sum: number, l: ExerciseLog) => {
         return sum + (parseFloat(l.weight_lifted) || 0) * (l.sets ?? 1) * (l.repetitions ?? 1);
       }, 0);
 

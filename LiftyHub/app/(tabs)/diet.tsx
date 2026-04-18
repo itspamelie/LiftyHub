@@ -32,6 +32,15 @@ const PLAN_OPTIONS = [
   },
 ];
 
+type DietPlan = {
+  id: number;
+  user_id: number;
+  status: string;
+  goal: string;
+  duration_days: number;
+  notes?: string | null;
+};
+
 export default function DietScreen() {
 
   const { t } = useLanguage();
@@ -41,7 +50,7 @@ export default function DietScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [dietPlan, setDietPlan] = useState<any>(null);
+  const [dietPlan, setDietPlan] = useState<DietPlan | null>(null);
 
   const hasAccess = planLevel >= 2;
 

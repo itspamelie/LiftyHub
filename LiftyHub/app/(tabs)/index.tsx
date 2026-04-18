@@ -108,7 +108,15 @@ export default function RoutinesScreen() {
   // QR Import
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [showScanner, setShowScanner] = useState(false);
-  const [scannedData, setScannedData] = useState<any>(null);
+  const [scannedData, setScannedData] = useState<{
+    app: string;
+    name: string;
+    objective?: string;
+    level?: string;
+    category?: string;
+    duration?: number;
+    exercises?: { name: string; sets: number; reps: number }[];
+  } | null>(null);
   const [importing, setImporting] = useState(false);
   const scanLock = useRef(false);
   const [scannerUsed, setScannerUsed] = useState(false);
@@ -117,16 +125,20 @@ export default function RoutinesScreen() {
   const [showCameraPermModal, setShowCameraPermModal] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem("@liftyhub_scanner_date").then((val) => {
-      if (!val) return;
-      const last = new Date(val);
-      const next = new Date(last);
-      next.setMonth(next.getMonth() + 1);
-      if (new Date() < next) {
-        setScannerUsed(true);
-        setNextScanDate(next);
-      }
-    });
+    const checkScannerDate = async () => {
+      try {
+        const val = await AsyncStorage.getItem("@liftyhub_scanner_date");
+        if (!val) return;
+        const last = new Date(val);
+        const next = new Date(last);
+        next.setMonth(next.getMonth() + 1);
+        if (new Date() < next) {
+          setScannerUsed(true);
+          setNextScanDate(next);
+        }
+      } catch {}
+    };
+    checkScannerDate();
   }, []);
 
   const openScannerCamera = async () => {
@@ -255,25 +267,28 @@ export default function RoutinesScreen() {
 
       const user = JSON.parse(userRaw);
 
-      const [resRoutines, resUserRoutines] = await Promise.all([
+      const [resRoutines, resUserRoutines] = await Promise.allSettled([
         getRoutines(token),
         getUserRoutines(user.id, token),
       ]);
 
-      if (resRoutines?.data) {
-        setRoutines(resRoutines.data);
-        await saveCache("routines", resRoutines.data);
+      if (resRoutines.status === "fulfilled" && resRoutines.value?.data) {
+        setRoutines(resRoutines.value.data);
+        await saveCache("routines", resRoutines.value.data);
+      } else {
+        const cached = await loadCache<Routine[]>("routines");
+        if (cached) setRoutines(cached);
       }
-      if (resUserRoutines?.data) {
-        setUserRoutines(resUserRoutines.data);
-        await saveCache("userRoutines", resUserRoutines.data);
+
+      if (resUserRoutines.status === "fulfilled" && resUserRoutines.value?.data) {
+        setUserRoutines(resUserRoutines.value.data);
+        await saveCache("userRoutines", resUserRoutines.value.data);
+      } else {
+        const cached = await loadCache<UserRoutine[]>("userRoutines");
+        if (cached) setUserRoutines(cached);
       }
     } catch {
-      const cachedR = await loadCache<any[]>("routines");
-      const cachedU = await loadCache<any[]>("userRoutines");
-      if (cachedR) setRoutines(cachedR);
-      if (cachedU) setUserRoutines(cachedU);
-      if (!cachedR && !cachedU) showToast(t("routines.errorLoad"), "error");
+      showToast(t("routines.errorLoad"), "error");
     } finally {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);

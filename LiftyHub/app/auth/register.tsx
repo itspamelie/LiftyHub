@@ -46,7 +46,7 @@ export default function Register() {
     }
 
     await AsyncStorage.setItem("@register_data", JSON.stringify({ name, email, password }));
-    router.push("/onboarding/objectives" as any);
+    router.push("/onboarding/objectives");
   };
 
   return (
@@ -156,7 +156,7 @@ export default function Register() {
             </HapticButton>
 
             {/* LOGIN */}
-            <HapticButton onPress={() => router.push("/auth/login" as any)}>
+            <HapticButton onPress={() => router.push("/auth/login")}>
               <Text style={styles.register}>
                 {t("register.hasAccount")}{" "}
                 <Text style={styles.registerHighlight}>{t("register.login")}</Text>
