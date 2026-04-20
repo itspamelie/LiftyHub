@@ -26,6 +26,7 @@ use App\Http\Controllers\UserRoutineExercisesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserRoutineSessionsController;
 use App\Http\Controllers\UserWeekPlanController;
+use App\Http\Controllers\FriendshipsController;
 
 
 
@@ -70,4 +71,9 @@ Route::get('/userroutines/{id}/exercises', [UserRoutineExercisesController::clas
 Route::resource('userRoutineSessions', UserRoutineSessionsController::class); 
 Route::get('/userWeekPlan', [UserWeekPlanController::class, 'index']);
 Route::put('/userWeekPlan', [UserWeekPlanController::class, 'update']);
+Route::get('/friends', [FriendshipsController::class, 'index']);
+Route::get('/friends/requests', [FriendshipsController::class, 'requests']);
+Route::post('/friends/request/{userId}', [FriendshipsController::class, 'sendRequest']);
+Route::put('/friends/accept/{id}', [FriendshipsController::class, 'accept']);
+Route::delete('/friends/{id}', [FriendshipsController::class, 'destroy']);
 });

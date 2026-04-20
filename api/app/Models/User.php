@@ -74,4 +74,14 @@ class User extends Authenticatable implements JWTSubject
 {
     return $this->hasMany(UserSavedRoutine::class, 'user_id');
 }
+
+public function sentFriendRequests()
+{
+    return $this->hasMany(Friendship::class, 'requester_id');
+}
+
+public function receivedFriendRequests()
+{
+    return $this->hasMany(Friendship::class, 'addressee_id');
+}
 }
