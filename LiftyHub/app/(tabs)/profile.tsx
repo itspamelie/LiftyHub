@@ -141,9 +141,11 @@ export default function ProfileScreen() {
       const sessionsData    = sessionsRes.status     === "fulfilled" ? sessionsRes.value     : null;
       const logsData        = logsRes.status         === "fulfilled" ? logsRes.value         : null;
 
-      const user   = userData.data ?? userData;
-      const props  = propsData.data ?? propsData;
-      const streak = streakData.data ?? streakData;
+      const user   = userData?.data ?? userData;
+      const props  = propsData?.data ?? propsData;
+      const streak = streakData?.data ?? streakData;
+
+      if (!user) throw new Error("User data unavailable");
 
       setProfileToken(token);
       setProfileUserId(userParsed.id);
