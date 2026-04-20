@@ -16,6 +16,7 @@ const [localUsers, setLocalUsers] = useState(users)
 const [editOpen,setEditOpen] = useState(false)
 const [selectedUser,setSelectedUser] = useState(null)
 const handleChangePage = (event: unknown, newPage: number) => {
+  console.log(event)
   setPage(newPage)
 }
 

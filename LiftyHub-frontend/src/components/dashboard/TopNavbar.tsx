@@ -1,5 +1,4 @@
 import { Box, Typography, IconButton } from "@mui/material";
-import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import React from "react";

@@ -70,6 +70,8 @@ const handleFileChange = (e: any) => {
 if (file) {
   formData.append("img", file)
 }
+  console.log(img)
+
       const res = await apiFetch("/routines", { 
         method: "POST",
         body: formData
