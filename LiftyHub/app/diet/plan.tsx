@@ -15,13 +15,6 @@ import DietTipCard from "@/src/components/diet/DietTipCard";
 import BackButton from "@/src/components/buttons/backButton";
 import { colors } from "@/src/styles/globalstyles";
 
-const TIPS = [
-  "Come cada 3-4 horas para mantener tu metabolismo activo",
-  "No te saltes el desayuno, es la comida más importante",
-  "Cena al menos 2 horas antes de dormir",
-  "Mantente bien hidratado durante el entrenamiento",
-];
-
 export default function DietPlanScreen() {
 
   const { t } = useLanguage();
@@ -144,7 +137,7 @@ export default function DietPlanScreen() {
 
         {/* TIPS */}
         <Text style={styles.section}>{t("dietPlan.tipsSection")}</Text>
-        <DietTipCard tips={TIPS} />
+        <DietTipCard tips={[t("dietPlan.tip1"), t("dietPlan.tip2"), t("dietPlan.tip3"), t("dietPlan.tip4")]} />
 
       </ScrollView>
     </View>

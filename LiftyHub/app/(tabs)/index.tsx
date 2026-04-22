@@ -101,6 +101,7 @@ export default function RoutinesScreen() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [networkError, setNetworkError] = useState(false);
   const [activeTab, setActiveTab] = useState<"mine" | "app">("mine");
   const [selectedFilter, setSelectedFilter] = useState("Todo");
   const [search, setSearch] = useState("");
@@ -272,12 +273,15 @@ export default function RoutinesScreen() {
         getUserRoutines(user.id, token),
       ]);
 
+      let hasError = false;
+
       if (resRoutines.status === "fulfilled" && resRoutines.value?.data) {
         setRoutines(resRoutines.value.data);
         await saveCache("routines", resRoutines.value.data);
       } else {
         const cached = await loadCache<Routine[]>("routines");
         if (cached) setRoutines(cached);
+        else hasError = true;
       }
 
       if (resUserRoutines.status === "fulfilled" && resUserRoutines.value?.data) {
@@ -286,9 +290,13 @@ export default function RoutinesScreen() {
       } else {
         const cached = await loadCache<UserRoutine[]>("userRoutines");
         if (cached) setUserRoutines(cached);
+        else hasError = true;
       }
+
+      setNetworkError(hasError);
     } catch {
       showToast(t("routines.errorLoad"), "error");
+      setNetworkError(true);
     } finally {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
@@ -351,7 +359,11 @@ export default function RoutinesScreen() {
               const token = await Storage.getItem("token");
               if (!token) return;
               await deleteUserRoutine(id, token);
-              setUserRoutines((prev) => prev.filter((r) => r.id !== id));
+              setUserRoutines((prev) => {
+                const updated = prev.filter((r) => r.id !== id);
+                saveCache("userRoutines", updated);
+                return updated;
+              });
               showToast(t("routines.deleteSuccess"), "success");
             } catch {
               showToast(t("routines.deleteError"), "error");
@@ -384,10 +396,10 @@ export default function RoutinesScreen() {
       }
       ListEmptyComponent={
         <View style={styles.emptyContainer}>
-          <Ionicons name="barbell-outline" size={60} color={colors.textSecondary} />
-          <Text style={styles.emptyTitle}>{t("routines.empty")}</Text>
+          <Ionicons name={networkError ? "cloud-offline-outline" : "barbell-outline"} size={60} color={colors.textSecondary} />
+          <Text style={styles.emptyTitle}>{networkError ? t("routines.errorLoad") : t("routines.empty")}</Text>
           <Text style={styles.emptyText}>
-            {activeTab === "mine" ? t("routines.noUserRoutines") : t("routines.emptyHint")}
+            {networkError ? "" : activeTab === "mine" ? t("routines.noUserRoutines") : t("routines.emptyHint")}
           </Text>
         </View>
       }

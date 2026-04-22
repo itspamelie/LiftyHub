@@ -121,7 +121,7 @@ export default function ProfileScreen() {
       const token = await Storage.getItem("token");
       const userStorage = await Storage.getItem("user");
 
-      if (!token || !userStorage) { setLoading(false); return; }
+      if (!token || !userStorage) { router.replace("/auth/login"); return; }
 
       const userParsed = JSON.parse(userStorage);
 
@@ -244,8 +244,15 @@ export default function ProfileScreen() {
       await saveCache("profile", { profile: { name: user.name, age: user.birthdate ? calculateAge(user.birthdate) : t("profile.na"), routinesCount, streak: currentStreak, weight: props?.weight ? parseFloat(props.weight).toString() : "0", height: props?.stature ? parseFloat(props.stature).toString() : "0", somatotype: props?.somatotype?.type ?? t("profile.na"), goal: props?.objective ?? t("profile.na"), weeklyWorkouts, weeklyProgress, weeklyReps, weeklySets }, stats: statsData, sessions: rawSessions, logs: rawLogs });
     } catch {
       const cached = await loadCache<any>("profile");
-      if (cached) { setProfile({ ...cached.profile, avatar: require("@/src/assets/defaultd.png") }); setStats(cached.stats); setAllSessions(cached.sessions); setAllLogs(cached.logs); }
-      showToast(t("profile.errorLoad"), "error");
+      if (cached) {
+        setProfile({ ...cached.profile, avatar: require("@/src/assets/defaultd.png") });
+        setStats(cached.stats);
+        setAllSessions(cached.sessions);
+        setAllLogs(cached.logs);
+      } else {
+        router.replace("/auth/login");
+        return;
+      }
     } finally {
       setLoading(false);
       if (isRefresh) setRefreshing(false);
@@ -286,13 +293,7 @@ export default function ProfileScreen() {
     );
   }
 
-  if (!profile) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background }}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
+  if (!profile) return null;
 
   return (
 
@@ -400,13 +401,11 @@ export default function ProfileScreen() {
                   icon="resize"
                   label={t("profile.height")}
                   value={profile.height !== "0" ? `${profile.height} cm` : "—"}
-                  onPress={() => { setTempHeightEdit(profile.height !== "0" ? parseInt(profile.height) : 170); setShowHeightEdit(true); }}
                 />
                 <InfoStatCard
                   icon="scale"
                   label={t("profile.weight")}
                   value={profile.weight !== "0" ? `${profile.weight} kg` : "—"}
-                  onPress={() => { setTempWeightEdit(profile.weight !== "0" ? parseInt(profile.weight) : 70); setShowWeightEdit(true); }}
                 />
                 <InfoStatCard icon="body" label={t("profile.somatotype")} value={profile.somatotype} />
                 <InfoStatCard icon="flag" label={t("profile.goal")} value={profile.goal} />
