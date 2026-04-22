@@ -17,7 +17,10 @@ import NutritionistDetail from './components/nutritionist/NutritionistDetail'
 import NutritionistJoin from './views/homenutritionist';
 import LoginPage from './components/nutritionist/loginNutritionist';
 import DashboardForExperts from './views/dashboardLiftyHubExperts';
-import HomeDashboard from './components/nutritionist/HomeDashboard';
+import ProfileDashboard from './components/nutritionist/ProfileDashboard';
+import MainNutritionist from './components/nutritionist/MainNutritionist';
+import DietsDashboard from './components/nutritionist/DietsDashboard';
+import ConfigDashboard from './components/nutritionist/ConfigDashboard';
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
@@ -54,7 +57,13 @@ function App() {
 
 
    <Route path="/DashboardForExperts" element={<PrivateRouteExperts><DashboardForExperts/></PrivateRouteExperts>}>
-          <Route index element={<HomeDashboard/>}/>
+          <Route index element={<MainNutritionist/>}/>
+          <Route path="profile" element={<ProfileDashboard />} />
+          <Route path="diets" element={<DietsDashboard />} />
+          <Route path="config" element={<ConfigDashboard />} />
+
+
+
         </Route>
 
 
