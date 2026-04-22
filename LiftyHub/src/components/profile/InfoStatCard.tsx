@@ -17,7 +17,7 @@ export default function InfoStatCard({ icon, label, value, onPress }: Props) {
         <Ionicons name={icon} size={22} color={colors.textSecondary} />
         <Text style={styles.label}>{label}</Text>
         <Text style={styles.value}>{value}</Text>
-        <Ionicons name="pencil-outline" size={12} color={colors.primary} style={styles.editIcon} />
+
       </HapticButton>
     );
   }

@@ -14,11 +14,11 @@ type Exercise = { id: number; name: string; muscle: string; categorie: string };
 const REST_OPTIONS = [15, 30, 45, 60, 90, 120, 150, 180, 240, 300];
 const ITEM_HEIGHT = 60;
 
-function formatRest(secs: number): string {
-  if (secs < 60) return `${secs} seg`;
+function formatRest(secs: number, sec: string, min: string): string {
+  if (secs < 60) return `${secs} ${sec}`;
   const m = Math.floor(secs / 60);
   const s = secs % 60;
-  return s === 0 ? `${m} min` : `${m} min ${s} seg`;
+  return s === 0 ? `${m} ${min}` : `${m} ${min} ${s} ${sec}`;
 }
 type SelectedExercise = {
   uid: number;
@@ -70,6 +70,8 @@ const dotStyles = StyleSheet.create({
 export default function NewRoutineScreen() {
   const { showToast, Toast } = useToast();
   const { t } = useLanguage();
+  const sec = t("routines.sec");
+  const min = t("routines.min");
 
   const filters = [
     { key: "Fuerza",    label: t("routines.categories.strength") },
@@ -352,7 +354,7 @@ export default function NewRoutineScreen() {
                   }}
                 >
                   <Ionicons name="timer-outline" size={18} color={colors.primary} />
-                  <Text style={styles.restPickerValue}>{formatRest(Number(defaultRest))}</Text>
+                  <Text style={styles.restPickerValue}>{formatRest(Number(defaultRest), sec, min)}</Text>
                   <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
                 </HapticButton>
               )}
@@ -381,7 +383,7 @@ export default function NewRoutineScreen() {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.exerciseName}>{sel.exercise.name}</Text>
                     <Text style={styles.exerciseMeta}>
-                      {sel.sets} series × {sel.repetitions} reps · {formatRest(Number(sel.seconds_rest))}
+                      {sel.sets} series × {sel.repetitions} reps · {formatRest(Number(sel.seconds_rest), sec, min)}
                     </Text>
                   </View>
                   <HapticButton onPress={() => handleRemoveExercise(sel.uid)}>
@@ -508,7 +510,7 @@ export default function NewRoutineScreen() {
                       }}
                     >
                       <Text style={[styles.pickerItemText, selected && styles.pickerItemTextSelected]}>
-                        {formatRest(secs)}
+                        {formatRest(secs, sec, min)}
                       </Text>
                     </HapticButton>
                   );

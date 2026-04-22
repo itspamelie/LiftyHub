@@ -127,6 +127,8 @@ export const translations = {
       deleteConfirm: "Eliminar",
       cancel: "Cancelar",
       errorLoad: "Error al cargar las rutinas.",
+      sec: "seg",
+      min: "min",
       deleteSuccess: "Rutina eliminada.",
       deleteError: "No se pudo eliminar la rutina.",
       importSuccess: "\"%{name}\" fue agregada a tus rutinas.",
@@ -422,6 +424,7 @@ export const translations = {
       resetScheduleConfirm: "Limpiar",
       startWorkoutTitle: "Entrenamiento del día",
       startWorkout: "Iniciar entrenamiento",
+      errorLoad: "No se pudo cargar el calendario. Verifica tu conexión.",
     },
 
     // Routine Detail
@@ -561,6 +564,10 @@ export const translations = {
       supplements: "Suplementos",
       supplementsEmpty: "Tu nutriólogo aún no ha asignado suplementos.",
       tipsSection: "Consejos",
+      tip1: "Come cada 3-4 horas para mantener tu metabolismo activo",
+      tip2: "No te saltes el desayuno, es la comida más importante",
+      tip3: "Cena al menos 2 horas antes de dormir",
+      tip4: "Mantente bien hidratado durante el entrenamiento",
     },
 
     // Stats screen
@@ -850,6 +857,8 @@ export const translations = {
       deleteConfirm: "Delete",
       cancel: "Cancel",
       errorLoad: "Error loading routines.",
+      sec: "sec",
+      min: "min",
       deleteSuccess: "Routine deleted.",
       deleteError: "Could not delete the routine.",
       importSuccess: "\"%{name}\" was added to your routines.",
@@ -1145,6 +1154,7 @@ export const translations = {
       resetScheduleConfirm: "Clear",
       startWorkoutTitle: "Today's workout",
       startWorkout: "Start workout",
+      errorLoad: "Could not load the calendar. Check your connection.",
     },
 
     // Routine Detail
@@ -1284,6 +1294,10 @@ export const translations = {
       supplements: "Supplements",
       supplementsEmpty: "Your nutritionist has not assigned supplements yet.",
       tipsSection: "Tips",
+      tip1: "Eat every 3-4 hours to keep your metabolism active",
+      tip2: "Don't skip breakfast, it's the most important meal",
+      tip3: "Have dinner at least 2 hours before sleeping",
+      tip4: "Stay well hydrated during your workout",
     },
 
     // Stats screen

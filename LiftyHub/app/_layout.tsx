@@ -3,7 +3,6 @@ import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { useEffect, useRef } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -12,6 +11,7 @@ import { SubscriptionProvider } from '@/src/context/SubscriptionContext';
 import { UnitsProvider } from '@/src/context/UnitsContext';
 import { WorkoutProvider } from '@/src/context/WorkoutContext';
 import { syncPendingWorkouts } from '@/src/utils/pendingSync';
+import * as Storage from '@/src/utils/storage';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -20,7 +20,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     const checkToken = async () => {
-      const token = await AsyncStorage.getItem('token');
+      const token = await Storage.getItem('token');
       if (!token) {
         router.replace('/auth/login');
       }
@@ -34,7 +34,7 @@ export default function RootLayout() {
     const unsubscribe = NetInfo.addEventListener(async (state) => {
       const isNowConnected = state.isConnected ?? false;
       if (isNowConnected && prevConnected.current === false) {
-        const token = await AsyncStorage.getItem('token');
+        const token = await Storage.getItem('token');
         if (token) syncPendingWorkouts(token);
       }
       prevConnected.current = isNowConnected;
@@ -67,6 +67,8 @@ export default function RootLayout() {
         <Stack.Screen name="routines/edit/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="diet/nutritionists" options={{ headerShown: false }} />
         <Stack.Screen name="diet/plan" options={{ headerShown: false }} />
+        <Stack.Screen name="user/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="friends" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="light" />
     </ThemeProvider>

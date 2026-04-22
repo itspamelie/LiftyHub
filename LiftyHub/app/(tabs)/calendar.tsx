@@ -60,6 +60,7 @@ export default function CalendarScreen() {
   const [completedDates, setCompletedDates] = useState<Date[]>([]);
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDayIdx, setSelectedDayIdx] = useState<number | null>(null);
@@ -125,8 +126,8 @@ export default function CalendarScreen() {
         });
       setCompletedDates(completedDatesFromApi);
     } catch {
-      // sin conexión: dejar estado vacío
       setWeekPlanState({});
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -236,6 +237,19 @@ export default function CalendarScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingBox}>
           <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingBox}>
+          <Ionicons name="cloud-offline-outline" size={48} color={colors.textSecondary} />
+          <Text style={{ color: colors.textSecondary, marginTop: 12, fontSize: 15, textAlign: "center", paddingHorizontal: 32 }}>
+            {t("calendar.errorLoad")}
+          </Text>
         </View>
       </SafeAreaView>
     );

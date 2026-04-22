@@ -318,7 +318,10 @@ export default function FriendsScreen() {
           <View style={styles.card}>
             {friends.map((friend, i) => (
               <View key={friend.id}>
-                <View style={styles.friendRow}>
+                <HapticButton
+                  style={styles.friendRow}
+                  onPress={() => router.push({ pathname: "/user/[id]", params: { id: friend.user_id, name: friend.name, streak: friend.streak, workouts: friend.workouts } })}
+                >
                   <Avatar name={friend.name} />
                   <View style={styles.friendInfo}>
                     <Text style={styles.friendName}>{friend.name}</Text>
@@ -343,7 +346,7 @@ export default function FriendsScreen() {
                       color={colors.textSecondary}
                     />
                   </HapticButton>
-                </View>
+                </HapticButton>
                 {i < friends.length - 1 && <View style={styles.divider} />}
               </View>
             ))}
