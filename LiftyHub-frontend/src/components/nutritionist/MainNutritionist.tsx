@@ -2,15 +2,16 @@
 import {Grid,Box,Typography} from "@mui/material";
 import MetricCard from "../dashboard-nutritionists/metricCard";
 import AlertsPanel from "../dashboard-nutritionists/AlertsPanel";
-export default function HomeDashboard(){
-    return (
+export default function Home(){
+
+return (
                 <Box p={4} >
-          <Typography fontSize={40} fontWeight="bold">
+        <Typography fontSize={40} fontWeight="bold">
             Hola, Nutriólogo 👋
           </Typography>
 
           <Typography color="#ababab" mb={4}>
-            You have alerts and appointments today
+            Métricas y actividad reciente
           </Typography>
 
           {/* Metrics */}
@@ -38,7 +39,6 @@ export default function HomeDashboard(){
               <AlertsPanel />
             </Grid>
           </Grid>
-
-        </Box>
-    );
+          </Box>
+)
 }

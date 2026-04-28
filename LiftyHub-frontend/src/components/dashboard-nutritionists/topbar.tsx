@@ -1,8 +1,35 @@
 import { Box, TextField, IconButton, Typography, Avatar } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import { useEffect, useState } from "react";
+import { apiFetch,getImageUrl } from "../../services/api";
 
 const Topbar: React.FC = () => {
+  const [user, setUser] = useState<any>(null);
+useEffect(() => {
+  const fetchUser = async () => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      const parsed = storedUser ? JSON.parse(storedUser) : null;
+
+      if (!parsed) return;
+
+      const userId = parsed.id; 
+
+      const response = await apiFetch(`/users/${userId}`, {
+        method: "GET"
+      });
+
+      console.log("USER API:", response.data);
+
+      setUser(response.data);
+    } catch (error) {
+      console.error("Error obteniendo usuario:", error);
+    }
+  };
+
+  fetchUser();
+}, []);
   return (
     <Box
       sx={{
@@ -40,8 +67,12 @@ const Topbar: React.FC = () => {
           <HelpOutlineIcon />
         </IconButton>
 
-        <Typography>Dr. Pame</Typography>
-        <Avatar />
+       <Typography  color="white">
+  {user ? user.name : "Cargando..."}
+</Typography>
+{user && (
+  <Avatar src={getImageUrl(user.img, "users")} />
+)}
       </Box>
     </Box>
   );

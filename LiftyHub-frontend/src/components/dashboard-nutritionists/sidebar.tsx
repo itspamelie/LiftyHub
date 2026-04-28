@@ -11,8 +11,13 @@ import GroupIcon from "@mui/icons-material/Group";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from '@mui/icons-material/Home';
+import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import FlatwareIcon from '@mui/icons-material/Flatware';
 const Sidebar: React.FC = () => {
+  const location = useLocation();
+const isActive = (path: string) => location.pathname === path;
+
   return (
     <Drawer
       variant="permanent"
@@ -39,27 +44,81 @@ const Sidebar: React.FC = () => {
 
       <List sx={{ flex: 1 }}>
         <ListItemButton
-          sx={{
-            color: "#3a8dff",
-            borderRight: "2px solid #3a8dff",
-            bgcolor: "hsla(211, 66%, 43%, 0.10)"
-          }}
+        component={Link} to="/DashboardForExperts/"
+           sx={{
+    background: isActive("/DashboardForExperts/")
+      ? "#3a8dff"
+      : "transparent",
+    color: isActive("/DashboardForExperts/")
+      ? "#3a8dff"
+      : "#ababab",
+    borderRight: isActive("/DashboardForExperts/")
+      ? "2px solid #3a8dff"
+      : "none",
+    bgcolor: isActive("/DashboardForExperts/")
+      ? "hsla(211, 66%, 43%, 0.10)"
+      : "transparent",
+  }}
         >
           <HomeIcon sx={{ mr: 1 }} />
-          <ListItemText primary="Inicio" />
+          <ListItemText primary="Inicio"  />
         </ListItemButton>
 
-        <ListItemButton sx={{ color: "#ababab" }}>
+        <ListItemButton
+        component={Link} to="/DashboardForExperts/profile"
+                   sx={{
+    background: isActive("/DashboardForExperts/profile")
+      ? "#3a8dff"
+      : "transparent",
+    color: isActive("/DashboardForExperts/profile")
+      ? "#3a8dff"
+      : "#ababab",
+    borderRight: isActive("/DashboardForExperts/profile")
+      ? "2px solid #3a8dff"
+      : "none",
+    bgcolor: isActive("/DashboardForExperts/profile")
+      ? "hsla(211, 66%, 43%, 0.10)"
+      : "transparent",
+  }}>
           <GroupIcon sx={{ mr: 1 }} />
           <ListItemText primary="Perfil" />
         </ListItemButton>
 
-        <ListItemButton sx={{ color: "#ababab" }}>
+        <ListItemButton 
+        component={Link} to="/DashboardForExperts/diets"
+                           sx={{
+    background: isActive("/DashboardForExperts/diets")
+      ? "#3a8dff"
+      : "transparent",
+    color: isActive("/DashboardForExperts/diets")
+      ? "#3a8dff"
+      : "#ababab",
+    borderRight: isActive("/DashboardForExperts/diets")
+      ? "2px solid #3a8dff"
+      : "none",
+    bgcolor: isActive("/DashboardForExperts/diets")
+      ? "hsla(211, 66%, 43%, 0.10)"
+      : "transparent",
+  }}>
           <FlatwareIcon sx={{ mr: 1 }} />
           <ListItemText primary="Dietas" />
         </ListItemButton>
 
-        <ListItemButton sx={{ color: "#ababab" }}>
+        <ListItemButton         component={Link} to="/DashboardForExperts/config"
+                           sx={{
+    background: isActive("/DashboardForExperts/config")
+      ? "#3a8dff"
+      : "transparent",
+    color: isActive("/DashboardForExperts/config")
+      ? "#3a8dff"
+      : "#ababab",
+    borderRight: isActive("/DashboardForExperts/config")
+      ? "2px solid #3a8dff"
+      : "none",
+    bgcolor: isActive("/DashboardForExperts/config")
+      ? "hsla(211, 66%, 43%, 0.10)"
+      : "transparent",
+  }}>
           <SettingsIcon sx={{ mr: 1 }} />
           <ListItemText primary="Ajustes" />
         </ListItemButton>
