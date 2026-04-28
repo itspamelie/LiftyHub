@@ -47,6 +47,7 @@
     "react-native-body-highlighter": "^3.1.4",
     "react-native-gesture-handler": "~2.28.0",
     "react-native-gifted-charts": "^1.4.76",
+    "react-native-paypal": "^4.1.0",
     "react-native-qrcode-svg": "^6.3.21",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",

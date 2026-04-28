@@ -2,8 +2,10 @@ import { View, Text, StyleSheet, Alert, Modal, ActivityIndicator } from "react-n
 import { useRouter, Stack } from "expo-router";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import * as Notifications from "expo-notifications";
 import * as ImagePicker from "expo-image-picker";
+import Constants from "expo-constants";
+
+const isExpoGo = Constants.appOwnership === "expo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Storage from "@/src/utils/storage";
 import { colors, spacing } from "@/src/styles/globalstyles";
@@ -47,8 +49,13 @@ export default function Permissions() {
     setStepLoading(true);
     try {
       if (step === 0) {
-        const { status } = await Notifications.requestPermissionsAsync();
-        setNotifStatus(status === "granted" ? "granted" : "denied");
+        if (isExpoGo) {
+          setNotifStatus("denied");
+        } else {
+          const { default: Notifications } = await import("expo-notifications");
+          const { status } = await Notifications.requestPermissionsAsync();
+          setNotifStatus(status === "granted" ? "granted" : "denied");
+        }
       } else if (step === 1) {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         setGalleryStatus(status === "granted" ? "granted" : "denied");

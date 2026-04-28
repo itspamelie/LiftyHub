@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, RefreshControl, Modal, Dimensions, TextInput, ActivityIndicator } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Image, ImageBackground, RefreshControl, Modal, Dimensions, TextInput, ActivityIndicator, TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, planColors } from "@/src/styles/globalstyles";
@@ -8,6 +8,7 @@ import StatsSummaryGrid from "@/src/components/stats/StatsSummaryGrid";
 import WeeklyActivityChart from "@/src/components/stats/WeeklyActivityChart";
 import PersonalRecords from "@/src/components/stats/PersonalRecords";
 import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useEffect, useState, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Storage from "@/src/utils/storage";
@@ -63,6 +64,7 @@ export default function ProfileScreen() {
 
   const { t } = useLanguage();
   const { plan } = useSubscription();
+  const insets = useSafeAreaInsets();
   const planColor = planColors[plan?.name ?? "Free"] ?? "#A1A1A1";
   const hasStatsAccess = plan?.name === "Basic" || plan?.name === "Pro";
 
@@ -301,6 +303,7 @@ export default function ProfileScreen() {
       {!isConnected && <OfflineBanner />}
 
       <ScrollView
+        style={{ flex: 1, zIndex: 0 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary} />
         }
@@ -590,6 +593,23 @@ export default function ProfileScreen() {
 
       {Toast}
 
+      <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+        <TouchableOpacity
+          style={[styles.floatBtn, { top: insets.top + 12, left: 20 }]}
+          onPress={() => router.push("/friends" as any)}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="people" size={20} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.floatBtn, { top: insets.top + 12, right: 20 }]}
+          onPress={() => router.push("/edit-profile" as any)}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="pencil" size={20} color="white" />
+        </TouchableOpacity>
+      </View>
+
     </View>
   );
 }
@@ -602,10 +622,12 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: colors.background
+    backgroundColor: colors.background,
+    position: "relative",
+    zIndex: 0,
   },
 
-  cover: {
+cover: {
     width: "100%",
     height: 200
   },
@@ -1043,6 +1065,18 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "600",
     fontSize: 15,
+  },
+
+  floatBtn: {
+    position: "absolute",
+    zIndex: 999,
+    elevation: 10,
+    width: 45,
+    height: 45,
+    borderRadius: 25,
+    backgroundColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
 });

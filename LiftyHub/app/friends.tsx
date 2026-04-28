@@ -422,6 +422,8 @@ export default function FriendsScreen() {
               <View style={styles.card}>
                 {searchResults.map((user, i) => {
                   const alreadySent = sentRequests.has(user.id);
+                  const alreadyFriend = friends.some((f) => f.user_id === user.id);
+                  const isDisabled = alreadyFriend || alreadySent;
                   return (
                     <View key={user.id}>
                       <View style={styles.searchResultRow}>
@@ -431,11 +433,14 @@ export default function FriendsScreen() {
                           <Text style={styles.searchEmail}>{user.email}</Text>
                         </View>
                         <HapticButton
-                          style={alreadySent ? styles.sentBtn : styles.addRequestBtn}
-                          onPress={() => !alreadySent && handleSendRequest(user)}
+                          style={alreadyFriend ? styles.alreadyFriendBtn : alreadySent ? styles.sentBtn : styles.addRequestBtn}
+                          onPress={() => !isDisabled && handleSendRequest(user)}
+                          disabled={isDisabled}
                         >
-                          <Text style={styles.addRequestBtnText}>
-                            {alreadySent
+                          <Text style={[styles.addRequestBtnText, isDisabled && { color: colors.textSecondary }]}>
+                            {alreadyFriend
+                              ? t("friends.alreadyFriend")
+                              : alreadySent
                               ? t("friends.alreadySent")
                               : t("friends.sendRequest")}
                           </Text>
@@ -685,6 +690,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 16,
+  },
+  alreadyFriendBtn: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.textSecondary + "33",
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 16,
+    opacity: 0.5,
   },
   addRequestBtnText: {
     color: "white",

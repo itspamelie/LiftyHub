@@ -29,7 +29,6 @@ export default function RootLayout() {
     checkToken();
   }, []);
 
-  // Auto-sync pending workouts when connectivity is restored
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(async (state) => {
       const isNowConnected = state.isConnected ?? false;

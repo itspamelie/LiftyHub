@@ -210,6 +210,12 @@ export const translations = {
       upgradeSubtitle: "Accede a tu nutriólogo personal, plan de dieta y suplementos recomendados.",
       recommended: "Recomendado",
       upgradeNote: "Contacta a un administrador para actualizar tu plan.",
+      comingSoon: "Próximamente",
+      comingSoonTitle: "Nutrición personalizada",
+      comingSoonSubtitle: "Estamos preparando planes de dieta con nutriólogos certificados. Muy pronto disponible.",
+      feature1: "Plan de dieta personalizado según tus objetivos",
+      feature2: "Nutriólogo asignado a tu perfil",
+      feature3: "Suplementos y recomendaciones a tu medida",
     },
 
     // Profile
@@ -700,6 +706,15 @@ export const translations = {
       endomorphTrait3: "Fácil ganar fuerza",
     },
 
+    // Body Avatar
+    bodyAvatar: {
+      title: "Músculos trabajados",
+      front: "Frente",
+      back: "Espalda",
+      noData: "No hay datos esta semana. ¡Empieza a entrenar!",
+      thisWeek: "Esta semana trabajaste:",
+    },
+
     // Friends
     friends: {
       title: "Amigos",
@@ -721,6 +736,7 @@ export const translations = {
       requestSent: "Solicitud enviada a %{name}",
       requestError: "No se pudo enviar la solicitud. Inténtalo de nuevo.",
       alreadySent: "Enviada",
+      alreadyFriend: "Ya agregado",
       removeTitle: "¿Eliminar amigo?",
       removeMessage: "¿Eliminar a %{name} de tu lista de amigos?",
       removeConfirm: "Eliminar",
@@ -940,6 +956,12 @@ export const translations = {
       upgradeSubtitle: "Access your personal nutritionist, diet plan and recommended supplements.",
       recommended: "Recommended",
       upgradeNote: "Contact an administrator to upgrade your plan.",
+      comingSoon: "Coming soon",
+      comingSoonTitle: "Personalized nutrition",
+      comingSoonSubtitle: "We're preparing personalized diet plans with certified nutritionists. Available very soon.",
+      feature1: "Personalized diet plan based on your goals",
+      feature2: "Nutritionist assigned to your profile",
+      feature3: "Supplements and recommendations tailored to you",
     },
 
     // Profile
@@ -1430,6 +1452,15 @@ export const translations = {
       endomorphTrait3: "Gains strength easily",
     },
 
+    // Body Avatar
+    bodyAvatar: {
+      title: "Muscles worked",
+      front: "Front",
+      back: "Back",
+      noData: "No data this week. Start training!",
+      thisWeek: "This week you worked:",
+    },
+
     // Friends
     friends: {
       title: "Friends",
@@ -1451,6 +1482,7 @@ export const translations = {
       requestSent: "Request sent to %{name}",
       requestError: "Could not send the request. Try again.",
       alreadySent: "Sent",
+      alreadyFriend: "Already added",
       removeTitle: "Remove friend?",
       removeMessage: "Remove %{name} from your friends list?",
       removeConfirm: "Remove",

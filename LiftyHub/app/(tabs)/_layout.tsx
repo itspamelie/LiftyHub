@@ -1,4 +1,4 @@
-import { Tabs, useSegments, router } from "expo-router";
+import { Tabs, router } from "expo-router";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -77,8 +77,6 @@ export default function TabLayout() {
   const { plan } = useSubscription();
   const membershipColor = planColors[plan?.name ?? "Free"];
   const insets = useSafeAreaInsets();
-  const segments = useSegments();
-  const isProfile = segments[segments.length - 1] === "profile";
 
 
   return (
@@ -137,26 +135,8 @@ export default function TabLayout() {
 
       </Tabs>
 
-      {/* OVERLAY GLOBAL - botones flotantes */}
+      {/* OVERLAY GLOBAL - botón avatar corporal */}
       <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
-        {/* Botones de perfil: solo visibles en la pestaña de perfil */}
-        {isProfile && (
-          <>
-            <TouchableOpacity
-              style={[overlayStyles.floatBtn, { top: insets.top + 12, left: 20 }]}
-              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/friends"); }}
-            >
-              <Ionicons name="people" size={20} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[overlayStyles.floatBtn, { top: insets.top + 12, right: 20 }]}
-              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/edit-profile"); }}
-            >
-              <Ionicons name="pencil" size={20} color="white" />
-            </TouchableOpacity>
-          </>
-        )}
-        {/* Botón avatar corporal: visible en todos los tabs */}
         <TouchableOpacity
           style={[overlayStyles.bodyBtn, { bottom: 70 + insets.bottom + 12, right: 20, backgroundColor: membershipColor }]}
           onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/body-avatar"); }}

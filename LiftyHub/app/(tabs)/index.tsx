@@ -7,7 +7,6 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useFocusEffect, router } from "expo-router";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
-import { BlurView } from "expo-blur";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Storage from "@/src/utils/storage";
 import { CameraView, useCameraPermissions } from "expo-camera";
@@ -315,11 +314,6 @@ export default function RoutinesScreen() {
     fetchAll(true);
   }, [fetchAll]);
 
-  useEffect(() => {
-    if (!subLoading && activeTab === "app" && !hasAppAccess) {
-      setShowUpgradeModal(true);
-    }
-  }, [subLoading, activeTab, hasAppAccess]);
 
   const handleTabSwitch = async (tab: "mine" | "app") => {
     if (tab === "app" && !hasAppAccess) {
@@ -385,6 +379,7 @@ export default function RoutinesScreen() {
   return (
     <View style={{ flex: 1 }}>
       {!isConnected && <OfflineBanner />}
+
     <FlatList
       ref={listRef}
       style={styles.container}
@@ -498,21 +493,6 @@ export default function RoutinesScreen() {
         />
       )}
     />
-
-      {/* BLUR si está en pestaña app sin acceso */}
-      {activeTab === "app" && !hasAppAccess && (
-        <BlurView intensity={55} tint="dark" style={StyleSheet.absoluteFill} pointerEvents="box-none" />
-      )}
-
-      {/* BOTÓN reabrir modal */}
-      {activeTab === "app" && !hasAppAccess && !showUpgradeModal && (
-        <View style={styles.unlockBar}>
-          <HapticButton style={styles.unlockButton} onPress={() => setShowUpgradeModal(true)}>
-            <Ionicons name="lock-closed" size={16} color="white" />
-            <Text style={styles.unlockText}>{t("routines.unlockButton")}</Text>
-          </HapticButton>
-        </View>
-      )}
 
       {/* MODAL UPGRADE */}
       <Modal visible={showUpgradeModal} transparent animationType="slide">
@@ -764,7 +744,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#1C1C1E",
     borderRadius: 12,
     padding: 4,
-    marginBottom: 16,
+    marginBottom: 8,
   },
 
   tabBtn: {
@@ -808,30 +788,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginTop: 5,
     textAlign: "center"
-  },
-
-  unlockBar: {
-    position: "absolute",
-    bottom: 100,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-  },
-
-  unlockButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: spacing.borderRadius,
-    gap: 8,
-  },
-
-  unlockText: {
-    color: "white",
-    fontWeight: "700",
-    fontSize: 15,
   },
 
   modalOverlay: {
