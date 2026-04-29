@@ -16,7 +16,7 @@ class ExerciseFilesSeeder extends Seeder
          DB::table('exercise_files')->insert([
             [
                 'exercise_id' => 1,
-                'file_path' => 'press_banca.jpg',
+                'file_path' => 'pressbanca.jpg',
                 'type' => 'image',
                 'created_at' => now(),
                 'updated_at' => now(),
