@@ -15,7 +15,7 @@ type Exercise = {
   muscle: string;
   technique: string;
   categorie?: string;
-  files?: ExerciseFile[];
+  exercise_files?: ExerciseFile[];
 };
 
 type Props = {
@@ -28,8 +28,12 @@ type Props = {
 export default function ExerciseCard({ exercise, isFavorite, onToggleFavorite, onAdd }: Props) {
 
   const getImage = () => {
-    const imageFile = exercise.files?.find(file => file.type === "image");
-    return imageFile?.file_path ?? "https://via.placeholder.com/100";
+    const imageFile = exercise.exercise_files?.find(file => file.type === "image");
+    if (!imageFile) return "https://via.placeholder.com/100";
+    const filePath = imageFile.file_path;
+    if (filePath.startsWith("http")) return filePath;
+    const base = (process.env.EXPO_PUBLIC_API_URL ?? "").replace(/\/api$/, "");
+    return `${base}/exercises/${filePath}`;
   };
 
   return (
