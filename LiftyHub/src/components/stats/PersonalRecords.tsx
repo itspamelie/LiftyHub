@@ -27,6 +27,7 @@ export default function PersonalRecords({ logs }: Props) {
   const recordMap: { [exerciseId: number]: Record } = {};
   logs.forEach((l: any) => {
     const weight = parseFloat(l.weight_lifted) || 0;
+    if (weight === 0) return;
     const name = l.exercise?.name ?? `Ejercicio ${l.exercise_id}`;
     const existing = recordMap[l.exercise_id];
     if (!existing || weight > existing.weight) {
