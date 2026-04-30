@@ -26,7 +26,8 @@ export default function LoginPage() {
     const [email, setEmail] = useState<string>("admin@example.com")
     const [password, setPassword] = useState<string>("123")
     const token = localStorage.getItem("token")
-    
+    const API_URL = import.meta.env.VITE_API_URL
+
       if (token && !isTokenExpired(token)) {
         return <Navigate to="/LiftyHub-Experts" replace />
       }
@@ -40,7 +41,7 @@ export default function LoginPage() {
     const submit = async (e: React.FormEvent) => {
             e.preventDefault()
         try {
-          const res = await fetch("http://localhost:8000/api/login", {
+      const res = await fetch(API_URL+"/login", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
