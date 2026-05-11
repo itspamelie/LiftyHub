@@ -4,7 +4,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useCallback } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { useState } from "react";
-import * as Notifications from "expo-notifications";
 import * as ImagePicker from "expo-image-picker";
 import SettingsItem from "@/src/components/settings/SettingsItem";
 import { useLanguage } from "@/src/context/LanguageContext";
@@ -19,8 +18,13 @@ export default function PermissionsScreen() {
   const [cameraPerm, setCameraPerm] = useState<"granted" | "denied" | "unknown">("unknown");
 
   const checkPermissions = useCallback(async () => {
-    const notif = await Notifications.getPermissionsAsync();
-    setNotifPerm(notif.status === "granted" ? "granted" : notif.status === "denied" ? "denied" : "unknown");
+    try {
+      const Notifications = await import("expo-notifications");
+      const notif = await Notifications.getPermissionsAsync();
+      setNotifPerm(notif.status === "granted" ? "granted" : notif.status === "denied" ? "denied" : "unknown");
+    } catch {
+      setNotifPerm("denied");
+    }
 
     const gallery = await ImagePicker.getMediaLibraryPermissionsAsync();
     setGalleryPerm(gallery.status === "granted" ? "granted" : gallery.status === "denied" ? "denied" : "unknown");

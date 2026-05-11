@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import BackButton from "@/src/components/buttons/backButton";
+import StepDots from "@/src/components/auth/StepDots";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
 import HapticButton from "@/src/components/buttons/HapticButton";
@@ -164,6 +165,8 @@ export default function Register() {
             </HapticButton>
 
           </View>
+
+          <StepDots currentStep={1} />
 
         </ScrollView>
 

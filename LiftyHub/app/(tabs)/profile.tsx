@@ -44,7 +44,7 @@ const calculateAge = (birthdate: string) => {
 type Profile = {
   name: string;
   age: number | string;
-  avatar: number;
+  avatar: number | { uri: string };
   routinesCount: number;
   streak: number;
   weight: string;
@@ -101,6 +101,7 @@ export default function ProfileScreen() {
   const [profileToken, setProfileToken] = useState<string | null>(null);
   const [profileUserId, setProfileUserId] = useState<number | null>(null);
   const [profilePropertiesId, setProfilePropertiesId] = useState<number | null>(null);
+  const [activeChallenge, setActiveChallenge] = useState<{ goal: string; endDate: string; photos: { uri: string }[] } | null>(null);
   const [showHeightEdit, setShowHeightEdit] = useState(false);
   const [showWeightEdit, setShowWeightEdit] = useState(false);
   const [tempHeightEdit, setTempHeightEdit] = useState(170);
@@ -225,10 +226,15 @@ export default function ProfileScreen() {
       setAllSessions(rawSessions);
       setAllLogs(rawLogs);
 
+      const imgBase = process.env.EXPO_PUBLIC_API_URL?.replace("/api", "") ?? "";
+      const avatarSource = user.img && user.img !== "default.jpg"
+        ? { uri: `${imgBase}/users/${user.img}` }
+        : require("@/src/assets/defaultd.png");
+
       setProfile({
         name:            user.name,
         age:             user.birthdate ? calculateAge(user.birthdate) : t("profile.na"),
-        avatar:          require("@/src/assets/defaultd.png"),
+        avatar:          avatarSource,
         routinesCount,
         streak:          currentStreak,
         weight:          props?.weight ? parseFloat(props.weight).toString() : "0",
@@ -243,11 +249,11 @@ export default function ProfileScreen() {
 
       const statsData = { workouts: routinesCount, streak: currentStreak, totalTime: 0, totalWeight: 0 };
       setStats(statsData);
-      await saveCache("profile", { profile: { name: user.name, age: user.birthdate ? calculateAge(user.birthdate) : t("profile.na"), routinesCount, streak: currentStreak, weight: props?.weight ? parseFloat(props.weight).toString() : "0", height: props?.stature ? parseFloat(props.stature).toString() : "0", somatotype: props?.somatotype?.type ?? t("profile.na"), goal: props?.objective ?? t("profile.na"), weeklyWorkouts, weeklyProgress, weeklyReps, weeklySets }, stats: statsData, sessions: rawSessions, logs: rawLogs });
+      await saveCache("profile", { profile: { name: user.name, age: user.birthdate ? calculateAge(user.birthdate) : t("profile.na"), routinesCount, streak: currentStreak, weight: props?.weight ? parseFloat(props.weight).toString() : "0", height: props?.stature ? parseFloat(props.stature).toString() : "0", somatotype: props?.somatotype?.type ?? t("profile.na"), goal: props?.objective ?? t("profile.na"), weeklyWorkouts, weeklyProgress, weeklyReps, weeklySets, imgUrl: user.img && user.img !== "default.jpg" ? `${imgBase}/users/${user.img}` : null }, stats: statsData, sessions: rawSessions, logs: rawLogs });
     } catch {
       const cached = await loadCache<any>("profile");
       if (cached) {
-        setProfile({ ...cached.profile, avatar: require("@/src/assets/defaultd.png") });
+        setProfile({ ...cached.profile, avatar: cached.profile.imgUrl ? { uri: cached.profile.imgUrl } : require("@/src/assets/defaultd.png") });
         setStats(cached.stats);
         setAllSessions(cached.sessions);
         setAllLogs(cached.logs);
@@ -261,7 +267,12 @@ export default function ProfileScreen() {
     }
   };
 
-  useEffect(() => { loadUser(); }, []);
+  useEffect(() => {
+    loadUser();
+    AsyncStorage.getItem("@active_challenge").then((raw) => {
+      if (raw) setActiveChallenge(JSON.parse(raw));
+    });
+  }, []);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -396,6 +407,35 @@ export default function ProfileScreen() {
                 reps={profile.weeklyReps ?? 0}
                 sets={profile.weeklySets ?? 0}
               />
+
+              {/* RETO PERSONAL */}
+              <HapticButton
+                style={styles.challengeCard}
+                onPress={() => router.push("/challenge" as any)}
+              >
+                <View style={styles.challengeLeft}>
+                  <Ionicons name="trophy" size={20} color="#F59E0B" />
+                  <View style={{ flex: 1 }}>
+                    {activeChallenge ? (
+                      <>
+                        <Text style={styles.challengeTitle} numberOfLines={1}>{activeChallenge.goal}</Text>
+                        <Text style={styles.challengeSub}>
+                          {Math.max(0, Math.ceil((new Date(activeChallenge.endDate).getTime() - Date.now()) / 86400000))} días restantes
+                        </Text>
+                      </>
+                    ) : (
+                      <Text style={styles.challengeTitle}>Iniciar reto personal</Text>
+                    )}
+                  </View>
+                </View>
+                {activeChallenge?.photos?.length ? (
+                  <Image
+                    source={{ uri: activeChallenge.photos[activeChallenge.photos.length - 1].uri }}
+                    style={styles.challengeThumb}
+                  />
+                ) : null}
+                <Ionicons name="chevron-forward" size={16} color="#F59E0B" />
+              </HapticButton>
 
               {/* INFORMACIÓN FÍSICA */}
               <Text style={styles.title}>{t("profile.physicalInfo")}</Text>
@@ -1077,6 +1117,44 @@ cover: {
     backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
+  },
+
+  challengeCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1C1A0E",
+    borderRadius: spacing.borderRadius,
+    padding: 14,
+    marginTop: 16,
+    marginBottom: 4,
+    borderWidth: 1,
+    borderColor: "#F59E0B44",
+    gap: 10,
+  },
+
+  challengeLeft: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  challengeTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  challengeSub: {
+    color: "#F59E0B",
+    fontSize: 12,
+    marginTop: 2,
+  },
+
+  challengeThumb: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
   },
 
 });

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Platform, Alert, KeyboardAvoidingView, Modal,  } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Platform, Alert, KeyboardAvoidingView, Modal, Image } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
 import { useRouter, Stack } from "expo-router";
@@ -6,7 +6,9 @@ import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import * as ImagePicker from "expo-image-picker";
 import BackButton from "@/src/components/buttons/backButton";
+import StepDots from "@/src/components/auth/StepDots";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
 import HapticButton from "@/src/components/buttons/HapticButton";
@@ -29,6 +31,22 @@ export default function Personal() {
   const HEIGHT_VALUES = Array.from({ length: 151 }, (_, i) => i + 100); // 100–250 cm
   const WEIGHT_VALUES = Array.from({ length: 221 }, (_, i) => i + 30);  // 30–250 kg
   const [gender, setGender] = useState<string | null>(null);
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+
+  const handlePickPhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setPhotoUri(result.assets[0].uri);
+      await AsyncStorage.setItem("@register_photo", result.assets[0].uri);
+    }
+  };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("es-MX", {
@@ -104,7 +122,16 @@ export default function Personal() {
       >
         {/* HEADER */}
         <View style={styles.header}>
-          <Ionicons name="person-circle-outline" size={50} color={colors.primary} />
+          <HapticButton style={styles.avatarPicker} onPress={handlePickPhoto}>
+            {photoUri ? (
+              <Image source={{ uri: photoUri }} style={styles.avatarImage} />
+            ) : (
+              <Ionicons name="person-circle-outline" size={80} color={colors.primary} />
+            )}
+            <View style={styles.avatarBadge}>
+              <Ionicons name="camera" size={14} color="white" />
+            </View>
+          </HapticButton>
           <Text style={styles.title}>{t("onboarding.personalTitle")}</Text>
           <Text style={styles.subtitle}>{t("onboarding.personalSubtitle")}</Text>
         </View>
@@ -268,6 +295,8 @@ export default function Personal() {
           </HapticButton>
 
         </View>
+
+        <StepDots currentStep={3} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -290,6 +319,34 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     marginBottom: 30,
+  },
+
+  avatarPicker: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: "#2C2C2E",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+
+  avatarImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+  },
+
+  avatarBadge: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   title: {

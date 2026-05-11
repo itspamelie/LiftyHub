@@ -148,6 +148,26 @@ export const updateUser = async (id: number, data: { name?: string; email?: stri
   });
 };
 
+// 📸 SUBIR FOTO DE PERFIL (POST con _method=PUT para que PHP parsee $_FILES)
+export const updateUserPhoto = async (id: number, photoUri: string, token: string) => {
+  const filename = photoUri.split("/").pop() ?? "photo.jpg";
+  const ext = filename.split(".").pop()?.toLowerCase() ?? "jpg";
+  const type = ext === "png" ? "image/png" : "image/jpeg";
+
+  const formData = new FormData();
+  formData.append("_method", "PUT");
+  formData.append("img", { uri: photoUri, name: filename, type } as any);
+
+  return apiFetch(`${API_URL}/users/${id}`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+};
+
 // ✏️ ACTUALIZAR PROPIEDADES DEL USUARIO
 export const updateUserProperties = async (
   propertiesId: number,

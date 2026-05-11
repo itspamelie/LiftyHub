@@ -4,8 +4,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import { Stack, router } from "expo-router";
 import * as Storage from "@/src/utils/storage";
+import * as ImagePicker from "expo-image-picker";
 import { colors, spacing, planColors } from "@/src/styles/globalstyles";
-import { getUserProperties, updateUser, updateUserProperties, checkPassword } from "@/src/services/api";
+import { getUserProperties, updateUser, updateUserProperties, updateUserPhoto, checkPassword } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import HapticButton from "@/src/components/buttons/HapticButton";
@@ -34,6 +35,9 @@ export default function EditProfileScreen() {
   const [token, setToken]             = useState<string | null>(null);
 
   const [loading, setLoading]     = useState(true);
+  const [userImg, setUserImg]      = useState<string | null>(null);
+  const [localPhoto, setLocalPhoto] = useState<string | null>(null);
+
   const [saving, setSaving]       = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -69,6 +73,7 @@ export default function EditProfileScreen() {
       setUserId(user.id);
       setName(user.name ?? "");
       setEmail(user.email ?? "");
+      setUserImg(user.img ?? null);
 
       const props = await getUserProperties(user.id, storedToken);
       if (props?.data) {
@@ -144,11 +149,42 @@ export default function EditProfileScreen() {
     }
   };
 
+  const handlePickPhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(t("editProfile.errorTitle"), t("permissions.gallery"));
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setLocalPhoto(result.assets[0].uri);
+    }
+  };
+
   const handleSave = async () => {
     if (!userId || !token) return;
 
     setSaving(true);
     try {
+      // Subir foto si se seleccionó una nueva
+      if (localPhoto) {
+        const res = await updateUserPhoto(userId, localPhoto, token);
+        if (res?.data?.img) {
+          const storedUser = await Storage.getItem("user");
+          if (storedUser) {
+            const user = JSON.parse(storedUser);
+            await Storage.setItem("user", JSON.stringify({ ...user, img: res.data.img }));
+          }
+          setUserImg(res.data.img);
+          setLocalPhoto(null);
+        }
+      }
+
       // Actualizar nombre en users
       await updateUser(userId, { name }, token);
 
@@ -167,10 +203,10 @@ export default function EditProfileScreen() {
         );
       }
 
-      // Actualizar nombre en AsyncStorage
-      const storedUser = await Storage.getItem("user");
-      if (storedUser) {
-        const user = JSON.parse(storedUser);
+      // Actualizar nombre en Storage
+      const storedUser2 = await Storage.getItem("user");
+      if (storedUser2) {
+        const user = JSON.parse(storedUser2);
         await Storage.setItem("user", JSON.stringify({ ...user, name }));
       }
 
@@ -220,10 +256,16 @@ export default function EditProfileScreen() {
         {/* AVATAR */}
         <View style={styles.avatarSection}>
           <Image
-            source={require("@/src/assets/defaultd.png")}
+            source={
+              localPhoto
+                ? { uri: localPhoto }
+                : userImg && userImg !== "default.jpg"
+                ? { uri: `${process.env.EXPO_PUBLIC_API_URL?.replace("/api", "")}/users/${userImg}` }
+                : require("@/src/assets/defaultd.png")
+            }
             style={[styles.avatar, { borderColor: planColor }]}
           />
-          <HapticButton style={styles.changePhoto}>
+          <HapticButton style={styles.changePhoto} onPress={handlePickPhoto}>
             <Ionicons name="camera" size={16} color="white" />
             <Text style={styles.changePhotoText}>{t("editProfile.changePhoto")}</Text>
           </HapticButton>

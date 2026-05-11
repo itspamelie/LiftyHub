@@ -3,13 +3,11 @@ import { useRouter, Stack } from "expo-router";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import Constants from "expo-constants";
-
-const isExpoGo = Constants.appOwnership === "expo";
+import StepDots from "@/src/components/auth/StepDots";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Storage from "@/src/utils/storage";
 import { colors, spacing } from "@/src/styles/globalstyles";
-import { registerRequest, createUserProperties } from "@/src/services/api";
+import { registerRequest, createUserProperties, updateUserPhoto } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import BackButton from "@/src/components/buttons/backButton";
@@ -49,12 +47,12 @@ export default function Permissions() {
     setStepLoading(true);
     try {
       if (step === 0) {
-        if (isExpoGo) {
-          setNotifStatus("denied");
-        } else {
+        try {
           const { default: Notifications } = await import("expo-notifications");
           const { status } = await Notifications.requestPermissionsAsync();
           setNotifStatus(status === "granted" ? "granted" : "denied");
+        } catch {
+          setNotifStatus("denied");
         }
       } else if (step === 1) {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -103,6 +101,17 @@ export default function Permissions() {
           { user_id: data.user.id, stature: height, weight, waist, objective, somatotype_id },
           data.token
         );
+
+        const registerPhoto = await AsyncStorage.getItem("@register_photo");
+        if (registerPhoto) {
+          try {
+            const photoRes = await updateUserPhoto(data.user.id, registerPhoto, data.token);
+            if (photoRes?.data?.img) {
+              await Storage.setItem("user", JSON.stringify({ ...data.user, img: photoRes.data.img }));
+            }
+          } catch {}
+          await AsyncStorage.removeItem("@register_photo");
+        }
 
         await AsyncStorage.removeItem("@register_data");
         await AsyncStorage.removeItem("@register_objective");
@@ -205,6 +214,8 @@ export default function Permissions() {
           </Text>
         )}
       </HapticButton>
+
+      <StepDots currentStep={5} />
 
       {/* MODAL AUTOMÁTICO DE PERMISOS */}
       <Modal visible={showModal && !allStepsDone} transparent animationType="fade">

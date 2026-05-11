@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Modal, FlatList, Animated,  } from "react-native";
+import { View, Text, StyleSheet, TextInput, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Modal, FlatList, Animated, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect, useRef } from "react";
 import { router } from "expo-router";
@@ -10,6 +10,13 @@ import { useToast } from "@/src/hooks/useToast";
 import HapticButton from "@/src/components/buttons/HapticButton";
 
 type Exercise = { id: number; name: string; muscle: string; categorie: string };
+
+const IMG_BASE = process.env.EXPO_PUBLIC_API_URL?.replace("/api", "") ?? "";
+const STOCK_IMAGES = [
+  { key: "default.jpg",    label: "General" },
+  { key: "fullbody.png",   label: "Full Body" },
+  { key: "hipertrofia.png", label: "Hipertrofia" },
+];
 
 const REST_OPTIONS = [15, 30, 45, 60, 90, 120, 150, 180, 240, 300];
 const ITEM_HEIGHT = 60;
@@ -360,14 +367,25 @@ export default function NewRoutineScreen() {
               )}
 
               <Text style={styles.sectionLabel}>{t("routines.modal.image")}</Text>
-              <TextInput
-                placeholder={t("routines.modal.imagePlaceholder")}
-                placeholderTextColor={colors.textSecondary}
-                value={form.img}
-                onChangeText={(v) => setForm({ ...form, img: v })}
-                style={styles.input}
-                autoCapitalize="none"
-              />
+              <View style={styles.stockImagesRow}>
+                {STOCK_IMAGES.map((item) => {
+                  const uri = `${IMG_BASE}/routines/${item.key}`;
+                  const isSelected = form.img === uri;
+                  return (
+                    <TouchableOpacity
+                      key={item.key}
+                      style={[styles.stockImageWrap, isSelected && styles.stockImageSelected]}
+                      onPress={() => setForm({ ...form, img: uri })}
+                      activeOpacity={0.8}
+                    >
+                      <Image source={{ uri }} style={styles.stockImage} resizeMode="cover" />
+                      <Text style={[styles.stockImageLabel, isSelected && { color: colors.primary }]}>
+                        {item.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
             </View>
           )}
 
@@ -745,6 +763,39 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
     marginBottom: 4,
+  },
+
+  stockImagesRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 4,
+  },
+
+  stockImageWrap: {
+    flex: 1,
+    alignItems: "center",
+    gap: 6,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "transparent",
+    padding: 4,
+  },
+
+  stockImageSelected: {
+    borderColor: colors.primary,
+    backgroundColor: "#1E3A8A22",
+  },
+
+  stockImage: {
+    width: "100%",
+    aspectRatio: 1,
+    borderRadius: 10,
+  },
+
+  stockImageLabel: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    fontWeight: "600",
   },
 
   categoryGrid: {

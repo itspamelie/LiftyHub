@@ -68,6 +68,7 @@ export default function RootLayout() {
         <Stack.Screen name="diet/plan" options={{ headerShown: false }} />
         <Stack.Screen name="user/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="friends" options={{ headerShown: false }} />
+        <Stack.Screen name="challenge" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="light" />
     </ThemeProvider>
