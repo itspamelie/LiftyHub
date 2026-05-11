@@ -22,7 +22,7 @@ const MetricCard: React.FC<Props> = ({ title, value, extra }) => {
       </Typography>
 
       <Box display="flex" alignItems="baseline" gap={1}>
-        <Typography fontSize={32} fontWeight="bold">
+        <Typography fontSize={32} fontWeight="bold" sx={{ color: "#ffffff" }}>
           {value}
         </Typography>
 

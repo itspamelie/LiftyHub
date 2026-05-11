@@ -13,7 +13,7 @@ const AlertsPanel: React.FC = () => {
     >
       <Box display="flex" alignItems="center" gap={1} mb={3}>
         <WarningIcon sx={{ color: "#ff716c" }} />
-        <Typography fontWeight="bold">
+        <Typography fontWeight="bold" sx={{ color: "#ffffff" }}>
           Alertas Críticas
         </Typography>
       </Box>
