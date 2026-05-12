@@ -1,90 +1,66 @@
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
-import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import BarChartIcon from "@mui/icons-material/BarChart";
-import PersonIcon from "@mui/icons-material/Person";
-import MedicationIcon from "@mui/icons-material/Medication";
+import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import type { SvgIconComponent } from "@mui/icons-material";
 
-const features: { Icon: SvgIconComponent; title: string; desc: string }[] = [
-  {
-    Icon: FitnessCenterIcon,
-    title: "Rutinas personalizadas",
-    desc: "Crea tus propias rutinas con nombre, categoría, nivel y duración. Filtra por Fuerza, Cardio, HIIT, Movilidad o Full Body."
-  },
-  {
-    Icon: DirectionsRunIcon,
-    title: "Catálogo de ejercicios",
-    desc: "Explora ejercicios con técnica detallada organizados por grupo muscular: pecho, espalda, pierna, abdomen y más."
-  },
-  {
-    Icon: RestaurantIcon,
-    title: "Plan de dieta",
-    desc: "Recibe un plan alimenticio personalizado con desayuno, comida, cena y snacks asignado por tu nutricionista."
-  },
-  {
-    Icon: BarChartIcon,
-    title: "Estadísticas y progreso",
-    desc: "Visualiza tu racha de entrenamiento, récords personales, actividad semanal y evolución mensual en un solo lugar."
-  },
-  {
-    Icon: PersonIcon,
-    title: "Perfil físico completo",
-    desc: "Registra tu somatotipo, peso, altura, medidas corporales y objetivo para recibir recomendaciones más precisas."
-  },
-  {
-    Icon: MedicationIcon,
-    title: "Suplementación guiada",
-    desc: "Consulta los suplementos recomendados por tu nutricionista con dosis, horario y propósito específico."
-  }
+const FEATURES: { icon: SvgIconComponent; title: string; desc: string }[] = [
+  { icon: FitnessCenterIcon, title: "Rutinas personalizadas", desc: "Crea y organiza tus rutinas de entrenamiento con ejercicios, series y repeticiones a tu medida." },
+  { icon: MenuBookIcon, title: "Catálogo de ejercicios", desc: "Accede a cientos de ejercicios con guías visuales, músculos trabajados y variantes." },
+  { icon: RestaurantIcon, title: "Plan de dieta", desc: "Conéctate con un nutriólogo certificado que diseñe tu plan alimenticio personalizado." },
+  { icon: BarChartIcon, title: "Estadísticas y progreso", desc: "Visualiza tu racha, peso levantado, tiempo de entrenamiento y evolución semana a semana." },
+  { icon: QrCodeScannerIcon, title: "Compartir por QR", desc: "Comparte tus rutinas con amigos en segundos escaneando un código QR único." },
+  { icon: PersonOutlineIcon, title: "Perfil físico completo", desc: "Registra tu peso, altura, somatotipo y metas para un seguimiento real de tu transformación." },
 ];
 
 export default function Features() {
   return (
-    <section className="features-section py-5" id="funciones">
+    <section id="funciones" style={{ padding: "90px 40px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
-      <div className="container">
-
-        <div className="row align-items-end mb-5">
-
-          <div className="col-lg-7">
-
-            <span className="section-badge mb-3 d-inline-block">
-              TODO LO QUE NECESITAS
-            </span>
-
-            <h2 className="fw-bold display-6 text-light mt-2">
-              Diseñada para atletas,<br/>
-              construida para resultados.
-            </h2>
-
-          </div>
-
-          <div className="col-lg-5">
-
-            <p className="text-secondary fs-5">
-              Todo lo que necesitas para alcanzar tu mejor
-              versión, en una sola aplicación intuitiva.
-            </p>
-
-          </div>
-
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <span style={{
+            display: "inline-block", background: "rgba(59,130,246,0.12)",
+            border: "1px solid rgba(59,130,246,0.3)", color: "#3B82F6",
+            fontSize: 11, fontWeight: 700, letterSpacing: "0.12em",
+            padding: "5px 14px", borderRadius: 999, textTransform: "uppercase", marginBottom: 16,
+          }}>Funciones</span>
+          <h2 style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 800, marginBottom: 14, letterSpacing: "-0.5px" }}>
+            Todo lo que necesitas en una app
+          </h2>
+          <p style={{ color: "#94a3b8", fontSize: 17, maxWidth: 600, margin: "0 auto", lineHeight: 1.6 }}>
+            Diseñada para atletas, construida para resultados reales.
+          </p>
         </div>
 
-        <div className="row g-4">
-          {features.map((f, i) => (
-            <div className="col-md-4" key={i}>
-              <div className="feature-card p-4 h-100">
-                <div className="icon-box mb-4"><f.Icon sx={{ fontSize: 28, color: "#3B82F6" }} /></div>
-                <h5 className="fw-bold text-light">{f.title}</h5>
-                <p className="text-secondary">{f.desc}</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20 }}>
+          {FEATURES.map(f => {
+            const Icon = f.icon;
+            return (
+              <div key={f.title} style={{
+                background: "#0f1623", border: "1px solid #1e2a3a",
+                borderRadius: 16, padding: "28px 24px",
+                transition: "border-color .2s, transform .2s", cursor: "default",
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "#3B82F6"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(-4px)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "#1e2a3a"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; }}
+              >
+                <div style={{
+                  width: 52, height: 52, borderRadius: 14,
+                  background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)",
+                  display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16,
+                }}>
+                  <Icon sx={{ fontSize: 26, color: "#3B82F6" }} />
+                </div>
+                <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 8 }}>{f.title}</h3>
+                <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-
       </div>
-
     </section>
-  )
+  );
 }

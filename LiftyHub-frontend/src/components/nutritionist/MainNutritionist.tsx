@@ -110,8 +110,8 @@ export default function MainNutritionist() {
             sx={{
               height: 280,
               borderRadius: "16px",
-              background: "#111",
-              border: "1px solid rgba(255,255,255,0.05)",
+              background: "#141d2b",
+              border: "1px solid rgba(59,130,246,0.25)",
               p: 3,
               position: "relative",
               overflow: "hidden",
@@ -133,7 +133,7 @@ export default function MainNutritionist() {
                       {item.value} / {item.total}
                     </Typography>
                   </Box>
-                  <Box sx={{ height: 6, borderRadius: 3, bgcolor: "#1a1a1a", overflow: "hidden" }}>
+                  <Box sx={{ height: 6, borderRadius: 3, bgcolor: "#1e293b", overflow: "hidden" }}>
                     <Box
                       sx={{
                         height: "100%",
@@ -165,8 +165,8 @@ export default function MainNutritionist() {
             sx={{
               height: 280,
               borderRadius: "16px",
-              background: "#111",
-              border: "1px solid rgba(255,255,255,0.05)",
+              background: "#141d2b",
+              border: "1px solid rgba(59,130,246,0.25)",
               p: 3,
               overflowY: "auto",
             }}

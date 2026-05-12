@@ -19,13 +19,13 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PLAN_OPTIONS = [
   {
     name: "Meal",
-    price: "$400/mes",
+    price: "$149/mes",
     color: "#10B981",
     features: ["Nutriólogo personal", "Plan de dieta personalizado", "Suplementos recomendados"],
   },
   {
     name: "Pro",
-    price: "$600/mes",
+    price: "$229/mes",
     color: "#F59E0B",
     features: ["Nutriólogo personal", "Plan de dieta personalizado", "Suplementos recomendados", "Estadísticas avanzadas", "Rutinas ilimitadas"],
     highlighted: true,

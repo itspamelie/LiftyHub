@@ -49,7 +49,7 @@ export default function AboutScreen() {
         </View>
 
         <Text style={styles.section}>{t("about.contactTitle")}</Text>
-        <Text style={styles.text}>support@liftyhub.app</Text>
+        <Text style={styles.text}>liftyhubofficial@gmail.com</Text>
 
         <Text style={styles.version}>{t("about.version")}</Text>
         <Text style={styles.footer}>{t("about.copyright")}</Text>

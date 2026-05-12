@@ -648,6 +648,38 @@ export const searchUsers = async (query: string, token: string) => {
   });
 };
 
+// 💳 PAYPAL — CREAR ORDEN
+export const createPayPalOrder = async (
+  body: { plan_id: number; user_id: number },
+  token: string
+) => {
+  return apiFetch(`${API_URL}/paypal/create-order`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+};
+
+// 💳 PAYPAL — CAPTURAR PAGO
+export const capturePayPalOrder = async (
+  body: { order_id: string; plan_id: number; user_id: number },
+  token: string
+) => {
+  return apiFetch(`${API_URL}/paypal/capture-order`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+};
+
 // 🔥 CREAR RACHA DEL USUARIO (si no existe)
 export const createUserStreak = async (
   data: {
@@ -666,5 +698,29 @@ export const createUserStreak = async (
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
+  });
+};
+
+export const forgotPassword = async (email: string) => {
+  return apiFetch(`${API_URL}/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ email }),
+  });
+};
+
+export const verifyResetCode = async (email: string, code: string) => {
+  return apiFetch(`${API_URL}/verify-reset-code`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ email, code }),
+  });
+};
+
+export const resetPassword = async (email: string, code: string, password: string) => {
+  return apiFetch(`${API_URL}/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ email, code, password }),
   });
 };

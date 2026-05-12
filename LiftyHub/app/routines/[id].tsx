@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, Dimension
 import QRCode from "react-native-qrcode-svg";
 import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Storage from "@/src/utils/storage";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/src/styles/globalstyles";
@@ -10,6 +11,7 @@ import { useLanguage } from "@/src/context/LanguageContext";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { saveCache, loadCache } from "@/src/utils/cache";
 import HapticButton from "@/src/components/buttons/HapticButton";
+import { useSubscription } from "@/src/context/SubscriptionContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const HERO_HEIGHT = 240;
@@ -66,9 +68,62 @@ export default function RoutineDetail() {
 
   const { t } = useLanguage();
   const isConnected = useNetworkStatus();
+  const { plan } = useSubscription();
   const [exercises, setExercises] = useState<ExerciseEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [showQR, setShowQR] = useState(false);
+  const [showShareWarning, setShowShareWarning] = useState(false);
+  const [showShareLimit, setShowShareLimit] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  const SHARE_KEY_MONTH = "@liftyhub_share_month";
+  const SHARE_KEY_COUNT = "@liftyhub_share_count";
+
+  const getShareLimit = () => {
+    if (plan?.name === "Pro") return Infinity;
+    if (plan?.name === "Meal") return 10;
+    if (plan?.name === "Basic") return 5;
+    return 1; // Free
+  };
+
+  const handleQRPress = async () => {
+    const limit = getShareLimit();
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const storedMonth = await AsyncStorage.getItem(SHARE_KEY_MONTH);
+    const rawCount = await AsyncStorage.getItem(SHARE_KEY_COUNT);
+    const count = storedMonth === currentMonth ? parseInt(rawCount ?? "0") : 0;
+
+    if (limit === Infinity) {
+      setShowQR(true);
+      return;
+    }
+
+    if (count >= limit) {
+      if (plan?.name === "Free") setShowUpgradeModal(true);
+      else setShowShareLimit(true);
+      return;
+    }
+
+    if (plan?.name === "Free" && count === 0) {
+      setShowShareWarning(true);
+      return;
+    }
+
+    await incrementShareCount(currentMonth, count);
+    setShowQR(true);
+  };
+
+  const incrementShareCount = async (month: string, current: number) => {
+    await AsyncStorage.setItem(SHARE_KEY_MONTH, month);
+    await AsyncStorage.setItem(SHARE_KEY_COUNT, String(current + 1));
+  };
+
+  const handleShareWarningConfirm = async () => {
+    setShowShareWarning(false);
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    await incrementShareCount(currentMonth, 0);
+    setShowQR(true);
+  };
 
   const handleStartWorkout = () => {
     if (!isConnected) {
@@ -178,7 +233,7 @@ export default function RoutineDetail() {
               <Ionicons name="pencil" size={20} color="white" />
             </HapticButton>
           )}
-          <HapticButton style={styles.shareButton} onPress={() => setShowQR(true)}>
+          <HapticButton style={styles.shareButton} onPress={handleQRPress}>
             <Ionicons name="qr-code" size={20} color="white" />
           </HapticButton>
           {/* arco inferior para transición suave */}
@@ -374,6 +429,89 @@ export default function RoutineDetail() {
           </View>
         </View>
       </Modal>
+
+      {/* ── MODAL AVISO FREE (1 compartido gratis) ── */}
+      <Modal visible={showShareWarning} transparent animationType="fade">
+        <HapticButton style={styles.qrOverlay} activeOpacity={1} onPress={() => setShowShareWarning(false)}>
+          <HapticButton activeOpacity={1} style={styles.qrCard} onPress={() => {}}>
+            <View style={{ alignItems: "center", marginBottom: 12 }}>
+              <Ionicons name="qr-code" size={32} color={colors.primary} />
+            </View>
+            <Text style={styles.qrTitle}>Compartir rutina</Text>
+            <Text style={[styles.qrHint, { textAlign: "center", marginBottom: 20 }]}>
+              Con el plan Free puedes compartir{"\n"}
+              <Text style={{ color: "white", fontWeight: "700" }}>1 rutina por mes</Text>
+              {"\n"}Este será tu compartido del mes.
+            </Text>
+            <View style={{ flexDirection: "row", gap: 10, marginTop: 4 }}>
+              <HapticButton
+                style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 13, borderRadius: spacing.borderRadius, borderWidth: 1, borderColor: "#3A3A3A" }}
+                onPress={() => setShowShareWarning(false)}
+              >
+                <Text style={{ color: colors.textSecondary, fontSize: 15, fontWeight: "600" }}>Cancelar</Text>
+              </HapticButton>
+              <HapticButton
+                style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 13, borderRadius: spacing.borderRadius, backgroundColor: colors.primary }}
+                onPress={handleShareWarningConfirm}
+              >
+                <Text style={{ color: "white", fontSize: 15, fontWeight: "600" }}>Compartir</Text>
+              </HapticButton>
+            </View>
+          </HapticButton>
+        </HapticButton>
+      </Modal>
+
+      {/* ── MODAL LÍMITE BASIC/MEAL ── */}
+      <Modal visible={showShareLimit} transparent animationType="fade">
+        <HapticButton style={styles.qrOverlay} activeOpacity={1} onPress={() => setShowShareLimit(false)}>
+          <HapticButton activeOpacity={1} style={styles.qrCard} onPress={() => {}}>
+            <View style={{ alignItems: "center", marginBottom: 12 }}>
+              <Ionicons name="alert-circle" size={32} color="#F59E0B" />
+            </View>
+            <Text style={styles.qrTitle}>Límite alcanzado</Text>
+            <Text style={[styles.qrHint, { textAlign: "center", marginBottom: 20 }]}>
+              Alcanzaste los{" "}
+              <Text style={{ color: "white", fontWeight: "700" }}>{getShareLimit()} compartidos del mes</Text>
+              {"\n"}Actualiza a Pro para compartir sin límite.
+            </Text>
+            <HapticButton
+              style={[styles.qrShareButton, { backgroundColor: "#F59E0B" }]}
+              onPress={() => { setShowShareLimit(false); router.push("/settings/plans" as any); }}
+            >
+              <Text style={styles.qrShareText}>Ver plan Pro</Text>
+            </HapticButton>
+            <HapticButton style={styles.qrCloseButton} onPress={() => setShowShareLimit(false)}>
+              <Text style={styles.qrCloseText}>Cerrar</Text>
+            </HapticButton>
+          </HapticButton>
+        </HapticButton>
+      </Modal>
+
+      {/* ── MODAL UPGRADE FREE ── */}
+      <Modal visible={showUpgradeModal} transparent animationType="fade">
+        <HapticButton style={styles.qrOverlay} activeOpacity={1} onPress={() => setShowUpgradeModal(false)}>
+          <HapticButton activeOpacity={1} style={styles.qrCard} onPress={() => {}}>
+            <View style={{ alignItems: "center", marginBottom: 12 }}>
+              <Ionicons name="lock-closed" size={32} color={colors.primary} />
+            </View>
+            <Text style={styles.qrTitle}>Compartir rutinas</Text>
+            <Text style={[styles.qrHint, { textAlign: "center", marginBottom: 20 }]}>
+              Ya usaste tu compartido gratuito este mes.{"\n"}
+              Actualiza tu plan para compartir más rutinas.
+            </Text>
+            <HapticButton
+              style={styles.qrShareButton}
+              onPress={() => { setShowUpgradeModal(false); router.push("/settings/plans" as any); }}
+            >
+              <Text style={styles.qrShareText}>Ver planes</Text>
+            </HapticButton>
+            <HapticButton style={styles.qrCloseButton} onPress={() => setShowUpgradeModal(false)}>
+              <Text style={styles.qrCloseText}>Cerrar</Text>
+            </HapticButton>
+          </HapticButton>
+        </HapticButton>
+      </Modal>
+
     </View>
   );
 }

@@ -200,67 +200,129 @@ export default function ChallengeScreen() {
   }
 
   /* ──────────────── VER RETO ACTIVO ──────────────── */
-  const elapsed  = daysElapsed(challenge.startDate);
-  const total    = challenge.durationMonths * 30;
-  const left     = daysLeft(challenge.endDate);
-  const progress = Math.min(elapsed / total, 1);
+  const elapsed     = daysElapsed(challenge.startDate);
+  const total       = challenge.durationMonths * 30;
+  const left        = daysLeft(challenge.endDate);
+  const progress    = Math.min(elapsed / total, 1);
+  const pct         = Math.round(progress * 100);
   const isCompleted = left === 0;
-  const firstPhoto = challenge.photos[0];
-  const lastPhoto  = challenge.photos[challenge.photos.length - 1];
+  const firstPhoto  = challenge.photos[0];
+  const lastPhoto   = challenge.photos[challenge.photos.length - 1];
+
+  const motivationalMsg = () => {
+    if (isCompleted) return { text: "¡Lo lograste! Eres increíble.", icon: "trophy" as const };
+    if (pct >= 75)   return { text: "¡Ya casi! El final está cerca.", icon: "flame" as const };
+    if (pct >= 50)   return { text: "Vas a la mitad, ¡sigue así!", icon: "trending-up" as const };
+    if (pct >= 25)   return { text: "Buen arranque, no pares ahora.", icon: "flash" as const };
+    return { text: "Cada día cuenta. ¡Tú puedes!", icon: "heart" as const };
+  };
+  const motiv = motivationalMsg();
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      <BackButton />
 
-      <ScrollView contentContainerStyle={styles.viewContent}>
+      {/* HEADER */}
+      <View style={styles.activeHeader}>
+        <HapticButton style={styles.activeBackBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={20} color="white" />
+        </HapticButton>
+        <Text style={styles.activeHeaderTitle}>Mi Reto</Text>
+        {isCompleted && (
+          <View style={styles.completedBadge}>
+            <Text style={styles.completedBadgeText}>¡Completado!</Text>
+          </View>
+        )}
+      </View>
 
-        {/* ENCABEZADO DEL RETO */}
-        <View style={styles.challengeHeader}>
-          <View style={styles.trophyRow}>
-            <Ionicons name="trophy" size={22} color={ACCENT} />
-            {isCompleted && (
-              <View style={[styles.badge, { backgroundColor: `${ACCENT}22` }]}>
-                <Text style={[styles.badgeText, { color: ACCENT }]}>¡Completado!</Text>
-              </View>
-            )}
+      <ScrollView contentContainerStyle={styles.viewContent} showsVerticalScrollIndicator={false}>
+
+        {/* TARJETA PRINCIPAL */}
+        <View style={styles.heroCard}>
+          <View style={styles.heroTopRow}>
+            <View style={[styles.trophyCircle, { backgroundColor: `${ACCENT}22` }]}>
+              <Ionicons name="trophy" size={26} color={ACCENT} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.heroLabel}>TU META</Text>
+              <Text style={styles.goalText}>{challenge.goal}</Text>
+            </View>
           </View>
 
-          <Text style={styles.goalText}>{challenge.goal}</Text>
+          {/* BARRA DE PROGRESO CON HITOS */}
+          <View style={styles.progressSection}>
+            <View style={styles.progressLabelRow}>
+              <Text style={styles.progressMeta}>Día {elapsed} de {total}</Text>
+              <Text style={styles.progressPct}>{pct}%</Text>
+            </View>
+            <View style={styles.progressBg}>
+              <View style={[styles.progressFill, { width: `${pct}%` }]} />
+              {[25, 50, 75].map((m) => (
+                <View key={m} style={[styles.milestone, { left: `${m}%` as any, backgroundColor: pct >= m ? ACCENT : "#3A3A3A" }]} />
+              ))}
+            </View>
+            <View style={styles.milestoneLabels}>
+              {[25, 50, 75].map((m) => (
+                <Text key={m} style={[styles.milestoneLabel, { left: `${m}%` as any, color: pct >= m ? ACCENT : "#555" }]}>{m}%</Text>
+              ))}
+            </View>
+          </View>
 
-          <View style={styles.progressLabelRow}>
-            <Text style={styles.progressMeta}>
-              {challenge.durationMonths} {challenge.durationMonths === 1 ? "mes" : "meses"} · Día {elapsed} de {total}
+          {/* MENSAJE MOTIVACIONAL */}
+          <View style={styles.motivRow}>
+            <Ionicons name={motiv.icon} size={15} color={ACCENT} />
+            <Text style={styles.motivText}>{motiv.text}</Text>
+          </View>
+        </View>
+
+        {/* STATS */}
+        <View style={styles.statsRow}>
+          <View style={styles.statBox}>
+            <Text style={styles.statValue}>{elapsed}</Text>
+            <Text style={styles.statLabel}>Días{"\n"}transcurridos</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statBox}>
+            <Text style={[styles.statValue, { color: isCompleted ? ACCENT : colors.primary }]}>
+              {isCompleted ? "✓" : left}
             </Text>
-            <Text style={styles.progressPct}>{Math.round(progress * 100)}%</Text>
+            <Text style={styles.statLabel}>Días{"\n"}restantes</Text>
           </View>
-          <View style={styles.progressBg}>
-            <View style={[styles.progressFill, { width: `${Math.round(progress * 100)}%` }]} />
+          <View style={styles.statDivider} />
+          <View style={styles.statBox}>
+            <Text style={styles.statValue}>{challenge.photos.length}</Text>
+            <Text style={styles.statLabel}>Fotos de{"\n"}progreso</Text>
           </View>
-          <Text style={styles.daysLeft}>
-            {isCompleted ? "Reto completado" : `${left} días restantes`}
-          </Text>
         </View>
 
         {/* COMPARACIÓN INICIO VS AHORA */}
         {challenge.photos.length >= 2 && (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Comparación</Text>
+            <View style={styles.sectionHeaderRow}>
+              <Ionicons name="git-compare-outline" size={18} color={ACCENT} />
+              <Text style={styles.sectionTitle}>Comparación</Text>
+            </View>
             <View style={styles.comparisonRow}>
               <View style={styles.comparisonItem}>
                 <Image source={{ uri: firstPhoto.uri }} style={styles.comparisonPhoto} resizeMode="cover" />
-                <Text style={styles.comparisonLabel}>Inicio</Text>
-                <Text style={styles.comparisonDate}>
-                  {new Date(firstPhoto.date).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
-                </Text>
+                <View style={styles.comparisonLabelBox}>
+                  <Text style={styles.comparisonLabel}>Inicio</Text>
+                  <Text style={styles.comparisonDate}>
+                    {new Date(firstPhoto.date).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
+                  </Text>
+                </View>
               </View>
-              <Ionicons name="arrow-forward" size={28} color={colors.textSecondary} />
+              <View style={styles.vsCircle}>
+                <Ionicons name="arrow-forward" size={18} color={ACCENT} />
+              </View>
               <View style={styles.comparisonItem}>
                 <Image source={{ uri: lastPhoto.uri }} style={styles.comparisonPhoto} resizeMode="cover" />
-                <Text style={styles.comparisonLabel}>Ahora</Text>
-                <Text style={styles.comparisonDate}>
-                  {new Date(lastPhoto.date).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
-                </Text>
+                <View style={styles.comparisonLabelBox}>
+                  <Text style={styles.comparisonLabel}>Ahora</Text>
+                  <Text style={styles.comparisonDate}>
+                    {new Date(lastPhoto.date).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
@@ -269,33 +331,56 @@ export default function ChallengeScreen() {
         {/* AGREGAR FOTO */}
         {!isCompleted && (
           <HapticButton style={styles.addPhotoBtn} onPress={handlePickPhoto}>
-            <Ionicons name="camera" size={20} color={colors.primary} />
-            <Text style={styles.addPhotoText}>Agregar foto de progreso</Text>
+            <View style={styles.addPhotoIcon}>
+              <Ionicons name="camera" size={20} color={ACCENT} />
+            </View>
+            <View>
+              <Text style={styles.addPhotoText}>Agregar foto de progreso</Text>
+              <Text style={styles.addPhotoSub}>Registra tu transformación</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} style={{ marginLeft: "auto" }} />
           </HapticButton>
         )}
 
         {/* GALERÍA */}
         {challenge.photos.length > 0 ? (
-          <>
-            <Text style={styles.sectionTitle}>Fotos de progreso ({challenge.photos.length})</Text>
+          <View style={styles.card}>
+            <View style={styles.sectionHeaderRow}>
+              <Ionicons name="images-outline" size={18} color={colors.primary} />
+              <Text style={styles.sectionTitle}>Fotos de progreso</Text>
+              <View style={styles.countBadge}>
+                <Text style={styles.countBadgeText}>{challenge.photos.length}</Text>
+              </View>
+            </View>
             <View style={styles.photoGrid}>
               {[...challenge.photos].reverse().map((photo) => (
                 <View key={photo.id} style={styles.photoItem}>
                   <Image source={{ uri: photo.uri }} style={styles.photo} resizeMode="cover" />
-                  <Text style={styles.photoDate}>
-                    {new Date(photo.date).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "2-digit" })}
-                  </Text>
-                  {photo.note ? <Text style={styles.photoNote} numberOfLines={2}>{photo.note}</Text> : null}
+                  <View style={styles.photoMeta}>
+                    <Text style={styles.photoDate}>
+                      {new Date(photo.date).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "2-digit" })}
+                    </Text>
+                    {photo.note ? <Text style={styles.photoNote} numberOfLines={2}>{photo.note}</Text> : null}
+                  </View>
                 </View>
               ))}
             </View>
-          </>
+          </View>
         ) : (
           <View style={styles.emptyPhotos}>
-            <Ionicons name="images-outline" size={44} color={colors.textSecondary} />
-            <Text style={styles.emptyText}>Sube tu primera foto para empezar a registrar tu progreso</Text>
+            <Ionicons name="camera-outline" size={48} color="#333" />
+            <Text style={styles.emptyTitle}>Sin fotos aún</Text>
+            <Text style={styles.emptyText}>Sube tu primera foto para empezar a registrar tu transformación</Text>
           </View>
         )}
+
+        {/* FECHA DE INICIO */}
+        <View style={styles.dateRow}>
+          <Ionicons name="calendar-outline" size={14} color={colors.textSecondary} />
+          <Text style={styles.dateText}>
+            Iniciado el {new Date(challenge.startDate).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}
+          </Text>
+        </View>
 
         {/* ELIMINAR */}
         <HapticButton style={styles.deleteBtn} onPress={handleDelete}>
@@ -356,36 +441,68 @@ const styles = StyleSheet.create({
   createBtn:     { backgroundColor: ACCENT, borderRadius: 30, paddingVertical: 16, alignItems: "center" },
   createBtnText: { color: "white", fontSize: 16, fontWeight: "700" },
 
-  challengeHeader:  { backgroundColor: colors.card, borderRadius: spacing.borderRadius, padding: 20, marginBottom: 16 },
-  trophyRow:        { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 },
-  badge:            { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  badgeText:        { fontSize: 12, fontWeight: "700" },
-  goalText:         { color: colors.text, fontSize: 18, fontWeight: "700", marginBottom: 16, lineHeight: 26 },
-  progressLabelRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6 },
+  activeHeader:      { flexDirection: "row", alignItems: "center", paddingTop: 60, paddingHorizontal: 20, paddingBottom: 16, gap: 12, borderBottomWidth: 1, borderBottomColor: colors.card },
+  activeBackBtn:     { width: 42, height: 42, borderRadius: 21, backgroundColor: colors.primary, justifyContent: "center", alignItems: "center" },
+  activeHeaderTitle: { color: colors.text, fontSize: 22, fontWeight: "700", flex: 1 },
+  completedBadge:    { backgroundColor: `${ACCENT}22`, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  completedBadgeText:{ color: ACCENT, fontSize: 12, fontWeight: "700" },
+
+  heroCard:     { backgroundColor: colors.card, borderRadius: spacing.borderRadius, padding: 20, marginBottom: 14 },
+  heroTopRow:   { flexDirection: "row", gap: 14, marginBottom: 20 },
+  trophyCircle: { width: 52, height: 52, borderRadius: 26, justifyContent: "center", alignItems: "center" },
+  heroLabel:    { color: colors.textSecondary, fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 4 },
+  goalText:     { color: colors.text, fontSize: 16, fontWeight: "700", lineHeight: 22 },
+
+  progressSection:  { marginBottom: 14 },
+  progressLabelRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
   progressMeta:     { color: colors.textSecondary, fontSize: 12 },
-  progressPct:      { color: ACCENT, fontSize: 12, fontWeight: "700" },
-  progressBg:       { height: 8, backgroundColor: "#2C2C2E", borderRadius: 4, marginBottom: 8 },
-  progressFill:     { height: 8, backgroundColor: ACCENT, borderRadius: 4 },
-  daysLeft:         { color: colors.textSecondary, fontSize: 12, textAlign: "center", marginTop: 4 },
+  progressPct:      { color: ACCENT, fontSize: 13, fontWeight: "700" },
+  progressBg:       { height: 10, backgroundColor: "#2C2C2E", borderRadius: 5, marginBottom: 6, position: "relative", overflow: "visible" },
+  progressFill:     { height: 10, backgroundColor: ACCENT, borderRadius: 5 },
+  milestone:        { position: "absolute", top: -3, width: 6, height: 16, borderRadius: 3, marginLeft: -3 },
+  milestoneLabels:  { position: "relative", height: 16 },
+  milestoneLabel:   { position: "absolute", fontSize: 10, marginLeft: -10 },
 
-  sectionTitle:  { color: colors.text, fontSize: 16, fontWeight: "700", marginBottom: 12 },
-  comparisonRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 8 },
-  comparisonItem:  { flex: 1, alignItems: "center", gap: 6 },
-  comparisonPhoto: { width: "100%", aspectRatio: 1, borderRadius: 12 },
-  comparisonLabel: { color: colors.text, fontSize: 13, fontWeight: "700" },
-  comparisonDate:  { color: colors.textSecondary, fontSize: 11 },
+  motivRow:   { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: `${ACCENT}11`, borderRadius: 10, padding: 10 },
+  motivText:  { color: ACCENT, fontSize: 13, fontWeight: "600", flex: 1 },
 
-  addPhotoBtn:  { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: colors.card, borderRadius: spacing.borderRadius, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: colors.primary, borderStyle: "dashed" },
-  addPhotoText: { color: colors.primary, fontSize: 15, fontWeight: "600" },
+  statsRow:    { flexDirection: "row", backgroundColor: colors.card, borderRadius: spacing.borderRadius, padding: 20, marginBottom: 14 },
+  statBox:     { flex: 1, alignItems: "center", gap: 6 },
+  statValue:   { color: ACCENT, fontSize: 26, fontWeight: "800" },
+  statLabel:   { color: colors.textSecondary, fontSize: 11, textAlign: "center", lineHeight: 15 },
+  statDivider: { width: 1, backgroundColor: "#2C2C2E", marginHorizontal: 8 },
 
-  photoGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 24 },
-  photoItem: { width: "47%", gap: 4 },
+  sectionHeaderRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 14 },
+  sectionTitle:     { color: colors.text, fontSize: 15, fontWeight: "700", flex: 1 },
+  countBadge:       { backgroundColor: colors.primary + "22", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+  countBadgeText:   { color: colors.primary, fontSize: 12, fontWeight: "700" },
+
+  comparisonRow:    { flexDirection: "row", alignItems: "center", gap: 10 },
+  comparisonItem:   { flex: 1, gap: 8 },
+  comparisonPhoto:  { width: "100%", aspectRatio: 1, borderRadius: 14 },
+  comparisonLabelBox: { alignItems: "center", gap: 2 },
+  comparisonLabel:  { color: colors.text, fontSize: 13, fontWeight: "700" },
+  comparisonDate:   { color: colors.textSecondary, fontSize: 11 },
+  vsCircle:         { width: 36, height: 36, borderRadius: 18, backgroundColor: `${ACCENT}22`, justifyContent: "center", alignItems: "center" },
+
+  addPhotoBtn:  { flexDirection: "row", alignItems: "center", gap: 14, backgroundColor: colors.card, borderRadius: spacing.borderRadius, padding: 16, marginBottom: 14, borderWidth: 1, borderColor: `${ACCENT}44` },
+  addPhotoIcon: { width: 42, height: 42, borderRadius: 21, backgroundColor: `${ACCENT}22`, justifyContent: "center", alignItems: "center" },
+  addPhotoText: { color: colors.text, fontSize: 15, fontWeight: "600" },
+  addPhotoSub:  { color: colors.textSecondary, fontSize: 12, marginTop: 2 },
+
+  photoGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  photoItem: { width: "47%", gap: 6 },
   photo:     { width: "100%", aspectRatio: 1, borderRadius: 12 },
+  photoMeta: { gap: 2 },
   photoDate: { color: colors.textSecondary, fontSize: 11 },
   photoNote: { color: colors.text, fontSize: 12, lineHeight: 16 },
 
-  emptyPhotos: { alignItems: "center", gap: 12, paddingVertical: 40 },
-  emptyText:   { color: colors.textSecondary, textAlign: "center", fontSize: 14, lineHeight: 20 },
+  emptyPhotos: { alignItems: "center", gap: 10, paddingVertical: 40, backgroundColor: colors.card, borderRadius: spacing.borderRadius, marginBottom: 14 },
+  emptyTitle:  { color: colors.text, fontSize: 16, fontWeight: "700" },
+  emptyText:   { color: colors.textSecondary, textAlign: "center", fontSize: 13, lineHeight: 19, paddingHorizontal: 24 },
+
+  dateRow:   { flexDirection: "row", alignItems: "center", gap: 6, justifyContent: "center", marginBottom: 8, marginTop: 4 },
+  dateText:  { color: colors.textSecondary, fontSize: 12 },
 
   deleteBtn:     { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 16, marginTop: 4 },
   deleteBtnText: { color: colors.danger, fontSize: 14 },

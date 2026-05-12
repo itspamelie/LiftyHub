@@ -24,7 +24,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
   pending:     { label: "Pendiente",     color: "#FBBF24" },
   in_progress: { label: "En progreso",   color: "#3B82F6" },
   completed:   { label: "Completado",    color: "#22c55e" },
-  cancelled:   { label: "Cancelado",     color: "#555"    },
+  cancelled:   { label: "Cancelado",     color: "#94a3b8"    },
   paid:        { label: "Pagado",        color: "#a78bfa" },
 };
 
@@ -97,14 +97,14 @@ export default function RequestsDashboard() {
       Swal.fire({
         icon: "success",
         title: status === "in_progress" ? "Solicitud aceptada" : "Solicitud rechazada",
-        background: "#111",
+        background: "#141d2b",
         color: "#fff",
         confirmButtonColor: "#3B82F6",
         timer: 1800,
         showConfirmButton: false,
       });
     } catch {
-      Swal.fire({ icon: "error", title: "Error al actualizar", background: "#111", color: "#fff", confirmButtonColor: "#3B82F6" });
+      Swal.fire({ icon: "error", title: "Error al actualizar", background: "#141d2b", color: "#fff", confirmButtonColor: "#3B82F6" });
     } finally {
       setActionLoading(null);
     }
@@ -123,13 +123,13 @@ export default function RequestsDashboard() {
           icon: "info",
           title: "Sin cuestionario",
           text: `${req.user.name} aún no ha llenado el cuestionario nutricional.`,
-          background: "#111",
+          background: "#141d2b",
           color: "#fff",
           confirmButtonColor: "#3B82F6",
         });
       }
     } catch {
-      Swal.fire({ icon: "error", title: "Error al cargar cuestionario", background: "#111", color: "#fff", confirmButtonColor: "#3B82F6" });
+      Swal.fire({ icon: "error", title: "Error al cargar cuestionario", background: "#141d2b", color: "#fff", confirmButtonColor: "#3B82F6" });
     }
   };
 
@@ -271,8 +271,8 @@ export default function RequestsDashboard() {
             sx={{
               p: 3,
               borderRadius: "16px",
-              background: "#111",
-              border: "1px solid rgba(255,255,255,0.05)",
+              background: "#141d2b",
+              border: "1px solid rgba(59,130,246,0.25)",
               position: "sticky",
               top: 80,
             }}
@@ -280,13 +280,13 @@ export default function RequestsDashboard() {
             <Typography fontSize={12} color="#555" letterSpacing="0.06em" textTransform="uppercase" mb={2}>
               Resumen
             </Typography>
-            <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", mb: 2 }} />
+            <Divider sx={{ borderColor: "rgba(59,130,246,0.22)", mb: 2 }} />
 
             {[
               { label: "Pendientes",   value: pending.length,    color: "#FBBF24" },
               { label: "En progreso",  value: active.length,     color: "#3B82F6" },
               { label: "Completados",  value: historical.filter((r) => r.status === "completed").length, color: "#22c55e" },
-              { label: "Cancelados",   value: historical.filter((r) => r.status === "cancelled").length, color: "#555" },
+              { label: "Cancelados",   value: historical.filter((r) => r.status === "cancelled").length, color: "#94a3b8" },
             ].map((item) => (
               <Box key={item.label} display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Box display="flex" alignItems="center" gap={1.5}>
@@ -297,7 +297,7 @@ export default function RequestsDashboard() {
               </Box>
             ))}
 
-            <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", mb: 2 }} />
+            <Divider sx={{ borderColor: "rgba(59,130,246,0.22)", mb: 2 }} />
             <Box display="flex" justifyContent="space-between">
               <Typography fontSize={12} color="#555">Total</Typography>
               <Typography fontSize={12} color="#888" fontWeight={600}>{requests.length} solicitudes</Typography>
@@ -314,9 +314,9 @@ export default function RequestsDashboard() {
         fullWidth
         PaperProps={{
           sx: {
-            background: "#111",
+            background: "#141d2b",
             borderRadius: "20px",
-            border: "1px solid rgba(255,255,255,0.06)",
+            border: "1px solid rgba(59,130,246,0.25)",
             color: "white",
           },
         }}
@@ -326,11 +326,11 @@ export default function RequestsDashboard() {
             <Typography fontSize={16} fontWeight={700}>Cuestionario nutricional</Typography>
             <Typography fontSize={12} color="#555">{questPatientName}</Typography>
           </Box>
-          <IconButton onClick={() => setQuestOpen(false)} sx={{ color: "#555", "&:hover": { color: "#aaa" } }}>
+          <IconButton onClick={() => setQuestOpen(false)} sx={{ color: "#94a3b8", "&:hover": { color: "#94a3b8" } }}>
             <CloseIcon fontSize="small" />
           </IconButton>
         </DialogTitle>
-        <DialogContent dividers sx={{ borderColor: "rgba(255,255,255,0.06)" }}>
+        <DialogContent dividers sx={{ borderColor: "rgba(59,130,246,0.22)" }}>
           {questionnaire && (
             <Box display="flex" flexDirection="column" gap={0}>
               <QRow label="Peso" value={`${questionnaire.weight} kg`} />
@@ -353,7 +353,7 @@ export default function RequestsDashboard() {
 
 function QRow({ label, value }: { label: string; value: string | null | undefined }) {
   return (
-    <Box py={1.5} sx={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+    <Box py={1.5} sx={{ borderBottom: "1px solid rgba(59,130,246,0.22)" }}>
       <Typography fontSize={11} color="#555" mb={0.3} letterSpacing="0.04em" textTransform="uppercase">
         {label}
       </Typography>
@@ -387,10 +387,10 @@ function RequestCard({
       sx={{
         p: 2.5,
         borderRadius: "16px",
-        background: "#111",
-        border: "1px solid rgba(255,255,255,0.05)",
+        background: "#141d2b",
+        border: "1px solid rgba(59,130,246,0.25)",
         transition: "border-color 0.2s",
-        "&:hover": { borderColor: "rgba(59,130,246,0.15)" },
+        "&:hover": { borderColor: "rgba(59,130,246,0.22)" },
       }}
     >
       <Box display="flex" alignItems="flex-start" gap={2}>
@@ -430,7 +430,7 @@ function RequestCard({
             borderRadius: "8px",
             px: 1.5,
             py: 0.6,
-            "&:hover": { bgcolor: "rgba(59,130,246,0.12)" },
+            "&:hover": { bgcolor: "rgba(59,130,246,0.18)" },
           }}
         >
           Ver cuestionario

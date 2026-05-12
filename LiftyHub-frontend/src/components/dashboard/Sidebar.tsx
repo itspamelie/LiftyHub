@@ -52,10 +52,8 @@ return (
       <Box>
         {/* Logo */}
         <Box mb={3} sx={{ textAlign: "center" }}>
-  <Typography variant="h4" fontWeight="bold">
-    LiftyHub
-  </Typography>
-</Box>
+          <img src="/logo.jpg" alt="LiftyHub" style={{ width: 120, borderRadius: 16 }} />
+        </Box>
 
 <List
   sx={{

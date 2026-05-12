@@ -42,7 +42,7 @@ const Topbar: React.FC = () => {
         px: 4,
         gap: 2,
         borderBottom: "1px solid rgba(255,255,255,0.04)",
-        background: "rgba(8,8,8,0.8)",
+        background: "rgba(11,15,20,0.9)",
         backdropFilter: "blur(12px)",
         position: "sticky",
         top: 0,
@@ -52,8 +52,8 @@ const Topbar: React.FC = () => {
       <IconButton
         size="small"
         sx={{
-          color: "#555",
-          "&:hover": { color: "#aaa", background: "rgba(255,255,255,0.04)" },
+          color: "#94a3b8",
+          "&:hover": { color: "#94a3b8", background: "rgba(255,255,255,0.04)" },
         }}
       >
         <Badge

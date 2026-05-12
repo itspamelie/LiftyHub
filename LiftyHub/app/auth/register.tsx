@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TextInput, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, ScrollView, Image } from "react-native";
 
 import { useRouter, Stack } from "expo-router";
 import { useState } from "react";
@@ -66,9 +66,10 @@ export default function Register() {
 
         <ScrollView contentContainerStyle={styles.content}>
 
-          {/* 🔥 HEADER CON LOGO (MEJORADO) */}
           <View style={styles.header}>
-            <Ionicons name="barbell" size={50} color={colors.primary} />
+            <View style={styles.logoWrapper}>
+              <Image source={require("@/assets/images/logo.jpg")} style={styles.logo} resizeMode="cover" />
+            </View>
             <Text style={styles.title}>LiftyHub</Text>
             <Text style={styles.subtitle}>{t("register.subtitle")}</Text>
           </View>
@@ -195,11 +196,22 @@ const styles = StyleSheet.create({
     marginBottom: 30
   },
 
+  logoWrapper: {
+    width: 100,
+    height: 100,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  logo: {
+    width: "100%",
+    height: "100%",
+  },
   title: {
-    color: colors.text,
-    fontSize: 32,
+    color: "#ffffff",
+    fontSize: 34,
     fontWeight: "700",
-    marginTop: 8
+    marginTop: 10,
+    marginBottom: 2,
   },
 
   subtitle: {

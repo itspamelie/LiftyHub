@@ -71,13 +71,13 @@ export default function ProfileScreen() {
   const STATS_PLAN_OPTIONS = [
     {
       name: "Basic",
-      price: "$99/mes",
+      price: "$79/mes",
       color: colors.primary,
       features: [t("plans.features.stats"), t("stats.weeklyActivity"), t("stats.personalRecords"), t("plans.features.routines20")],
     },
     {
       name: "Pro",
-      price: "$600/mes",
+      price: "$229/mes",
       color: "#F59E0B",
       features: [t("plans.features.routinesUnlimited"), t("plans.features.nutritionist"), t("plans.features.dietPlan")],
       highlighted: true,

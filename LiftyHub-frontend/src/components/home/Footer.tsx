@@ -1,130 +1,88 @@
-import LanguageIcon from "@mui/icons-material/Language";
-import SearchIcon from "@mui/icons-material/Search";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import XIcon from "@mui/icons-material/X";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import type { SvgIconComponent } from "@mui/icons-material";
 
-export default function Footer(){
+const SOCIAL: { Icon: SvgIconComponent; href: string }[] = [
+  { Icon: XIcon, href: "#" },
+  { Icon: FacebookIcon, href: "#" },
+  { Icon: InstagramIcon, href: "#" },
+  { Icon: LinkedInIcon, href: "#" },
+];
 
-return(
+export default function Footer() {
+    const COLS = [
+    {
+      title: "Producto",
+      links: ["Funciones", "Planes", "Opiniones", "FAQ", "Descargar"],
+      hrefs: ["#funciones", "#planes", "#opiniones", "#faq", "#"],
+    },
+    {
+      title: "Empresa",
+      links: ["Sobre nosotros", "Blog", "Prensa", "Trabaja con nosotros"],
+      hrefs: ["#", "#", "#", "#"],
+    },
+    {
+      title: "Legal",
+      links: ["Política de privacidad", "Términos de servicio", "Cookies"],
+      hrefs: ["/politica-de-privacidad", "#", "#"],
+    },
+  ];
 
-<footer className="footer-section">
+  return (
+    <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "60px 40px 32px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
-<div className="container py-5">
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 40, marginBottom: 48 }}>
 
-<div className="row gy-4">
+          {/* Brand col */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <img src="/logo.jpg" alt="LiftyHub" style={{ height: 42, borderRadius: 10 }} />
+              <span style={{ color: "white", fontWeight: 800, fontSize: 20, letterSpacing: "-0.5px" }}>LiftyHub</span>
+            </div>
+            <p style={{ color: "#64748b", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
+              La app de fitness para atletas serios. Crea rutinas, registra progreso y alcanza tus metas.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              {SOCIAL.map(({ Icon, href }, i) => (
+                <a key={i} href={href} style={{
+                  width: 36, height: 36, borderRadius: "50%",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  textDecoration: "none", color: "#64748b",
+                  transition: "background .2s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = "#3B82F6"; e.currentTarget.style.color = "white"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748b"; }}
+                ><Icon sx={{ fontSize: 16 }} /></a>
+              ))}
+            </div>
+          </div>
 
-{/* LOGO + DESC */}
+          {/* Link cols */}
+          {COLS.map(col => (
+            <div key={col.title}>
+              <h4 style={{ color: "white", fontWeight: 700, fontSize: 14, marginBottom: 16 }}>{col.title}</h4>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+                {col.links.map((l, li) => (
+                  <li key={l}>
+                    <a href={col.hrefs[li]} style={{ color: "#64748b", fontSize: 14, textDecoration: "none", transition: "color .2s" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "#3B82F6")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "#64748b")}
+                    >{l}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
 
-<div className="col-lg-3">
-
-<h5 className="text-light fw-bold">
-<span style={{color:"#3B82F6"}}>✕</span> LiftyHub
-</h5>
-
-<p className="text-secondary mt-3">
-
-La app de fitness definitiva para atletas
-que quieren entrenar con inteligencia y constancia.
-
-</p>
-
-<div className="d-flex gap-3 mt-3 social-icons">
-
-<LanguageIcon sx={{ fontSize: 20, color: "#6b7280" }} />
-<SearchIcon sx={{ fontSize: 20, color: "#6b7280" }} />
-<PlayArrowIcon sx={{ fontSize: 20, color: "#6b7280" }} />
-
-</div>
-
-</div>
-
-
-{/* PRODUCT */}
-
-<div className="col-lg-3">
-
-<h6 className="text-light fw-bold mb-3">
-Producto
-</h6>
-
-<ul className="footer-links">
-
-<li>Funciones</li>
-<li>Rutinas</li>
-<li>Dieta</li>
-<li>Planes</li>
-
-</ul>
-
-</div>
-
-
-{/* COMPANY */}
-
-<div className="col-lg-3">
-
-<h6 className="text-light fw-bold mb-3">
-Empresa
-</h6>
-
-<ul className="footer-links">
-
-<li>Sobre nosotros</li>
-<li>Trabaja con nosotros</li>
-<li>Blog</li>
-<li>Prensa</li>
-
-</ul>
-
-</div>
-
-
-{/* SUPPORT */}
-
-<div className="col-lg-3">
-
-<h6 className="text-light fw-bold mb-3">
-Soporte
-</h6>
-
-<ul className="footer-links">
-
-<li>Centro de ayuda</li>
-<li>Contacto</li>
-<li>Comunidad</li>
-
-</ul>
-
-</div>
-
-</div>
-
-<hr className="footer-line"/>
-
-
-{/* BOTTOM */}
-
-<div className="d-flex flex-column flex-md-row justify-content-between align-items-center pt-3">
-
-<p className="text-secondary small">
-
-© 2026 LiftyHub. Todos los derechos reservados.
-
-</p>
-
-<div className="d-flex gap-4 small text-secondary">
-
-<span>Política de privacidad</span>
-<span>Términos de servicio</span>
-<span>Cookies</span>
-
-</div>
-
-</div>
-
-</div>
-
-</footer>
-
-)
-
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24, textAlign: "center", color: "#374151", fontSize: 13 }}>
+          © {new Date().getFullYear()} LiftyHub. Todos los derechos reservados.
+        </div>
+      </div>
+    </footer>
+  );
 }

@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
+use App\Mail\WelcomeMail;
+use App\Mail\PasswordResetMail;
 
 
 class AuthController extends Controller
@@ -33,6 +37,12 @@ class AuthController extends Controller
         ]);
 
         $token = JWTAuth::fromUser($user);
+
+        try {
+            Mail::to($user->email)->send(new WelcomeMail($user->name));
+        } catch (\Exception $e) {
+            \Log::error('Welcome email failed: ' . $e->getMessage());
+        }
 
         return response()->json([
             'status' => 'ok',
@@ -103,4 +113,66 @@ class AuthController extends Controller
 
     return response()->json(['token' => $token, 'user' => $user]);
 }
+
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)->first();
+
+        // Siempre respondemos ok para no revelar si el email existe
+        if (!$user) {
+            return response()->json(['status' => 'ok']);
+        }
+
+        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        Cache::put('reset_code_' . $request->email, $code, now()->addMinutes(15));
+
+        try {
+            Mail::to($user->email)->send(new PasswordResetMail($user->name, $code));
+        } catch (\Exception $e) {
+            \Log::error('Password reset email failed: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'No se pudo enviar el correo'], 500);
+        }
+
+        return response()->json(['status' => 'ok', 'message' => 'Correo enviado']);
+    }
+
+    public function verifyResetCode(Request $request)
+    {
+        $request->validate(['email' => 'required|email', 'code' => 'required|string']);
+
+        $cached = Cache::get('reset_code_' . $request->email);
+
+        if (!$cached || $cached !== $request->code) {
+            return response()->json(['status' => 'error', 'message' => 'Código incorrecto o expirado'], 422);
+        }
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email'    => 'required|email',
+            'code'     => 'required|string',
+            'password' => 'required|min:6',
+        ]);
+
+        $cached = Cache::get('reset_code_' . $request->email);
+
+        if (!$cached || $cached !== $request->code) {
+            return response()->json(['status' => 'error', 'message' => 'Código incorrecto o expirado'], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'Usuario no encontrado'], 404);
+        }
+
+        $user->update(['password' => Hash::make($request->password)]);
+        Cache::forget('reset_code_' . $request->email);
+
+        return response()->json(['status' => 'ok', 'message' => 'Contraseña actualizada']);
+    }
 }

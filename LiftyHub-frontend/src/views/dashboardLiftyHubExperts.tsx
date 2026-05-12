@@ -32,9 +32,21 @@ const Dashboard: React.FC = () => {
     return <Navigate to="/" replace />
   }
   return (
-    <Box sx={{ display: "flex", bgcolor: "#080808", minHeight: "100vh", color: "white" }}>
+    <Box sx={{ display: "flex", bgcolor: "#0b0f14", minHeight: "100vh", color: "white", position: "relative", overflow: "hidden" }}>
+      {/* Gradient blobs igual al landing */}
+      <Box sx={{
+        position: "fixed", top: -200, right: -200, width: 700, height: 700,
+        borderRadius: "50%", background: "radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)",
+        pointerEvents: "none", zIndex: 0,
+      }} />
+      <Box sx={{
+        position: "fixed", bottom: -200, left: 60, width: 600, height: 600,
+        borderRadius: "50%", background: "radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%)",
+        pointerEvents: "none", zIndex: 0,
+      }} />
+
       <Sidebar />
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box sx={{ flex: 1, minWidth: 0, position: "relative", zIndex: 1 }}>
         <Topbar />
         <Outlet />
       </Box>

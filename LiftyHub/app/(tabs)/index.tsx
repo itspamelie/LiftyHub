@@ -68,13 +68,13 @@ export default function RoutinesScreen() {
   const PLAN_OPTIONS = [
     {
       name: "Basic",
-      price: "$99/mes",
+      price: "$79/mes",
       color: "#3B82F6",
       features: [t("plans.features.exercises"), t("plans.features.routines20"), t("plans.features.stats")],
     },
     {
       name: "Pro",
-      price: "$600/mes",
+      price: "$229/mes",
       color: "#F59E0B",
       features: [t("plans.features.routinesUnlimited"), t("plans.features.shareRoutinesUnlimited"), t("plans.features.nutritionist"), t("plans.features.dietPlan")],
       highlighted: true,
@@ -121,25 +121,39 @@ export default function RoutinesScreen() {
   const scanLock = useRef(false);
   const [scannerUsed, setScannerUsed] = useState(false);
   const [showScannerWarning, setShowScannerWarning] = useState(false);
+  const [showScanLimit, setShowScanLimit] = useState(false);
   const [nextScanDate, setNextScanDate] = useState<Date | null>(null);
   const [showCameraPermModal, setShowCameraPermModal] = useState(false);
+
+  const SCAN_KEY_MONTH = "@liftyhub_scan_month";
+  const SCAN_KEY_COUNT = "@liftyhub_scan_count";
+
+  const getScanLimit = () => {
+    if (plan?.name === "Pro") return Infinity;
+    if (plan?.name === "Meal") return 10;
+    if (plan?.name === "Basic") return 5;
+    return 1; // Free
+  };
 
   useEffect(() => {
     const checkScannerDate = async () => {
       try {
-        const val = await AsyncStorage.getItem("@liftyhub_scanner_date");
-        if (!val) return;
-        const last = new Date(val);
-        const next = new Date(last);
-        next.setMonth(next.getMonth() + 1);
-        if (new Date() < next) {
-          setScannerUsed(true);
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const storedMonth = await AsyncStorage.getItem(SCAN_KEY_MONTH);
+        const rawCount = await AsyncStorage.getItem(SCAN_KEY_COUNT);
+        if (storedMonth !== currentMonth) return;
+        const count = parseInt(rawCount ?? "0");
+        if (count >= getScanLimit()) setScannerUsed(true);
+        // Free: keep nextScanDate for display
+        if (plan?.name === "Free" && count >= 1) {
+          const next = new Date();
+          next.setMonth(next.getMonth() + 1);
           setNextScanDate(next);
         }
       } catch {}
     };
     checkScannerDate();
-  }, []);
+  }, [plan]);
 
   const openScannerCamera = async () => {
     if (cameraPermission?.granted) {
@@ -171,22 +185,36 @@ export default function RoutinesScreen() {
     }
   };
 
-  const handleOpenScanner = () => {
-    if (!hasAppAccess) {
-      if (scannerUsed) {
-        setShowUpgradeModal(true);
-      } else {
-        setShowScannerWarning(true);
-      }
+  const handleOpenScanner = async () => {
+    const limit = getScanLimit();
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const storedMonth = await AsyncStorage.getItem(SCAN_KEY_MONTH);
+    const rawCount = await AsyncStorage.getItem(SCAN_KEY_COUNT);
+    const count = storedMonth === currentMonth ? parseInt(rawCount ?? "0") : 0;
+
+    if (limit === Infinity) { openScannerCamera(); return; }
+
+    if (count >= limit) {
+      if (plan?.name === "Free") setShowUpgradeModal(true);
+      else setShowScanLimit(true);
       return;
     }
+
+    if (plan?.name === "Free" && count === 0) {
+      setShowScannerWarning(true);
+      return;
+    }
+
+    await AsyncStorage.setItem(SCAN_KEY_MONTH, currentMonth);
+    await AsyncStorage.setItem(SCAN_KEY_COUNT, String(count + 1));
     openScannerCamera();
   };
 
   const handleScannerWarningConfirm = async () => {
     setShowScannerWarning(false);
-    const now = new Date().toISOString();
-    await AsyncStorage.setItem("@liftyhub_scanner_date", now);
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    await AsyncStorage.setItem(SCAN_KEY_MONTH, currentMonth);
+    await AsyncStorage.setItem(SCAN_KEY_COUNT, "1");
     setScannerUsed(true);
     const next = new Date();
     next.setMonth(next.getMonth() + 1);
@@ -629,6 +657,34 @@ export default function RoutinesScreen() {
                 <Text style={{ color: "white", fontWeight: "700" }}>{t("routines.scan")}</Text>
               </HapticButton>
             </View>
+          </HapticButton>
+        </HapticButton>
+      </Modal>
+
+      {/* MODAL LÍMITE SCANNER BASIC/MEAL */}
+      <Modal visible={showScanLimit} transparent animationType="fade">
+        <HapticButton style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowScanLimit(false)}>
+          <HapticButton activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+            <View style={styles.modalIcon}>
+              <Ionicons name="alert-circle" size={32} color="#F59E0B" />
+            </View>
+            <Text style={styles.modalTitle}>Límite alcanzado</Text>
+            <Text style={styles.modalSubtitle}>
+              Alcanzaste los <Text style={{ color: "white", fontWeight: "700" }}>{getScanLimit()} escaneos del mes</Text>.{"\n"}
+              Actualiza a Pro para escanear sin límite.
+            </Text>
+            <HapticButton
+              style={[styles.planCard, { alignItems: "center", paddingVertical: 14, backgroundColor: "#F59E0B", marginBottom: 8 }]}
+              onPress={() => { setShowScanLimit(false); router.push("/settings/plans" as any); }}
+            >
+              <Text style={{ color: "white", fontWeight: "700" }}>Ver plan Pro</Text>
+            </HapticButton>
+            <HapticButton
+              style={[styles.planCard, { alignItems: "center", paddingVertical: 14, borderColor: "#2C2C2E", borderWidth: 1 }]}
+              onPress={() => setShowScanLimit(false)}
+            >
+              <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>Cerrar</Text>
+            </HapticButton>
           </HapticButton>
         </HapticButton>
       </Modal>

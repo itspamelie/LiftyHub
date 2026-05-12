@@ -1,14 +1,16 @@
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack } from "expo-router";
 import Body, { ExtendedBodyPart, Slug } from "react-native-body-highlighter";
-import { colors } from "@/src/styles/globalstyles";
+import { colors, spacing } from "@/src/styles/globalstyles";
 import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Storage from "@/src/utils/storage";
 import HapticButton from "@/src/components/buttons/HapticButton";
 import { getExerciseLogs } from "@/src/services/api";
 import { useLanguage } from "@/src/context/LanguageContext";
+import { useSubscription } from "@/src/context/SubscriptionContext";
 
 // Mapeo de grupos musculares del DB → slugs del highlighter
 const MUSCLE_MAP: Record<string, Slug[]> = {
@@ -60,12 +62,18 @@ function buildBodyData(logs: any[], userId: number): ExtendedBodyPart[] {
   }));
 }
 
+const FIRST_VISIT_KEY  = "@liftyhub_body_first_visit";
+const WARNED_KEY       = "@liftyhub_body_warned";
+
 export default function BodyAvatarScreen() {
   const { t } = useLanguage();
+  const { plan } = useSubscription();
   const [side, setSide] = useState<"front" | "back">("front");
   const [gender, setGender] = useState<"male" | "female">("male");
   const [bodyData, setBodyData] = useState<ExtendedBodyPart[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showTrialModal, setShowTrialModal] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -73,6 +81,26 @@ export default function BodyAvatarScreen() {
         const raw = await Storage.getItem("user");
         const token = await Storage.getItem("token");
         if (!raw || !token) return;
+
+        // Bloquear Free después de 7 días
+        if (plan?.name === "Free" || !plan) {
+          const firstVisit = await AsyncStorage.getItem(FIRST_VISIT_KEY);
+          if (!firstVisit) {
+            await AsyncStorage.setItem(FIRST_VISIT_KEY, new Date().toISOString());
+            const warned = await AsyncStorage.getItem(WARNED_KEY);
+            if (!warned) {
+              await AsyncStorage.setItem(WARNED_KEY, "true");
+              setShowTrialModal(true);
+            }
+          } else {
+            const daysSince = (Date.now() - new Date(firstVisit).getTime()) / (1000 * 60 * 60 * 24);
+            if (daysSince > 7) {
+              setShowUpgrade(true);
+              setLoading(false);
+              return;
+            }
+          }
+        }
 
         const u = JSON.parse(raw);
         setGender(u.gender === "Femenino" || u.gender === "femenino" ? "female" : "male");
@@ -87,7 +115,7 @@ export default function BodyAvatarScreen() {
       }
     };
     load();
-  }, []);
+  }, [plan]);
 
   const workedMuscles = [...new Set(
     bodyData.map(b => {
@@ -95,6 +123,39 @@ export default function BodyAvatarScreen() {
       return entry?.[0] ?? b.slug ?? "";
     }).filter(Boolean)
   )];
+
+  if (showUpgrade) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={styles.header}>
+          <HapticButton style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={20} color="white" />
+          </HapticButton>
+          <Text style={styles.headerTitle}>{t("bodyAvatar.title")}</Text>
+        </View>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 32 }}>
+          <Ionicons name="lock-closed" size={48} color={colors.primary} style={{ marginBottom: 20 }} />
+          <Text style={{ color: "white", fontSize: 20, fontWeight: "700", textAlign: "center", marginBottom: 12 }}>
+            Función Premium
+          </Text>
+          <Text style={{ color: colors.textSecondary, fontSize: 14, textAlign: "center", lineHeight: 21, marginBottom: 32 }}>
+            Tu semana de prueba gratuita terminó.{"\n"}
+            Actualiza tu plan para seguir viendo los músculos trabajados.
+          </Text>
+          <HapticButton
+            style={{ backgroundColor: colors.primary, borderRadius: spacing.borderRadius, paddingVertical: 14, paddingHorizontal: 32, width: "100%", alignItems: "center" }}
+            onPress={() => router.push("/settings/plans" as any)}
+          >
+            <Text style={{ color: "white", fontSize: 15, fontWeight: "700" }}>Ver planes</Text>
+          </HapticButton>
+          <HapticButton style={{ marginTop: 14 }} onPress={() => router.back()}>
+            <Text style={{ color: colors.textSecondary, fontSize: 14 }}>Volver</Text>
+          </HapticButton>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -160,6 +221,28 @@ export default function BodyAvatarScreen() {
           </>
         )}
       </View>
+
+      {/* MODAL AVISO PRUEBA GRATUITA */}
+      <Modal visible={showTrialModal} transparent animationType="fade">
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "center", alignItems: "center", padding: 32 }}>
+          <View style={{ backgroundColor: "#1C1C1E", borderRadius: 20, padding: 24, width: "100%", alignItems: "center" }}>
+            <Ionicons name="time-outline" size={40} color={colors.primary} style={{ marginBottom: 16 }} />
+            <Text style={{ color: "white", fontSize: 18, fontWeight: "700", textAlign: "center", marginBottom: 10 }}>
+              7 días gratis
+            </Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 14, textAlign: "center", lineHeight: 21, marginBottom: 24 }}>
+              Tienes <Text style={{ color: "white", fontWeight: "700" }}>7 días</Text> para explorar los músculos trabajados gratuitamente.{"\n"}
+              Después necesitarás un plan de pago para seguir accediendo.
+            </Text>
+            <HapticButton
+              style={{ backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 13, width: "100%", alignItems: "center" }}
+              onPress={() => setShowTrialModal(false)}
+            >
+              <Text style={{ color: "white", fontSize: 15, fontWeight: "700" }}>Entendido</Text>
+            </HapticButton>
+          </View>
+        </View>
+      </Modal>
 
     </SafeAreaView>
   );

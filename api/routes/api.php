@@ -29,6 +29,7 @@ use App\Http\Controllers\UserWeekPlanController;
 use App\Http\Controllers\FriendshipsController;
 use App\Http\Controllers\DietRequestsController;
 use App\Http\Controllers\NutritionProfilesController;
+use App\Http\Controllers\PayPalController;
 
 
 
@@ -36,6 +37,9 @@ use App\Http\Controllers\NutritionProfilesController;
 Route::post('/login',[AuthController::class,'login']);
 Route::post('/auth/google',[AuthController::class,'googleLogin']);
 Route::post('/register',[AuthController::class,'register']);
+Route::post('/forgot-password',[AuthController::class,'forgotPassword']);
+Route::post('/verify-reset-code',[AuthController::class,'verifyResetCode']);
+Route::post('/reset-password',[AuthController::class,'resetPassword']);
 Route::middleware("jwt")->post('/check-password',[AuthController::class,'checkPassword']);
 //Proteger vistas. Si hay una ruta fuera del grupo, cualquier persona puede hacerle peticion
 //para enviar token
@@ -88,4 +92,8 @@ Route::resource('dietRequests', DietRequestsController::class);
 // Nutrition profiles (questionnaire)
 Route::get('/nutritionProfiles/user/{userId}', [NutritionProfilesController::class, 'byUser']);
 Route::resource('nutritionProfiles', NutritionProfilesController::class);
+
+// PayPal
+Route::post('/paypal/create-order',  [PayPalController::class, 'createOrder']);
+Route::post('/paypal/capture-order', [PayPalController::class, 'captureOrder']);
 });

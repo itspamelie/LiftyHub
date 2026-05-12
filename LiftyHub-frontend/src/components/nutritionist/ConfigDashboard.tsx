@@ -71,7 +71,7 @@ export default function ConfigDashboard() {
         icon: "success",
         title: "Guardado",
         text: "Tu perfil fue actualizado correctamente",
-        background: "#111",
+        background: "#141d2b",
         color: "#fff",
         confirmButtonColor: "#3B82F6",
         timer: 2000,
@@ -82,7 +82,7 @@ export default function ConfigDashboard() {
         icon: "error",
         title: "Error",
         text: "No se pudo guardar. Intenta de nuevo.",
-        background: "#111",
+        background: "#141d2b",
         color: "#fff",
         confirmButtonColor: "#3B82F6",
       });
@@ -101,15 +101,15 @@ export default function ConfigDashboard() {
 
   const fieldSx = {
     "& .MuiOutlinedInput-root": {
-      bgcolor: "#0d0d0d",
-      color: "#ddd",
+      bgcolor: "#090f18",
+      color: "#e2e8f0",
       borderRadius: "10px",
       fontSize: 14,
-      "& fieldset": { borderColor: "rgba(255,255,255,0.06)" },
+      "& fieldset": { borderColor: "rgba(59,130,246,0.22)" },
       "&:hover fieldset": { borderColor: "rgba(59,130,246,0.3)" },
       "&.Mui-focused fieldset": { borderColor: "#3B82F6" },
     },
-    "& .MuiInputLabel-root": { color: "#444", fontSize: 13 },
+    "& .MuiInputLabel-root": { color: "#64748b", fontSize: 13 },
     "& .MuiInputLabel-root.Mui-focused": { color: "#3B82F6" },
   };
 
@@ -141,8 +141,8 @@ export default function ConfigDashboard() {
             sx={{
               p: 4,
               borderRadius: "20px",
-              background: "#111",
-              border: "1px solid rgba(255,255,255,0.05)",
+              background: "#141d2b",
+              border: "1px solid rgba(59,130,246,0.25)",
             }}
           >
             <Box display="flex" alignItems="center" gap={1.5} mb={3}>
@@ -247,8 +247,8 @@ export default function ConfigDashboard() {
               sx={{
                 p: 3,
                 borderRadius: "16px",
-                background: "#111",
-                border: "1px solid rgba(255,255,255,0.05)",
+                background: "#141d2b",
+                border: "1px solid rgba(59,130,246,0.25)",
               }}
             >
               <Box display="flex" alignItems="center" gap={1.5} mb={2}>
@@ -259,7 +259,7 @@ export default function ConfigDashboard() {
                   Visibilidad
                 </Typography>
               </Box>
-              <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", mb: 2 }} />
+              <Divider sx={{ borderColor: "rgba(59,130,246,0.22)", mb: 2 }} />
               <Box display="flex" flexDirection="column" gap={1.5}>
                 {[
                   { label: "Perfil", value: form.is_active ? "Público" : "Oculto", active: form.is_active },
@@ -281,8 +281,8 @@ export default function ConfigDashboard() {
               sx={{
                 p: 3,
                 borderRadius: "16px",
-                background: "#111",
-                border: "1px solid rgba(255,255,255,0.05)",
+                background: "#141d2b",
+                border: "1px solid rgba(59,130,246,0.25)",
               }}
             >
               <Box display="flex" alignItems="center" gap={1.5} mb={2}>
@@ -293,7 +293,7 @@ export default function ConfigDashboard() {
                   Consejos
                 </Typography>
               </Box>
-              <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", mb: 2 }} />
+              <Divider sx={{ borderColor: "rgba(59,130,246,0.22)", mb: 2 }} />
               <Box display="flex" flexDirection="column" gap={1.5}>
                 {[
                   "Una biografía completa aumenta tu visibilidad en la app.",

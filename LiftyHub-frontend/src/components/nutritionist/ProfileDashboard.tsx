@@ -29,8 +29,8 @@ const InfoCard = ({
     sx={{
       p: 3,
       borderRadius: "16px",
-      background: "#111",
-      border: "1px solid rgba(255,255,255,0.05)",
+      background: "#141d2b",
+      border: "1px solid rgba(59,130,246,0.25)",
       height: "100%",
       transition: "border-color 0.2s",
       "&:hover": { borderColor: "rgba(59,130,246,0.2)" },
@@ -44,7 +44,7 @@ const InfoCard = ({
         {title}
       </Typography>
     </Box>
-    <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", mb: 2 }} />
+    <Divider sx={{ borderColor: "rgba(59,130,246,0.22)", mb: 2 }} />
     {children}
   </Box>
 );
@@ -116,8 +116,8 @@ export default function ProfileDashboard() {
         sx={{
           p: 3.5,
           borderRadius: "20px",
-          background: "#111",
-          border: "1px solid rgba(255,255,255,0.05)",
+          background: "#141d2b",
+          border: "1px solid rgba(59,130,246,0.25)",
           display: "flex",
           alignItems: "center",
           gap: 3,
@@ -136,7 +136,7 @@ export default function ProfileDashboard() {
             width: 200,
             height: 200,
             borderRadius: "50%",
-            background: "rgba(59,130,246,0.08)",
+            background: "rgba(59,130,246,0.22)",
             filter: "blur(50px)",
             pointerEvents: "none",
           }}
@@ -196,11 +196,11 @@ export default function ProfileDashboard() {
           }}
         >
           <Box display="flex" alignItems="center" justifyContent="flex-end" gap={0.5}>
-            <LocationOnIcon sx={{ fontSize: 14, color: "#444" }} />
+            <LocationOnIcon sx={{ fontSize: 14, color: "#64748b" }} />
             <Typography fontSize={13} color="#555">{nutritionist.location}</Typography>
           </Box>
           <Box display="flex" alignItems="center" justifyContent="flex-end" gap={0.5}>
-            <BadgeIcon sx={{ fontSize: 14, color: "#444" }} />
+            <BadgeIcon sx={{ fontSize: 14, color: "#64748b" }} />
             <Typography fontSize={13} color="#555">{nutritionist.license_number}</Typography>
           </Box>
         </Box>
@@ -213,8 +213,8 @@ export default function ProfileDashboard() {
             px: 3.5,
             py: 2.5,
             borderRadius: "14px",
-            background: "#111",
-            border: "1px solid rgba(255,255,255,0.05)",
+            background: "#141d2b",
+            border: "1px solid rgba(59,130,246,0.25)",
             mb: 3,
           }}
         >
@@ -239,7 +239,7 @@ export default function ProfileDashboard() {
                     label={s.name}
                     size="small"
                     sx={{
-                      bgcolor: "rgba(59,130,246,0.08)",
+                      bgcolor: "rgba(59,130,246,0.22)",
                       color: "#60a5fa",
                       border: "1px solid rgba(59,130,246,0.2)",
                       fontSize: 12,
@@ -303,8 +303,8 @@ export default function ProfileDashboard() {
                   sx={{
                     p: 2.5,
                     borderRadius: "14px",
-                    background: "#111",
-                    border: "1px solid rgba(255,255,255,0.05)",
+                    background: "#141d2b",
+                    border: "1px solid rgba(59,130,246,0.25)",
                     transition: "border-color 0.2s",
                     "&:hover": { borderColor: "rgba(251,191,36,0.2)" },
                   }}

@@ -9,7 +9,7 @@ import Footer from "../components/home/Footer"
 
 function Home() {
   return (
-    <div style={{background:"#0b0f14", color:"white"}}>
+    <div style={{background:"#0b0f14", color:"white", fontFamily:"'Inter', system-ui, -apple-system, sans-serif"}}>
       <Navbar/>
       <Hero/>
       <Features/>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, ScrollView, Alert, Modal, TextInput, ActivityIndicator, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Alert, Modal, TextInput, ActivityIndicator, TouchableWithoutFeedback, Keyboard, Platform, Linking } from "react-native";
+import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Storage from "@/src/utils/storage";
 import { router } from "expo-router";
@@ -22,7 +23,86 @@ export default function Settings() {
   const { showToast, Toast } = useToast();
 
   const planColor = plan ? (planColors[plan.name] ?? colors.primary) : "#A1A1A1";
+
+  // Notificaciones
+  const NOTIF_KEY = "@liftyhub_reminder_config";
+  const DAYS_ES = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
   const [notifications, setNotifications] = useState(false);
+  const [showReminderModal, setShowReminderModal] = useState(false);
+  const [reminderDays, setReminderDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [reminderHour, setReminderHour] = useState(8);
+  const [reminderMinute, setReminderMinute] = useState(0);
+
+  useEffect(() => {
+    const loadReminder = async () => {
+      try {
+        const raw = await AsyncStorage.getItem(NOTIF_KEY);
+        if (!raw) return;
+        const config = JSON.parse(raw);
+        setNotifications(config.enabled ?? false);
+        setReminderDays(config.days ?? [1, 2, 3, 4, 5]);
+        setReminderHour(config.hour ?? 8);
+        setReminderMinute(config.minute ?? 0);
+      } catch {}
+    };
+    loadReminder();
+  }, []);
+
+  const scheduleReminders = async (days: number[], hour: number, minute: number) => {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    for (const day of days) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "💪 LiftyHub",
+          body: "¡Es hora de entrenar! Tu cuerpo te lo agradecerá.",
+          sound: true,
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
+          weekday: day,
+          hour,
+          minute,
+        },
+      });
+    }
+  };
+
+  const handleNotifToggle = async (val: boolean) => {
+    if (val) {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permiso requerido",
+          "Activa las notificaciones en Configuración del sistema para recibir recordatorios.",
+          [{ text: "Abrir configuración", onPress: () => Linking.openSettings() }, { text: "Cancelar", style: "cancel" }]
+        );
+        return;
+      }
+      setShowReminderModal(true);
+    } else {
+      await Notifications.cancelAllScheduledNotificationsAsync();
+      setNotifications(false);
+      await AsyncStorage.setItem(NOTIF_KEY, JSON.stringify({ enabled: false, days: reminderDays, hour: reminderHour, minute: reminderMinute }));
+    }
+  };
+
+  const handleSaveReminder = async () => {
+    if (reminderDays.length === 0) {
+      showToast("Selecciona al menos un día", "error");
+      return;
+    }
+    await scheduleReminders(reminderDays, reminderHour, reminderMinute);
+    setNotifications(true);
+    setShowReminderModal(false);
+    await AsyncStorage.setItem(NOTIF_KEY, JSON.stringify({ enabled: true, days: reminderDays, hour: reminderHour, minute: reminderMinute }));
+    showToast("Recordatorios activados", "success");
+  };
+
+  const toggleDay = (day: number) => {
+    setReminderDays(prev =>
+      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+    );
+  };
 
   // Dev mode
   const versionTaps = useRef(0);
@@ -31,9 +111,9 @@ export default function Settings() {
 
   const DEV_PLANS = [
     { id: 1, name: "Free",  level: 0, price: 0,   description: "Acceso limitado" },
-    { id: 2, name: "Basic", level: 1, price: 99,  description: "Plan básico" },
-    { id: 3, name: "Meal",  level: 2, price: 400, description: "Plan nutrición" },
-    { id: 4, name: "Pro",   level: 2, price: 600, description: "Plan completo" },
+    { id: 2, name: "Basic", level: 1, price: 79,  description: "Plan básico" },
+    { id: 3, name: "Meal",  level: 2, price: 149, description: "Plan nutrición" },
+    { id: 4, name: "Pro",   level: 2, price: 229, description: "Plan completo" },
   ] as const;
 
   useEffect(() => {
@@ -248,12 +328,7 @@ export default function Settings() {
             icon="notifications"
             label={t("settings.reminders")}
             value={notifications}
-            onChange={setNotifications}
-          />
-          <View style={styles.divider} />
-          <SettingsItem
-            icon="volume-high"
-            label={t("settings.workoutSounds")}
+            onChange={handleNotifToggle}
           />
         </View>
 
@@ -376,6 +451,87 @@ export default function Settings() {
       </Modal>
 
       {Toast}
+
+      {/* MODAL RECORDATORIOS */}
+      <Modal visible={showReminderModal} transparent animationType="slide">
+        <TouchableWithoutFeedback onPress={() => setShowReminderModal(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.modalContent}>
+
+                <Text style={styles.modalTitle}>⏰ Recordatorios</Text>
+                <Text style={styles.modalSubtitle}>Elige los días y hora en que quieres entrenar</Text>
+
+                {/* Días */}
+                <Text style={[styles.modalSubtitle, { color: "white", marginBottom: 10 }]}>Días</Text>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }}>
+                  {DAYS_ES.map((day, i) => {
+                    const dayNum = i + 1;
+                    const active = reminderDays.includes(dayNum);
+                    return (
+                      <HapticButton
+                        key={dayNum}
+                        onPress={() => toggleDay(dayNum)}
+                        style={{
+                          width: 38, height: 38, borderRadius: 19,
+                          backgroundColor: active ? colors.primary : "#2C2C2E",
+                          alignItems: "center", justifyContent: "center",
+                        }}
+                      >
+                        <Text style={{ color: active ? "white" : "#666", fontSize: 11, fontWeight: "700" }}>{day}</Text>
+                      </HapticButton>
+                    );
+                  })}
+                </View>
+
+                {/* Hora */}
+                <Text style={[styles.modalSubtitle, { color: "white", marginBottom: 10 }]}>Hora</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 24 }}>
+                  {/* Horas */}
+                  <View style={{ alignItems: "center" }}>
+                    <HapticButton onPress={() => setReminderHour(h => h >= 23 ? 0 : h + 1)} style={{ padding: 8 }}>
+                      <Ionicons name="chevron-up" size={20} color={colors.primary} />
+                    </HapticButton>
+                    <View style={{ backgroundColor: "#2C2C2E", borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 }}>
+                      <Text style={{ color: "white", fontSize: 28, fontWeight: "700", minWidth: 44, textAlign: "center" }}>
+                        {String(reminderHour).padStart(2, "0")}
+                      </Text>
+                    </View>
+                    <HapticButton onPress={() => setReminderHour(h => h <= 0 ? 23 : h - 1)} style={{ padding: 8 }}>
+                      <Ionicons name="chevron-down" size={20} color={colors.primary} />
+                    </HapticButton>
+                  </View>
+
+                  <Text style={{ color: "white", fontSize: 28, fontWeight: "700" }}>:</Text>
+
+                  {/* Minutos */}
+                  <View style={{ alignItems: "center" }}>
+                    <HapticButton onPress={() => setReminderMinute(m => m >= 55 ? 0 : m + 5)} style={{ padding: 8 }}>
+                      <Ionicons name="chevron-up" size={20} color={colors.primary} />
+                    </HapticButton>
+                    <View style={{ backgroundColor: "#2C2C2E", borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 }}>
+                      <Text style={{ color: "white", fontSize: 28, fontWeight: "700", minWidth: 44, textAlign: "center" }}>
+                        {String(reminderMinute).padStart(2, "0")}
+                      </Text>
+                    </View>
+                    <HapticButton onPress={() => setReminderMinute(m => m <= 0 ? 55 : m - 5)} style={{ padding: 8 }}>
+                      <Ionicons name="chevron-down" size={20} color={colors.primary} />
+                    </HapticButton>
+                  </View>
+                </View>
+
+                <HapticButton style={styles.modalButton} onPress={handleSaveReminder}>
+                  <Text style={styles.modalButtonText}>Activar recordatorios</Text>
+                </HapticButton>
+                <HapticButton style={styles.modalCancel} onPress={() => setShowReminderModal(false)}>
+                  <Text style={styles.modalCancelText}>{t("settings.cancel")}</Text>
+                </HapticButton>
+
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
 
       {/* MODAL DEV — plan override */}
       <Modal visible={showDevModal} transparent animationType="fade">

@@ -14,7 +14,12 @@
       "Bash(python3 -c \"import sys; content=sys.stdin.read\\(\\); print\\(content[:3000]\\)\")",
       "Bash(curl -s \"https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json\")",
       "Bash(python3 -c ' *)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/3_4_Sit-Up/0.jpg\")"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/3_4_Sit-Up/0.jpg\")",
+      "Bash(python3 -c \"from PIL import Image; print\\('PIL ok'\\)\")",
+      "Bash(pip3 install *)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(curl -s \"http://localhost:5173/src/components/dashboard/Sidebar.tsx\")",
+      "Read(//tmp/**)"
     ]
   }
 }

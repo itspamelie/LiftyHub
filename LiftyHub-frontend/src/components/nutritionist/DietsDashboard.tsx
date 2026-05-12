@@ -47,8 +47,8 @@ const StatBox = ({
       px: 3,
       py: 2.5,
       borderRadius: "14px",
-      background: "#111",
-      border: "1px solid rgba(255,255,255,0.05)",
+      background: "#141d2b",
+      border: "1px solid rgba(59,130,246,0.25)",
     }}
   >
     <Box
@@ -157,11 +157,11 @@ export default function DietsDashboard() {
             sx={{
               mb: 2,
               "& .MuiOutlinedInput-root": {
-                bgcolor: "#111",
-                color: "#ccc",
+                bgcolor: "#141d2b",
+                color: "#cbd5e1",
                 borderRadius: "10px",
                 fontSize: 13,
-                "& fieldset": { borderColor: "rgba(255,255,255,0.06)" },
+                "& fieldset": { borderColor: "rgba(59,130,246,0.22)" },
                 "&:hover fieldset": { borderColor: "rgba(59,130,246,0.3)" },
                 "&.Mui-focused fieldset": { borderColor: "#3B82F6" },
               },
@@ -170,7 +170,7 @@ export default function DietsDashboard() {
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon sx={{ color: "#444", fontSize: 16 }} />
+                    <SearchIcon sx={{ color: "#64748b", fontSize: 16 }} />
                   </InputAdornment>
                 ),
               },
@@ -195,8 +195,8 @@ export default function DietsDashboard() {
             <TableContainer
               sx={{
                 borderRadius: "16px",
-                background: "#111",
-                border: "1px solid rgba(255,255,255,0.05)",
+                background: "#141d2b",
+                border: "1px solid rgba(59,130,246,0.25)",
                 overflow: "hidden",
               }}
             >
@@ -207,12 +207,12 @@ export default function DietsDashboard() {
                       <TableCell
                         key={h}
                         sx={{
-                          color: "#444",
+                          color: "#64748b",
                           fontSize: 11,
                           fontWeight: 600,
                           letterSpacing: "0.06em",
                           textTransform: "uppercase",
-                          borderBottom: "1px solid rgba(255,255,255,0.04)",
+                          borderBottom: "1px solid rgba(59,130,246,0.22)",
                           py: 2,
                         }}
                       >
@@ -229,7 +229,7 @@ export default function DietsDashboard() {
                         key={diet.id}
                         sx={{
                           "&:hover td": { bgcolor: "rgba(255,255,255,0.015)" },
-                          "& td": { borderBottom: "1px solid rgba(255,255,255,0.03)", py: 1.8 },
+                          "& td": { borderBottom: "1px solid rgba(59,130,246,0.06)", py: 1.8 },
                         }}
                       >
                         <TableCell>
@@ -289,14 +289,14 @@ export default function DietsDashboard() {
             sx={{
               p: 3,
               borderRadius: "16px",
-              background: "#111",
-              border: "1px solid rgba(255,255,255,0.05)",
+              background: "#141d2b",
+              border: "1px solid rgba(59,130,246,0.25)",
             }}
           >
             <Typography fontSize={12} color="#555" letterSpacing="0.06em" textTransform="uppercase" mb={2}>
               Resumen
             </Typography>
-            <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", mb: 2 }} />
+            <Divider sx={{ borderColor: "rgba(59,130,246,0.22)", mb: 2 }} />
 
             {/* Barra de progreso activos vs completados */}
             <Box mb={3}>
@@ -304,7 +304,7 @@ export default function DietsDashboard() {
                 <Typography fontSize={12} color="#555">Activos</Typography>
                 <Typography fontSize={12} color="#22c55e">{diets.length ? Math.round((active / diets.length) * 100) : 0}%</Typography>
               </Box>
-              <Box sx={{ height: 4, borderRadius: 2, bgcolor: "#1a1a1a", overflow: "hidden" }}>
+              <Box sx={{ height: 4, borderRadius: 2, bgcolor: "#1e293b", overflow: "hidden" }}>
                 <Box
                   sx={{
                     height: "100%",
@@ -322,7 +322,7 @@ export default function DietsDashboard() {
                 <Typography fontSize={12} color="#555">Completados</Typography>
                 <Typography fontSize={12} color="#60a5fa">{diets.length ? Math.round((completed / diets.length) * 100) : 0}%</Typography>
               </Box>
-              <Box sx={{ height: 4, borderRadius: 2, bgcolor: "#1a1a1a", overflow: "hidden" }}>
+              <Box sx={{ height: 4, borderRadius: 2, bgcolor: "#1e293b", overflow: "hidden" }}>
                 <Box
                   sx={{
                     height: "100%",
@@ -335,7 +335,7 @@ export default function DietsDashboard() {
               </Box>
             </Box>
 
-            <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", mb: 2 }} />
+            <Divider sx={{ borderColor: "rgba(59,130,246,0.22)", mb: 2 }} />
 
             {/* Últimos planes */}
             <Typography fontSize={12} color="#555" letterSpacing="0.06em" textTransform="uppercase" mb={2}>

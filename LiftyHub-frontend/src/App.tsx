@@ -22,6 +22,7 @@ import MainNutritionist from './components/nutritionist/MainNutritionist';
 import DietsDashboard from './components/nutritionist/DietsDashboard';
 import ConfigDashboard from './components/nutritionist/ConfigDashboard';
 import RequestsDashboard from './components/nutritionist/RequestsDashboard';
+import PrivacyPolicy from './views/PrivacyPolicy';
 function PrivateRouteExperts({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/Liftyhub-Experts-Login" replace />;
@@ -37,6 +38,7 @@ function App() {
       <Routes>
 
         <Route path="/" element={<Home/>}/>
+        <Route path="/politica-de-privacidad" element={<PrivacyPolicy/>}/>
         <Route path="/login" element={<Login/>}/>
         <Route path="/Liftyhub-Experts" element={<NutritionistJoin/>}/>
         <Route path="/Liftyhub-Experts-Login" element={<LoginPage/>}/>
