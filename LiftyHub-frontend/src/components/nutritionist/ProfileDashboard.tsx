@@ -1,279 +1,351 @@
-
 import {
   Box,
   Typography,
   Avatar,
   Chip,
-  Paper
+  CircularProgress,
+  Divider,
 } from "@mui/material";
-import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { apiFetch, getImageUrl } from "../../services/api";
-import Grid from "@mui/material/Grid"; 
+import Grid from "@mui/material/Grid";
 import StarIcon from "@mui/icons-material/Star";
-export default function ProfileDashboard(){
+import BadgeIcon from "@mui/icons-material/Badge";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import SchoolIcon from "@mui/icons-material/School";
+import WorkIcon from "@mui/icons-material/Work";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+
+const InfoCard = ({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) => (
+  <Box
+    sx={{
+      p: 3,
+      borderRadius: "16px",
+      background: "#111",
+      border: "1px solid rgba(255,255,255,0.05)",
+      height: "100%",
+      transition: "border-color 0.2s",
+      "&:hover": { borderColor: "rgba(59,130,246,0.2)" },
+    }}
+  >
+    <Box display="flex" alignItems="center" gap={1.5} mb={2}>
+      <Box sx={{ color: "#3B82F6", display: "flex", alignItems: "center" }}>
+        {icon}
+      </Box>
+      <Typography fontSize={13} fontWeight={600} color="#888" letterSpacing="0.04em" textTransform="uppercase">
+        {title}
+      </Typography>
+    </Box>
+    <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", mb: 2 }} />
+    {children}
+  </Box>
+);
+
+export default function ProfileDashboard() {
   const [nutritionist, setNutritionist] = useState<any>(null);
-      const id = localStorage.getItem("id")
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const getNutritionist = async () => {
+    const load = async () => {
       try {
-        const res = await apiFetch(`/nutritionistProfiles/${id}`);
-        setNutritionist(res.data);
-      } catch (error) {
-        console.error(error);
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const res = await apiFetch("/nutritionistProfiles");
+        const profile = res.data.find((p: any) => Number(p.user_id) === Number(user.id));
+        if (profile) {
+          const detail = await apiFetch(`/nutritionistProfiles/${profile.id}`);
+          setNutritionist(detail.data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
+    load();
+  }, []);
 
-    if (id) getNutritionist();
-  }, [id]);
-return (
-                <Box p={4} >
-        <Typography fontSize={40} fontWeight="bold">
-            Perfil
-          </Typography>
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="60vh">
+        <CircularProgress sx={{ color: "#3B82F6" }} size={32} />
+      </Box>
+    );
+  }
 
-        <Box
-      sx={{
-        minHeight: "100vh",
-        width: "100%", 
-        background: "#0a0a0a",
-        color: "white",
-        p: 4,
-        boxSizing: "border-box",
-        pl:7
-      }}
-    >
+  if (!nutritionist) {
+    return (
+      <Box p={4}>
+        <Typography color="#444">No se encontró el perfil.</Typography>
+      </Box>
+    );
+  }
 
+  const stars = Math.round(nutritionist.rating ?? 0);
 
+  return (
+    <Box p={4} sx={{ color: "white" }}>
       {/* HEADER */}
-      <Typography variant="h5" fontWeight="bold" mb={3}>
-        Detalles del perfil:  {nutritionist.user.name}
-      </Typography>
+      <Box mb={5}>
+        <Typography fontSize={13} color="#555" mb={0.5} letterSpacing="0.05em" textTransform="uppercase">
+          Tu perfil
+        </Typography>
+        <Typography
+          fontSize={36}
+          fontWeight={700}
+          letterSpacing="-0.5px"
+          sx={{
+            background: "linear-gradient(135deg, #fff 40%, #555)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          Perfil profesional
+        </Typography>
+      </Box>
 
-      {/* CARD PRINCIPAL */}
-      <Paper
+      {/* HERO CARD */}
+      <Box
         sx={{
-          p: 3,
-          borderRadius: "16px",
-          background: "#1c1c1c",
-          color: "white",
+          p: 3.5,
+          borderRadius: "20px",
+          background: "#111",
+          border: "1px solid rgba(255,255,255,0.05)",
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
-          width: "100%"
+          gap: 3,
+          mb: 3,
+          flexWrap: "wrap",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        {/* IZQUIERDA */}
-        <Box display="flex" gap={3} alignItems="center">
-          <Avatar  src={getImageUrl(nutritionist.profile_pic, "nutritionists")}
-  sx={{ width: 80, height: 80 }}/>
+        {/* Ambient glow */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: -60,
+            left: -60,
+            width: 200,
+            height: 200,
+            borderRadius: "50%",
+            background: "rgba(59,130,246,0.08)",
+            filter: "blur(50px)",
+            pointerEvents: "none",
+          }}
+        />
+        <Avatar
+          src={getImageUrl(nutritionist.profile_pic, "nutritionists")}
+          sx={{
+            width: 80,
+            height: 80,
+            border: "2px solid rgba(59,130,246,0.4)",
+            fontSize: 28,
+            fontWeight: 700,
+            bgcolor: "#3B82F622",
+            color: "#3B82F6",
+          }}
+        >
+          {nutritionist.user?.name?.[0]}
+        </Avatar>
 
-          <Box>
-            <Typography fontWeight="bold" fontSize="20px">
-              {nutritionist.user.name}
+        <Box flex={1} minWidth={0}>
+          <Box display="flex" alignItems="center" gap={2} flexWrap="wrap" mb={0.5}>
+            <Typography fontSize={22} fontWeight={700} color="#fff">
+              {nutritionist.user?.name}
             </Typography>
-
-            <Typography color="#aaa" mt={1}>
-              Nutricionista Clínica y Deportiva
-            </Typography>
-
-            <Box display="flex" alignItems="center" gap={1} mt={1}>
-              ⭐⭐⭐⭐⭐
-              <Typography>{nutritionist.rating}</Typography>
-            </Box>
-          </Box>
-
             <Chip
-        label={nutritionist.active ? "Activo" : "Inactivo"}
-        size="small"
-        sx={{
-          background: nutritionist.active ? "#22c55e" : "#6b7280",
-          color: "white",
-          fontSize: "16px",
-          height: "30px"
-        }}
-      />
+              label={nutritionist.is_active ? "Activo" : "Inactivo"}
+              size="small"
+              sx={{
+                height: 22,
+                fontSize: 11,
+                fontWeight: 600,
+                bgcolor: nutritionist.is_active ? "rgba(34,197,94,0.1)" : "rgba(107,114,128,0.1)",
+                color: nutritionist.is_active ? "#22c55e" : "#6b7280",
+                border: `1px solid ${nutritionist.is_active ? "rgba(34,197,94,0.25)" : "rgba(107,114,128,0.25)"}`,
+              }}
+            />
+          </Box>
+          <Typography color="#555" fontSize={14} mb={1.5}>
+            {nutritionist.specialty}
+          </Typography>
+          <Box display="flex" alignItems="center" gap={0.5}>
+            {[...Array(5)].map((_, i) => (
+              <StarIcon key={i} sx={{ fontSize: 15, color: i < stars ? "#FBBF24" : "#2a2a2a" }} />
+            ))}
+            <Typography color="#555" fontSize={13} ml={0.5}>
+              {nutritionist.rating} · {nutritionist.reviews_count} reseñas
+            </Typography>
+          </Box>
         </Box>
 
-        {/* DERECHA */}
-        <Box textAlign="right">
-          <Typography fontWeight="bold">{nutritionist.rating} ⭐⭐⭐⭐⭐</Typography>
-          <Typography color="#aaa">{nutritionist.reviews_count} reseñas</Typography>
-        </Box> 
-      </Paper>
-
-      {/* GRID */}
-      <Box
-        mt={3}
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-          gap: 3,
-          width: "100%"
-        }}
-      >
-        {/* DATOS */}
-        <Paper
+        <Box
           sx={{
-            p: 2,
-            borderRadius: "12px",
-            background: "#1c1c1c",
-            color: "white"
-          }}
-        >
-          <Typography fontWeight="bold">DATOS GENERALES</Typography>
-
-          <Typography mt={1} color="#aaa">
-            Licencia: {nutritionist.license_number}
-          </Typography>
-          <Typography color="#aaa">Ubicación: {nutritionist.location}</Typography>
-          <Typography color="#aaa">Bio: {nutritionist.bio}</Typography>
-        </Paper>
-
-        {/* EDUCACIÓN */}
-<Paper
-  sx={{
-    p: 2,
-    borderRadius: "12px",
-    background: "#1c1c1c",
-    color: "white"
-  }}
->
-  <Typography fontWeight="bold">EDUCACIÓN</Typography>
-
-  {nutritionist?.education?.length > 0 ? (
-    nutritionist.education.map((edu: any) => (
-      <Box key={edu.id} mt={1}>
-        <Typography>{edu.degree}</Typography>
-        <Typography color="#aaa">
-          {edu.institution} ({edu.start_year} - {edu.end_year})
-        </Typography>
-      </Box>
-    ))
-  ) : (
-    <Typography mt={1} color="#aaa">
-      Sin educación registrada
-    </Typography>
-  )}
-</Paper>
-        {/* EXPERIENCIA */}
-<Paper
-  sx={{
-    p: 2,
-    borderRadius: "12px",
-    background: "#1c1c1c",
-    color: "white"
-  }}
->
-  <Typography fontWeight="bold">
-    EXPERIENCIA LABORAL
-  </Typography>
-
-  {nutritionist?.experience?.length > 0 ? (
-    nutritionist.experience.map((exp: any) => (
-      <Box key={exp.id} mt={1}>
-        <Typography>{exp.position}</Typography>
-        <Typography color="#aaa">
-          {exp.company} ({exp.start_year} - {exp.end_year})
-        </Typography>
-      </Box>
-    ))
-  ) : (
-    <Typography mt={1} color="#aaa">
-      Sin experiencia registrada
-    </Typography>
-  )}
-</Paper>
-
-            {/* ESPECIALIDADES */}
-      <Paper
-  sx={{
-    p: 2,
-    borderRadius: "12px",
-    background: "#1c1c1c",
-    color: "white"
-  }}
->
-  <Typography fontWeight="bold">
-    ESPECIALIDADES
-  </Typography>
-
-  {nutritionist?.specialties?.length > 0 ? (
-    nutritionist.specialties.map((spec: any) => (
-      <Typography key={spec.id} mt={1}>
-        {spec.name}
-      </Typography>
-    ))
-  ) : (
-    <Typography mt={1} color="#aaa">
-      Sin especialidades
-    </Typography>
-  )}
-</Paper>
-
-
-      </Box>
-      <Box>
-    {/* HEADER */}
- <Typography variant="h5" fontWeight="bold" mb={3}>
-  Reviews de los Usuarios
-</Typography>
-
-<Grid container spacing={2}>
-  {nutritionist?.reviews?.length > 0 ? (
-    nutritionist.reviews.map((review: any) => (
-      <Grid item xs={12} sm={6} md={3} key={review.id}>
-        <Paper
-          sx={{
-            p: 2,
-            borderRadius: "16px",
-            background: "#1c1c1c",
-            color: "white",
-            height: "100%",
+            textAlign: "right",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "space-between",
-            transition: "0.3s",
-            "&:hover": {
-              transform: "translateY(-5px)",
-              boxShadow: "0px 10px 20px rgba(0,0,0,0.4)"
-            }
+            gap: 0.5,
           }}
         >
-          {/* Header usuario */}
-          <Box display="flex" alignItems="center" gap={1} mb={1}>
-            <Avatar
-              src={review.user?.profile_pic || ""}
-              alt={review.user?.name}
-            />
-            <Typography fontWeight="bold">
-              {review.user?.name}
-            </Typography>
+          <Box display="flex" alignItems="center" justifyContent="flex-end" gap={0.5}>
+            <LocationOnIcon sx={{ fontSize: 14, color: "#444" }} />
+            <Typography fontSize={13} color="#555">{nutritionist.location}</Typography>
           </Box>
-
-          {/* Estrellas */}
-          <Box display="flex" mb={1}>
-            {[...Array(review.rating)].map((_, i) => (
-              <StarIcon key={i} sx={{ color: "#FFD700" }} />
-            ))}
+          <Box display="flex" alignItems="center" justifyContent="flex-end" gap={0.5}>
+            <BadgeIcon sx={{ fontSize: 14, color: "#444" }} />
+            <Typography fontSize={13} color="#555">{nutritionist.license_number}</Typography>
           </Box>
+        </Box>
+      </Box>
 
-          {/* Comentario */}
-          <Typography color="#aaa" fontSize="0.9rem">
-            {review.comment}
+      {/* BIO */}
+      {nutritionist.bio && (
+        <Box
+          sx={{
+            px: 3.5,
+            py: 2.5,
+            borderRadius: "14px",
+            background: "#111",
+            border: "1px solid rgba(255,255,255,0.05)",
+            mb: 3,
+          }}
+        >
+          <Typography fontSize={13} color="#555" mb={1} textTransform="uppercase" letterSpacing="0.04em">
+            Sobre mí
           </Typography>
-        </Paper>
+          <Typography color="#aaa" fontSize={14} lineHeight={1.7}>
+            {nutritionist.bio}
+          </Typography>
+        </Box>
+      )}
+
+      {/* INFO GRID */}
+      <Grid container spacing={2} mb={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <InfoCard icon={<LocalOfferIcon fontSize="small" />} title="Especialidades">
+            {nutritionist.specialties?.length > 0 ? (
+              <Box display="flex" flexWrap="wrap" gap={1}>
+                {nutritionist.specialties.map((s: any) => (
+                  <Chip
+                    key={s.id}
+                    label={s.name}
+                    size="small"
+                    sx={{
+                      bgcolor: "rgba(59,130,246,0.08)",
+                      color: "#60a5fa",
+                      border: "1px solid rgba(59,130,246,0.2)",
+                      fontSize: 12,
+                    }}
+                  />
+                ))}
+              </Box>
+            ) : (
+              <Typography color="#333" fontSize={13}>Sin especialidades</Typography>
+            )}
+          </InfoCard>
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 4 }}>
+          <InfoCard icon={<SchoolIcon fontSize="small" />} title="Educación">
+            {nutritionist.education?.length > 0 ? (
+              <Box display="flex" flexDirection="column" gap={2}>
+                {nutritionist.education.map((edu: any) => (
+                  <Box key={edu.id}>
+                    <Typography fontSize={13} fontWeight={600} color="#ddd">{edu.degree}</Typography>
+                    <Typography fontSize={12} color="#555">{edu.institution} · {edu.year}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            ) : (
+              <Typography color="#333" fontSize={13}>Sin educación registrada</Typography>
+            )}
+          </InfoCard>
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 4 }}>
+          <InfoCard icon={<WorkIcon fontSize="small" />} title="Experiencia">
+            {nutritionist.experience?.length > 0 ? (
+              <Box display="flex" flexDirection="column" gap={2}>
+                {nutritionist.experience.map((exp: any) => (
+                  <Box key={exp.id}>
+                    <Typography fontSize={13} fontWeight={600} color="#ddd">{exp.title}</Typography>
+                    <Typography fontSize={12} color="#555">
+                      {exp.company} · {exp.start_year} – {exp.end_year ?? "Presente"}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            ) : (
+              <Typography color="#333" fontSize={13}>Sin experiencia registrada</Typography>
+            )}
+          </InfoCard>
+        </Grid>
       </Grid>
-    ))
-  ) : (
-    <Typography mt={1} color="#aaa">
-      Sin reseñas
-    </Typography>
-  )}
-</Grid>
-</Box>
+
+      {/* REVIEWS */}
+      <Box mb={2}>
+        <Typography fontSize={13} color="#555" letterSpacing="0.04em" textTransform="uppercase" mb={2}>
+          Reseñas de usuarios
+        </Typography>
+        <Grid container spacing={2}>
+          {nutritionist.reviews?.length > 0 ? (
+            nutritionist.reviews.map((r: any) => (
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={r.id}>
+                <Box
+                  sx={{
+                    p: 2.5,
+                    borderRadius: "14px",
+                    background: "#111",
+                    border: "1px solid rgba(255,255,255,0.05)",
+                    transition: "border-color 0.2s",
+                    "&:hover": { borderColor: "rgba(251,191,36,0.2)" },
+                  }}
+                >
+                  <Box display="flex" alignItems="center" gap={1.5} mb={1.5}>
+                    <Avatar
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        bgcolor: "#3B82F622",
+                        color: "#3B82F6",
+                        fontSize: 12,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {r.user?.name?.[0] ?? "U"}
+                    </Avatar>
+                    <Box>
+                      <Typography fontSize={13} fontWeight={600} color="#ddd">
+                        {r.user?.name ?? "Usuario"}
+                      </Typography>
+                      <Box display="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <StarIcon key={i} sx={{ fontSize: 11, color: i < r.rating ? "#FBBF24" : "#222" }} />
+                        ))}
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Typography color="#555" fontSize={13} lineHeight={1.6}>
+                    {r.comment}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))
+          ) : (
+            <Grid size={{ xs: 12 }}>
+              <Typography color="#333" fontSize={13}>Sin reseñas aún</Typography>
+            </Grid>
+          )}
+        </Grid>
+      </Box>
     </Box>
-          </Box>
-)
+  );
 }

@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet, ScrollView, Modal, FlatList, ActivityIndicator, Alert,  } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, StyleSheet, ScrollView, Modal, FlatList, ActivityIndicator, Alert, Switch } from "react-native";
 import { useState, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Storage from "@/src/utils/storage";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -69,6 +69,11 @@ export default function CalendarScreen() {
   const [startModalRoutine, setStartModalRoutine] = useState<{ id: string; name: string; isUserRoutine: boolean } | null>(null);
   const [startModalDate, setStartModalDate] = useState<Date | null>(null);
 
+  const [individualMode, setIndividualMode] = useState(false);
+  const [individualPlan, setIndividualPlan] = useState<Record<string, DayPlan>>({});
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const INDIVIDUAL_KEY = "@liftyhub_individual_plan";
+
   const monthNames = language === "es" ? MONTH_NAMES_ES : MONTH_NAMES_EN;
   const dayFullNames = language === "es" ? DAY_FULL_ES : DAY_FULL_EN;
   const grid = buildMonthGrid(viewYear, viewMonth);
@@ -125,6 +130,9 @@ export default function CalendarScreen() {
           return new Date(y, m - 1, d);
         });
       setCompletedDates(completedDatesFromApi);
+
+      const savedIndividual = await AsyncStorage.getItem(INDIVIDUAL_KEY);
+      if (savedIndividual) setIndividualPlan(JSON.parse(savedIndividual));
     } catch {
       setWeekPlanState({});
       setError(true);
@@ -168,7 +176,20 @@ export default function CalendarScreen() {
     }
   };
 
+  const dateKey = (d: Date) => d.toISOString().split("T")[0];
+
+  const saveIndividual = async (next: Record<string, DayPlan>) => {
+    setIndividualPlan(next);
+    await AsyncStorage.setItem(INDIVIDUAL_KEY, JSON.stringify(next));
+  };
+
   const handleMarkRest = async () => {
+    if (individualMode && selectedDate) {
+      const k = dateKey(selectedDate);
+      await saveIndividual({ ...individualPlan, [k]: { type: "rest" } });
+      setModalVisible(false);
+      return;
+    }
     if (selectedDayIdx === null) return;
     const plan: DayPlan = { type: "rest" };
     setWeekPlanState(prev => ({ ...prev, [selectedDayIdx]: plan }));
@@ -177,19 +198,33 @@ export default function CalendarScreen() {
   };
 
   const handleAssign = async (routine: Routine) => {
-    if (selectedDayIdx === null) return;
     const plan: DayPlan = {
       type: "routine",
       routineId: String(routine.id),
       routineName: routine.name,
       isUserRoutine: routine.isUserRoutine,
     };
+    if (individualMode && selectedDate) {
+      const k = dateKey(selectedDate);
+      await saveIndividual({ ...individualPlan, [k]: plan });
+      setModalVisible(false);
+      return;
+    }
+    if (selectedDayIdx === null) return;
     setWeekPlanState(prev => ({ ...prev, [selectedDayIdx]: plan }));
     setModalVisible(false);
     await syncDay(selectedDayIdx, plan);
   };
 
   const handleRemove = async () => {
+    if (individualMode && selectedDate) {
+      const k = dateKey(selectedDate);
+      const next = { ...individualPlan };
+      delete next[k];
+      await saveIndividual(next);
+      setModalVisible(false);
+      return;
+    }
     if (selectedDayIdx === null) return;
     setWeekPlanState(prev => ({ ...prev, [selectedDayIdx]: null }));
     setModalVisible(false);
@@ -228,46 +263,50 @@ export default function CalendarScreen() {
     : 0;
 
   const trainingDaysCount = Object.values(weekPlan).filter(p => p?.type === "routine").length;
-  const selectedPlan = selectedDayIdx !== null ? weekPlan[selectedDayIdx] : null;
+  const selectedPlan = individualMode && selectedDate
+    ? (individualPlan[dateKey(selectedDate)] ?? null)
+    : (selectedDayIdx !== null ? weekPlan[selectedDayIdx] : null);
   const selectedIsRest = selectedPlan?.type === "rest";
   const selectedIsRoutine = selectedPlan?.type === "routine";
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.loadingBox}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.loadingBox}>
           <Ionicons name="cloud-offline-outline" size={48} color={colors.textSecondary} />
           <Text style={{ color: colors.textSecondary, marginTop: 12, fontSize: 15, textAlign: "center", paddingHorizontal: 32 }}>
             {t("calendar.errorLoad")}
           </Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {!isConnected && <OfflineBanner />}
+      <View style={styles.pageHeader}>
+        <Text style={styles.screenTitle}>{t("calendar.title")}</Text>
+        <Text style={styles.screenSubtitle}>{t("calendar.subtitle")}</Text>
+      </View>
+      <View style={styles.headerDivider} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-        <View style={styles.pageHeader}>
-          <Text style={styles.screenTitle}>{t("calendar.title")}</Text>
-          <Text style={styles.screenSubtitle}>{t("calendar.subtitle")}</Text>
-        </View>
-
         {/* ── Weekly schedule strip ── */}
-        <View style={styles.scheduleCard}>
+        <View style={[styles.scheduleCard, individualMode && styles.disabledSection]}
+          pointerEvents={individualMode ? "none" : "auto"}
+        >
           <View style={styles.scheduleHeader}>
             <View style={{ flex: 1 }}>
               <Text style={styles.scheduleTitle}>{t("calendar.mySchedule")}</Text>
@@ -370,7 +409,9 @@ export default function CalendarScreen() {
               {week.map((date, di) => {
                 if (!date) return <View key={di} style={styles.daySlot} />;
                 const idx = dayOfWeekIndex(date);
-                const plan = weekPlan[idx];
+                const plan = individualMode
+                  ? (individualPlan[dateKey(date)] ?? null)
+                  : weekPlan[idx];
                 const isToday = isSameDay(date, today);
                 const isRoutine = plan?.type === "routine";
                 const isRest = plan?.type === "rest";
@@ -390,6 +431,10 @@ export default function CalendarScreen() {
                         });
                         setStartModalDate(date);
                         setStartModalVisible(true);
+                      } else if (individualMode) {
+                        setSelectedDate(date);
+                        setSelectedDayIdx(null);
+                        setModalVisible(true);
                       } else {
                         handleOpenModal(idx);
                       }
@@ -439,6 +484,20 @@ export default function CalendarScreen() {
               <Text style={styles.legendText}>{t("calendar.restDay")}</Text>
             </View>
           </View>
+        </View>
+
+        {/* ── Mode toggle ── */}
+        <View style={styles.modeToggleRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.modeToggleLabel}>Días individuales</Text>
+            <Text style={styles.modeToggleSub}>Asigna rutinas por fecha específica</Text>
+          </View>
+          <Switch
+            value={individualMode}
+            onValueChange={setIndividualMode}
+            trackColor={{ false: "#2C2C2E", true: colors.primary + "88" }}
+            thumbColor={individualMode ? colors.primary : "#888"}
+          />
         </View>
 
       </ScrollView>
@@ -501,17 +560,28 @@ export default function CalendarScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalSheet}>
 
-            {selectedDayIdx !== null && (
+            {individualMode && selectedDate ? (
+              <View style={styles.modalDayBadge}>
+                <Text style={styles.modalDayBadgeText}>
+                  {selectedDate.toLocaleDateString(language === "es" ? "es-ES" : "en-US", {
+                    weekday: "long", day: "numeric", month: "long",
+                  })}
+                </Text>
+              </View>
+            ) : selectedDayIdx !== null ? (
               <View style={styles.modalDayBadge}>
                 <Text style={styles.modalDayBadgeText}>{dayFullNames[selectedDayIdx]}</Text>
               </View>
-            )}
+            ) : null}
 
             <Text style={styles.recurringHint}>
-              <Ionicons name="repeat" size={13} color={colors.primary} />
-              {"  "}{t("calendar.recurringHint", {
-                day: selectedDayIdx !== null ? dayFullNames[selectedDayIdx] : "",
-              })}
+              <Ionicons name={individualMode ? "calendar-outline" : "repeat"} size={13} color={colors.primary} />
+              {"  "}{individualMode
+                ? "Solo aplica para este día específico"
+                : t("calendar.recurringHint", {
+                    day: selectedDayIdx !== null ? dayFullNames[selectedDayIdx] : "",
+                  })
+              }
             </Text>
 
             {/* Estado actual del día */}
@@ -583,7 +653,7 @@ export default function CalendarScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -594,9 +664,22 @@ const styles = StyleSheet.create({
   loadingBox: { flex: 1, justifyContent: "center", alignItems: "center" },
   content: { padding: spacing.screenPadding, paddingBottom: 40, gap: 14 },
 
-  pageHeader: { marginTop: 40, gap: 4 },
-  screenTitle: { color: colors.text, fontSize: 28, fontWeight: "bold" },
+  pageHeader: { paddingTop: 54, paddingBottom: 16, paddingHorizontal: spacing.screenPadding, gap: 2 },
+  screenTitle: { color: "white", fontSize: 28, fontWeight: "bold" },
   screenSubtitle: { color: colors.textSecondary, fontSize: 14 },
+  headerDivider: { height: 1, backgroundColor: "#1C1C1E" },
+
+  modeToggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.card,
+    borderRadius: spacing.borderRadius,
+    padding: 14,
+    gap: 12,
+  },
+  modeToggleLabel: { color: colors.text, fontSize: 14, fontWeight: "600" },
+  modeToggleSub: { color: colors.textSecondary, fontSize: 12, marginTop: 2 },
+  disabledSection: { opacity: 0.35 },
 
   // Weekly schedule strip
   scheduleCard: {

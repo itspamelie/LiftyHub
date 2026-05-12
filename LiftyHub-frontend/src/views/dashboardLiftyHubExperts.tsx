@@ -32,15 +32,11 @@ const Dashboard: React.FC = () => {
     return <Navigate to="/" replace />
   }
   return (
-    <Box sx={{ display: "flex", bgcolor: "#0e0e0e", minHeight: "100vh", color: "white" }}>
-      
+    <Box sx={{ display: "flex", bgcolor: "#080808", minHeight: "100vh", color: "white" }}>
       <Sidebar />
-
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
         <Topbar />
-
-      <Outlet />
-
+        <Outlet />
       </Box>
     </Box>
   );

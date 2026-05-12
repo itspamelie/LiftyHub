@@ -65,6 +65,7 @@ export default function RootLayout() {
         <Stack.Screen name="routines/session" options={{ headerShown: false }} />
         <Stack.Screen name="routines/edit/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="diet/nutritionists" options={{ headerShown: false }} />
+        <Stack.Screen name="diet/questionnaire" options={{ headerShown: false }} />
         <Stack.Screen name="diet/plan" options={{ headerShown: false }} />
         <Stack.Screen name="user/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="friends" options={{ headerShown: false }} />

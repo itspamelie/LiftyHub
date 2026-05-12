@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import * as Storage from "@/src/utils/storage";
-import { getNutritionistProfiles } from "@/src/services/api";
+import { getNutritionistProfiles, createDietRequest, getStorageUrl } from "@/src/services/api";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import { useLanguage } from "@/src/context/LanguageContext";
 import BackButton from "@/src/components/buttons/backButton";
@@ -32,6 +32,7 @@ export default function NutritionistsScreen() {
   const [selected, setSelected] = useState<Nutritionist | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -55,18 +56,37 @@ export default function NutritionistsScreen() {
     setShowConfirm(true);
   };
 
-  const handleConfirm = () => {
-    setShowConfirm(false);
-    Alert.alert(
-      t("nutritionists.comingSoonTitle"),
-      t("nutritionists.comingSoonMessage"),
-      [{ text: "OK", onPress: () => router.back() }]
-    );
+  const handleConfirm = async () => {
+    if (!selected || confirming) return;
+    setConfirming(true);
+    try {
+      const token = await Storage.getItem("token");
+      const userStorage = await Storage.getItem("user");
+      if (!token || !userStorage) return;
+      const user = JSON.parse(userStorage);
+      const now = new Date();
+      await createDietRequest(
+        {
+          user_id: user.id,
+          nutritionist_id: selected.user.id,
+          year: now.getFullYear(),
+          month: now.getMonth() + 1,
+          status: "pending",
+        },
+        token
+      );
+      setShowConfirm(false);
+      setShowSuccess(true);
+    } catch {
+      Alert.alert("Error", "No se pudo enviar la solicitud. Intenta de nuevo.");
+    } finally {
+      setConfirming(false);
+    }
   };
 
   const handleSuccessClose = () => {
     setShowSuccess(false);
-    router.back();
+    router.replace("/(tabs)/diet" as any);
   };
 
   if (loading) {
@@ -111,7 +131,7 @@ export default function NutritionistsScreen() {
 
               <View style={styles.cardTop}>
                 {n.profile_pic ? (
-                  <Image source={{ uri: n.profile_pic }} style={styles.avatar} />
+                  <Image source={{ uri: getStorageUrl(n.profile_pic, "nutritionists") }} style={styles.avatar} />
                 ) : (
                   <View style={[styles.avatar, styles.avatarFallback]}>
                     <Ionicons name="person" size={28} color={colors.textSecondary} />
@@ -137,14 +157,7 @@ export default function NutritionistsScreen() {
                   style={styles.viewBtn}
                   onPress={() => router.push({
                     pathname: "/nutritionist-profile",
-                    params: {
-                      name: n.user?.name ?? "Nutriólogo",
-                      specialty: n.specialty,
-                      bio: n.bio ?? "",
-                      rating: n.rating,
-                      location: n.location ?? "",
-                      profile_pic: n.profile_pic ?? "",
-                    },
+                    params: { profileId: n.id },
                   } as any)}
                 >
                   <Ionicons name="person-outline" size={15} color={colors.primary} />
@@ -177,8 +190,10 @@ export default function NutritionistsScreen() {
               <HapticButton style={styles.cancelBtn} onPress={() => setShowConfirm(false)}>
                 <Text style={styles.cancelBtnText}>{t("nutritionists.cancel")}</Text>
               </HapticButton>
-              <HapticButton style={styles.confirmBtn} onPress={handleConfirm}>
-                <Text style={styles.confirmBtnText}>{t("nutritionists.confirm")}</Text>
+              <HapticButton style={[styles.confirmBtn, confirming && { opacity: 0.7 }]} onPress={handleConfirm} disabled={confirming}>
+                <Text style={styles.confirmBtnText}>
+                  {confirming ? "Enviando..." : t("nutritionists.confirm")}
+                </Text>
               </HapticButton>
             </View>
           </View>

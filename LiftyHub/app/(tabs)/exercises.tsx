@@ -173,9 +173,14 @@ export default function ExercisesScreen() {
   });
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       {!isConnected && <OfflineBanner />}
       {Toast}
+      <View style={styles.pageHeader}>
+        <Text style={styles.screenTitle}>{t("exercises.title")}</Text>
+        <Text style={styles.screenSubtitle}>{t("exercises.subtitle")}</Text>
+      </View>
+      <View style={styles.headerDivider} />
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
@@ -184,11 +189,8 @@ export default function ExercisesScreen() {
         }
       >
 
-        {/* HEADER */}
+        {/* SEARCH */}
         <View style={styles.header}>
-          <Text style={styles.title}>{t("exercises.title")}</Text>
-          <Text style={styles.subtitle}>{t("exercises.subtitle")}</Text>
-
           <TextInput
             placeholder={t("exercises.search")}
             placeholderTextColor={colors.textSecondary}
@@ -361,15 +363,13 @@ const styles = StyleSheet.create({
     paddingBottom: 40
   },
 
+  pageHeader: { paddingTop: 54, paddingBottom: 16, paddingHorizontal: spacing.screenPadding, gap: 2 },
+  screenTitle: { color: "white", fontSize: 28, fontWeight: "bold" },
+  screenSubtitle: { color: colors.textSecondary, fontSize: 14 },
+  headerDivider: { height: 1, backgroundColor: "#1C1C1E" },
+
   header: {
     marginBottom: 20
-  },
-
-  title: {
-    color: colors.text,
-    fontSize: 28,
-    fontWeight: "bold",
-    marginTop: 40
   },
 
   subtitle: {

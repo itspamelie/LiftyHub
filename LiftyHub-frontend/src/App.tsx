@@ -21,6 +21,7 @@ import ProfileDashboard from './components/nutritionist/ProfileDashboard';
 import MainNutritionist from './components/nutritionist/MainNutritionist';
 import DietsDashboard from './components/nutritionist/DietsDashboard';
 import ConfigDashboard from './components/nutritionist/ConfigDashboard';
+import RequestsDashboard from './components/nutritionist/RequestsDashboard';
 function PrivateRouteExperts({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/Liftyhub-Experts-Login" replace />;
@@ -62,6 +63,7 @@ function App() {
           <Route path="profile" element={<ProfileDashboard />} />
           <Route path="diets" element={<DietsDashboard />} />
           <Route path="config" element={<ConfigDashboard />} />
+          <Route path="requests" element={<RequestsDashboard />} />
 
 
 

@@ -3,7 +3,18 @@
     "allow": [
       "Bash(npm install *)",
       "Bash(xcrun simctl *)",
-      "Bash(open -a Simulator)"
+      "Bash(open -a Simulator)",
+      "Bash(xargs -I {} basename {} .php)",
+      "Bash(npm run *)",
+      "Bash(php artisan *)",
+      "Bash(xargs ls -la)",
+      "Bash(curl -s \"https://oss.exercisedb.dev/api/v1/exercises?limit=25\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('total:', d['meta']['total'], 'returned:', len\\(d['data']\\), 'hasNext:', d['meta']['hasNextPage'], 'cursor:', d['meta'].get\\('nextCursor'\\)\\)\")",
+      "Bash(curl -s \"https://v1.exercisedb.dev/docs\")",
+      "Bash(python3 -c \"import sys; content=sys.stdin.read\\(\\); print\\(content[:3000]\\)\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json\")",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/3_4_Sit-Up/0.jpg\")"
     ]
   }
 }

@@ -27,6 +27,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserRoutineSessionsController;
 use App\Http\Controllers\UserWeekPlanController;
 use App\Http\Controllers\FriendshipsController;
+use App\Http\Controllers\DietRequestsController;
+use App\Http\Controllers\NutritionProfilesController;
 
 
 
@@ -76,4 +78,14 @@ Route::get('/friends/requests', [FriendshipsController::class, 'requests']);
 Route::post('/friends/request/{userId}', [FriendshipsController::class, 'sendRequest']);
 Route::put('/friends/accept/{id}', [FriendshipsController::class, 'accept']);
 Route::delete('/friends/{id}', [FriendshipsController::class, 'destroy']);
+
+// Diet requests
+Route::get('/dietRequests/user/{userId}', [DietRequestsController::class, 'byUser']);
+Route::get('/dietRequests/nutritionist/{nutritionistId}', [DietRequestsController::class, 'byNutritionist']);
+Route::patch('/dietRequests/{id}/status', [DietRequestsController::class, 'updateStatus']);
+Route::resource('dietRequests', DietRequestsController::class);
+
+// Nutrition profiles (questionnaire)
+Route::get('/nutritionProfiles/user/{userId}', [NutritionProfilesController::class, 'byUser']);
+Route::resource('nutritionProfiles', NutritionProfilesController::class);
 });

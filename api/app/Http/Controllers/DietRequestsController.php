@@ -4,20 +4,49 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\DietRequest;
+use App\Models\NutritionistProfile;
 
 
 class DietRequestsController extends Controller
 {
-     public function index()
+    public function index()
     {
-         $data = DietRequest::with('user','nutritionist')->get();
+        $data = DietRequest::with('user', 'nutritionist', 'dietPlan')->get();
+        return response()->json(["status" => "ok", "data" => $data]);
+    }
 
-        //Siempre que hagamos una api enviamos un JSON
-        return response()->json([
-            "status"=>"ok",
-            "data"=>$data
+    public function byUser(string $userId)
+    {
+        $data = DietRequest::with('user', 'nutritionist', 'dietPlan')
+            ->where('user_id', $userId)
+            ->whereNotIn('status', ['cancelled'])
+            ->latest()
+            ->first();
+        return response()->json(["status" => "ok", "data" => $data]);
+    }
 
+    public function byNutritionist(string $nutritionistId)
+    {
+        // nutritionistId aquí es el id del nutritionist_profiles, no el user_id
+        $profile = NutritionistProfile::find($nutritionistId);
+        if (!$profile) {
+            return response()->json(["status" => "ok", "data" => []]);
+        }
+        $data = DietRequest::with('user', 'dietPlan')
+            ->where('nutritionist_id', $profile->user_id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return response()->json(["status" => "ok", "data" => $data]);
+    }
+
+    public function updateStatus(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:pending,paid,in_progress,completed,cancelled',
         ]);
+        $data = DietRequest::findOrFail($id);
+        $data->update($validated);
+        return response()->json(["status" => "ok", "data" => $data]);
     }
 
     /**
@@ -84,23 +113,16 @@ class DietRequestsController extends Controller
      */
     public function update(Request $request, string $id)
     {
-         $validated = $request->validate([
-            'user_id'=>'required',
-            'nutritionist_id'=>'required',
-            'year'=>'required',
-            'month'=>'required',
-            'status'=>'required|string',
-         ]);
-
-        //metodo si los campos se llaman igual que en la base de datos
+        $validated = $request->validate([
+            'user_id'         => 'sometimes|required',
+            'nutritionist_id' => 'sometimes|required',
+            'year'            => 'sometimes|required',
+            'month'           => 'sometimes|required',
+            'status'          => 'sometimes|required|string',
+        ]);
         $data = DietRequest::findOrFail($id);
         $data->update($validated);
-          return response()->json([
-            "status"=>"ok",
-            "mesage"=>"Solicitud actualizada correctamente.",
-            "data"=>$data
-
-        ]);
+        return response()->json(["status" => "ok", "mesage" => "Solicitud actualizada correctamente.", "data" => $data]);
     }
 
     /**

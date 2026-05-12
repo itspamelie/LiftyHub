@@ -2,6 +2,11 @@ import * as Storage from "@/src/utils/storage";
 import { router } from "expo-router";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+export const getStorageUrl = (filename: string, folder: string) => {
+  const base = API_URL?.replace("/api", "") ?? "";
+  return `${base}/${folder}/${filename}`;
+};
 const TIMEOUT_MS = 10000;
 
 const fetchWithTimeout = async (url: string, options: RequestInit = {}): Promise<Response> => {
@@ -410,6 +415,59 @@ export const getNutritionistProfiles = async (token: string) => {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
+  });
+};
+
+// 📋 SOLICITUDES DE DIETA
+export const getDietRequestByUser = async (userId: number, token: string) => {
+  return apiFetch(`${API_URL}/dietRequests/user/${userId}`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+};
+
+export const createDietRequest = async (
+  data: { user_id: number; nutritionist_id: number; year: number; month: number; status: string },
+  token: string
+) => {
+  return apiFetch(`${API_URL}/dietRequests`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+};
+
+export const updateDietRequestStatus = async (id: number, status: string, token: string) => {
+  return apiFetch(`${API_URL}/dietRequests/${id}/status`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ status }),
+  });
+};
+
+// 🥗 PERFIL NUTRICIONAL (CUESTIONARIO)
+export const getNutritionProfileByUser = async (userId: number, token: string) => {
+  return apiFetch(`${API_URL}/nutritionProfiles/user/${userId}`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+};
+
+export const saveNutritionProfile = async (data: Record<string, unknown>, token: string) => {
+  return apiFetch(`${API_URL}/nutritionProfiles`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(data),
   });
 };
 

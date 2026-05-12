@@ -1,78 +1,92 @@
-import { Box, TextField, IconButton, Typography, Avatar } from "@mui/material";
+import { Box, IconButton, Avatar, Typography, Badge } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { useEffect, useState } from "react";
-import { apiFetch,getImageUrl } from "../../services/api";
+import { apiFetch, getImageUrl } from "../../services/api";
 
 const Topbar: React.FC = () => {
   const [user, setUser] = useState<any>(null);
-useEffect(() => {
-  const fetchUser = async () => {
-    try {
-      const storedUser = localStorage.getItem("user");
-      const parsed = storedUser ? JSON.parse(storedUser) : null;
+  const [profilePic, setProfilePic] = useState<string | null>(null);
 
-      if (!parsed) return;
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const stored = localStorage.getItem("user");
+        const parsed = stored ? JSON.parse(stored) : null;
+        if (!parsed) return;
+        const res = await apiFetch(`/users/${parsed.id}`);
+        setUser(res.data);
+        const profilesRes = await apiFetch("/nutritionistProfiles");
+        const profile = profilesRes.data.find((p: any) => Number(p.user_id) === Number(parsed.id));
+        if (profile?.profile_pic) setProfilePic(getImageUrl(profile.profile_pic, "nutritionists"));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchUser();
+  }, []);
 
-      const userId = parsed.id; 
+  const initials = user?.name
+    ?.split(" ")
+    .map((w: string) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
-      const response = await apiFetch(`/users/${userId}`, {
-        method: "GET"
-      });
-
-      console.log("USER API:", response.data);
-
-      setUser(response.data);
-    } catch (error) {
-      console.error("Error obteniendo usuario:", error);
-    }
-  };
-
-  fetchUser();
-}, []);
   return (
     <Box
       sx={{
-        height: 70,
+        height: 64,
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between",
+        justifyContent: "flex-end",
         px: 4,
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
-        backdropFilter: "blur(10px)"
+        gap: 2,
+        borderBottom: "1px solid rgba(255,255,255,0.04)",
+        background: "rgba(8,8,8,0.8)",
+        backdropFilter: "blur(12px)",
+        position: "sticky",
+        top: 0,
+        zIndex: 10,
       }}
     >
-      <TextField
-        placeholder="Buscar..."
-        variant="standard"
-        InputProps={{
-          disableUnderline: true
-        }}
+      <IconButton
+        size="small"
         sx={{
-          bgcolor: "#131313",
-          px: 2,
-          py: 1,
-          borderRadius: 1,
-          width: 300,
-          input: { color: "white" }
+          color: "#555",
+          "&:hover": { color: "#aaa", background: "rgba(255,255,255,0.04)" },
         }}
-      />
+      >
+        <Badge
+          variant="dot"
+          sx={{ "& .MuiBadge-dot": { bgcolor: "#3B82F6", width: 6, height: 6 } }}
+        >
+          <NotificationsIcon fontSize="small" />
+        </Badge>
+      </IconButton>
 
-      <Box display="flex" alignItems="center" gap={3}>
-        <IconButton sx={{ color: "#ababab" }}>
-          <NotificationsIcon />
-        </IconButton>
-
-        <IconButton sx={{ color: "#ababab" }}>
-          <HelpOutlineIcon />
-        </IconButton>
-
-       <Typography  color="white">
-  {user ? user.name : "Cargando..."}
-</Typography>
-{user && (
-  <Avatar src={getImageUrl(user.img, "users")} />
-)}
+      <Box display="flex" alignItems="center" gap={1.5}>
+        <Box textAlign="right">
+          <Typography fontSize={13} fontWeight={600} color="#ddd">
+            {user?.name ?? "Cargando..."}
+          </Typography>
+          <Typography fontSize={11} color="#444">
+            Nutriólogo
+          </Typography>
+        </Box>
+        <Avatar
+          src={profilePic ?? (user ? getImageUrl(user.img, "users") : "")}
+          sx={{
+            width: 34,
+            height: 34,
+            bgcolor: "#3B82F622",
+            color: "#3B82F6",
+            fontSize: 13,
+            fontWeight: 700,
+            border: "2px solid rgba(59,130,246,0.3)",
+          }}
+        >
+          {initials}
+        </Avatar>
       </Box>
     </Box>
   );

@@ -1,104 +1,453 @@
-import { View, Text, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  TouchableOpacity,
+  Modal,
+  Dimensions,
+} from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { useLanguage } from "@/src/context/LanguageContext";
+import { BlurView } from "expo-blur";
+import * as Storage from "@/src/utils/storage";
+import { getDietRequestByUser, getNutritionProfileByUser } from "@/src/services/api";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
+import { useSubscription } from "@/src/context/SubscriptionContext";
+import HapticButton from "@/src/components/buttons/HapticButton";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+type DietRequest = {
+  id: number;
+  status: "pending" | "paid" | "in_progress" | "completed" | "cancelled";
+  year: number;
+  month: number;
+  created_at: string;
+  nutritionist: { id: number; name: string } | null;
+  dietPlan: any | null;
+};
+
+const MONTH_NAMES = [
+  "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre",
+];
+
+const PLAN_OPTIONS = [
+  {
+    name: "Meal",
+    price: "$299/mes",
+    color: "#10B981",
+    features: ["Plan alimenticio mensual","Suplementación incluida","Asignación de nutriólogo"],
+    highlighted: false,
+  },
+  {
+    name: "Pro",
+    price: "$600/mes",
+    color: "#F59E0B",
+    features: ["Todo lo del plan Meal","Rutinas ilimitadas","Escaneo QR ilimitado","Plan de entrenamiento"],
+    highlighted: true,
+  },
+];
 
 export default function DietScreen() {
   const { t } = useLanguage();
+  const { plan } = useSubscription();
+
+  const [loading, setLoading] = useState(true);
+  const [request, setRequest] = useState<DietRequest | null>(null);
+  const [hasQuestionnaire, setHasQuestionnaire] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  const hasDietAccess = plan?.name === "Meal" || plan?.name === "Pro";
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const token = await Storage.getItem("token");
+      const userStorage = await Storage.getItem("user");
+      if (!token || !userStorage) return;
+      const user = JSON.parse(userStorage);
+      const [reqRes, qRes] = await Promise.all([
+        getDietRequestByUser(user.id, token),
+        getNutritionProfileByUser(user.id, token),
+      ]);
+      setRequest(reqRes?.data ?? null);
+      setHasQuestionnaire(!!qRes?.data);
+    } catch {
+      // silencioso
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+      if (!hasDietAccess) setShowUpgradeModal(true);
+    }, [load, hasDietAccess])
+  );
+
+  // ─── CONTENIDO SEGÚN ESTADO ──────────────────────────────────
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      );
+    }
+
+    if (!request) {
+      return (
+        <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.heroSection}>
+            <View style={styles.heroIcon}>
+              <Ionicons name="nutrition" size={44} color={colors.primary} />
+            </View>
+            <Text style={styles.heroTitle}>Nutrición personalizada</Text>
+            <Text style={styles.heroSubtitle}>
+              Elige un nutriólogo certificado que diseñe un plan alimenticio a tu medida, con suplementación y rutina de entrenamiento incluida.
+            </Text>
+          </View>
+
+          <View style={styles.featureCard}>
+            {[
+              { icon: "restaurant-outline" as const, text: "Plan alimenticio mensual" },
+              { icon: "fitness-outline" as const, text: "Rutina de entrenamiento incluida" },
+              { icon: "flask-outline" as const, text: "Suplementación personalizada" },
+              { icon: "trending-up-outline" as const, text: "Seguimiento mensual" },
+            ].map((item) => (
+              <View key={item.text} style={styles.featureRow}>
+                <View style={styles.featureIconBg}>
+                  <Ionicons name={item.icon} size={16} color={colors.primary} />
+                </View>
+                <Text style={styles.featureText}>{item.text}</Text>
+              </View>
+            ))}
+          </View>
+
+          <TouchableOpacity
+            style={styles.primaryBtn}
+            onPress={() => router.push("/diet/nutritionists" as any)}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="search-outline" size={18} color="white" />
+            <Text style={styles.primaryBtnText}>Explorar nutriólogos</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      );
+    }
+
+    if (request.status === "pending") {
+      return (
+        <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.statusHeader}>
+            <View style={[styles.statusIconBg, { backgroundColor: "rgba(251,191,36,0.12)" }]}>
+              <Ionicons name="time-outline" size={40} color="#FBBF24" />
+            </View>
+            <Text style={styles.statusTitle}>Solicitud enviada</Text>
+            <Text style={styles.statusSubtitle}>Estamos esperando que tu nutriólogo acepte la solicitud</Text>
+          </View>
+          <View style={styles.infoCard}>
+            <InfoRow icon="person-outline" label="Nutriólogo" value={request.nutritionist?.name ?? "—"} />
+            <View style={styles.divider} />
+            <InfoRow icon="calendar-outline" label="Período" value={`${MONTH_NAMES[(request.month ?? 1) - 1]} ${request.year}`} />
+            <View style={styles.divider} />
+            <View style={styles.infoRow}>
+              <Ionicons name="ellipse" size={10} color="#FBBF24" />
+              <Text style={styles.infoLabel}>Estado</Text>
+              <Text style={[styles.infoValue, { color: "#FBBF24" }]}>Pendiente de aceptación</Text>
+            </View>
+          </View>
+          <Text style={styles.hintText}>Recibirás una notificación cuando el nutriólogo responda tu solicitud.</Text>
+        </ScrollView>
+      );
+    }
+
+    if (request.status === "in_progress") {
+      if (!hasQuestionnaire) {
+        return (
+          <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+            <View style={styles.statusHeader}>
+              <View style={[styles.statusIconBg, { backgroundColor: "rgba(34,197,94,0.12)" }]}>
+                <Ionicons name="checkmark-circle-outline" size={40} color="#22c55e" />
+              </View>
+              <Text style={styles.statusTitle}>¡Solicitud aceptada!</Text>
+              <Text style={styles.statusSubtitle}>{request.nutritionist?.name ?? "Tu nutriólogo"} aceptó trabajar contigo</Text>
+            </View>
+            <View style={styles.actionCard}>
+              <Ionicons name="document-text-outline" size={28} color={colors.primary} style={{ marginBottom: 10 }} />
+              <Text style={styles.actionCardTitle}>Llena tu cuestionario nutricional</Text>
+              <Text style={styles.actionCardDesc}>
+                Para que tu nutriólogo diseñe tu plan personalizado necesita conocer tu información: peso, alergias, hábitos alimenticios y más.
+              </Text>
+              <TouchableOpacity
+                style={[styles.primaryBtn, { marginTop: 16 }]}
+                onPress={() => router.push({ pathname: "/diet/questionnaire", params: { requestId: request.id } } as any)}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="create-outline" size={18} color="white" />
+                <Text style={styles.primaryBtnText}>Llenar cuestionario</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        );
+      }
+
+      return (
+        <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.statusHeader}>
+            <View style={[styles.statusIconBg, { backgroundColor: "rgba(59,130,246,0.12)" }]}>
+              <Ionicons name="hourglass-outline" size={40} color={colors.primary} />
+            </View>
+            <Text style={styles.statusTitle}>Plan en preparación</Text>
+            <Text style={styles.statusSubtitle}>{request.nutritionist?.name ?? "Tu nutriólogo"} está preparando tu plan personalizado</Text>
+          </View>
+          <View style={styles.infoCard}>
+            <View style={styles.infoRow}>
+              <Ionicons name="checkmark-circle" size={15} color="#22c55e" />
+              <Text style={styles.infoLabel}>Cuestionario</Text>
+              <Text style={[styles.infoValue, { color: "#22c55e" }]}>Completado</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.infoRow}>
+              <Ionicons name="ellipse" size={10} color={colors.primary} />
+              <Text style={styles.infoLabel}>Estado</Text>
+              <Text style={[styles.infoValue, { color: colors.primary }]}>En preparación</Text>
+            </View>
+          </View>
+          <Text style={styles.hintText}>Recibirás una notificación cuando tu plan esté listo.</Text>
+        </ScrollView>
+      );
+    }
+
+    if (request.status === "completed") {
+      return (
+        <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.statusHeader}>
+            <View style={[styles.statusIconBg, { backgroundColor: "rgba(34,197,94,0.12)" }]}>
+              <Ionicons name="checkmark-circle" size={40} color="#22c55e" />
+            </View>
+            <Text style={styles.statusTitle}>¡Tu plan está listo!</Text>
+            <Text style={styles.statusSubtitle}>{request.nutritionist?.name ?? "Tu nutriólogo"} ha entregado tu plan mensual</Text>
+          </View>
+          <TouchableOpacity style={styles.primaryBtn} onPress={() => router.push("/diet/plan" as any)} activeOpacity={0.85}>
+            <Ionicons name="restaurant-outline" size={18} color="white" />
+            <Text style={styles.primaryBtnText}>Ver mi plan de dieta</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      );
+    }
+
+    // Cancelado / fallback
+    return (
+      <View style={styles.center}>
+        <Ionicons name="close-circle-outline" size={48} color={colors.textSecondary} />
+        <Text style={[styles.hintText, { marginTop: 12 }]}>Solicitud cancelada</Text>
+        <TouchableOpacity style={[styles.primaryBtn, { marginTop: 20 }]} onPress={() => router.push("/diet/nutritionists" as any)} activeOpacity={0.85}>
+          <Text style={styles.primaryBtnText}>Nueva solicitud</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.iconBg}>
-          <Ionicons name="nutrition" size={44} color={colors.primary} />
-        </View>
-
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{t("diet.comingSoon")}</Text>
-        </View>
-
-        <Text style={styles.title}>{t("diet.comingSoonTitle")}</Text>
-        <Text style={styles.subtitle}>{t("diet.comingSoonSubtitle")}</Text>
-
-        <View style={styles.featureList}>
-          {(["diet.feature1", "diet.feature2", "diet.feature3"] as const).map((key) => (
-            <View key={key} style={styles.featureRow}>
-              <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
-              <Text style={styles.featureText}>{t(key)}</Text>
-            </View>
-          ))}
-        </View>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <View style={styles.pageHeader}>
+        <Text style={styles.screenTitle}>Dieta</Text>
+        <Text style={styles.screenSubtitle}>Tu plan alimenticio personalizado</Text>
       </View>
+      <View style={styles.headerDivider} />
+      {renderContent()}
+
+      {/* OVERLAY DIFUMINADO — visible cuando no tiene acceso y cerró el modal */}
+      {!hasDietAccess && !showUpgradeModal && (
+        <>
+          <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+          <View style={styles.lockedOverlay}>
+            <View style={styles.lockedIconBg}>
+              <Ionicons name="lock-closed" size={36} color="white" />
+            </View>
+            <Text style={styles.lockedTitle}>Función premium</Text>
+            <Text style={styles.lockedSubtitle}>Actualiza tu plan para acceder al apartado de nutrición.</Text>
+            <HapticButton style={styles.unlockBtn} onPress={() => setShowUpgradeModal(true)}>
+              <Ionicons name="lock-open-outline" size={18} color="white" />
+              <Text style={styles.unlockBtnText}>Desbloquear dieta</Text>
+            </HapticButton>
+          </View>
+        </>
+      )}
+
+      {/* MODAL UPGRADE */}
+      <Modal visible={!hasDietAccess && showUpgradeModal} transparent animationType="slide">
+        <BlurView intensity={25} tint="dark" style={StyleSheet.absoluteFill} />
+        <HapticButton style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowUpgradeModal(false)}>
+          <HapticButton activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
+            <HapticButton style={styles.modalClose} onPress={() => setShowUpgradeModal(false)}>
+              <Ionicons name="close" size={22} color={colors.textSecondary} />
+            </HapticButton>
+            <View style={styles.modalIcon}>
+              <Ionicons name="nutrition" size={32} color="#10B981" />
+            </View>
+            <Text style={styles.modalTitle}>Función premium</Text>
+            <Text style={styles.modalSubtitle}>
+              El apartado de nutrición está disponible en los planes Meal y Pro. Elige el que mejor se adapte a ti.
+            </Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {PLAN_OPTIONS.map((opt) => (
+                <HapticButton
+                  key={opt.name}
+                  style={[styles.planCard, opt.highlighted && { borderColor: opt.color, borderWidth: 2 }]}
+                  onPress={() => { setShowUpgradeModal(false); router.push("/settings/plans" as any); }}
+                >
+                  {opt.highlighted && (
+                    <View style={[styles.planBadge, { backgroundColor: opt.color }]}>
+                      <Text style={styles.planBadgeText}>Recomendado</Text>
+                    </View>
+                  )}
+                  <View style={styles.planHeader}>
+                    <Text style={[styles.planName, { color: opt.color }]}>{opt.name}</Text>
+                    <Text style={styles.planPrice}>{opt.price}</Text>
+                  </View>
+                  {opt.features.map((f, i) => (
+                    <View key={i} style={styles.planFeature}>
+                      <Ionicons name="checkmark-circle" size={16} color={opt.color} />
+                      <Text style={styles.planFeatureText}>{f}</Text>
+                    </View>
+                  ))}
+                </HapticButton>
+              ))}
+              <Text style={styles.modalNote}>Contacta al administrador para activar tu plan</Text>
+            </ScrollView>
+          </HapticButton>
+        </HapticButton>
+      </Modal>
+    </View>
+  );
+}
+
+function InfoRow({ icon, label, value }: { icon: any; label: string; value: string }) {
+  return (
+    <View style={styles.infoRow}>
+      <Ionicons name={icon} size={15} color={colors.textSecondary} />
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
+  container: { flex: 1, backgroundColor: colors.background },
+  center: {
+    flex: 1, backgroundColor: colors.background,
+    justifyContent: "center", alignItems: "center", padding: 24,
+  },
+  content: { padding: spacing.screenPadding, paddingTop: 32, paddingBottom: 100, flexGrow: 1, justifyContent: "center" },
+  pageHeader: { paddingTop: 54, paddingBottom: 16, paddingHorizontal: spacing.screenPadding, gap: 2 },
+  screenTitle: { color: "white", fontSize: 28, fontWeight: "bold" },
+  screenSubtitle: { color: colors.textSecondary, fontSize: 14 },
+  headerDivider: { height: 1, backgroundColor: "#1C1C1E" },
+
+  heroSection: { alignItems: "center", marginBottom: 24 },
+  heroIcon: {
+    width: 88, height: 88, borderRadius: 44,
+    backgroundColor: "rgba(59,130,246,0.12)",
+    justifyContent: "center", alignItems: "center", marginBottom: 16,
+  },
+  heroTitle: { color: "white", fontSize: 24, fontWeight: "700", textAlign: "center", marginBottom: 10 },
+  heroSubtitle: { color: colors.textSecondary, fontSize: 14, textAlign: "center", lineHeight: 21 },
+
+  featureCard: { backgroundColor: "#1C1C1E", borderRadius: 18, padding: 18, marginBottom: 20, gap: 14 },
+  featureRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  featureIconBg: {
+    width: 32, height: 32, borderRadius: 8,
+    backgroundColor: "rgba(59,130,246,0.1)",
+    justifyContent: "center", alignItems: "center",
+  },
+  featureText: { color: colors.textSecondary, fontSize: 14 },
+
+  primaryBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 8, backgroundColor: colors.primary,
+    borderRadius: spacing.borderRadius, paddingVertical: 15, paddingHorizontal: 24,
+  },
+  primaryBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
+
+  statusHeader: { alignItems: "center", marginBottom: 24 },
+  statusIconBg: {
+    width: 88, height: 88, borderRadius: 44,
+    justifyContent: "center", alignItems: "center", marginBottom: 16,
+  },
+  statusTitle: { color: "white", fontSize: 24, fontWeight: "700", textAlign: "center", marginBottom: 8 },
+  statusSubtitle: { color: colors.textSecondary, fontSize: 14, textAlign: "center", lineHeight: 21 },
+
+  infoCard: { backgroundColor: "#1C1C1E", borderRadius: 18, padding: 16, marginBottom: 16 },
+  infoRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 12 },
+  infoLabel: { color: colors.textSecondary, fontSize: 14, flex: 1 },
+  infoValue: { color: "white", fontSize: 14, fontWeight: "600" },
+  divider: { height: 1, backgroundColor: "#2A2A2A" },
+
+  hintText: { color: colors.textSecondary, fontSize: 13, textAlign: "center", lineHeight: 19, paddingHorizontal: 16 },
+
+  actionCard: { backgroundColor: "#1C1C1E", borderRadius: 18, padding: 20, alignItems: "center", marginBottom: 16 },
+  actionCardTitle: { color: "white", fontSize: 16, fontWeight: "700", textAlign: "center", marginBottom: 8 },
+  actionCardDesc: { color: colors.textSecondary, fontSize: 13, textAlign: "center", lineHeight: 19 },
+
+  // Modal
+  modalOverlay: { flex: 1, justifyContent: "flex-end" },
+  modalContent: {
+    backgroundColor: "#1C1C1E",
+    borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    padding: 24, paddingBottom: 48,
+    maxHeight: SCREEN_HEIGHT * 0.85,
+  },
+  modalClose: { alignSelf: "flex-end", padding: 4 },
+  modalIcon: {
+    width: 64, height: 64, borderRadius: 32,
+    backgroundColor: "rgba(16,185,129,0.15)",
+    justifyContent: "center", alignItems: "center",
+    alignSelf: "center", marginBottom: 16,
+  },
+  modalTitle: { color: "white", fontSize: 22, fontWeight: "700", textAlign: "center", marginBottom: 8 },
+  modalSubtitle: { color: colors.textSecondary, fontSize: 14, textAlign: "center", marginBottom: 24, lineHeight: 20 },
+  planCard: {
+    backgroundColor: "#2C2C2E", borderRadius: spacing.borderRadius,
+    padding: 16, marginBottom: 12, borderWidth: 1, borderColor: "transparent",
+  },
+  planBadge: { alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, marginBottom: 8 },
+  planBadgeText: { color: "white", fontSize: 11, fontWeight: "700" },
+  planHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
+  planName: { fontSize: 18, fontWeight: "700" },
+  planPrice: { color: "white", fontSize: 16, fontWeight: "600" },
+  planFeature: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 6 },
+  planFeatureText: { color: colors.textSecondary, fontSize: 13 },
+  modalNote: { color: colors.textSecondary, fontSize: 12, textAlign: "center", marginTop: 8 },
+
+  // Locked overlay
+  lockedOverlay: {
+    ...StyleSheet.absoluteFillObject,
     justifyContent: "center",
     alignItems: "center",
-    padding: spacing.screenPadding,
-  },
-  card: {
-    backgroundColor: "#1C1C1E",
-    borderRadius: 24,
     padding: 32,
-    alignItems: "center",
-    width: "100%",
     gap: 12,
   },
-  iconBg: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: "rgba(59,130,246,0.12)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  badge: {
-    backgroundColor: "rgba(59,130,246,0.15)",
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderWidth: 1,
-    borderColor: colors.primary + "55",
-  },
-  badgeText: {
-    color: colors.primary,
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-  },
-  title: {
-    color: "white",
-    fontSize: 22,
-    fontWeight: "700",
-    textAlign: "center",
-    marginTop: 4,
-  },
-  subtitle: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 21,
+  lockedIconBg: {
+    width: 80, height: 80, borderRadius: 40,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    justifyContent: "center", alignItems: "center",
     marginBottom: 8,
   },
-  featureList: {
-    width: "100%",
-    gap: 10,
+  lockedTitle: { color: "white", fontSize: 22, fontWeight: "700", textAlign: "center" },
+  lockedSubtitle: { color: colors.textSecondary, fontSize: 14, textAlign: "center", lineHeight: 20, marginBottom: 8 },
+  unlockBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 8, backgroundColor: colors.primary,
+    borderRadius: spacing.borderRadius, paddingVertical: 14, paddingHorizontal: 28,
     marginTop: 4,
   },
-  featureRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  featureText: {
-    color: colors.textSecondary,
-    fontSize: 14,
-  },
+  unlockBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
 });

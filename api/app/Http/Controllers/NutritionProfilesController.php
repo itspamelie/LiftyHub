@@ -7,15 +7,16 @@ use App\Models\NutritionProfile;
 
 class NutritionProfilesController extends Controller
 {
-         public function index()
+    public function index()
     {
-         $data = NutritionProfile::with('user')->get();
+        $data = NutritionProfile::with('user')->get();
+        return response()->json(["status" => "ok", "data" => $data]);
+    }
 
-        //Siempre que hagamos una api enviamos un JSON
-        return response()->json([
-            "status"=>"ok",
-            "data"=>$data
-        ]);
+    public function byUser(string $userId)
+    {
+        $data = NutritionProfile::where('user_id', $userId)->first();
+        return response()->json(["status" => "ok", "data" => $data]);
     }
 
     /**
@@ -31,28 +32,26 @@ class NutritionProfilesController extends Controller
      */
     public function store(Request $request)
     {
-          $validated = $request->validate([
-            'user_id'=>'required',
-            'weight'=>'required|numeric',
-            'age'=>'required|numeric',
-            'height'=>'required|numeric',
-            'meal_schedule'=>'required|string',
-            'favorite_foods'=>'required|string',
-            'disliked_foods'=>'required|string',
-            'allergies'=>'required|string',
-            'medical_restrictions'=>'required|string',
-            'favorite_meal'=>'required|string',
-            'can_cook_sunday'=>'required',
+        $validated = $request->validate([
+            'user_id'             => 'required',
+            'weight'              => 'required|numeric',
+            'age'                 => 'required|integer',
+            'height'              => 'required|numeric',
+            'meal_schedule'       => 'nullable|string',
+            'favorite_foods'      => 'nullable|string',
+            'disliked_foods'      => 'nullable|string',
+            'allergies'           => 'nullable|string',
+            'medical_restrictions'=> 'nullable|string',
+            'favorite_meal'       => 'nullable|string',
+            'can_cook_sunday'     => 'boolean',
         ]);
 
-        //metodo si los campos se llaman igual que en la base de datos
-        $data = NutritionProfile::create($validated);
-          return response()->json([
-            "status"=>"ok",
-            "mesage"=>"Registro agregado correctamente.",
-            "data"=>$data
-
-        ]);
+        // Upsert: si el usuario ya tiene perfil, actualiza
+        $data = NutritionProfile::updateOrCreate(
+            ['user_id' => $validated['user_id']],
+            $validated
+        );
+        return response()->json(["status" => "ok", "mesage" => "Registro guardado correctamente.", "data" => $data]);
     }
 
     /**
@@ -87,29 +86,22 @@ class NutritionProfilesController extends Controller
      */
     public function update(Request $request, string $id)
     {
-         $validated = $request->validate([
-            'user_id'=>'required',
-            'weight'=>'required|numeric',
-            'age'=>'required|numeric',
-            'height'=>'required|numeric',
-            'meal_schedule'=>'required|string',
-            'favorite_foods'=>'required|string',
-            'disliked_foods'=>'required|string',
-            'allergies'=>'required|string',
-            'medical_restrictions'=>'required|string',
-            'favorite_meal'=>'required|string',
-            'can_cook_sunday'=>'required',
+        $validated = $request->validate([
+            'user_id'             => 'sometimes|required',
+            'weight'              => 'sometimes|numeric',
+            'age'                 => 'sometimes|integer',
+            'height'              => 'sometimes|numeric',
+            'meal_schedule'       => 'nullable|string',
+            'favorite_foods'      => 'nullable|string',
+            'disliked_foods'      => 'nullable|string',
+            'allergies'           => 'nullable|string',
+            'medical_restrictions'=> 'nullable|string',
+            'favorite_meal'       => 'nullable|string',
+            'can_cook_sunday'     => 'boolean',
         ]);
-
-        //metodo si los campos se llaman igual que en la base de datos
         $data = NutritionProfile::findOrFail($id);
         $data->update($validated);
-          return response()->json([
-            "status"=>"ok",
-            "mesage"=>"Registro actualizado correctamente.",
-            "data"=>$data
-
-        ]);
+        return response()->json(["status" => "ok", "mesage" => "Registro actualizado correctamente.", "data" => $data]);
     }
 
     /**

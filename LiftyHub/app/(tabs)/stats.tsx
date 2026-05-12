@@ -1,5 +1,4 @@
 import { ScrollView, Text, StyleSheet, View, ActivityIndicator, RefreshControl } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect, useCallback } from "react";
 import * as Storage from "@/src/utils/storage";
 
@@ -98,17 +97,22 @@ export default function StatsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.loading}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {!isConnected && <OfflineBanner />}
+      <View style={styles.pageHeader}>
+        <Text style={styles.screenTitle}>{t("statsScreen.title")}</Text>
+        <Text style={styles.screenSubtitle}>{t("statsScreen.subtitle")}</Text>
+      </View>
+      <View style={styles.headerDivider} />
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -120,8 +124,6 @@ export default function StatsScreen() {
           />
         }
       >
-        <Text style={styles.title}>{t("statsScreen.title")}</Text>
-        <Text style={styles.subtitle}>{t("statsScreen.subtitle")}</Text>
 
         {stats && <StatsSummaryGrid stats={stats} trigger={animationTrigger} />}
 
@@ -130,7 +132,7 @@ export default function StatsScreen() {
 
       </ScrollView>
       {Toast}
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -146,17 +148,10 @@ const styles = StyleSheet.create({
     paddingBottom: 40
   },
 
-  title: {
-    color: colors.text,
-    fontSize: 28,
-    fontWeight: "bold",
-    marginTop: 10
-  },
-
-  subtitle: {
-    color: colors.textSecondary,
-    marginBottom: 20
-  },
+  pageHeader: { paddingTop: 54, paddingBottom: 16, paddingHorizontal: spacing.screenPadding, gap: 2 },
+  screenTitle: { color: "white", fontSize: 28, fontWeight: "bold" },
+  screenSubtitle: { color: colors.textSecondary, fontSize: 14 },
+  headerDivider: { height: 1, backgroundColor: "#1C1C1E" },
 
   loading: {
     flex: 1,

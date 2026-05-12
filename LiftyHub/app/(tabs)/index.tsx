@@ -377,8 +377,25 @@ export default function RoutinesScreen() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       {!isConnected && <OfflineBanner />}
+      <View style={styles.pageHeader}>
+        <View style={styles.pageHeaderRow}>
+          <Text style={styles.screenTitle}>{t("routines.title")}</Text>
+          {activeTab === "mine" && (
+            <View style={styles.headerActions}>
+              <HapticButton style={styles.iconButton} onPress={handleOpenScanner}>
+                <Ionicons name="qr-code" size={20} color="white" />
+              </HapticButton>
+              <HapticButton style={styles.iconButton} onPress={() => router.push("/routines/new")}>
+                <Ionicons name="add" size={26} color="white" />
+              </HapticButton>
+            </View>
+          )}
+        </View>
+        <Text style={styles.screenSubtitle}>{t("routines.subtitle")}</Text>
+      </View>
+      <View style={styles.headerDivider} />
 
     <FlatList
       ref={listRef}
@@ -400,11 +417,8 @@ export default function RoutinesScreen() {
       }
       ListHeaderComponent={
         <>
-          {/* HEADER */}
+          {/* SEARCH */}
           <View style={styles.header}>
-            <Text style={styles.title}>{t("routines.title")}</Text>
-            <Text style={styles.subtitle}>{t("routines.subtitle")}</Text>
-
             <TextInput
               placeholder={t("routines.search")}
               placeholderTextColor={colors.textSecondary}
@@ -412,17 +426,6 @@ export default function RoutinesScreen() {
               value={search}
               onChangeText={setSearch}
             />
-
-            {activeTab === "mine" && (
-              <View style={styles.headerButtons}>
-                <HapticButton style={styles.iconButton} onPress={handleOpenScanner}>
-                  <Ionicons name="qr-code" size={20} color="white" />
-                </HapticButton>
-                <HapticButton style={styles.iconButton} onPress={() => router.push("/routines/new")}>
-                  <Ionicons name="add" size={26} color="white" />
-                </HapticButton>
-              </View>
-            )}
           </View>
 
           {/* TAB SWITCH */}
@@ -695,20 +698,14 @@ const styles = StyleSheet.create({
     paddingBottom: 40
   },
 
+  pageHeader: { paddingTop: 54, paddingBottom: 16, paddingHorizontal: spacing.screenPadding, gap: 2 },
+  pageHeaderRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  screenTitle: { color: "white", fontSize: 28, fontWeight: "bold" },
+  screenSubtitle: { color: colors.textSecondary, fontSize: 14 },
+  headerDivider: { height: 1, backgroundColor: "#1C1C1E" },
+  headerActions: { flexDirection: "row", gap: 8 },
+
   header: {
-    marginBottom: 16
-  },
-
-  title: {
-    color: colors.text,
-    fontSize: 28,
-    fontWeight: "bold",
-    marginTop: 40
-  },
-
-  subtitle: {
-    color: colors.textSecondary,
-    marginTop: 4,
     marginBottom: 16
   },
 
