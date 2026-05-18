@@ -1,12 +1,11 @@
-import { Box, Typography, TextField, IconButton } from "@mui/material";
+import { Box, TextField } from "@mui/material";
 import UserStats from "../components/users/UserStats"
 import UserCharts from "../components/users/UserCharts"
 import TopStreaks from "../components/users/TopStreaks"
 import UserTable from "../components/users/UserTable"
 import SearchIcon from "@mui/icons-material/Search";
-import SettingsIcon from "@mui/icons-material/Settings";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";import { useEffect, useState } from "react";
+import TopNavbar from "../components/dashboard/TopNavbar";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import UserForm from "../components/users/UserForm";
 import { Chart as ChartJS, CategoryScale, LinearScale, ArcElement, PointElement, LineElement, Tooltip, Legend} from "chart.js";
@@ -83,7 +82,7 @@ useEffect(() => {
     Swal.fire({
       title: "Cargando usuarios...",
       text: "Obteniendo estadísticas",
-      background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background:"#0f1117",
       color:"#fff",
       allowOutsideClick:false,
       didOpen: () => {
@@ -138,49 +137,11 @@ setTopStreaks(statsData.top_streaks || [])
         flexGrow: 1,
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#000000",
-        padding: 1
+        background: "linear-gradient(180deg, #0b0e15 0%, #0f1117 100%)",
+        minHeight: "100vh"
       }}
     >
-      <Box
-      display="flex"
-      justifyContent="space-between"
-      alignItems="center"
-      p={3}
-      color="white"
-    >
-      {/* Breadcrumb + Title */}
-
-      <Box>
-        <Typography variant="body2" sx={{ color: "#8f9bb3" }}>
-          &nbsp;&nbsp;Panel de control
-        </Typography>
-
-        <Typography variant="h5" fontWeight="bold">
-          &nbsp;Usuarios
-        </Typography>
-      </Box>
-
-      {/* Right side */}
-
-      <Box display="flex" alignItems="center" gap={2}>
-        
-      
-
-        <IconButton sx={{ color: "white" }}>
-          <AccountCircleIcon />
-        </IconButton>
-
-        <IconButton sx={{ color: "white" }}>
-          <SettingsIcon />
-        </IconButton>
-
-        <IconButton sx={{ color: "white" }}>
-          <NotificationsIcon />
-        </IconButton>
-
-      </Box>
-    </Box>
+      <TopNavbar />
 
 <Box sx={{ml:6,mt:3}}>
 

@@ -52,7 +52,7 @@ const getData = async () => {
         Swal.fire({
           title: "Cargando ejercicios...",
           text: "Obteniendo información",
-          background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+          background: "#0f1117",
           color: "#fff",
                 confirmButtonColor:"#60a5fa",
           allowOutsideClick: false,
@@ -91,7 +91,7 @@ const getData = async () => {
       confirmButtonColor: "#ef4444",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Sí, eliminar",
-      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background: "#0f1117",
       color: "#fff"
     });
 
@@ -119,7 +119,7 @@ const getData = async () => {
       icon: "success",
       title: "Archivo eliminado",
       confirmButtonColor: "#60a5fa",
-      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background: "#0f1117",
       color: "#fff"
     });
 
@@ -130,7 +130,7 @@ const getData = async () => {
       icon: "error",
       title: "Error al eliminar",
       confirmButtonColor: "#60a5fa",
-      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background: "#0f1117",
       color: "#fff"
     });
   }
@@ -167,12 +167,26 @@ const getData = async () => {
     sx={{
       position: "absolute",
       inset: 0,
-      background: "linear-gradient(to right,180deg, #1e1f24 0%, #1e1e24 100%)",
+      background: "linear-gradient(180deg, #0b0e15 0%, #0f1117 100%)",
       zIndex: 1
     }}
   />
-  <Box sx={{ position: "relative", zIndex: 2, pl: 9,pr:9 }}>
+  <Box sx={{ position: "relative", zIndex: 2, pl: 9, pr: 9 }}>
     <TopNavbar />
+    <Box sx={{ mb: 2 }}>
+      <Button
+        startIcon={<ArrowBackIosIcon sx={{ fontSize: 14 }} />}
+        onClick={() => navigate("/dashboard/exercises")}
+        sx={{
+          color: "#94a3b8", textTransform: "none", fontWeight: 600, fontSize: 14,
+          borderRadius: "10px", px: 2, py: 0.8,
+          border: "1px solid rgba(255,255,255,0.1)",
+          "&:hover": { background: "rgba(255,255,255,0.06)", color: "white" }
+        }}
+      >
+        Volver a ejercicios
+      </Button>
+    </Box>
 
 
 {/*SI NO HAY ARCHIVOS... */}

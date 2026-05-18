@@ -43,7 +43,7 @@ if (file) {
            Swal.fire({
               icon: "success",
               title: "Somatotipo creado",
-              background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+              background: "#0f1117",
               confirmButtonColor:"#60a5fa",
               color: "#fff"
             });
@@ -52,7 +52,7 @@ if (file) {
        Swal.fire({
               icon: "error",
               title: "Error al crear somatotipo",
-              background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+              background: "#0f1117",
                             confirmButtonColor:"#60a5fa",
 
               color: "#fff"
@@ -74,7 +74,7 @@ if (file) {
   }}
 >         <DialogContent
         sx={{
-          background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+          background: "#0f1117",
           color: "white",
           p: 4,
           position: "relative",

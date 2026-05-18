@@ -64,7 +64,7 @@ setEditPlan({
       Swal.fire({
         title: "Cargando planes...",
         text: "Obteniendo información",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         color: "#fff",
         allowOutsideClick: false,
         didOpen: () => {
@@ -114,7 +114,7 @@ setEditPlan({
       Swal.fire({
         icon: "success",
         title: "Plan creado",
-        background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background:"#0f1117",
         confirmButtonColor:"#60a5fa",
         color: "#fff"
       });
@@ -129,7 +129,7 @@ setEditPlan({
       Swal.fire({
         icon: "error",
         title: "Error al crear plan",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         color: "#fff",
         confirmButtonColor:"#60a5fa",
 
@@ -147,7 +147,7 @@ showCancelButton: true,
 confirmButtonText: "Sí, eliminar",
 cancelButtonText: "Cancelar",
 confirmButtonColor:"#e71d1d",
-background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+background:"#0f1117",
 color:"#fff"
 })
 
@@ -164,7 +164,7 @@ setPlans(plans.filter(plan => plan.id !== id))
 Swal.fire({
 icon:"success",
 title:"Plan eliminado",
-background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+background:"#0f1117",
 confirmButtonColor:"#60a5fa",
 color:"#fff"
 })
@@ -176,7 +176,7 @@ console.error(error)
 Swal.fire({
 icon:"error",
 title:"Error al eliminar",
-background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+background:"#0f1117",
 confirmButtonColor:"#60a5fa",
 color:"#fff"
 })
@@ -203,7 +203,7 @@ p.id === editPlan.id ? editPlan : p
 Swal.fire({
 icon:"success",
 title:"Plan actualizado",
-background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+background:"#0f1117",
 color:"#fff",
 confirmButtonColor:"#60a5fa",
 
@@ -218,7 +218,7 @@ console.error(error)
 Swal.fire({
 icon:"error",
 title:"Error al actualizar",
-background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+background:"#0f1117",
 color:"#fff",
 confirmButtonColor:"#60a5fa",
 
@@ -233,7 +233,7 @@ sx={{
 minHeight: "100vh",
 display: "flex",
 flexDirection: "column",
-background:"#000000",
+background: "linear-gradient(180deg, #0b0e15 0%, #0f1117 100%)",
 }}
 >
 

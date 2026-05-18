@@ -55,7 +55,7 @@ export default function ExercisesDashboard() {
       Swal.fire({
         title: "Cargando ejercicios...",
         text: "Obteniendo información",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         color: "#fff",
               confirmButtonColor:"#60a5fa",
         allowOutsideClick: false,
@@ -97,7 +97,7 @@ export default function ExercisesDashboard() {
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
       confirmButtonColor:"#e71d1d",
-      background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background:"#0f1117",
       color:"#fff"
     })
 
@@ -113,7 +113,7 @@ export default function ExercisesDashboard() {
       Swal.fire({
         icon:"success",
         title:"Ejercicio eliminado",
-        background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background:"#0f1117",
         color: "#fff",
               confirmButtonColor:"#60a5fa",
       })
@@ -124,7 +124,7 @@ export default function ExercisesDashboard() {
       Swal.fire({
         icon:"error",
         title:"Error al eliminar",
-        background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background:"#0f1117",
         color: "#fff",
               confirmButtonColor:"#60a5fa",
       })
@@ -137,7 +137,7 @@ export default function ExercisesDashboard() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        background:"#000000",
+        background: "linear-gradient(180deg, #0b0e15 0%, #0f1117 100%)",
         width: "100%" 
 
       }}
@@ -192,35 +192,21 @@ export default function ExercisesDashboard() {
 </Button>
 </Box>
 
-      <Box
-        sx={{
-          flexGrow:1,
-          display:"grid",
-          gridTemplateColumns:"2fr 1fr",
-          gap:3,
-          p:5
-        }}
-      >
-
-
-<Box
-  sx={{
-    display: "grid",
-gridTemplateColumns: "repeat(4, minmax(280px, 1fr))",
-    gap: 2,
-    p: 4
-  }}
->
-  {exercises.map((s) => (
-<ExercisesCard
-  key={s.id}
-  data={s}
-  onEdit={openEditModal}
-  onDelete={deleteExercise}
-/>
-  ))}
-</Box>
-
+      <Box sx={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+        gap: 2.5,
+        p: 5,
+        pt: 3,
+      }}>
+        {exercises.map((s) => (
+          <ExercisesCard
+            key={s.id}
+            data={s}
+            onEdit={openEditModal}
+            onDelete={deleteExercise}
+          />
+        ))}
       </Box>
 
 

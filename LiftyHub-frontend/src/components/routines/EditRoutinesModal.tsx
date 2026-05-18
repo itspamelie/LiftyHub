@@ -89,7 +89,7 @@ const [category, setCategory] = useState("")
       Swal.fire({
         icon: "success",
         title: "Rutina actualizada",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         color: "#fff",
         confirmButtonColor:"#60a5fa",
 
@@ -101,7 +101,7 @@ const [category, setCategory] = useState("")
       Swal.fire({
         icon: "error",
         title: "Error al actualizar",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         color: "#fff",
         confirmButtonColor:"#60a5fa",
       })
@@ -124,7 +124,7 @@ const [category, setCategory] = useState("")
   }}
 >         <DialogContent
         sx={{
-          background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+          background: "#0f1117",
           color: "white",
           p: 4,
           position: "relative",

@@ -1,6 +1,10 @@
+import { useState } from "react";
 import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 import AppleIcon from "@mui/icons-material/Apple";
 import AndroidIcon from "@mui/icons-material/Android";
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
+import { Dialog, DialogContent, IconButton } from "@mui/material";
 
 const PLANS = [
   {
@@ -29,6 +33,28 @@ const PLANS = [
   },
 ];
 
+const PLAN_HEADERS = [
+  { name: "Free",  color: "#A1A1A1" },
+  { name: "Basic", color: "#3B82F6" },
+  { name: "Meal",  color: "#10B981" },
+  { name: "Pro",   color: "#F59E0B" },
+];
+
+const COMPARE_ROWS = [
+  { label: "Rutinas propias",     values: ["7", "20", "20", "∞"] },
+  { label: "Rutinas de la app",   values: [false, true, true, true] },
+  { label: "Catálogo ejercicios", values: [true, true, true, true] },
+  { label: "Escanear QR",         values: ["1/mes", "5/mes", "10/mes", "∞"] },
+  { label: "Compartir QR",        values: ["1/mes", "5/mes", "10/mes", "∞"] },
+  { label: "Estadísticas",        values: [false, true, true, true] },
+  { label: "Músculos trabajados", values: ["7 días", true, true, true] },
+  { label: "Nutriólogo",          values: [false, false, true, true] },
+  { label: "Plan de dieta",       values: [false, false, true, true] },
+  { label: "Suplementos",         values: [false, false, true,  true] },
+  { label: "Generar rutina con IA", values: [false, false, false, true] },
+  { label: "Hidratación",          values: [false, false, false, true] },
+];
+
 const FAQS = [
   { q: "¿LiftyHub es gratis?", a: "Sí, LiftyHub tiene un plan gratuito permanente con acceso a funciones básicas. Los planes de pago desbloquean rutinas ilimitadas, estadísticas, nutriólogo y más." },
   { q: "¿En qué dispositivos está disponible?", a: "LiftyHub está disponible como app para Android e iOS, y también tiene un dashboard web para nutriólogos y administradores." },
@@ -38,10 +64,13 @@ const FAQS = [
   { q: "¿Mis datos están seguros?", a: "Sí. Toda la información se transmite encriptada y los datos personales no son compartidos con terceros bajo ninguna circunstancia." },
 ];
 
-import { useState } from "react";
-
 export default function CTA() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [compareOpen, setCompareOpen] = useState(false);
+
+  const scrollToDownload = () => {
+    document.getElementById("descarga")?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <>
@@ -85,14 +114,16 @@ export default function CTA() {
                   <span style={{ color: "#94a3b8", fontSize: 14 }}>{plan.period}</span>
                 </div>
                 <p style={{ color: "#94a3b8", fontSize: 13, marginBottom: 20 }}>{plan.desc}</p>
-                <button style={{
-                  width: "100%", padding: "11px", borderRadius: 9, border: "none",
-                  background: plan.popular ? plan.color : "rgba(255,255,255,0.07)",
-                  color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer",
-                  marginBottom: 20, transition: "opacity .2s",
-                }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+                <button
+                  onClick={scrollToDownload}
+                  style={{
+                    width: "100%", padding: "11px", borderRadius: 9, border: "none",
+                    background: plan.popular ? plan.color : "rgba(255,255,255,0.07)",
+                    color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                    marginBottom: 20, transition: "opacity .2s",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+                  onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
                 >{plan.btn}</button>
                 <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
                   {plan.features.map(f => (
@@ -104,8 +135,123 @@ export default function CTA() {
               </div>
             ))}
           </div>
+
+          {/* Compare button */}
+          <div style={{ textAlign: "center", marginTop: 36 }}>
+            <button
+              onClick={() => setCompareOpen(true)}
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(59,130,246,0.35)",
+                borderRadius: 10, padding: "11px 28px",
+                color: "#3B82F6", fontWeight: 600, fontSize: 14,
+                cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8,
+                transition: "background .2s, border-color .2s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "rgba(59,130,246,0.08)"; e.currentTarget.style.borderColor = "rgba(59,130,246,0.6)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(59,130,246,0.35)"; }}
+            >
+              <CompareArrowsIcon sx={{ fontSize: 17 }} /> Comparar todos los planes
+            </button>
+          </div>
         </div>
       </section>
+
+      {/* COMPARE DIALOG */}
+      <Dialog
+        open={compareOpen}
+        onClose={() => setCompareOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: "#0f1623",
+            border: "1px solid rgba(59,130,246,0.2)",
+            borderRadius: "20px",
+            color: "white",
+          },
+        }}
+      >
+        <DialogContent sx={{ p: 3 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800, letterSpacing: "-0.4px" }}>Comparar planes</h3>
+              <p style={{ margin: "5px 0 0", color: "#64748b", fontSize: 13 }}>Todas las funciones en detalle</p>
+            </div>
+            <IconButton onClick={() => setCompareOpen(false)} sx={{ color: "#475569", "&:hover": { color: "#fff" } }}>
+              <CloseIcon sx={{ fontSize: 20 }} />
+            </IconButton>
+          </div>
+
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={{ textAlign: "left", padding: "10px 16px", color: "#475569", fontSize: 12, fontWeight: 600, width: "38%" }}>
+                    Función
+                  </th>
+                  {PLAN_HEADERS.map(p => (
+                    <th key={p.name} style={{ textAlign: "center", padding: "10px 12px", minWidth: 80 }}>
+                      <div style={{ color: p.color, fontSize: 13, fontWeight: 800 }}>{p.name}</div>
+                      {p.name === "Pro" && (
+                        <div style={{
+                          display: "inline-block", marginTop: 4,
+                          background: p.color, color: "white",
+                          fontSize: 9, fontWeight: 800, padding: "2px 7px",
+                          borderRadius: 4, letterSpacing: "0.06em",
+                        }}>POPULAR</div>
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARE_ROWS.map((row, i) => (
+                  <tr key={i} style={{
+                    borderTop: "1px solid rgba(255,255,255,0.05)",
+                    background: i % 2 === 0 ? "rgba(255,255,255,0.015)" : "transparent",
+                  }}>
+                    <td style={{ padding: "13px 16px", fontSize: 13, color: "#cbd5e1", fontWeight: 500 }}>
+                      {row.label}
+                    </td>
+                    {(row.values as (boolean | string)[]).map((val, vi) => (
+                      <td key={vi} style={{ textAlign: "center", padding: "13px 12px" }}>
+                        {val === true ? (
+                          <CheckIcon sx={{ fontSize: 18, color: "#22c55e" }} />
+                        ) : val === false ? (
+                          <span style={{ color: "#2d3748", fontSize: 18, fontWeight: 700 }}>—</span>
+                        ) : (
+                          <span style={{
+                            color: PLAN_HEADERS[vi].color,
+                            fontSize: 12, fontWeight: 700,
+                            background: `${PLAN_HEADERS[vi].color}18`,
+                            padding: "3px 8px", borderRadius: 6,
+                          }}>{val}</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div style={{ textAlign: "center", marginTop: 28 }}>
+            <button
+              onClick={() => { setCompareOpen(false); scrollToDownload(); }}
+              style={{
+                background: "#3B82F6", border: "none", borderRadius: 10,
+                padding: "12px 32px", color: "white", fontWeight: 700,
+                fontSize: 14, cursor: "pointer", transition: "background .2s",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = "#2563EB")}
+              onMouseLeave={e => (e.currentTarget.style.background = "#3B82F6")}
+            >
+              Descargar LiftyHub
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* FAQ */}
       <section id="faq" style={{ padding: "90px 40px" }}>
@@ -152,7 +298,7 @@ export default function CTA() {
       </section>
 
       {/* CTA FINAL */}
-      <section style={{
+      <section id="descarga" style={{
         margin: "0 40px 80px", borderRadius: 20,
         background: "linear-gradient(135deg, #1a2744 0%, #0f1623 100%)",
         border: "1px solid rgba(59,130,246,0.25)",

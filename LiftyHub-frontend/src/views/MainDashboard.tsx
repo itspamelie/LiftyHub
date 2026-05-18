@@ -62,7 +62,7 @@ useEffect(() => {
     Swal.fire({
       title: "Cargando dashboard...",
       text: "Obteniendo información",
-      background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background:"#0f1117",
       color:"#fff",
       allowOutsideClick:false,
       didOpen: () => {
@@ -80,30 +80,19 @@ useEffect(() => {
         flexGrow: 1,
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#111214",
-        padding: 1
+        background: "linear-gradient(180deg, #0b0e15 0%, #0f1117 100%)",
+        minHeight: "100vh"
       }}
     >
       <TopNavbar />
 
-      <Box sx={{ pl: 3 }}>
-
+      <Box sx={{ flex: 1 }}>
         <StatsCards dashboard={dashboard} />
-
         <ChartsRow dashboard={dashboard} />
-
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr",
-            gap: 3,
-            pl:3
-          }}
-        >
-          <ProjectsTable  dashboard={dashboard} />
+        <Box sx={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 2.5, px: 3, pb: 3 }}>
+          <ProjectsTable dashboard={dashboard} />
           <OrdersOverview dashboard={dashboard} />
         </Box>
-
       </Box>
     </Box>
   );

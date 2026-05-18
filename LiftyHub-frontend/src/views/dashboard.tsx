@@ -27,30 +27,13 @@ export default function Dashboard() {
       sx={{
         display: "flex",
         minHeight: "100vh",
-        backgroundColor: "#000000"
+        background: "linear-gradient(180deg, #0b0e15 0%, #0f1117 100%)"
       }}
     >
       <Sidebar />
-      <Outlet />
-    </Box>
-  );
-
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        minHeight: "100vh",
-        backgroundColor: "#000000"
-      }}
-    >
-
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Aquí se renderiza MainDashboard */}
-      <Outlet />
-
+      <Box sx={{ flex: 1, overflow: "auto" }}>
+        <Outlet />
+      </Box>
     </Box>
   );
 }

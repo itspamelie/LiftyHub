@@ -28,6 +28,7 @@ export default function Navbar() {
     { href: "#opiniones", label: "Opiniones" },
     { href: "#planes", label: "Planes" },
     { href: "#faq", label: "FAQ" },
+    { href: "/Liftyhub-Experts", label: "Únete a nosotros" },
   ];
 
   return (
@@ -78,7 +79,7 @@ export default function Navbar() {
             onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >Iniciar sesión</a>
           )}
-          <a href="#" style={{
+          <a href="#descarga" style={{
             background: "#3B82F6", color: "#fff", fontSize: 14, fontWeight: 700,
             padding: "9px 22px", borderRadius: 8, textDecoration: "none",
             transition: "background .2s",
@@ -114,7 +115,7 @@ export default function Navbar() {
               textAlign: "center", background: "rgba(255,255,255,0.06)", color: "white",
               padding: "11px", borderRadius: 8, textDecoration: "none", fontWeight: 500,
             }}>{dashboardPath ? "Mi dashboard" : "Iniciar sesión"}</a>
-            <a href="#" style={{
+            <a href="#descarga" style={{
               textAlign: "center", background: "#3B82F6", color: "white",
               padding: "11px", borderRadius: 8, textDecoration: "none", fontWeight: 700,
             }}>Descargar gratis</a>

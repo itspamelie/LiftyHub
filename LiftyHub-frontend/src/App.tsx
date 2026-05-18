@@ -22,14 +22,23 @@ import MainNutritionist from './components/nutritionist/MainNutritionist';
 import DietsDashboard from './components/nutritionist/DietsDashboard';
 import ConfigDashboard from './components/nutritionist/ConfigDashboard';
 import RequestsDashboard from './components/nutritionist/RequestsDashboard';
-import PrivacyPolicy from './views/PrivacyPolicy';
+import PrivacyPolicy from './views/PrivacyPolicy'
+import TermsOfService from './views/TermsOfService';
+import RegisterNutritionist from './views/RegisterNutritionist';
+import ApplicationsDashboard from './views/ApplicationsDashboard';
 function PrivateRouteExperts({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/Liftyhub-Experts-Login" replace />;
+  const stored = localStorage.getItem("user");
+  const role = stored ? JSON.parse(stored).role : null;
+  if (token && role === "nutritionist") return <>{children}</>;
+  return <Navigate to="/Liftyhub-Experts-Login" replace />;
 }
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/login" replace />;
+  const stored = localStorage.getItem("user");
+  const role = stored ? JSON.parse(stored).role : null;
+  if (token && role === "admin") return <>{children}</>;
+  return <Navigate to="/login" replace />;
 }
 
 function App() {
@@ -39,8 +48,10 @@ function App() {
 
         <Route path="/" element={<Home/>}/>
         <Route path="/politica-de-privacidad" element={<PrivacyPolicy/>}/>
+        <Route path="/terminos" element={<TermsOfService/>}/>
         <Route path="/login" element={<Login/>}/>
         <Route path="/Liftyhub-Experts" element={<NutritionistJoin/>}/>
+        <Route path="/Liftyhub-Experts-Register" element={<RegisterNutritionist/>}/>
         <Route path="/Liftyhub-Experts-Login" element={<LoginPage/>}/>
 
         {/*DASHBOARD*/}
@@ -57,6 +68,7 @@ function App() {
 <Route path="routine/:id/add-exercise"element={<AddExerciseToRoutine />}/>
 <Route path="routine/:id/add-routine-to-exercise"element={<AddRoutineToExercise />}/>
 <Route path="nutritionists/:id" element={<NutritionistDetail />} />
+          <Route path="applications" element={<ApplicationsDashboard />} />
         </Route>
 
 

@@ -92,7 +92,7 @@ if (file) {
       Swal.fire({
         icon: "success",
         title: "Rutina creada",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         confirmButtonColor: "#60a5fa",
         color: "#fff"
       });
@@ -102,7 +102,7 @@ if (file) {
       Swal.fire({
         icon: "error",
         title: "Error al crear la rutina",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         color: "#fff",
               confirmButtonColor:"#60a5fa",
 
@@ -124,7 +124,7 @@ if (file) {
   }}
 >         <DialogContent
         sx={{
-          background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+          background: "#0f1117",
           color: "white",
           p: 4,
           position: "relative",

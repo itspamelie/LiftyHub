@@ -54,7 +54,7 @@ export default function SomatotypesDashboard() {
       Swal.fire({
         title: "Cargando somatotipos...",
         text: "Obteniendo información",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         color: "#fff",
         allowOutsideClick: false,
         didOpen: () => {
@@ -95,7 +95,7 @@ export default function SomatotypesDashboard() {
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
       confirmButtonColor:"#e71d1d",
-      background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background:"#0f1117",
       color:"#fff"
     })
 
@@ -111,7 +111,7 @@ export default function SomatotypesDashboard() {
       Swal.fire({
         icon:"success",
         title:"Somatotipo eliminado",
-        background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background:"#0f1117",
         confirmButtonColor:"#60a5fa",
         color:"#fff"
       })
@@ -121,8 +121,8 @@ export default function SomatotypesDashboard() {
 
       Swal.fire({
         icon:"error",
-        title:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
-        background:"#0f172a",
+        title:"Error al eliminar",
+        background:"#0f1117",
         confirmButtonColor:"#60a5fa",
         color:"#fff"
       })
@@ -136,8 +136,8 @@ export default function SomatotypesDashboard() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        background:"#000000",
-        width: "100%" 
+        background: "linear-gradient(180deg, #0b0e15 0%, #0f1117 100%)",
+        width: "100%"
 
       }}
     >

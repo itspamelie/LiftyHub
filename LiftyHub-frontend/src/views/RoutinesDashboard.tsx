@@ -53,7 +53,7 @@ export default function RoutinesDashboard() {
       Swal.fire({
         title: "Cargando rutinas...",
         text: "Obteniendo información",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         color: "#fff",
         allowOutsideClick: false,
         didOpen: () => {
@@ -94,7 +94,7 @@ export default function RoutinesDashboard() {
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
       confirmButtonColor: "#e71d1d",
-      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background: "#0f1117",
       color: "#fff"
     })
 
@@ -110,7 +110,7 @@ export default function RoutinesDashboard() {
       Swal.fire({
         icon: "success",
         title: "Rutina eliminada",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         confirmButtonColor: "#60a5fa",
         color: "#fff"
       })
@@ -121,7 +121,7 @@ export default function RoutinesDashboard() {
       Swal.fire({
         icon: "error",
         title: "Error al eliminar",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         confirmButtonColor: "#60a5fa",
         color: "#fff"
       })
@@ -134,7 +134,7 @@ export default function RoutinesDashboard() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        background: "#000000",
+        background: "linear-gradient(180deg, #0b0e15 0%, #0f1117 100%)",
         width: "100%"
       }}
     >

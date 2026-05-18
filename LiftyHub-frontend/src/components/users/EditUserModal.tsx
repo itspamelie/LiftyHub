@@ -91,7 +91,7 @@ Swal.fire({
 icon:"success",
 title:"Usuario actualizado",
 timer:1500,
-background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+background:"#0f1117",
 color:"#fff",
 showConfirmButton:false
 })
@@ -119,7 +119,7 @@ maxWidth="md"
 fullWidth
 PaperProps={{
 sx:{
-background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+background:"#0f1117",
 color:"white",
 borderRadius:"16px"
 }

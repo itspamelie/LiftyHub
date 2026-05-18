@@ -1,32 +1,27 @@
 import XIcon from "@mui/icons-material/X";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import type { SvgIconComponent } from "@mui/icons-material";
 
 const SOCIAL: { Icon: SvgIconComponent; href: string }[] = [
-  { Icon: XIcon, href: "#" },
-  { Icon: FacebookIcon, href: "#" },
-  { Icon: InstagramIcon, href: "#" },
-  { Icon: LinkedInIcon, href: "#" },
+  { Icon: XIcon, href: "https://x.com/liftyhub" },
+  { Icon: FacebookIcon, href: "https://www.facebook.com/profile.php?id=61566671511389" },
+  { Icon: InstagramIcon, href: "https://www.instagram.com/liftyhub/" },
 ];
 
 export default function Footer() {
-    const COLS = [
+  const COLS = [
     {
       title: "Producto",
       links: ["Funciones", "Planes", "Opiniones", "FAQ", "Descargar"],
-      hrefs: ["#funciones", "#planes", "#opiniones", "#faq", "#"],
-    },
-    {
-      title: "Empresa",
-      links: ["Sobre nosotros", "Blog", "Prensa", "Trabaja con nosotros"],
-      hrefs: ["#", "#", "#", "#"],
+      hrefs: ["#funciones", "#planes", "#opiniones", "#faq", "#descarga"],
+      external: [false, false, false, false, false],
     },
     {
       title: "Legal",
       links: ["Política de privacidad", "Términos de servicio", "Cookies"],
-      hrefs: ["/politica-de-privacidad", "#", "#"],
+      hrefs: ["/politica-de-privacidad", "/terminos", "/politica-de-privacidad"],
+      external: [false, false, false],
     },
   ];
 
@@ -34,7 +29,7 @@ export default function Footer() {
     <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "60px 40px 32px" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 40, marginBottom: 48 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 40, marginBottom: 48 }}>
 
           {/* Brand col */}
           <div>
@@ -47,7 +42,7 @@ export default function Footer() {
             </p>
             <div style={{ display: "flex", gap: 10 }}>
               {SOCIAL.map(({ Icon, href }, i) => (
-                <a key={i} href={href} style={{
+                <a key={i} href={href} target="_blank" rel="noopener noreferrer" style={{
                   width: 36, height: 36, borderRadius: "50%",
                   border: "1px solid rgba(255,255,255,0.1)",
                   display: "flex", alignItems: "center", justifyContent: "center",
@@ -68,9 +63,11 @@ export default function Footer() {
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
                 {col.links.map((l, li) => (
                   <li key={l}>
-                    <a href={col.hrefs[li]} style={{ color: "#64748b", fontSize: 14, textDecoration: "none", transition: "color .2s" }}
-                    onMouseEnter={e => (e.currentTarget.style.color = "#3B82F6")}
-                    onMouseLeave={e => (e.currentTarget.style.color = "#64748b")}
+                    <a
+                      href={col.hrefs[li]}
+                      style={{ color: "#64748b", fontSize: 14, textDecoration: "none", transition: "color .2s" }}
+                      onMouseEnter={e => (e.currentTarget.style.color = "#3B82F6")}
+                      onMouseLeave={e => (e.currentTarget.style.color = "#64748b")}
                     >{l}</a>
                   </li>
                 ))}

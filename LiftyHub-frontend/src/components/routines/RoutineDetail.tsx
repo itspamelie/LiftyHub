@@ -85,7 +85,7 @@ const mapped = exercisesData.map((item: any) => {
         Swal.fire({
           title: "Cargando rutinas...",
           text: "Obteniendo información",
-          background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+          background: "#0f1117",
           color: "#fff",
                 confirmButtonColor:"#60a5fa",
           allowOutsideClick: false,
@@ -110,7 +110,7 @@ const handleDelete = async (id: number) => {
       confirmButtonColor: "#ef4444",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Sí, eliminar",
-      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background: "#0f1117",
       color: "#fff"
     });
 
@@ -127,7 +127,7 @@ const handleDelete = async (id: number) => {
       icon: "success",
       title: "Ejercicio eliminado de la rutina",
       confirmButtonColor: "#60a5fa",
-      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background: "#0f1117",
       color: "#fff"
     });
 
@@ -138,7 +138,7 @@ const handleDelete = async (id: number) => {
       icon: "error",
       title: "Error al eliminar el ejercicio",
       confirmButtonColor: "#60a5fa",
-      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background: "#0f1117",
       color: "#fff"
     });
   }

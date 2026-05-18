@@ -79,7 +79,7 @@ Swal.fire({
 icon:"success",
 title:"Usuario creado",
 text:"El usuario se registró correctamente",
-      background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background:"#0f1117",
       confirmButtonColor:"#60a5fa",
       color:"#fff",
 })
@@ -90,7 +90,7 @@ Swal.fire({
 icon:"error",
 title:"Error",
 text:"No se pudo crear el usuario",
-      background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background:"#0f1117",
       color:"#fff",
       confirmButtonColor: "#3b82f6"
 })
@@ -100,7 +100,7 @@ text:"No se pudo crear el usuario",
 }
 return(
 
-<Card sx={{background:"linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",color:"white",borderRadius:"16px"}}>
+<Card sx={{background: "linear-gradient(135deg, #13141c 0%, #0f1117 100%)",color:"white",borderRadius: "20px", border: "1px solid rgba(255,255,255,0.07)", boxShadow: "0 8px 32px rgba(0,0,0,0.4)"}}>
 
 <CardContent>
 

@@ -34,6 +34,8 @@ const COMPARE_ROWS: CompareRow[] = [
   { label: "Nutriólogo",          icon: "person-outline",        values: [false,   false,   true,     true]  },
   { label: "Plan de dieta",       icon: "nutrition-outline",     values: [false,   false,   true,     true]  },
   { label: "Suplementos",         icon: "flask-outline",         values: [false,   false,   true,     true]  },
+  { label: "Generar rutina con IA", icon: "color-wand-outline",  values: [false,   false,   false,    true]  },
+  { label: "Hidratación",          icon: "water-outline",        values: [false,   false,   false,    true]  },
 ];
 
 // Widths calibrated to fit 4 plan columns without horizontal scroll (~375px screen)

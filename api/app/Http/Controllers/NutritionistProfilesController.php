@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\NutritionistProfile;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NutritionistApprovedMail;
 
 class NutritionistProfilesController extends Controller
 {
@@ -104,14 +107,25 @@ public function show(string $id)
             'is_active'=>'required'
          ]);
 
-        //metodo si los campos se llaman igual que en la base de datos
         $data = NutritionistProfile::findOrFail($id);
+        $wasInactive = !$data->is_active;
         $data->update($validated);
-          return response()->json([
+
+        if ($wasInactive && $validated['is_active']) {
+            $user = User::find($data->user_id);
+            if ($user) {
+                try {
+                    Mail::to($user->email)->send(new NutritionistApprovedMail($user->name));
+                } catch (\Exception $e) {
+                    \Log::error('Nutritionist approved email failed: ' . $e->getMessage());
+                }
+            }
+        }
+
+        return response()->json([
             "status"=>"ok",
             "mesage"=>"Perfil actualizado correctamente.",
             "data"=>$data
-
         ]);
     }
 

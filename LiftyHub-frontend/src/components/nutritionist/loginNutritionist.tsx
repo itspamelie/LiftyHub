@@ -28,8 +28,6 @@ export default function LoginPage() {
     const stored = localStorage.getItem("user")
     const role = stored ? JSON.parse(stored).role : null
     if (role === "nutritionist") return <Navigate to="/DashboardForExperts/" replace />
-    if (role === "admin") return <Navigate to="/dashboard" replace />
-    return <Navigate to="/" replace />
   }
   if (token && isTokenExpired(token)) {
     localStorage.clear()
@@ -100,6 +98,15 @@ export default function LoginPage() {
           <img src="/logo.jpg" alt="LiftyHub" style={{ height: 36, borderRadius: 9 }} />
           <span style={{ color: "white", fontWeight: 800, fontSize: 18, letterSpacing: "-0.5px", marginLeft: 10 }}>LiftyHub</span>
         </Link>
+        <Link to="/Liftyhub-Experts" style={{
+          marginLeft: "auto", display: "flex", alignItems: "center", gap: 6,
+          color: "#94a3b8", fontSize: 14, fontWeight: 500, textDecoration: "none",
+          padding: "7px 14px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)",
+          transition: "background .2s",
+        }}
+          onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
+          onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.background = "transparent")}
+        >← Volver</Link>
       </header>
 
       {/* Main */}

@@ -50,7 +50,7 @@ export default function EditExerciseRoutineModal({
         icon: "success",
         title: "Ejercicio actualizado",
         confirmButtonColor: "#60a5fa",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         color: "#fff"
       });
 
@@ -64,7 +64,7 @@ export default function EditExerciseRoutineModal({
         icon: "error",
         title: "Error al actualizar",
         confirmButtonColor: "#60a5fa",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         color: "#fff"
       });
     }
@@ -87,7 +87,7 @@ export default function EditExerciseRoutineModal({
 >    
   <DialogContent
         sx={{
-          background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+          background: "#0f1117",
           color: "white",
           p: 4,
           position: "relative"

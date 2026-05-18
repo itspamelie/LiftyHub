@@ -27,7 +27,7 @@ export default function NutritionistDashboard() {
     const getNutritionists = async () => {
       try {
         const data = await apiFetch("/nutritionistProfiles");
-        setNutritionists(data.data || []);
+        setNutritionists((data.data || []).filter((n: any) => n.is_active));
       } catch (err) {
         console.error(err);
       } finally {
@@ -43,7 +43,7 @@ export default function NutritionistDashboard() {
     if (loading) {
       Swal.fire({
         title: "Cargando nutriólogos...",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         color: "#fff",
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
@@ -76,7 +76,7 @@ export default function NutritionistDashboard() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        background:"#000000",
+        background: "linear-gradient(180deg, #0b0e15 0%, #0f1117 100%)",
         width: "100%",
         pl:4
 
@@ -116,10 +116,14 @@ export default function NutritionistDashboard() {
 <Card
   key={n.id}
   sx={{
-    borderRadius: "16px",
-    background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+    borderRadius: "20px",
+    background: "linear-gradient(135deg, #13141c 0%, #0f1117 100%)",
     color: "white",
-    overflow: "hidden"
+    overflow: "hidden",
+    border: "1px solid rgba(255,255,255,0.07)",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+    transition: "transform 0.2s",
+    "&:hover": { transform: "translateY(-2px)" }
   }}
 >
   {/* HEADER */}

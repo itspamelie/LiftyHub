@@ -1,8 +1,10 @@
 import { Tabs, router } from "expo-router";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import { Text, View, TouchableOpacity, StyleSheet, Animated } from "react-native";
+import { useState, useRef, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { useSubscription } from "@/src/context/SubscriptionContext";
 import { planColors, colors } from "@/src/styles/globalstyles";
@@ -78,6 +80,107 @@ export default function TabLayout() {
   const membershipColor = planColors[plan?.name ?? "Free"];
   const insets = useSafeAreaInsets();
 
+  const [fabOpen, setFabOpen] = useState(false);
+  const fabAnim = useRef(new Animated.Value(0)).current;
+  const [hydrationCount, setHydrationCount] = useState(0);
+  const HYDRATION_GOAL = 8;
+  const hydrationFillAnim = useRef(new Animated.Value(0)).current;
+  const hydrationTransAnim = useRef(new Animated.Value(0)).current; // 0=icon, 1=number
+  const hydrationCountTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hydrationTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hydrationTapCount = useRef(0);
+  const hydrationIconOpacity = hydrationTransAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
+  const hydrationNumOpacity  = hydrationTransAnim;
+
+  const animateHydrationBtn = (value: number) => {
+    Animated.spring(hydrationFillAnim, {
+      toValue: 48 * Math.min(value / HYDRATION_GOAL, 1),
+      useNativeDriver: false,
+      tension: 80,
+      friction: 8,
+    }).start();
+  };
+
+  const loadHydration = async () => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const date = await AsyncStorage.getItem("@liftyhub_hydration_date");
+      if (date !== today) { setHydrationCount(0); animateHydrationBtn(0); return; }
+      const count = parseInt((await AsyncStorage.getItem("@liftyhub_hydration_count")) ?? "0");
+      setHydrationCount(count);
+      animateHydrationBtn(count);
+    } catch {}
+  };
+
+  const updateHydration = async (next: number) => {
+    setHydrationCount(next);
+    animateHydrationBtn(next);
+    if (hydrationCountTimer.current) clearTimeout(hydrationCountTimer.current);
+    Animated.timing(hydrationTransAnim, { toValue: 1, duration: 180, useNativeDriver: true }).start();
+    hydrationCountTimer.current = setTimeout(() => {
+      Animated.timing(hydrationTransAnim, { toValue: 0, duration: 180, useNativeDriver: true }).start();
+    }, 1500);
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      await AsyncStorage.setItem("@liftyhub_hydration_date", today);
+      await AsyncStorage.setItem("@liftyhub_hydration_count", String(next));
+    } catch {}
+  };
+
+  const addHydration = async () => {
+    hydrationTapCount.current += 1;
+    if (hydrationTapTimer.current) clearTimeout(hydrationTapTimer.current);
+
+    hydrationTapTimer.current = setTimeout(async () => {
+      const taps = hydrationTapCount.current;
+      hydrationTapCount.current = 0;
+
+      if (taps >= 2) {
+        // Doble tap → restar
+        if (hydrationCount <= 0) return;
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        await updateHydration(Math.max(0, hydrationCount - 1));
+      } else {
+        // Tap simple → sumar
+        if (hydrationCount >= HYDRATION_GOAL) return;
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        await updateHydration(hydrationCount + 1);
+      }
+    }, 250);
+  };
+
+
+  useEffect(() => { loadHydration(); }, []);
+
+  const toggleFab = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (!fabOpen) loadHydration();
+    const toValue = fabOpen ? 0 : 1;
+    setFabOpen(!fabOpen);
+    Animated.spring(fabAnim, {
+      toValue,
+      useNativeDriver: true,
+      tension: 90,
+      friction: 8,
+    }).start();
+  };
+
+  const closeFab = (callback?: () => void) => {
+    setFabOpen(false);
+    Animated.spring(fabAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 90,
+      friction: 8,
+    }).start(() => callback?.());
+  };
+
+  const btn1TranslateY = fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -64] });
+  const btn2TranslateY = fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -128] });
+  const btn3TranslateY = fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -192] });
+  const subScale = fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] });
+  const subOpacity = fabAnim;
+
 
   return (
     <View key={language} style={{ flex: 1 }}>
@@ -135,15 +238,116 @@ export default function TabLayout() {
 
       </Tabs>
 
-      {/* OVERLAY GLOBAL - botón avatar corporal */}
+      {/* SPEED DIAL — músculos + IA */}
       <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+
+        {/* Overlay para cerrar al tocar fuera */}
+        {fabOpen && (
+          <TouchableOpacity
+            style={StyleSheet.absoluteFillObject}
+            activeOpacity={1}
+            onPress={() => closeFab()}
+          />
+        )}
+
+        {/* Sub-btn 1: Hidratación — tap = +1 vaso, long press = pantalla */}
+        <Animated.View
+          pointerEvents={fabOpen ? "auto" : "none"}
+          style={[
+            overlayStyles.bodyBtn,
+            {
+              bottom: 70 + insets.bottom + 12,
+              right: 20,
+              backgroundColor: "#0c2340",
+              overflow: "hidden",
+              opacity: subOpacity,
+              transform: [{ translateY: btn1TranslateY }, { scale: subScale }],
+            },
+          ]}
+        >
+          <Animated.View style={{
+            position: "absolute", bottom: 0, left: 0, right: 0,
+            height: hydrationFillAnim,
+            backgroundColor: "#3B82F6",
+          }} />
+          <TouchableOpacity
+            style={overlayStyles.subBtnInner}
+            onPress={addHydration}
+            onLongPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); closeFab(() => router.push("/hydration" as any)); }}
+            delayLongPress={400}
+            activeOpacity={0.85}
+          >
+            <Animated.View style={{ position: "absolute", opacity: hydrationIconOpacity }}>
+              <Ionicons name="water" size={20} color="white" />
+            </Animated.View>
+            <Animated.View style={{ position: "absolute", opacity: hydrationNumOpacity }}>
+              <Text style={{ color: "white", fontWeight: "800", fontSize: 15 }}>{hydrationCount}</Text>
+            </Animated.View>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Sub-btn 2: Músculos trabajados */}
+        <Animated.View
+          pointerEvents={fabOpen ? "auto" : "none"}
+          style={[
+            overlayStyles.bodyBtn,
+            {
+              bottom: 70 + insets.bottom + 12,
+              right: 20,
+              backgroundColor: membershipColor,
+              opacity: subOpacity,
+              transform: [{ translateY: btn2TranslateY }, { scale: subScale }],
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={overlayStyles.subBtnInner}
+            onPress={() => closeFab(() => router.push("/body-avatar"))}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="body" size={20} color="white" />
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Sub-btn 3: Generar rutina con IA */}
+        <Animated.View
+          pointerEvents={fabOpen ? "auto" : "none"}
+          style={[
+            overlayStyles.bodyBtn,
+            {
+              bottom: 70 + insets.bottom + 12,
+              right: 20,
+              backgroundColor: "#8B5CF6",
+              opacity: subOpacity,
+              transform: [{ translateY: btn3TranslateY }, { scale: subScale }],
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={overlayStyles.subBtnInner}
+            onPress={() => closeFab(() => router.push("/routines/generate" as any))}
+            activeOpacity={0.85}
+          >
+            <MaterialCommunityIcons name="robot-outline" size={22} color="white" />
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Botón principal */}
         <TouchableOpacity
-          style={[overlayStyles.bodyBtn, { bottom: 70 + insets.bottom + 12, right: 20, backgroundColor: membershipColor }]}
-          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/body-avatar"); }}
+          style={[
+            overlayStyles.bodyBtn,
+            {
+              bottom: 70 + insets.bottom + 12,
+              right: 20,
+              backgroundColor: fabOpen ? "#374151" : membershipColor,
+            },
+          ]}
+          onPress={toggleFab}
           activeOpacity={0.85}
         >
-          <Ionicons name="body" size={22} color="white" />
+          <Ionicons name={fabOpen ? "close" : "menu"} size={22} color="white" />
         </TouchableOpacity>
+
       </View>
 
     </View>
@@ -205,5 +409,11 @@ const overlayStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 999,
+  },
+  subBtnInner: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

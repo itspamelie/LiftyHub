@@ -37,7 +37,7 @@ const handleSave = async () => {
       Swal.fire({
         icon: "warning",
         title: "Selecciona un ejercicio",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         color: "#fff",
         confirmButtonColor: "#60a5fa"
       });
@@ -48,7 +48,7 @@ const handleSave = async () => {
       Swal.fire({
         icon: "warning",
         title: "Completa todos los campos",
-        background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+        background: "#0f1117",
         color: "#fff",
         confirmButtonColor: "#60a5fa"
       });
@@ -59,7 +59,7 @@ const handleSave = async () => {
     Swal.fire({
       title: "Agregando ejercicio...",
       allowOutsideClick: false,
-      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background: "#0f1117",
       color: "#fff",
       didOpen: () => {
         Swal.showLoading();
@@ -84,7 +84,7 @@ const handleSave = async () => {
     Swal.fire({
       icon: "success",
       title: "Ejercicio agregado a la rutina",
-      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background: "#0f1117",
       confirmButtonColor: "#60a5fa",
       color: "#fff"
     });
@@ -98,7 +98,7 @@ const handleSave = async () => {
     Swal.fire({
       icon: "error",
       title: "Error al agregar el ejercicio",
-      background: "linear-gradient(180deg, #1e1f24 0%, #1e1e24 100%)",
+      background: "#0f1117",
       color: "#fff",
       confirmButtonColor: "#60a5fa"
     });
