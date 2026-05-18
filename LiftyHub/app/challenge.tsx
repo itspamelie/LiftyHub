@@ -8,7 +8,6 @@ import { colors, spacing } from "@/src/styles/globalstyles";
 import HapticButton from "@/src/components/buttons/HapticButton";
 import BackButton from "@/src/components/buttons/backButton";
 
-const CHALLENGE_KEY = "@active_challenge";
 const DURATION_OPTIONS = [1, 2, 3, 6, 12];
 const ACCENT = "#F59E0B";
 
@@ -38,6 +37,7 @@ function daysElapsed(startDate: string): number {
 
 export default function ChallengeScreen() {
   const [loading, setLoading]           = useState(true);
+  const [challengeKey, setChallengeKey] = useState("@active_challenge_guest");
   const [challenge, setChallenge]       = useState<Challenge | null>(null);
   const [showCreate, setShowCreate]     = useState(false);
   const [goal, setGoal]                 = useState("");
@@ -48,14 +48,19 @@ export default function ChallengeScreen() {
   const [selectedUri, setSelectedUri]   = useState<string | null>(null);
 
   useEffect(() => {
-    AsyncStorage.getItem(CHALLENGE_KEY).then((raw) => {
+    AsyncStorage.getItem("user").then((userRaw) => {
+      const userId = userRaw ? JSON.parse(userRaw).id : "guest";
+      const key = `@active_challenge_${userId}`;
+      setChallengeKey(key);
+      return AsyncStorage.getItem(key);
+    }).then((raw) => {
       if (raw) setChallenge(JSON.parse(raw));
       setLoading(false);
     });
   }, []);
 
   const persist = async (c: Challenge) => {
-    await AsyncStorage.setItem(CHALLENGE_KEY, JSON.stringify(c));
+    await AsyncStorage.setItem(challengeKey, JSON.stringify(c));
     setChallenge(c);
   };
 
@@ -119,7 +124,7 @@ export default function ChallengeScreen() {
           text: "Eliminar",
           style: "destructive",
           onPress: async () => {
-            await AsyncStorage.removeItem(CHALLENGE_KEY);
+            await AsyncStorage.removeItem(challengeKey);
             setChallenge(null);
           },
         },

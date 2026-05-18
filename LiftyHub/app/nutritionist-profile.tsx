@@ -7,7 +7,7 @@ import {
   ImageBackground,
   ActivityIndicator,
   TouchableOpacity,
-  Alert,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -47,6 +47,7 @@ export default function NutritionistProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [requesting, setRequesting] = useState(false);
   const [hasActiveRequest, setHasActiveRequest] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -88,45 +89,31 @@ export default function NutritionistProfileScreen() {
     );
   }
 
-  const handleRequest = () => {
-    Alert.alert(
-      "Solicitar nutriólogo",
-      `¿Quieres enviar una solicitud a ${profile.user?.name ?? "este nutriólogo"}?`,
-      [
-        { text: "Cancelar", style: "cancel" },
+  const handleConfirmRequest = async () => {
+    setShowConfirm(false);
+    setRequesting(true);
+    try {
+      const token = await Storage.getItem("token");
+      const userStorage = await Storage.getItem("user");
+      if (!token || !userStorage) return;
+      const user = JSON.parse(userStorage);
+      const now = new Date();
+      await createDietRequest(
         {
-          text: "Sí, solicitar",
-          onPress: async () => {
-            setRequesting(true);
-            try {
-              const token = await Storage.getItem("token");
-              const userStorage = await Storage.getItem("user");
-              if (!token || !userStorage) return;
-              const user = JSON.parse(userStorage);
-              const now = new Date();
-              await createDietRequest(
-                {
-                  user_id: user.id,
-                  nutritionist_id: profile.user.id,
-                  year: now.getFullYear(),
-                  month: now.getMonth() + 1,
-                  status: "pending",
-                },
-                token
-              );
-              router.replace("/(tabs)/diet" as any);
-            } catch {
-              Alert.alert(
-                "No se pudo enviar",
-                "Ya tienes una solicitud activa este mes o hubo un error. Intenta más tarde."
-              );
-            } finally {
-              setRequesting(false);
-            }
-          },
+          user_id: user.id,
+          nutritionist_id: profile.user.id,
+          year: now.getFullYear(),
+          month: now.getMonth() + 1,
+          status: "pending",
         },
-      ]
-    );
+        token
+      );
+      setHasActiveRequest(true);
+    } catch {
+      // silent — already has request or server error
+    } finally {
+      setRequesting(false);
+    }
   };
 
   const avatarUrl = profile.profile_pic
@@ -278,11 +265,8 @@ export default function NutritionistProfileScreen() {
 
       {/* BOTÓN SOLICITAR */}
       <TouchableOpacity
-        style={[
-          styles.requestBtn,
-          (requesting || hasActiveRequest) && styles.requestBtnDisabled,
-        ]}
-        onPress={hasActiveRequest ? undefined : handleRequest}
+        style={[styles.requestBtn, hasActiveRequest && styles.requestBtnSent]}
+        onPress={hasActiveRequest ? undefined : () => setShowConfirm(true)}
         disabled={requesting || hasActiveRequest}
         activeOpacity={hasActiveRequest ? 1 : 0.85}
       >
@@ -290,15 +274,37 @@ export default function NutritionistProfileScreen() {
           <ActivityIndicator size="small" color="white" />
         ) : (
           <Ionicons
-            name={hasActiveRequest ? "time-outline" : "send-outline"}
+            name={hasActiveRequest ? "checkmark-circle-outline" : "send-outline"}
             size={18}
-            color={hasActiveRequest ? "#888" : "white"}
+            color={hasActiveRequest ? "#10B981" : "white"}
           />
         )}
-        <Text style={[styles.requestBtnText, hasActiveRequest && styles.requestBtnTextDisabled]}>
-          {requesting ? "Enviando..." : hasActiveRequest ? "Solicitud en curso" : "Solicitar este nutriólogo"}
+        <Text style={[styles.requestBtnText, hasActiveRequest && styles.requestBtnTextSent]}>
+          {requesting ? "Enviando..." : hasActiveRequest ? "Solicitud enviada" : "Solicitar este nutriólogo"}
         </Text>
       </TouchableOpacity>
+
+      {/* MODAL CONFIRMAR SOLICITUD */}
+      <Modal visible={showConfirm} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalIconBox}>
+              <Ionicons name="send-outline" size={28} color={colors.primary} />
+            </View>
+            <Text style={styles.modalTitle}>Solicitar nutriólogo</Text>
+            <Text style={styles.modalBody}>
+              ¿Quieres enviar una solicitud a{"\n"}
+              <Text style={{ color: "white", fontWeight: "700" }}>{profile.user?.name ?? "este nutriólogo"}</Text>?
+            </Text>
+            <TouchableOpacity style={styles.modalConfirmBtn} onPress={handleConfirmRequest}>
+              <Text style={styles.modalConfirmText}>Sí, solicitar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setShowConfirm(false)}>
+              <Text style={styles.modalCancelText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -395,11 +401,36 @@ const styles = StyleSheet.create({
     borderRadius: spacing.borderRadius, paddingVertical: 15,
     marginHorizontal: spacing.screenPadding, marginTop: 6,
   },
-  requestBtnDisabled: {
-    backgroundColor: "#1C1C1E",
+  requestBtnSent: {
+    backgroundColor: "rgba(16,185,129,0.12)",
     borderWidth: 1,
-    borderColor: "#2A2A2A",
+    borderColor: "rgba(16,185,129,0.35)",
   },
   requestBtnText: { color: "white", fontSize: 15, fontWeight: "700" },
-  requestBtnTextDisabled: { color: "#555" },
+  requestBtnTextSent: { color: "#10B981" },
+  modalOverlay: {
+    flex: 1, backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center", alignItems: "center", padding: 32,
+  },
+  modalCard: {
+    backgroundColor: "#13141c",
+    borderRadius: 20, padding: 24,
+    width: "100%",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.08)",
+    alignItems: "center",
+  },
+  modalIconBox: {
+    width: 60, height: 60, borderRadius: 30,
+    backgroundColor: "rgba(59,130,246,0.12)",
+    justifyContent: "center", alignItems: "center", marginBottom: 16,
+  },
+  modalTitle: { color: "white", fontSize: 18, fontWeight: "700", marginBottom: 8 },
+  modalBody: { color: "#94a3b8", fontSize: 14, textAlign: "center", lineHeight: 22, marginBottom: 24 },
+  modalConfirmBtn: {
+    width: "100%", backgroundColor: colors.primary,
+    borderRadius: 12, paddingVertical: 14, alignItems: "center", marginBottom: 10,
+  },
+  modalConfirmText: { color: "white", fontSize: 15, fontWeight: "700" },
+  modalCancelBtn: { width: "100%", paddingVertical: 10, alignItems: "center" },
+  modalCancelText: { color: "#64748b", fontSize: 14 },
 });

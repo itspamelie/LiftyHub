@@ -13,6 +13,7 @@ import {
   TextField,
   InputAdornment,
   Divider,
+  Button,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { useEffect, useState } from "react";
@@ -21,6 +22,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import FlatwareIcon from "@mui/icons-material/Flatware";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import AddIcon from "@mui/icons-material/Add";
+import PlanCreatorDialog from "./PlanCreatorDialog";
 
 const STATUS: Record<string, { label: string; color: string }> = {
   active:    { label: "Activo",     color: "#22c55e" },
@@ -81,23 +84,27 @@ export default function DietsDashboard() {
   const [diets, setDiets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [profileId, setProfileId] = useState<number | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const load = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const profilesRes = await apiFetch("/nutritionistProfiles");
+      const profile = profilesRes.data.find((p: any) => Number(p.user_id) === Number(user.id));
+      if (profile) {
+        setProfileId(profile.id);
+        const dietsRes = await apiFetch("/dietPlans");
+        setDiets(dietsRes.data.filter((d: any) => d.nutritionist_id === profile.id));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const profilesRes = await apiFetch("/nutritionistProfiles");
-        const profile = profilesRes.data.find((p: any) => Number(p.user_id) === Number(user.id));
-        if (profile) {
-          const dietsRes = await apiFetch("/dietPlans");
-          setDiets(dietsRes.data.filter((d: any) => d.nutritionist_id === profile.id));
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
     load();
   }, []);
 
@@ -120,22 +127,42 @@ export default function DietsDashboard() {
   return (
     <Box p={4} sx={{ color: "white" }}>
       {/* HEADER */}
-      <Box mb={5}>
-        <Typography fontSize={13} color="#555" mb={0.5} letterSpacing="0.05em" textTransform="uppercase">
-          Gestión
-        </Typography>
-        <Typography
-          fontSize={36}
-          fontWeight={700}
-          letterSpacing="-0.5px"
+      <Box mb={5} display="flex" alignItems="flex-end" justifyContent="space-between">
+        <Box>
+          <Typography fontSize={13} color="#555" mb={0.5} letterSpacing="0.05em" textTransform="uppercase">
+            Gestión
+          </Typography>
+          <Typography
+            fontSize={36}
+            fontWeight={700}
+            letterSpacing="-0.5px"
+            sx={{
+              background: "linear-gradient(135deg, #fff 40%, #555)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Planes de dieta
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon fontSize="small" />}
+          onClick={() => setDialogOpen(true)}
           sx={{
-            background: "linear-gradient(135deg, #fff 40%, #555)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            textTransform: "none",
+            fontWeight: 600,
+            fontSize: 13,
+            px: 3,
+            py: 1.1,
+            borderRadius: "10px",
+            background: "#3B82F6",
+            boxShadow: "0 0 20px rgba(59,130,246,0.25)",
+            "&:hover": { background: "#2563eb", boxShadow: "0 0 28px rgba(59,130,246,0.35)" },
           }}
         >
-          Planes de dieta
-        </Typography>
+          Crear plan
+        </Button>
       </Box>
 
       {/* STATS ROW */}
@@ -284,7 +311,7 @@ export default function DietsDashboard() {
         </Grid>
 
         {/* PANEL LATERAL */}
-        <Grid size={{ xs: 12, lg: 4 }}>
+        <Grid size={{ xs: 12, lg: 4 }} >
           <Box
             sx={{
               p: 3,
@@ -366,6 +393,15 @@ export default function DietsDashboard() {
           </Box>
         </Grid>
       </Grid>
+
+      {profileId && (
+        <PlanCreatorDialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          nutritionistProfileId={profileId}
+          onCreated={() => { setLoading(true); load(); }}
+        />
+      )}
     </Box>
   );
 }

@@ -269,7 +269,10 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     loadUser();
-    AsyncStorage.getItem("@active_challenge").then((raw) => {
+    AsyncStorage.getItem("user").then((userRaw) => {
+      const userId = userRaw ? JSON.parse(userRaw).id : "guest";
+      return AsyncStorage.getItem(`@active_challenge_${userId}`);
+    }).then((raw) => {
       if (raw) setActiveChallenge(JSON.parse(raw));
     });
   }, []);

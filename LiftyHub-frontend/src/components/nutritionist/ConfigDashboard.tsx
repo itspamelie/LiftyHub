@@ -6,15 +6,18 @@ import {
   CircularProgress,
   Switch,
   Divider,
+  Avatar,
+  IconButton,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { useEffect, useState } from "react";
-import { apiFetch } from "../../services/api";
+import { useEffect, useRef, useState } from "react";
+import { apiFetch, getImageUrl } from "../../services/api";
 import Swal from "sweetalert2";
 import SaveIcon from "@mui/icons-material/Save";
 import BadgeIcon from "@mui/icons-material/Badge";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 
 export default function ConfigDashboard() {
   const [loading, setLoading] = useState(true);
@@ -30,6 +33,9 @@ export default function ConfigDashboard() {
     rating: 0,
     is_active: true,
   });
+  const [picFile, setPicFile] = useState<File | null>(null);
+  const [picPreview, setPicPreview] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -49,6 +55,9 @@ export default function ConfigDashboard() {
             rating: profile.rating ?? 0,
             is_active: !!profile.is_active,
           });
+          if (profile.profile_pic) {
+            setPicPreview(getImageUrl(profile.profile_pic, "nutritionists"));
+          }
         }
       } catch (err) {
         console.error(err);
@@ -59,14 +68,38 @@ export default function ConfigDashboard() {
     load();
   }, []);
 
+  const handlePickImage = () => fileInputRef.current?.click();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPicFile(file);
+    setPicPreview(URL.createObjectURL(file));
+  };
+
   const handleSave = async () => {
     if (!profileId) return;
     setSaving(true);
     try {
+      const fd = new FormData();
+      fd.append("_method", "PUT");
+      fd.append("user_id", String(form.user_id));
+      fd.append("license_number", form.license_number);
+      fd.append("specialty", form.specialty);
+      fd.append("location", form.location);
+      fd.append("bio", form.bio);
+      fd.append("rating", String(form.rating));
+      fd.append("is_active", form.is_active ? "1" : "0");
+      if (picFile) {
+        fd.append("profile_pic", picFile);
+      }
+
       await apiFetch(`/nutritionistProfiles/${profileId}`, {
-        method: "PUT",
-        body: JSON.stringify(form),
+        method: "POST",
+        body: fd,
       });
+
+      window.dispatchEvent(new Event("nutri-pic-updated"));
       Swal.fire({
         icon: "success",
         title: "Guardado",
@@ -77,6 +110,7 @@ export default function ConfigDashboard() {
         timer: 2000,
         showConfirmButton: false,
       });
+      setPicFile(null);
     } catch {
       Swal.fire({
         icon: "error",
@@ -145,6 +179,77 @@ export default function ConfigDashboard() {
               border: "1px solid rgba(59,130,246,0.25)",
             }}
           >
+            {/* FOTO DE PERFIL */}
+            <Box display="flex" alignItems="center" gap={3} mb={4}>
+              <Box sx={{ position: "relative", flexShrink: 0 }}>
+                <Avatar
+                  src={picPreview || undefined}
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    bgcolor: "#3B82F622",
+                    color: "#3B82F6",
+                    fontSize: 28,
+                    fontWeight: 700,
+                    border: "2px solid rgba(59,130,246,0.4)",
+                  }}
+                >
+                  {!picPreview && (form.user_id ? "N" : "N")}
+                </Avatar>
+                <IconButton
+                  onClick={handlePickImage}
+                  size="small"
+                  sx={{
+                    position: "absolute",
+                    bottom: -4,
+                    right: -4,
+                    width: 28,
+                    height: 28,
+                    bgcolor: "#3B82F6",
+                    color: "white",
+                    border: "2px solid #141d2b",
+                    "&:hover": { bgcolor: "#2563eb" },
+                  }}
+                >
+                  <CameraAltIcon sx={{ fontSize: 14 }} />
+                </IconButton>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  hidden
+                  onChange={handleFileChange}
+                />
+              </Box>
+              <Box>
+                <Typography fontSize={14} fontWeight={600} color="#ddd">
+                  Foto de perfil
+                </Typography>
+                <Typography fontSize={12} color="#64748b" mt={0.5}>
+                  JPG, PNG o WebP · máx. 4 MB
+                </Typography>
+                <Button
+                  size="small"
+                  onClick={handlePickImage}
+                  sx={{
+                    mt: 1,
+                    textTransform: "none",
+                    fontSize: 12,
+                    color: "#3B82F6",
+                    px: 1.5,
+                    py: 0.4,
+                    borderRadius: "8px",
+                    bgcolor: "rgba(59,130,246,0.08)",
+                    "&:hover": { bgcolor: "rgba(59,130,246,0.14)" },
+                  }}
+                >
+                  Cambiar foto
+                </Button>
+              </Box>
+            </Box>
+
+            <Divider sx={{ borderColor: "rgba(255,255,255,0.05)", mb: 3 }} />
+
             <Box display="flex" alignItems="center" gap={1.5} mb={3}>
               <Box sx={{ color: "#3B82F6", display: "flex" }}>
                 <BadgeIcon fontSize="small" />
@@ -265,6 +370,7 @@ export default function ConfigDashboard() {
                   { label: "Perfil", value: form.is_active ? "Público" : "Oculto", active: form.is_active },
                   { label: "Especialidad", value: form.specialty || "—", active: !!form.specialty },
                   { label: "Ubicación", value: form.location || "—", active: !!form.location },
+                  { label: "Foto", value: picPreview ? "Configurada" : "Sin foto", active: !!picPreview },
                 ].map((item) => (
                   <Box key={item.label} display="flex" justifyContent="space-between" alignItems="center">
                     <Typography fontSize={12} color="#555">{item.label}</Typography>
@@ -296,6 +402,7 @@ export default function ConfigDashboard() {
               <Divider sx={{ borderColor: "rgba(59,130,246,0.22)", mb: 2 }} />
               <Box display="flex" flexDirection="column" gap={1.5}>
                 {[
+                  "Una foto de perfil genera más confianza en los pacientes.",
                   "Una biografía completa aumenta tu visibilidad en la app.",
                   "Agrega tu especialidad para atraer pacientes específicos.",
                   "Mantén tu perfil activo para recibir nuevas solicitudes.",

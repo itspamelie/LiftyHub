@@ -99,7 +99,7 @@ public function show(string $id)
          $validated = $request->validate([
             'user_id'=>'required',
             'license_number'=>'required|string',
-            'profile_pic'=>'required|string',
+            'profile_pic'=>'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
             'specialty'=>'required|string',
             'location'=>'required|string',
             'bio'=>'required|string',
@@ -109,6 +109,22 @@ public function show(string $id)
 
         $data = NutritionistProfile::findOrFail($id);
         $wasInactive = !$data->is_active;
+
+        if ($request->hasFile('profile_pic')) {
+            if ($data->profile_pic && $data->profile_pic !== 'default.jpg') {
+                $oldPath = public_path('nutritionists/' . $data->profile_pic);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+            }
+            $file = $request->file('profile_pic');
+            $filename = time() . '_' . \Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('nutritionists'), $filename);
+            $validated['profile_pic'] = $filename;
+        } else {
+            unset($validated['profile_pic']);
+        }
+
         $data->update($validated);
 
         if ($wasInactive && $validated['is_active']) {

@@ -27,8 +27,8 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { apiFetch } from "../../services/api";
+import { useEffect, useState } from "react";
+import { apiFetch, getImageUrl } from "../../services/api";
 import Swal from "sweetalert2";
 
 const NAV_ITEMS = [
@@ -42,6 +42,25 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const [profilePicUrl, setProfilePicUrl] = useState<string>("");
+
+  const fetchProfilePic = async () => {
+    try {
+      const res = await apiFetch("/nutritionistProfiles");
+      const profile = res.data.find((p: any) => Number(p.user_id) === Number(user.id));
+      if (profile?.profile_pic) {
+        setProfilePicUrl(getImageUrl(profile.profile_pic, "nutritionists") + "?t=" + Date.now());
+      }
+    } catch { /* silent */ }
+  };
+
+  useEffect(() => {
+    fetchProfilePic();
+    const handler = () => fetchProfilePic();
+    window.addEventListener("nutri-pic-updated", handler);
+    return () => window.removeEventListener("nutri-pic-updated", handler);
+  }, []);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
@@ -166,39 +185,6 @@ const Sidebar: React.FC = () => {
           })}
         </List>
 
-        {/* LOGOUT + DELETE */}
-        <Box px={1.5} mb={1.5} display="flex" flexDirection="column" gap={0.5}>
-          <ListItemButton
-            onClick={handleLogout}
-            sx={{
-              borderRadius: "10px", px: 2, py: 1.2,
-              color: "#ef4444", background: "transparent",
-              "&:hover": { background: "rgba(239,68,68,0.08)", color: "#f87171" },
-              transition: "all 0.15s ease",
-            }}
-          >
-            <Box sx={{ mr: 1.5, display: "flex", alignItems: "center" }}>
-              <LogoutIcon fontSize="small" />
-            </Box>
-            <ListItemText primary="Cerrar sesión" slotProps={{ primary: { fontSize: 14, fontWeight: 500, color: "inherit" } }} />
-          </ListItemButton>
-
-          <ListItemButton
-            onClick={() => { setDeletePassword(""); setDeleteOpen(true); }}
-            sx={{
-              borderRadius: "10px", px: 2, py: 1.2,
-              color: "#ef4444", background: "transparent",
-              "&:hover": { background: "rgba(239,68,68,0.08)", color: "#f87171" },
-              transition: "all 0.15s ease",
-            }}
-          >
-            <Box sx={{ mr: 1.5, display: "flex", alignItems: "center" }}>
-              <DeleteForeverIcon fontSize="small" />
-            </Box>
-            <ListItemText primary="Eliminar cuenta" slotProps={{ primary: { fontSize: 13, fontWeight: 400, color: "inherit" } }} />
-          </ListItemButton>
-        </Box>
-
         {/* USER CARD — clickable */}
         <Box
           onClick={handleOpenMenu}
@@ -222,6 +208,7 @@ const Sidebar: React.FC = () => {
         >
           <Box sx={{ position: "relative", flexShrink: 0 }}>
             <Avatar
+              src={profilePicUrl || undefined}
               sx={{
                 width: 34,
                 height: 34,
@@ -250,11 +237,11 @@ const Sidebar: React.FC = () => {
             <Typography fontSize={13} fontWeight={600} color="#ddd" noWrap>
               {user?.name ?? "Nutriólogo"}
             </Typography>
-            <Typography fontSize={11} color="#444" noWrap>
+            <Typography fontSize={11} color="#64748b" noWrap>
               {user?.email ?? ""}
             </Typography>
           </Box>
-          <ChevronRightIcon sx={{ fontSize: 14, color: "#333", flexShrink: 0 }} />
+          <ChevronRightIcon sx={{ fontSize: 14, color: "#64748b", flexShrink: 0 }} />
         </Box>
       </Drawer>
 
@@ -284,7 +271,7 @@ const Sidebar: React.FC = () => {
           <Typography fontSize={13} fontWeight={600} color="#ddd">
             {user?.name ?? "Nutriólogo"}
           </Typography>
-          <Typography fontSize={11} color="#444">
+          <Typography fontSize={11} color="#64748b">
             {user?.email ?? ""}
           </Typography>
         </Box>
@@ -322,6 +309,21 @@ const Sidebar: React.FC = () => {
         </MenuItem>
 
         <Divider sx={{ borderColor: "rgba(59,130,246,0.25)" }} />
+
+        <MenuItem
+          onClick={() => { handleCloseMenu(); setDeletePassword(""); setDeleteOpen(true); }}
+          sx={{
+            py: 1.3,
+            px: 2,
+            gap: 1.5,
+            fontSize: 13,
+            color: "#f87171",
+            "&:hover": { background: "rgba(248,113,113,0.06)", color: "#f87171" },
+          }}
+        >
+          <DeleteForeverIcon sx={{ fontSize: 16, color: "#f87171" }} />
+          Eliminar cuenta
+        </MenuItem>
 
         <MenuItem
           onClick={handleLogout}

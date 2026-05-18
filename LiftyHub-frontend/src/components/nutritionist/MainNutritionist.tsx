@@ -52,7 +52,7 @@ export default function MainNutritionist() {
     <Box p={4} sx={{ color: "white" }}>
       {/* GREETING */}
       <Box mb={5}>
-        <Typography fontSize={13} color="#555" mb={0.5} letterSpacing="0.05em" textTransform="uppercase">
+        <Typography fontSize={13} color="#64748b" mb={0.5} letterSpacing="0.05em" textTransform="uppercase">
           {greeting}
         </Typography>
         <Typography
@@ -60,14 +60,14 @@ export default function MainNutritionist() {
           fontWeight={700}
           letterSpacing="-0.5px"
           sx={{
-            background: "linear-gradient(135deg, #fff 40%, #555)",
+            background: "linear-gradient(135deg, #fff 40%, #94a3b8)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
           }}
         >
           {user?.name ?? "Nutriólogo"} 👋
         </Typography>
-        <Typography color="#444" mt={0.5} fontSize={14}>
+        <Typography color="#64748b" mt={0.5} fontSize={14}>
           Resumen de tu actividad profesional
         </Typography>
       </Box>
@@ -117,7 +117,7 @@ export default function MainNutritionist() {
               overflow: "hidden",
             }}
           >
-            <Typography fontSize={13} fontWeight={600} color="#888" mb={1}>
+            <Typography fontSize={13} fontWeight={600} color="white" mb={1}>
               Distribución de planes
             </Typography>
             {/* Progress bars por estado */}
@@ -128,7 +128,7 @@ export default function MainNutritionist() {
               ].map((item) => (
                 <Box key={item.label}>
                   <Box display="flex" justifyContent="space-between" mb={1}>
-                    <Typography fontSize={12} color="#555">{item.label}</Typography>
+                    <Typography fontSize={12} color="#94a3b8">{item.label}</Typography>
                     <Typography fontSize={12} color={item.color}>
                       {item.value} / {item.total}
                     </Typography>
@@ -171,12 +171,12 @@ export default function MainNutritionist() {
               overflowY: "auto",
             }}
           >
-            <Typography fontSize={13} fontWeight={600} color="#888" mb={2}>
+            <Typography fontSize={13} fontWeight={600} color="white" mb={2}>
               Pacientes recientes
             </Typography>
 
             {diets.length === 0 ? (
-              <Typography color="#333" fontSize={13}>Sin planes asignados aún</Typography>
+              <Typography color="#64748b" fontSize={13}>Sin planes asignados aún</Typography>
             ) : (
               diets.slice(0, 5).map((diet, i) => {
                 const isActive = diet.status === "active";
@@ -200,10 +200,10 @@ export default function MainNutritionist() {
                       {diet.user?.name?.[0] ?? "?"}
                     </Box>
                     <Box flex={1} minWidth={0}>
-                      <Typography fontSize={13} color="#ccc" noWrap>
+                      <Typography fontSize={13} color="white" noWrap>
                         {diet.user?.name ?? `Usuario #${diet.user_id}`}
                       </Typography>
-                      <Typography fontSize={11} color="#444" noWrap>
+                      <Typography fontSize={11} color="#64748b" noWrap>
                         {diet.goal ?? "Sin objetivo"}
                       </Typography>
                     </Box>

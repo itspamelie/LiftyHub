@@ -10,9 +10,17 @@ class PlanDaysController extends Controller
 {
      public function index()
     {
-         $data = PlanDay::with('dietPlan')->get();
+         $data = PlanDay::with(['dietPlan', 'meals'])->get();
 
-        //Siempre que hagamos una api enviamos un JSON
+        return response()->json([
+            "status"=>"ok",
+            "data"=>$data
+        ]);
+    }
+
+    public function byPlan(string $planId)
+    {
+        $data = PlanDay::with('meals')->where('diet_plan_id', $planId)->get();
         return response()->json([
             "status"=>"ok",
             "data"=>$data

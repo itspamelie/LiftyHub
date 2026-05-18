@@ -35,7 +35,7 @@ class MealsController extends Controller
             'plan_day_id'=>'required',
             'name'=>'required|string',
             'calories'=>'required|numeric',
-            'img'=>'required|string',
+            'image'=>'nullable|string',
             'order'=>'required',
             'description'=>'required|string',
         ]);
@@ -86,7 +86,7 @@ class MealsController extends Controller
             'plan_day_id'=>'required',
             'name'=>'required|string',
             'calories'=>'required|numeric',
-            'img'=>'required|string',
+            'image'=>'nullable|string',
             'order'=>'required',
             'description'=>'required|string',
         ]);
