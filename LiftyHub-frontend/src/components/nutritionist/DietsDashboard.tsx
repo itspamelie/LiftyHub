@@ -17,13 +17,13 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../services/api";
 import SearchIcon from "@mui/icons-material/Search";
 import FlatwareIcon from "@mui/icons-material/Flatware";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
-import PlanCreatorDialog from "./PlanCreatorDialog";
 
 const STATUS: Record<string, { label: string; color: string }> = {
   active:    { label: "Activo",     color: "#22c55e" },
@@ -81,11 +81,10 @@ const StatBox = ({
 );
 
 export default function DietsDashboard() {
+  const navigate = useNavigate();
   const [diets, setDiets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [profileId, setProfileId] = useState<number | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
 
   const load = async () => {
     try {
@@ -93,7 +92,6 @@ export default function DietsDashboard() {
       const profilesRes = await apiFetch("/nutritionistProfiles");
       const profile = profilesRes.data.find((p: any) => Number(p.user_id) === Number(user.id));
       if (profile) {
-        setProfileId(profile.id);
         const dietsRes = await apiFetch("/dietPlans");
         setDiets(dietsRes.data.filter((d: any) => d.nutritionist_id === profile.id));
       }
@@ -148,7 +146,7 @@ export default function DietsDashboard() {
         <Button
           variant="contained"
           startIcon={<AddIcon fontSize="small" />}
-          onClick={() => setDialogOpen(true)}
+          onClick={() => navigate("/DashboardForExperts/diets/create")}
           sx={{
             textTransform: "none",
             fontWeight: 600,
@@ -394,14 +392,6 @@ export default function DietsDashboard() {
         </Grid>
       </Grid>
 
-      {profileId && (
-        <PlanCreatorDialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          nutritionistProfileId={profileId}
-          onCreated={() => { setLoading(true); load(); }}
-        />
-      )}
     </Box>
   );
 }

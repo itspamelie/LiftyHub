@@ -20,7 +20,7 @@ class PlanDaysController extends Controller
 
     public function byPlan(string $planId)
     {
-        $data = PlanDay::with('meals')->where('diet_plan_id', $planId)->get();
+        $data = PlanDay::with(['meals', 'supplements'])->where('diet_plan_id', $planId)->get();
         return response()->json([
             "status"=>"ok",
             "data"=>$data

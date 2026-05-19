@@ -59,7 +59,7 @@ class DietPlansController extends Controller
      */
     public function show(string $id)
     {
-        $data = DietPlan::with(['nutritionist', 'user', 'planDays.meals', 'request'])->find($id);
+        $data = DietPlan::with(['nutritionist', 'user', 'planDays.meals', 'planDays.supplements', 'request'])->find($id);
         if($data){
             return response()->json([
             "status"=>"ok",

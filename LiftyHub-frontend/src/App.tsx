@@ -20,6 +20,7 @@ import DashboardForExperts from './views/dashboardLiftyHubExperts';
 import ProfileDashboard from './components/nutritionist/ProfileDashboard';
 import MainNutritionist from './components/nutritionist/MainNutritionist';
 import DietsDashboard from './components/nutritionist/DietsDashboard';
+import CreatePlanPage from './components/nutritionist/CreatePlanPage';
 import ConfigDashboard from './components/nutritionist/ConfigDashboard';
 import RequestsDashboard from './components/nutritionist/RequestsDashboard';
 import PrivacyPolicy from './views/PrivacyPolicy'
@@ -76,6 +77,7 @@ function App() {
           <Route index element={<MainNutritionist/>}/>
           <Route path="profile" element={<ProfileDashboard />} />
           <Route path="diets" element={<DietsDashboard />} />
+          <Route path="diets/create" element={<CreatePlanPage />} />
           <Route path="config" element={<ConfigDashboard />} />
           <Route path="requests" element={<RequestsDashboard />} />
 

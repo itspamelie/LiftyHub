@@ -32,6 +32,7 @@ use App\Http\Controllers\NutritionProfilesController;
 use App\Http\Controllers\PayPalController;
 use App\Http\Controllers\PlanDaysController;
 use App\Http\Controllers\MealsController;
+use App\Http\Controllers\SupplementsController;
 
 
 
@@ -95,10 +96,11 @@ Route::resource('dietRequests', DietRequestsController::class);
 Route::get('/nutritionProfiles/user/{userId}', [NutritionProfilesController::class, 'byUser']);
 Route::resource('nutritionProfiles', NutritionProfilesController::class);
 
-// Plan days & meals
+// Plan days, meals & supplements
 Route::get('/planDays/byPlan/{planId}', [PlanDaysController::class, 'byPlan']);
 Route::resource('planDays', PlanDaysController::class);
 Route::resource('meals', MealsController::class);
+Route::resource('supplements', SupplementsController::class);
 
 // PayPal
 Route::post('/paypal/create-order',  [PayPalController::class, 'createOrder']);

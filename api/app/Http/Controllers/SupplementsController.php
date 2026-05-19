@@ -36,11 +36,11 @@ class SupplementsController extends Controller
           $validated = $request->validate([
             'plan_day_id'=>'required',
             'name'=>'required|string',
-            'amount'=>'required|numeric',
-            'instructions'=>'required|string',
-            'image'=>'required',
-            'color'=>'required|string',
-            'order'=>'required',
+            'amount'=>'required|string',
+            'instructions'=>'nullable|string',
+            'image'=>'nullable|string',
+            'color'=>'nullable|string',
+            'order'=>'nullable',
         ]);
 
         //metodo si los campos se llaman igual que en la base de datos
@@ -88,11 +88,11 @@ class SupplementsController extends Controller
          $validated = $request->validate([
             'plan_day_id'=>'required',
             'name'=>'required|string',
-            'amount'=>'required|numeric',
-            'instructions'=>'required|string',
-            'image'=>'required',
-            'color'=>'required|string',
-            'order'=>'required',
+            'amount'=>'required|string',
+            'instructions'=>'nullable|string',
+            'image'=>'nullable|string',
+            'color'=>'nullable|string',
+            'order'=>'nullable',
         ]);
 
         //metodo si los campos se llaman igual que en la base de datos

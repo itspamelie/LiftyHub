@@ -408,6 +408,15 @@ export const getDietPlans = async (token: string) => {
   });
 };
 
+export const getDietPlanById = async (id: number, token: string) => {
+  return apiFetch(`${API_URL}/dietPlans/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 // 👨‍⚕️ OBTENER PERFILES DE NUTRIÓLOGOS
 export const getNutritionistProfiles = async (token: string) => {
   return apiFetch(`${API_URL}/nutritionistProfiles`, {
