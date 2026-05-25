@@ -41,13 +41,13 @@ export default function PlanCard({
         {isCurrent && (
           <View style={[styles.badge, { backgroundColor: accentColor }]}>
             <Ionicons name="checkmark-circle" size={12} color="white" />
-            <Text style={styles.badgeText}>Plan actual</Text>
+            <Text style={styles.badgeText}>{t("plans.current")}</Text>
           </View>
         )}
         {recommended && !isCurrent && (
           <View style={[styles.badge, { backgroundColor: accentColor }]}>
             <Ionicons name="star" size={12} color="white" />
-            <Text style={styles.badgeText}>Recomendado</Text>
+            <Text style={styles.badgeText}>{t("plans.recommended")}</Text>
           </View>
         )}
       </View>

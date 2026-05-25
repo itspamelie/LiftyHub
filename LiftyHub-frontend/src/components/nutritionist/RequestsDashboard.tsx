@@ -11,12 +11,13 @@ import {
   DialogContent,
   IconButton,
 } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Unstable_Grid2";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../services/api";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import AssignmentIcon from "@mui/icons-material/Assignment";
+import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import InboxIcon from "@mui/icons-material/Inbox";
 import Swal from "sweetalert2";
 
@@ -133,7 +134,65 @@ export default function RequestsDashboard() {
     }
   };
 
-  const pending    = requests.filter((r) => r.status === "pending");
+  const handleDischarge = async (req: DietRequest) => {
+    const result = await Swal.fire({
+      title: "¿Dar de baja a este paciente?",
+      html: `<span style="color:#94a3b8;font-size:14px">${req.user?.name ?? "Este paciente"} dejará de estar en tu lista de pacientes activos.</span>`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, dar de baja",
+      cancelButtonText: "Cancelar",
+      background: "#141d2b",
+      color: "#fff",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#334155",
+    });
+    if (!result.isConfirmed) return;
+    setActionLoading(req.id);
+    try {
+      // Cancel ALL open requests from this user (in_progress, pending, completed)
+      // so the mobile app stops showing stale states
+      const toCancel = requests.filter(
+        (r) => r.user?.id === req.user?.id && r.status !== "cancelled"
+      );
+      await Promise.all(
+        toCancel.map((r) =>
+          apiFetch(`/dietRequests/${r.id}/status`, {
+            method: "PATCH",
+            body: JSON.stringify({ status: "cancelled" }),
+          })
+        )
+      );
+
+      // Delete nutrition profile so user can fill it again with a new nutritionist
+      if (req.user?.id) {
+        const profileRes = await apiFetch(`/nutritionProfiles/user/${req.user.id}`);
+        if (profileRes?.data?.id) {
+          await apiFetch(`/nutritionProfiles/${profileRes.data.id}`, { method: "DELETE" });
+        }
+      }
+      setRequests((prev) =>
+        prev.map((r) =>
+          toCancel.some((c) => c.id === r.id) ? { ...r, status: "cancelled" } : r
+        )
+      );
+      Swal.fire({
+        icon: "success",
+        title: "Paciente dado de baja",
+        background: "#141d2b",
+        color: "#fff",
+        confirmButtonColor: "#3B82F6",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    } catch {
+      Swal.fire({ icon: "error", title: "Error al actualizar", background: "#141d2b", color: "#fff", confirmButtonColor: "#3B82F6" });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const pending    = requests.filter((r) => r.status === "pending" || r.status === "paid");
   const active     = requests.filter((r) => r.status === "in_progress");
   const historical = requests.filter((r) => r.status === "completed" || r.status === "cancelled");
 
@@ -149,7 +208,7 @@ export default function RequestsDashboard() {
     <Box p={4} sx={{ color: "white" }}>
       {/* HEADER */}
       <Box mb={5}>
-        <Typography fontSize={13} color="#555" mb={0.5} letterSpacing="0.05em" textTransform="uppercase">
+        <Typography fontSize={13} color="#94a3b8" mb={0.5} letterSpacing="0.05em" textTransform="uppercase">
           Gestión
         </Typography>
         <Typography
@@ -168,7 +227,7 @@ export default function RequestsDashboard() {
 
       <Grid container spacing={3}>
         {/* COLUMNA PRINCIPAL */}
-        <Grid size={{ xs: 12, lg: 8 }}>
+        <Grid xs={12} lg={8}>
 
           {/* PENDIENTES */}
           {pending.length > 0 && (
@@ -217,8 +276,9 @@ export default function RequestsDashboard() {
                     req={req}
                     actionLoading={actionLoading}
                     onAccept={() => {}}
-                    onReject={() => handleStatus(req.id, "cancelled")}
+                    onReject={() => {}}
                     onViewQuestionnaire={() => handleViewQuestionnaire(req)}
+                    onDischarge={() => handleDischarge(req)}
                     showActions={false}
                   />
                 ))}
@@ -229,7 +289,7 @@ export default function RequestsDashboard() {
           {/* HISTORIAL */}
           {historical.length > 0 && (
             <Box>
-              <Typography fontSize={12} color="#555" letterSpacing="0.06em" textTransform="uppercase" fontWeight={600} mb={2}>
+              <Typography fontSize={12} color="#94a3b8" letterSpacing="0.06em" textTransform="uppercase" fontWeight={600} mb={2}>
                 Historial
               </Typography>
               <Box display="flex" flexDirection="column" gap={2}>
@@ -241,6 +301,7 @@ export default function RequestsDashboard() {
                     onAccept={() => {}}
                     onReject={() => {}}
                     onViewQuestionnaire={() => handleViewQuestionnaire(req)}
+                    onDischarge={req.status === "completed" ? () => handleDischarge(req) : undefined}
                     showActions={false}
                   />
                 ))}
@@ -258,7 +319,7 @@ export default function RequestsDashboard() {
               }}
             >
               <InboxIcon sx={{ color: "#222", fontSize: 44, mb: 1.5 }} />
-              <Typography color="#333" fontSize={14}>
+              <Typography color="#64748b" fontSize={14}>
                 No hay solicitudes todavía
               </Typography>
             </Box>
@@ -266,7 +327,7 @@ export default function RequestsDashboard() {
         </Grid>
 
         {/* PANEL LATERAL — RESUMEN */}
-        <Grid size={{ xs: 12, lg: 4 }}>
+        <Grid xs={12} lg={4}>
           <Box
             sx={{
               p: 3,
@@ -277,7 +338,7 @@ export default function RequestsDashboard() {
               top: 80,
             }}
           >
-            <Typography fontSize={12} color="#555" letterSpacing="0.06em" textTransform="uppercase" mb={2}>
+            <Typography fontSize={12} color="#94a3b8" letterSpacing="0.06em" textTransform="uppercase" mb={2}>
               Resumen
             </Typography>
             <Divider sx={{ borderColor: "rgba(59,130,246,0.22)", mb: 2 }} />
@@ -299,7 +360,7 @@ export default function RequestsDashboard() {
 
             <Divider sx={{ borderColor: "rgba(59,130,246,0.22)", mb: 2 }} />
             <Box display="flex" justifyContent="space-between">
-              <Typography fontSize={12} color="#555">Total</Typography>
+              <Typography fontSize={12} color="#94a3b8">Total</Typography>
               <Typography fontSize={12} color="#888" fontWeight={600}>{requests.length} solicitudes</Typography>
             </Box>
           </Box>
@@ -324,7 +385,7 @@ export default function RequestsDashboard() {
         <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pb: 1 }}>
           <Box>
             <Typography fontSize={16} fontWeight={700}>Cuestionario nutricional</Typography>
-            <Typography fontSize={12} color="#555">{questPatientName}</Typography>
+            <Typography fontSize={12} color="#94a3b8">{questPatientName}</Typography>
           </Box>
           <IconButton onClick={() => setQuestOpen(false)} sx={{ color: "#94a3b8", "&:hover": { color: "#94a3b8" } }}>
             <CloseIcon fontSize="small" />
@@ -354,10 +415,10 @@ export default function RequestsDashboard() {
 function QRow({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <Box py={1.5} sx={{ borderBottom: "1px solid rgba(59,130,246,0.22)" }}>
-      <Typography fontSize={11} color="#555" mb={0.3} letterSpacing="0.04em" textTransform="uppercase">
+      <Typography fontSize={11} color="#94a3b8" mb={0.3} letterSpacing="0.04em" textTransform="uppercase">
         {label}
       </Typography>
-      <Typography fontSize={13} color={value ? "#ccc" : "#333"}>
+      <Typography fontSize={13} color={value ? "#ccc" : "#64748b"}>
         {value ?? "—"}
       </Typography>
     </Box>
@@ -370,6 +431,7 @@ function RequestCard({
   onAccept,
   onReject,
   onViewQuestionnaire,
+  onDischarge,
   showActions,
 }: {
   req: DietRequest;
@@ -377,6 +439,7 @@ function RequestCard({
   onAccept: () => void;
   onReject: () => void;
   onViewQuestionnaire: () => void;
+  onDischarge?: () => void;
   showActions: boolean;
 }) {
   const st = STATUS_MAP[req.status] ?? STATUS_MAP.pending;
@@ -411,7 +474,7 @@ function RequestCard({
               </Typography>
             </Box>
           </Box>
-          <Typography fontSize={12} color="#444" mt={0.3}>
+          <Typography fontSize={12} color="#64748b" mt={0.3}>
             {MONTH_NAMES[(req.month ?? 1) - 1]} {req.year} · {req.user?.email ?? ""}
           </Typography>
         </Box>
@@ -443,16 +506,7 @@ function RequestCard({
               startIcon={isLoading ? <CircularProgress size={12} color="inherit" /> : <CheckIcon sx={{ fontSize: "14px !important" }} />}
               onClick={onAccept}
               disabled={isLoading}
-              sx={{
-                fontSize: 12,
-                textTransform: "none",
-                color: "#22c55e",
-                bgcolor: "rgba(34,197,94,0.06)",
-                borderRadius: "8px",
-                px: 1.5,
-                py: 0.6,
-                "&:hover": { bgcolor: "rgba(34,197,94,0.12)" },
-              }}
+              sx={{ fontSize: 12, textTransform: "none", color: "#22c55e", bgcolor: "rgba(34,197,94,0.06)", borderRadius: "8px", px: 1.5, py: 0.6, "&:hover": { bgcolor: "rgba(34,197,94,0.12)" } }}
             >
               Aceptar
             </Button>
@@ -461,20 +515,23 @@ function RequestCard({
               startIcon={<CloseIcon sx={{ fontSize: "14px !important" }} />}
               onClick={onReject}
               disabled={isLoading}
-              sx={{
-                fontSize: 12,
-                textTransform: "none",
-                color: "#ef4444",
-                bgcolor: "rgba(239,68,68,0.06)",
-                borderRadius: "8px",
-                px: 1.5,
-                py: 0.6,
-                "&:hover": { bgcolor: "rgba(239,68,68,0.12)" },
-              }}
+              sx={{ fontSize: 12, textTransform: "none", color: "#ef4444", bgcolor: "rgba(239,68,68,0.06)", borderRadius: "8px", px: 1.5, py: 0.6, "&:hover": { bgcolor: "rgba(239,68,68,0.12)" } }}
             >
               Rechazar
             </Button>
           </>
+        )}
+
+        {onDischarge && (
+          <Button
+            size="small"
+            startIcon={isLoading ? <CircularProgress size={12} color="inherit" /> : <PersonRemoveIcon sx={{ fontSize: "14px !important" }} />}
+            onClick={onDischarge}
+            disabled={isLoading}
+            sx={{ fontSize: 12, textTransform: "none", color: "#ef4444", bgcolor: "rgba(239,68,68,0.06)", borderRadius: "8px", px: 1.5, py: 0.6, "&:hover": { bgcolor: "rgba(239,68,68,0.12)" }, ml: "auto" }}
+          >
+            Dar de baja
+          </Button>
         )}
       </Box>
     </Box>

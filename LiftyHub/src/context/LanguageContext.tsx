@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useMemo, useCallback, ReactNode } from "react";
 import { I18n } from "i18n-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { translations } from "@/src/i18n/translations";
@@ -23,24 +23,28 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState("es");
 
   useEffect(() => {
+    let cancelled = false;
     AsyncStorage.getItem("@liftyhub_language").then((saved) => {
-      if (saved) {
+      if (!cancelled && saved) {
         setLanguage(saved);
         i18n.locale = saved;
       }
     });
+    return () => { cancelled = true; };
   }, []);
 
-  const changeLanguage = async (lang: string) => {
+  const changeLanguage = useCallback(async (lang: string) => {
     setLanguage(lang);
     i18n.locale = lang;
     await AsyncStorage.setItem("@liftyhub_language", lang);
-  };
+  }, []);
 
-  const t = (scope: string, options?: object) => i18n.t(scope, options);
+  const t = useCallback((scope: string, options?: object) => i18n.t(scope, options), [language]);
+
+  const value = useMemo(() => ({ t, language, changeLanguage }), [t, language, changeLanguage]);
 
   return (
-    <LanguageContext.Provider value={{ t, language, changeLanguage }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

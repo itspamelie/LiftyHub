@@ -64,21 +64,34 @@ export default function NutritionistsScreen() {
       const userStorage = await Storage.getItem("user");
       if (!token || !userStorage) return;
       const user = JSON.parse(userStorage);
+
+      // Find the first available month (unique constraint: user_id + year + month)
       const now = new Date();
-      await createDietRequest(
-        {
+      let created = false;
+      for (let offset = 0; offset < 6; offset++) {
+        const date = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+        const payload = {
           user_id: user.id,
           nutritionist_id: selected.user.id,
-          year: now.getFullYear(),
-          month: now.getMonth() + 1,
+          year: date.getFullYear(),
+          month: date.getMonth() + 1,
           status: "pending",
-        },
-        token
-      );
+        };
+        try {
+          const res = await createDietRequest(payload, token);
+          if (res?.status === "ok") {
+            created = true;
+            break;
+          }
+        } catch {
+          // slot taken, try next month
+        }
+      }
+      if (!created) throw new Error("no_slot");
       setShowConfirm(false);
       setShowSuccess(true);
     } catch {
-      Alert.alert("Error", "No se pudo enviar la solicitud. Intenta de nuevo.");
+      Alert.alert("Sin disponibilidad", "Ya tienes solicitudes para los próximos meses. Contacta a tu nutriólogo.");
     } finally {
       setConfirming(false);
     }

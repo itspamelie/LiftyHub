@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { colors } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 const GOAL = 8;
 const GLASS_HEIGHT = 220;
@@ -13,6 +14,7 @@ const DATE_KEY = "@liftyhub_hydration_date";
 const COUNT_KEY = "@liftyhub_hydration_count";
 
 export default function HydrationScreen() {
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [count, setCount] = useState(0);
   const fillAnim = useRef(new Animated.Value(0)).current;
@@ -85,7 +87,7 @@ export default function HydrationScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Hidratación</Text>
+        <Text style={styles.headerTitle}>{t("hydration.title")}</Text>
       </View>
 
       <View style={styles.content}>
@@ -94,7 +96,7 @@ export default function HydrationScreen() {
         <View style={[styles.badge, done && styles.badgeDone]}>
           <Ionicons name="water" size={13} color={done ? "#22c55e" : "#3B82F6"} />
           <Text style={[styles.badgeText, done && styles.badgeTextDone]}>
-            {done ? "¡Meta alcanzada!" : `${count} de ${GOAL} vasos`}
+            {done ? t("hydration.goalReached") : t("hydration.glassesCount", { count, goal: GOAL })}
           </Text>
         </View>
 
@@ -151,7 +153,7 @@ export default function HydrationScreen() {
 
           <View style={styles.countDisplay}>
             <Text style={styles.countNumber}>{count}</Text>
-            <Text style={styles.countLabel}>vasos hoy</Text>
+            <Text style={styles.countLabel}>{t("hydration.glassesToday")}</Text>
           </View>
 
           <TouchableOpacity
@@ -165,7 +167,7 @@ export default function HydrationScreen() {
         </View>
 
         {/* Goal label */}
-        <Text style={styles.goalLabel}>Meta diaria: {GOAL} vasos · Se reinicia cada día</Text>
+        <Text style={styles.goalLabel}>{t("hydration.goalLabel", { goal: GOAL })}</Text>
 
       </View>
     </View>

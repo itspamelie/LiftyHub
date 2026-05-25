@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import HapticButton from "@/src/components/buttons/HapticButton";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 type ExerciseFile = {
   file_path: string;
@@ -26,6 +27,7 @@ type Props = {
 };
 
 export default function ExerciseCard({ exercise, isFavorite, onToggleFavorite, onAdd }: Props) {
+  const { t } = useLanguage();
 
   const getImage = () => {
     const imageFile = exercise.exercise_files?.find(file => file.type === "image");
@@ -60,7 +62,7 @@ export default function ExerciseCard({ exercise, isFavorite, onToggleFavorite, o
             }
           })}
         >
-          <Text style={styles.previewText}>Vista previa</Text>
+          <Text style={styles.previewText}>{t("exercises.preview")}</Text>
         </HapticButton>
       </View>
 

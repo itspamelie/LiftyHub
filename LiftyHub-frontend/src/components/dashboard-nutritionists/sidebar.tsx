@@ -159,7 +159,7 @@ const Sidebar: React.FC = () => {
                   mb: 0.5,
                   px: 2,
                   py: 1.2,
-                  color: active ? "#fff" : "#555",
+                  color: active ? "#fff" : "#94a3b8",
                   background: active ? "rgba(59,130,246,0.18)" : "transparent",
                   "&:hover": {
                     background: active ? "rgba(59,130,246,0.22)" : "rgba(255,255,255,0.03)",

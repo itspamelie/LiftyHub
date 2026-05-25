@@ -9,7 +9,7 @@ import {
   Avatar,
   IconButton,
 } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Unstable_Grid2";
 import { useEffect, useRef, useState } from "react";
 import { apiFetch, getImageUrl } from "../../services/api";
 import Swal from "sweetalert2";
@@ -151,7 +151,7 @@ export default function ConfigDashboard() {
     <Box p={4} sx={{ color: "white" }}>
       {/* HEADER */}
       <Box mb={5}>
-        <Typography fontSize={13} color="#555" mb={0.5} letterSpacing="0.05em" textTransform="uppercase">
+        <Typography fontSize={13} color="#94a3b8" mb={0.5} letterSpacing="0.05em" textTransform="uppercase">
           Configuración
         </Typography>
         <Typography
@@ -170,7 +170,7 @@ export default function ConfigDashboard() {
 
       <Grid container spacing={3}>
         {/* COLUMNA IZQUIERDA — Formulario */}
-        <Grid size={{ xs: 12, lg: 8 }}>
+        <Grid xs={12} lg={8}>
           <Box
             sx={{
               p: 4,
@@ -254,7 +254,7 @@ export default function ConfigDashboard() {
               <Box sx={{ color: "#3B82F6", display: "flex" }}>
                 <BadgeIcon fontSize="small" />
               </Box>
-              <Typography fontSize={12} color="#555" letterSpacing="0.06em" textTransform="uppercase">
+              <Typography fontSize={12} color="#94a3b8" letterSpacing="0.06em" textTransform="uppercase">
                 Información profesional
               </Typography>
             </Box>
@@ -302,7 +302,7 @@ export default function ConfigDashboard() {
                   <Typography fontSize={14} color="#ccc" fontWeight={500}>
                     Perfil visible
                   </Typography>
-                  <Typography fontSize={12} color="#555" mt={0.3}>
+                  <Typography fontSize={12} color="#94a3b8" mt={0.3}>
                     Los usuarios pueden encontrar tu perfil en la app
                   </Typography>
                 </Box>
@@ -345,7 +345,7 @@ export default function ConfigDashboard() {
         </Grid>
 
         {/* COLUMNA DERECHA — Tips */}
-        <Grid size={{ xs: 12, lg: 4 }}>
+        <Grid xs={12} lg={4}>
           <Box display="flex" flexDirection="column" gap={2}>
             {/* Visibilidad */}
             <Box
@@ -373,8 +373,8 @@ export default function ConfigDashboard() {
                   { label: "Foto", value: picPreview ? "Configurada" : "Sin foto", active: !!picPreview },
                 ].map((item) => (
                   <Box key={item.label} display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography fontSize={12} color="#555">{item.label}</Typography>
-                    <Typography fontSize={12} color={item.active ? "#22c55e" : "#444"} fontWeight={500}>
+                    <Typography fontSize={12} color="#94a3b8">{item.label}</Typography>
+                    <Typography fontSize={12} color={item.active ? "#22c55e" : "#64748b"} fontWeight={500}>
                       {item.value}
                     </Typography>
                   </Box>
@@ -418,7 +418,7 @@ export default function ConfigDashboard() {
                         flexShrink: 0,
                       }}
                     />
-                    <Typography fontSize={12} color="#555" lineHeight={1.6}>
+                    <Typography fontSize={12} color="#94a3b8" lineHeight={1.6}>
                       {tip}
                     </Typography>
                   </Box>

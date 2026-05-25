@@ -668,22 +668,22 @@ export default function RoutinesScreen() {
             <View style={styles.modalIcon}>
               <Ionicons name="alert-circle" size={32} color="#F59E0B" />
             </View>
-            <Text style={styles.modalTitle}>Límite alcanzado</Text>
+            <Text style={styles.modalTitle}>{t("tabs.scanLimitTitle")}</Text>
             <Text style={styles.modalSubtitle}>
-              Alcanzaste los <Text style={{ color: "white", fontWeight: "700" }}>{getScanLimit()} escaneos del mes</Text>.{"\n"}
-              Actualiza a Pro para escanear sin límite.
+              {t("tabs.scanLimitInfo")} <Text style={{ color: "white", fontWeight: "700" }}>{getScanLimit()} {t("tabs.scanLimitMonth")}</Text>.{"\n"}
+              {t("tabs.scanLimitUpgrade")}
             </Text>
             <HapticButton
               style={[styles.planCard, { alignItems: "center", paddingVertical: 14, backgroundColor: "#F59E0B", marginBottom: 8 }]}
               onPress={() => { setShowScanLimit(false); router.push("/settings/plans" as any); }}
             >
-              <Text style={{ color: "white", fontWeight: "700" }}>Ver plan Pro</Text>
+              <Text style={{ color: "white", fontWeight: "700" }}>{t("tabs.viewPro")}</Text>
             </HapticButton>
             <HapticButton
               style={[styles.planCard, { alignItems: "center", paddingVertical: 14, borderColor: "#2C2C2E", borderWidth: 1 }]}
               onPress={() => setShowScanLimit(false)}
             >
-              <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>Cerrar</Text>
+              <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>{t("tabs.close")}</Text>
             </HapticButton>
           </HapticButton>
         </HapticButton>
@@ -710,9 +710,9 @@ export default function RoutinesScreen() {
                 <Text style={styles.importMeta}>
                   {scannedData.category}  ·  {scannedData.level}  ·  {scannedData.duration} min
                 </Text>
-                {scannedData.exercises?.length > 0 && (
+                {scannedData.exercises && scannedData.exercises.length > 0 && (
                   <View style={styles.importExercises}>
-                    {scannedData.exercises.slice(0, 4).map((ex: any, i: number) => (
+                    {scannedData.exercises.slice(0, 4).map((ex, i) => (
                       <Text key={i} style={styles.importExerciseItem}>• {ex.name}  ({ex.sets}×{ex.reps})</Text>
                     ))}
                     {scannedData.exercises.length > 4 && (

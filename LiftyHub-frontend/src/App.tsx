@@ -78,6 +78,7 @@ function App() {
           <Route path="profile" element={<ProfileDashboard />} />
           <Route path="diets" element={<DietsDashboard />} />
           <Route path="diets/create" element={<CreatePlanPage />} />
+          <Route path="diets/edit/:planId" element={<CreatePlanPage />} />
           <Route path="config" element={<ConfigDashboard />} />
           <Route path="requests" element={<RequestsDashboard />} />
 

@@ -2,7 +2,6 @@ import { View, Text, StyleSheet } from "react-native";
 import { colors, spacing } from "@/src/styles/globalstyles";
 
 export default function ActivityHeatmap({ refreshTrigger = 0 }: { refreshTrigger?: number }) {
-  console.log("[ActivityHeatmap] render");
 
   return (
     <View style={styles.card}>

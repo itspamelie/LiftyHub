@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { apiFetch, getImageUrl } from "../../services/api";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Unstable_Grid2";
 import StarIcon from "@mui/icons-material/Star";
 import BadgeIcon from "@mui/icons-material/Badge";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -83,7 +83,7 @@ export default function ProfileDashboard() {
   if (!nutritionist) {
     return (
       <Box p={4}>
-        <Typography color="#444">No se encontró el perfil.</Typography>
+        <Typography color="#64748b">No se encontró el perfil.</Typography>
       </Box>
     );
   }
@@ -94,7 +94,7 @@ export default function ProfileDashboard() {
     <Box p={4} sx={{ color: "white" }}>
       {/* HEADER */}
       <Box mb={5}>
-        <Typography fontSize={13} color="#555" mb={0.5} letterSpacing="0.05em" textTransform="uppercase">
+        <Typography fontSize={13} color="#94a3b8" mb={0.5} letterSpacing="0.05em" textTransform="uppercase">
           Tu perfil
         </Typography>
         <Typography
@@ -174,14 +174,14 @@ export default function ProfileDashboard() {
               }}
             />
           </Box>
-          <Typography color="#555" fontSize={14} mb={1.5}>
+          <Typography color="#94a3b8" fontSize={14} mb={1.5}>
             {nutritionist.specialty}
           </Typography>
           <Box display="flex" alignItems="center" gap={0.5}>
             {[...Array(5)].map((_, i) => (
               <StarIcon key={i} sx={{ fontSize: 15, color: i < stars ? "#FBBF24" : "#2a2a2a" }} />
             ))}
-            <Typography color="#555" fontSize={13} ml={0.5}>
+            <Typography color="#94a3b8" fontSize={13} ml={0.5}>
               {nutritionist.rating} · {nutritionist.reviews_count} reseñas
             </Typography>
           </Box>
@@ -197,11 +197,11 @@ export default function ProfileDashboard() {
         >
           <Box display="flex" alignItems="center" justifyContent="flex-end" gap={0.5}>
             <LocationOnIcon sx={{ fontSize: 14, color: "#64748b" }} />
-            <Typography fontSize={13} color="#555">{nutritionist.location}</Typography>
+            <Typography fontSize={13} color="#94a3b8">{nutritionist.location}</Typography>
           </Box>
           <Box display="flex" alignItems="center" justifyContent="flex-end" gap={0.5}>
             <BadgeIcon sx={{ fontSize: 14, color: "#64748b" }} />
-            <Typography fontSize={13} color="#555">{nutritionist.license_number}</Typography>
+            <Typography fontSize={13} color="#94a3b8">{nutritionist.license_number}</Typography>
           </Box>
         </Box>
       </Box>
@@ -218,7 +218,7 @@ export default function ProfileDashboard() {
             mb: 3,
           }}
         >
-          <Typography fontSize={13} color="#555" mb={1} textTransform="uppercase" letterSpacing="0.04em">
+          <Typography fontSize={13} color="#94a3b8" mb={1} textTransform="uppercase" letterSpacing="0.04em">
             Sobre mí
           </Typography>
           <Typography color="#aaa" fontSize={14} lineHeight={1.7}>
@@ -229,7 +229,7 @@ export default function ProfileDashboard() {
 
       {/* INFO GRID */}
       <Grid container spacing={2} mb={4}>
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid xs={12} md={4}>
           <InfoCard icon={<LocalOfferIcon fontSize="small" />} title="Especialidades">
             {nutritionist.specialties?.length > 0 ? (
               <Box display="flex" flexWrap="wrap" gap={1}>
@@ -248,43 +248,43 @@ export default function ProfileDashboard() {
                 ))}
               </Box>
             ) : (
-              <Typography color="#333" fontSize={13}>Sin especialidades</Typography>
+              <Typography color="#64748b" fontSize={13}>Sin especialidades</Typography>
             )}
           </InfoCard>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid xs={12} md={4}>
           <InfoCard icon={<SchoolIcon fontSize="small" />} title="Educación">
             {nutritionist.education?.length > 0 ? (
               <Box display="flex" flexDirection="column" gap={2}>
                 {nutritionist.education.map((edu: any) => (
                   <Box key={edu.id}>
                     <Typography fontSize={13} fontWeight={600} color="#ddd">{edu.degree}</Typography>
-                    <Typography fontSize={12} color="#555">{edu.institution} · {edu.year}</Typography>
+                    <Typography fontSize={12} color="#94a3b8">{edu.institution} · {edu.year}</Typography>
                   </Box>
                 ))}
               </Box>
             ) : (
-              <Typography color="#333" fontSize={13}>Sin educación registrada</Typography>
+              <Typography color="#64748b" fontSize={13}>Sin educación registrada</Typography>
             )}
           </InfoCard>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid xs={12} md={4}>
           <InfoCard icon={<WorkIcon fontSize="small" />} title="Experiencia">
             {nutritionist.experience?.length > 0 ? (
               <Box display="flex" flexDirection="column" gap={2}>
                 {nutritionist.experience.map((exp: any) => (
                   <Box key={exp.id}>
                     <Typography fontSize={13} fontWeight={600} color="#ddd">{exp.title}</Typography>
-                    <Typography fontSize={12} color="#555">
+                    <Typography fontSize={12} color="#94a3b8">
                       {exp.company} · {exp.start_year} – {exp.end_year ?? "Presente"}
                     </Typography>
                   </Box>
                 ))}
               </Box>
             ) : (
-              <Typography color="#333" fontSize={13}>Sin experiencia registrada</Typography>
+              <Typography color="#64748b" fontSize={13}>Sin experiencia registrada</Typography>
             )}
           </InfoCard>
         </Grid>
@@ -292,13 +292,13 @@ export default function ProfileDashboard() {
 
       {/* REVIEWS */}
       <Box mb={2}>
-        <Typography fontSize={13} color="#555" letterSpacing="0.04em" textTransform="uppercase" mb={2}>
+        <Typography fontSize={13} color="#94a3b8" letterSpacing="0.04em" textTransform="uppercase" mb={2}>
           Reseñas de usuarios
         </Typography>
         <Grid container spacing={2}>
           {nutritionist.reviews?.length > 0 ? (
             nutritionist.reviews.map((r: any) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={r.id}>
+              <Grid xs={12} sm={6} md={4} key={r.id}>
                 <Box
                   sx={{
                     p: 2.5,
@@ -333,15 +333,15 @@ export default function ProfileDashboard() {
                       </Box>
                     </Box>
                   </Box>
-                  <Typography color="#555" fontSize={13} lineHeight={1.6}>
+                  <Typography color="#94a3b8" fontSize={13} lineHeight={1.6}>
                     {r.comment}
                   </Typography>
                 </Box>
               </Grid>
             ))
           ) : (
-            <Grid size={{ xs: 12 }}>
-              <Typography color="#333" fontSize={13}>Sin reseñas aún</Typography>
+            <Grid xs={12}>
+              <Typography color="#64748b" fontSize={13}>Sin reseñas aún</Typography>
             </Grid>
           )}
         </Grid>

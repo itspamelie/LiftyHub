@@ -347,14 +347,18 @@ export default function EditProfileScreen() {
               <Text style={styles.label}>{t("editProfile.somatotype")}</Text>
             </View>
             <View style={styles.selectorContainer}>
-              {["Ectomorfo", "Mesomorfo", "Endomorfo"].map((type) => (
+              {([
+                { value: "Ectomorfo", label: t("editProfile.ectomorph") },
+                { value: "Mesomorfo", label: t("editProfile.mesomorph") },
+                { value: "Endomorfo", label: t("editProfile.endomorph") },
+              ] as const).map(({ value, label }) => (
                 <HapticButton
-                  key={type}
-                  style={[styles.selectorButton, somatotype === type && styles.selectorButtonActive]}
-                  onPress={() => setSomatotype(type)}
+                  key={value}
+                  style={[styles.selectorButton, somatotype === value && styles.selectorButtonActive]}
+                  onPress={() => setSomatotype(value)}
                 >
-                  <Text style={[styles.selectorText, somatotype === type && styles.selectorTextActive]}>
-                    {type}
+                  <Text style={[styles.selectorText, somatotype === value && styles.selectorTextActive]}>
+                    {label}
                   </Text>
                 </HapticButton>
               ))}
@@ -370,20 +374,20 @@ export default function EditProfileScreen() {
               <Text style={styles.label}>{t("editProfile.goal")}</Text>
             </View>
             <View style={styles.selectorContainer}>
-              {[
-                "Perder grasa",
-                "Ganar músculo",
-                "Recomposición corporal",
-                "Mejorar resistencia",
-                "Mejorar fuerza"
-              ].map((item) => (
+              {([
+                { value: "Perder grasa",            label: t("editProfile.goalLoseFat") },
+                { value: "Ganar músculo",           label: t("editProfile.goalBuildMuscle") },
+                { value: "Recomposición corporal",  label: t("editProfile.goalRecomposition") },
+                { value: "Mejorar resistencia",     label: t("editProfile.goalEndurance") },
+                { value: "Mejorar fuerza",          label: t("editProfile.goalStrength") },
+              ] as const).map(({ value, label }) => (
                 <HapticButton
-                  key={item}
-                  style={[styles.selectorButton, goal === item && styles.selectorButtonActive]}
-                  onPress={() => setGoal(item)}
+                  key={value}
+                  style={[styles.selectorButton, goal === value && styles.selectorButtonActive]}
+                  onPress={() => setGoal(value)}
                 >
-                  <Text style={[styles.selectorText, goal === item && styles.selectorTextActive]}>
-                    {item}
+                  <Text style={[styles.selectorText, goal === value && styles.selectorTextActive]}>
+                    {label}
                   </Text>
                 </HapticButton>
               ))}

@@ -97,7 +97,7 @@ export default function Login() {
       await forgotPassword(forgotEmail);
       setForgotStep(2);
     } catch {
-      setForgotError("No se pudo enviar el correo. Intenta de nuevo.");
+      setForgotError(t("login.forgotErrSend"));
     } finally {
       setForgotLoading(false);
     }
@@ -112,7 +112,7 @@ export default function Login() {
       if (res?.status === "ok") {
         setForgotStep(3);
       } else {
-        setForgotError("Código incorrecto o expirado.");
+        setForgotError(t("login.forgotErrCode"));
       }
     } catch {
       setForgotError("Código incorrecto o expirado.");
@@ -124,11 +124,11 @@ export default function Login() {
   const handleResetPassword = async () => {
     if (!newPassword || !confirmPassword) return;
     if (newPassword !== confirmPassword) {
-      setForgotError("Las contraseñas no coinciden.");
+      setForgotError(t("login.forgotErrMismatch"));
       return;
     }
     if (newPassword.length < 6) {
-      setForgotError("La contraseña debe tener al menos 6 caracteres.");
+      setForgotError(t("login.forgotErrLength"));
       return;
     }
     setForgotLoading(true);
@@ -137,9 +137,9 @@ export default function Login() {
       const res = await resetPassword(forgotEmail, forgotCode, newPassword);
       if (res?.status === "ok") {
         closeForgotModal();
-        Alert.alert("¡Listo!", "Tu contraseña fue actualizada. Ya puedes iniciar sesión.");
+        Alert.alert(t("login.forgotSuccessTitle"), t("login.forgotSuccessMsg"));
       } else {
-        setForgotError("No se pudo actualizar la contraseña.");
+        setForgotError(t("login.forgotErrReset"));
       }
     } catch {
       setForgotError("No se pudo actualizar la contraseña.");
@@ -279,13 +279,13 @@ export default function Login() {
                   <View style={styles.modalIconCircle}>
                     <Ionicons name="mail-outline" size={28} color={colors.primary} />
                   </View>
-                  <Text style={styles.modalTitle}>¿Olvidaste tu contraseña?</Text>
-                  <Text style={styles.modalSubtitle}>Ingresa tu correo y te enviaremos un código de verificación.</Text>
+                  <Text style={styles.modalTitle}>{t("login.forgotStep1Title")}</Text>
+                  <Text style={styles.modalSubtitle}>{t("login.forgotStep1Subtitle")}</Text>
                   <View style={styles.modalInput}>
                     <Ionicons name="mail-outline" size={18} color={colors.textSecondary} />
                     <TextInput
                       style={styles.modalInputText}
-                      placeholder="correo@ejemplo.com"
+                      placeholder={t("login.forgotStep1Placeholder")}
                       placeholderTextColor={colors.textSecondary}
                       value={forgotEmail}
                       onChangeText={setForgotEmail}
@@ -295,10 +295,10 @@ export default function Login() {
                   </View>
                   {forgotError ? <Text style={styles.modalError}>{forgotError}</Text> : null}
                   <HapticButton style={[styles.modalBtn, (!forgotEmail || forgotLoading) && { opacity: 0.6 }]} onPress={handleSendCode} disabled={!forgotEmail || forgotLoading}>
-                    {forgotLoading ? <ActivityIndicator color="white" /> : <Text style={styles.modalBtnText}>Enviar código</Text>}
+                    {forgotLoading ? <ActivityIndicator color="white" /> : <Text style={styles.modalBtnText}>{t("login.forgotStep1Btn")}</Text>}
                   </HapticButton>
                   <HapticButton onPress={closeForgotModal}>
-                    <Text style={styles.modalCancelText}>Cancelar</Text>
+                    <Text style={styles.modalCancelText}>{t("login.forgotStep1Cancel")}</Text>
                   </HapticButton>
                 </>
               )}
@@ -309,8 +309,8 @@ export default function Login() {
                   <View style={styles.modalIconCircle}>
                     <Ionicons name="keypad-outline" size={28} color={colors.primary} />
                   </View>
-                  <Text style={styles.modalTitle}>Ingresa el código</Text>
-                  <Text style={styles.modalSubtitle}>Revisá tu correo <Text style={{ color: "white" }}>{forgotEmail}</Text>. El código expira en 15 minutos.</Text>
+                  <Text style={styles.modalTitle}>{t("login.forgotStep2Title")}</Text>
+                  <Text style={styles.modalSubtitle}>{t("login.forgotStep2Subtitle")} <Text style={{ color: "white" }}>{forgotEmail}</Text>{t("login.forgotStep2SubtitleSuffix")}</Text>
                   <TextInput
                     style={styles.modalCodeInput}
                     placeholder="000000"
@@ -323,10 +323,10 @@ export default function Login() {
                   />
                   {forgotError ? <Text style={styles.modalError}>{forgotError}</Text> : null}
                   <HapticButton style={[styles.modalBtn, (!forgotCode || forgotLoading) && { opacity: 0.6 }]} onPress={handleVerifyCode} disabled={!forgotCode || forgotLoading}>
-                    {forgotLoading ? <ActivityIndicator color="white" /> : <Text style={styles.modalBtnText}>Verificar código</Text>}
+                    {forgotLoading ? <ActivityIndicator color="white" /> : <Text style={styles.modalBtnText}>{t("login.forgotStep2Btn")}</Text>}
                   </HapticButton>
                   <HapticButton onPress={() => setForgotStep(1)}>
-                    <Text style={styles.modalCancelText}>← Volver</Text>
+                    <Text style={styles.modalCancelText}>{t("login.forgotStep2Back")}</Text>
                   </HapticButton>
                 </>
               )}
@@ -337,13 +337,13 @@ export default function Login() {
                   <View style={styles.modalIconCircle}>
                     <Ionicons name="lock-closed-outline" size={28} color={colors.primary} />
                   </View>
-                  <Text style={styles.modalTitle}>Nueva contraseña</Text>
-                  <Text style={styles.modalSubtitle}>Elige una contraseña segura de al menos 6 caracteres.</Text>
+                  <Text style={styles.modalTitle}>{t("login.forgotStep3Title")}</Text>
+                  <Text style={styles.modalSubtitle}>{t("login.forgotStep3Subtitle")}</Text>
                   <View style={styles.modalInput}>
                     <Ionicons name="lock-closed-outline" size={18} color={colors.textSecondary} />
                     <TextInput
                       style={styles.modalInputText}
-                      placeholder="Nueva contraseña"
+                      placeholder={t("login.forgotStep3Placeholder")}
                       placeholderTextColor={colors.textSecondary}
                       value={newPassword}
                       onChangeText={setNewPassword}
@@ -358,7 +358,7 @@ export default function Login() {
                     <Ionicons name="lock-closed-outline" size={18} color={colors.textSecondary} />
                     <TextInput
                       style={styles.modalInputText}
-                      placeholder="Repetir contraseña"
+                      placeholder={t("login.forgotStep3Confirm")}
                       placeholderTextColor={colors.textSecondary}
                       value={confirmPassword}
                       onChangeText={setConfirmPassword}
@@ -371,7 +371,7 @@ export default function Login() {
                   </View>
                   {forgotError ? <Text style={styles.modalError}>{forgotError}</Text> : null}
                   <HapticButton style={[styles.modalBtn, (!newPassword || !confirmPassword || forgotLoading) && { opacity: 0.6 }]} onPress={handleResetPassword} disabled={!newPassword || !confirmPassword || forgotLoading}>
-                    {forgotLoading ? <ActivityIndicator color="white" /> : <Text style={styles.modalBtnText}>Cambiar contraseña</Text>}
+                    {forgotLoading ? <ActivityIndicator color="white" /> : <Text style={styles.modalBtnText}>{t("login.forgotStep3Btn")}</Text>}
                   </HapticButton>
                 </>
               )}

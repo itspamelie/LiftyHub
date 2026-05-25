@@ -5,6 +5,7 @@ import { router, Stack } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 import HapticButton from "@/src/components/buttons/HapticButton";
 import BackButton from "@/src/components/buttons/backButton";
 
@@ -36,6 +37,7 @@ function daysElapsed(startDate: string): number {
 }
 
 export default function ChallengeScreen() {
+  const { t, language } = useLanguage();
   const [loading, setLoading]           = useState(true);
   const [challengeKey, setChallengeKey] = useState("@active_challenge_guest");
   const [challenge, setChallenge]       = useState<Challenge | null>(null);
@@ -84,7 +86,7 @@ export default function ChallengeScreen() {
   const handlePickPhoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permiso necesario", "Necesitamos acceso a tu galería para agregar fotos.");
+      Alert.alert(t("challenge.galleryPermTitle"), t("challenge.galleryPermMessage"));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -116,12 +118,12 @@ export default function ChallengeScreen() {
 
   const handleDelete = () => {
     Alert.alert(
-      "Eliminar reto",
-      "¿Seguro? Se perderán todas las fotos guardadas.",
+      t("challenge.deleteTitle"),
+      t("challenge.deleteMessage"),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t("challenge.deleteCancel"), style: "cancel" },
         {
-          text: "Eliminar",
+          text: t("challenge.deleteConfirm"),
           style: "destructive",
           onPress: async () => {
             await AsyncStorage.removeItem(challengeKey);
@@ -152,17 +154,15 @@ export default function ChallengeScreen() {
             <View style={[styles.iconCircle, { backgroundColor: `${ACCENT}22` }]}>
               <Ionicons name="trophy" size={42} color={ACCENT} />
             </View>
-            <Text style={styles.createTitle}>Reto Personal</Text>
-            <Text style={styles.createSubtitle}>
-              Define tu meta y registra tu transformación con fotos a lo largo del tiempo
-            </Text>
+            <Text style={styles.createTitle}>{t("challenge.title")}</Text>
+            <Text style={styles.createSubtitle}>{t("challenge.subtitle")}</Text>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.fieldLabel}>¿CUÁL ES TU META?</Text>
+            <Text style={styles.fieldLabel}>{t("challenge.goalLabel")}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: En 3 meses quiero bajar 10 kg y ver mi progreso..."
+              placeholder={t("challenge.goalPlaceholder")}
               placeholderTextColor={colors.textSecondary}
               value={goal}
               onChangeText={setGoal}
@@ -171,7 +171,7 @@ export default function ChallengeScreen() {
               textAlignVertical="top"
             />
 
-            <Text style={[styles.fieldLabel, { marginTop: 20 }]}>DURACIÓN DEL RETO</Text>
+            <Text style={[styles.fieldLabel, { marginTop: 20 }]}>{t("challenge.durationLabel")}</Text>
             <View style={styles.durationRow}>
               {DURATION_OPTIONS.map((m) => {
                 const active = duration === m;
@@ -182,7 +182,7 @@ export default function ChallengeScreen() {
                     onPress={() => setDuration(m)}
                   >
                     <Text style={[styles.durationText, active && styles.durationTextActive]}>
-                      {m}{m === 1 ? " mes" : " meses"}
+                      {m === 1 ? t("challenge.monthSingular", { n: m }) : t("challenge.monthPlural", { n: m })}
                     </Text>
                   </HapticButton>
                 );
@@ -196,7 +196,7 @@ export default function ChallengeScreen() {
             >
               {saving
                 ? <ActivityIndicator color="white" />
-                : <Text style={styles.createBtnText}>Iniciar Reto</Text>}
+                : <Text style={styles.createBtnText}>{t("challenge.startBtn")}</Text>}
             </HapticButton>
           </View>
         </ScrollView>
@@ -214,12 +214,13 @@ export default function ChallengeScreen() {
   const firstPhoto  = challenge.photos[0];
   const lastPhoto   = challenge.photos[challenge.photos.length - 1];
 
+  const locale = language === "en" ? "en-US" : "es-MX";
   const motivationalMsg = () => {
-    if (isCompleted) return { text: "¡Lo lograste! Eres increíble.", icon: "trophy" as const };
-    if (pct >= 75)   return { text: "¡Ya casi! El final está cerca.", icon: "flame" as const };
-    if (pct >= 50)   return { text: "Vas a la mitad, ¡sigue así!", icon: "trending-up" as const };
-    if (pct >= 25)   return { text: "Buen arranque, no pares ahora.", icon: "flash" as const };
-    return { text: "Cada día cuenta. ¡Tú puedes!", icon: "heart" as const };
+    if (isCompleted) return { text: t("challenge.motivCompleted"), icon: "trophy" as const };
+    if (pct >= 75)   return { text: t("challenge.motiv75"),        icon: "flame" as const };
+    if (pct >= 50)   return { text: t("challenge.motiv50"),        icon: "trending-up" as const };
+    if (pct >= 25)   return { text: t("challenge.motiv25"),        icon: "flash" as const };
+    return { text: t("challenge.motiv0"), icon: "heart" as const };
   };
   const motiv = motivationalMsg();
 
@@ -232,10 +233,10 @@ export default function ChallengeScreen() {
         <HapticButton style={styles.activeBackBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color="white" />
         </HapticButton>
-        <Text style={styles.activeHeaderTitle}>Mi Reto</Text>
+        <Text style={styles.activeHeaderTitle}>{t("challenge.activeTitle")}</Text>
         {isCompleted && (
           <View style={styles.completedBadge}>
-            <Text style={styles.completedBadgeText}>¡Completado!</Text>
+            <Text style={styles.completedBadgeText}>{t("challenge.completed")}</Text>
           </View>
         )}
       </View>
@@ -249,7 +250,7 @@ export default function ChallengeScreen() {
               <Ionicons name="trophy" size={26} color={ACCENT} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.heroLabel}>TU META</Text>
+              <Text style={styles.heroLabel}>{t("challenge.yourGoalLabel")}</Text>
               <Text style={styles.goalText}>{challenge.goal}</Text>
             </View>
           </View>
@@ -257,7 +258,7 @@ export default function ChallengeScreen() {
           {/* BARRA DE PROGRESO CON HITOS */}
           <View style={styles.progressSection}>
             <View style={styles.progressLabelRow}>
-              <Text style={styles.progressMeta}>Día {elapsed} de {total}</Text>
+              <Text style={styles.progressMeta}>{t("challenge.dayProgress", { elapsed, total })}</Text>
               <Text style={styles.progressPct}>{pct}%</Text>
             </View>
             <View style={styles.progressBg}>
@@ -284,19 +285,19 @@ export default function ChallengeScreen() {
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
             <Text style={styles.statValue}>{elapsed}</Text>
-            <Text style={styles.statLabel}>Días{"\n"}transcurridos</Text>
+            <Text style={styles.statLabel}>{t("challenge.daysElapsedLabel")}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statBox}>
             <Text style={[styles.statValue, { color: isCompleted ? ACCENT : colors.primary }]}>
               {isCompleted ? "✓" : left}
             </Text>
-            <Text style={styles.statLabel}>Días{"\n"}restantes</Text>
+            <Text style={styles.statLabel}>{t("challenge.daysRemainingLabel")}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statBox}>
             <Text style={styles.statValue}>{challenge.photos.length}</Text>
-            <Text style={styles.statLabel}>Fotos de{"\n"}progreso</Text>
+            <Text style={styles.statLabel}>{t("challenge.progressPhotosLabel")}</Text>
           </View>
         </View>
 
@@ -305,15 +306,15 @@ export default function ChallengeScreen() {
           <View style={styles.card}>
             <View style={styles.sectionHeaderRow}>
               <Ionicons name="git-compare-outline" size={18} color={ACCENT} />
-              <Text style={styles.sectionTitle}>Comparación</Text>
+              <Text style={styles.sectionTitle}>{t("challenge.comparisonTitle")}</Text>
             </View>
             <View style={styles.comparisonRow}>
               <View style={styles.comparisonItem}>
                 <Image source={{ uri: firstPhoto.uri }} style={styles.comparisonPhoto} resizeMode="cover" />
                 <View style={styles.comparisonLabelBox}>
-                  <Text style={styles.comparisonLabel}>Inicio</Text>
+                  <Text style={styles.comparisonLabel}>{t("challenge.startLabel")}</Text>
                   <Text style={styles.comparisonDate}>
-                    {new Date(firstPhoto.date).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
+                    {new Date(firstPhoto.date).toLocaleDateString(locale, { day: "numeric", month: "short" })}
                   </Text>
                 </View>
               </View>
@@ -323,9 +324,9 @@ export default function ChallengeScreen() {
               <View style={styles.comparisonItem}>
                 <Image source={{ uri: lastPhoto.uri }} style={styles.comparisonPhoto} resizeMode="cover" />
                 <View style={styles.comparisonLabelBox}>
-                  <Text style={styles.comparisonLabel}>Ahora</Text>
+                  <Text style={styles.comparisonLabel}>{t("challenge.nowLabel")}</Text>
                   <Text style={styles.comparisonDate}>
-                    {new Date(lastPhoto.date).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
+                    {new Date(lastPhoto.date).toLocaleDateString(locale, { day: "numeric", month: "short" })}
                   </Text>
                 </View>
               </View>
@@ -340,8 +341,8 @@ export default function ChallengeScreen() {
               <Ionicons name="camera" size={20} color={ACCENT} />
             </View>
             <View>
-              <Text style={styles.addPhotoText}>Agregar foto de progreso</Text>
-              <Text style={styles.addPhotoSub}>Registra tu transformación</Text>
+              <Text style={styles.addPhotoText}>{t("challenge.addPhotoTitle")}</Text>
+              <Text style={styles.addPhotoSub}>{t("challenge.addPhotoSubtitle")}</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} style={{ marginLeft: "auto" }} />
           </HapticButton>
@@ -352,7 +353,7 @@ export default function ChallengeScreen() {
           <View style={styles.card}>
             <View style={styles.sectionHeaderRow}>
               <Ionicons name="images-outline" size={18} color={colors.primary} />
-              <Text style={styles.sectionTitle}>Fotos de progreso</Text>
+              <Text style={styles.sectionTitle}>{t("challenge.photosTitle")}</Text>
               <View style={styles.countBadge}>
                 <Text style={styles.countBadgeText}>{challenge.photos.length}</Text>
               </View>
@@ -363,7 +364,7 @@ export default function ChallengeScreen() {
                   <Image source={{ uri: photo.uri }} style={styles.photo} resizeMode="cover" />
                   <View style={styles.photoMeta}>
                     <Text style={styles.photoDate}>
-                      {new Date(photo.date).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "2-digit" })}
+                      {new Date(photo.date).toLocaleDateString(locale, { day: "numeric", month: "short", year: "2-digit" })}
                     </Text>
                     {photo.note ? <Text style={styles.photoNote} numberOfLines={2}>{photo.note}</Text> : null}
                   </View>
@@ -374,8 +375,8 @@ export default function ChallengeScreen() {
         ) : (
           <View style={styles.emptyPhotos}>
             <Ionicons name="camera-outline" size={48} color="#333" />
-            <Text style={styles.emptyTitle}>Sin fotos aún</Text>
-            <Text style={styles.emptyText}>Sube tu primera foto para empezar a registrar tu transformación</Text>
+            <Text style={styles.emptyTitle}>{t("challenge.noPhotosTitle")}</Text>
+            <Text style={styles.emptyText}>{t("challenge.noPhotosText")}</Text>
           </View>
         )}
 
@@ -383,14 +384,14 @@ export default function ChallengeScreen() {
         <View style={styles.dateRow}>
           <Ionicons name="calendar-outline" size={14} color={colors.textSecondary} />
           <Text style={styles.dateText}>
-            Iniciado el {new Date(challenge.startDate).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}
+            {t("challenge.startedOn", { date: new Date(challenge.startDate).toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" }) })}
           </Text>
         </View>
 
         {/* ELIMINAR */}
         <HapticButton style={styles.deleteBtn} onPress={handleDelete}>
           <Ionicons name="trash-outline" size={15} color={colors.danger} />
-          <Text style={styles.deleteBtnText}>Eliminar reto</Text>
+          <Text style={styles.deleteBtnText}>{t("challenge.deleteBtn")}</Text>
         </HapticButton>
       </ScrollView>
 
@@ -401,20 +402,20 @@ export default function ChallengeScreen() {
             {selectedUri && (
               <Image source={{ uri: selectedUri }} style={styles.modalPreview} resizeMode="cover" />
             )}
-            <Text style={styles.modalTitle}>Agregar nota (opcional)</Text>
+            <Text style={styles.modalTitle}>{t("challenge.photoModalTitle")}</Text>
             <TextInput
               style={styles.noteInput}
-              placeholder="¿Cómo te sientes hoy?"
+              placeholder={t("challenge.photoModalPlaceholder")}
               placeholderTextColor={colors.textSecondary}
               value={noteText}
               onChangeText={setNoteText}
               multiline
             />
             <HapticButton style={styles.savePhotoBtn} onPress={handleSavePhoto}>
-              <Text style={styles.savePhotoBtnText}>Guardar foto</Text>
+              <Text style={styles.savePhotoBtnText}>{t("challenge.savePhotoBtn")}</Text>
             </HapticButton>
             <HapticButton style={styles.cancelModalBtn} onPress={() => setShowPhotoModal(false)}>
-              <Text style={styles.cancelModalText}>Cancelar</Text>
+              <Text style={styles.cancelModalText}>{t("challenge.cancelBtn")}</Text>
             </HapticButton>
           </View>
         </View>

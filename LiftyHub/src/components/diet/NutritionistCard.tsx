@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import HapticButton from "@/src/components/buttons/HapticButton";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 type Props = {
   name: string;
@@ -12,19 +13,20 @@ type Props = {
 };
 
 export default function NutritionistCard({ name, specialty, imageUrl, status, updatedAt }: Props) {
+  const { t } = useLanguage();
   return (
     <View style={styles.card}>
 
       <View style={styles.top}>
         <Image source={{ uri: imageUrl }} style={styles.avatar} />
         <View style={styles.info}>
-          <Text style={styles.label}>Nutricionista asignada</Text>
+          <Text style={styles.label}>{t("dietPlan.assignedNutritionist")}</Text>
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.specialty}>{specialty}</Text>
         </View>
         <View style={[styles.badge, status === "active" ? styles.badgeActive : styles.badgeCompleted]}>
           <Text style={[styles.badgeText, status === "active" ? styles.badgeTextActive : styles.badgeTextCompleted]}>
-            {status === "active" ? "Activo" : "Completado"}
+            {status === "active" ? t("dietPlan.statusActive") : t("dietPlan.statusCompleted")}
           </Text>
         </View>
       </View>
@@ -34,10 +36,10 @@ export default function NutritionistCard({ name, specialty, imageUrl, status, up
       <View style={styles.bottom}>
         <View style={styles.updatedRow}>
           <Ionicons name="time-outline" size={14} color="#666" />
-          <Text style={styles.updated}>Última actualización: {updatedAt}</Text>
+          <Text style={styles.updated}>{t("dietPlan.lastUpdated", { date: updatedAt })}</Text>
         </View>
         <HapticButton style={styles.detailBtn} onPress={() => router.push("/nutritionist-profile")}>
-          <Text style={styles.detailBtnText}>Ver perfil</Text>
+          <Text style={styles.detailBtnText}>{t("dietPlan.viewProfile")}</Text>
           <Ionicons name="arrow-forward" size={14} color="#3B82F6" />
         </HapticButton>
       </View>

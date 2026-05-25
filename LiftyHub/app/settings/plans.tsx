@@ -8,13 +8,6 @@ import { useSubscription } from "@/src/context/SubscriptionContext";
 import { colors, planColors } from "@/src/styles/globalstyles";
 import HapticButton from "@/src/components/buttons/HapticButton";
 
-const PLANS = [
-  { key: "Free",  label: "Free",  price: "Gratis",   color: planColors.Free  },
-  { key: "Basic", label: "Basic", price: "$79/mes",  color: planColors.Basic },
-  { key: "Meal",  label: "Meal",  price: "$149/mes", color: planColors.Meal  },
-  { key: "Pro",   label: "Pro",   price: "$229/mes", color: planColors.Pro, recommended: true },
-];
-
 type RowValue = string | boolean;
 
 type CompareRow = {
@@ -22,21 +15,6 @@ type CompareRow = {
   icon: string;
   values: [RowValue, RowValue, RowValue, RowValue];
 };
-
-const COMPARE_ROWS: CompareRow[] = [
-  { label: "Rutinas propias",      icon: "barbell-outline",      values: ["7",     "20",    "20",     "∞"]   },
-  { label: "Rutinas de la app",    icon: "apps-outline",         values: [false,   true,    true,     true]  },
-  { label: "Catálogo ejercicios",  icon: "fitness-outline",      values: [true,    true,    true,     true]  },
-  { label: "Escanear QR",         icon: "qr-code-outline",      values: ["1/mes", "5/mes", "10/mes", "∞"]   },
-  { label: "Compartir QR",        icon: "share-social-outline",  values: ["1/mes", "5/mes", "10/mes", "∞"]   },
-  { label: "Estadísticas",        icon: "stats-chart-outline",   values: [false,   true,    true,     true]  },
-  { label: "Músculos trabajados", icon: "body-outline",          values: ["7 días",true,   true,     true]  },
-  { label: "Nutriólogo",          icon: "person-outline",        values: [false,   false,   true,     true]  },
-  { label: "Plan de dieta",       icon: "nutrition-outline",     values: [false,   false,   true,     true]  },
-  { label: "Suplementos",         icon: "flask-outline",         values: [false,   false,   true,     true]  },
-  { label: "Generar rutina con IA", icon: "color-wand-outline",  values: [false,   false,   false,    true]  },
-  { label: "Hidratación",          icon: "water-outline",        values: [false,   false,   false,    true]  },
-];
 
 // Widths calibrated to fit 4 plan columns without horizontal scroll (~375px screen)
 const COL_W = 58;
@@ -73,6 +51,28 @@ export default function Plans() {
   const { plan: currentPlan } = useSubscription();
   const [activeTab, setActiveTab] = useState<"plans" | "compare">("plans");
 
+  const PLANS = [
+    { key: "Free",  label: "Free",  price: t("plans.free"),    color: planColors.Free  },
+    { key: "Basic", label: "Basic", price: "$79/mes",  color: planColors.Basic },
+    { key: "Meal",  label: "Meal",  price: "$149/mes", color: planColors.Meal  },
+    { key: "Pro",   label: "Pro",   price: "$229/mes", color: planColors.Pro, recommended: true },
+  ];
+
+  const COMPARE_ROWS: CompareRow[] = [
+    { label: t("plans.cmpOwnRoutines"),  icon: "barbell-outline",      values: ["7",     "20",    "20",     "∞"]   },
+    { label: t("plans.cmpAppRoutines"),  icon: "apps-outline",         values: [false,   true,    true,     true]  },
+    { label: t("plans.cmpExercises"),    icon: "fitness-outline",      values: [true,    true,    true,     true]  },
+    { label: t("plans.cmpScanQR"),       icon: "qr-code-outline",      values: ["1/mes", "5/mes", "10/mes", "∞"]   },
+    { label: t("plans.cmpShareQR"),      icon: "share-social-outline", values: ["1/mes", "5/mes", "10/mes", "∞"]   },
+    { label: t("plans.cmpStats"),        icon: "stats-chart-outline",  values: [false,   true,    true,     true]  },
+    { label: t("plans.cmpMuscles"),      icon: "body-outline",         values: ["7 días",true,   true,     true]  },
+    { label: t("plans.cmpNutritionist"), icon: "person-outline",       values: [false,   false,   true,     true]  },
+    { label: t("plans.cmpDietPlan"),     icon: "nutrition-outline",    values: [false,   false,   true,     true]  },
+    { label: t("plans.cmpSupplements"),  icon: "flask-outline",        values: [false,   false,   true,     true]  },
+    { label: t("plans.cmpGenerateAI"),   icon: "color-wand-outline",   values: [false,   false,   false,    true]  },
+    { label: t("plans.cmpHydration"),    icon: "water-outline",        values: [false,   false,   false,    true]  },
+  ];
+
   const planList = [
     {
       id: 1,
@@ -93,7 +93,7 @@ export default function Plans() {
     {
       id: 2,
       title: "Basic",
-      description: "Más rutinas y seguimiento",
+      description: t("plans.descBasic"),
       price: "$79 " + t("plans.month"),
       accentColor: planColors.Basic,
       features: [
@@ -109,7 +109,7 @@ export default function Plans() {
     {
       id: 4,
       title: "Meal",
-      description: "Dieta + entrenamiento",
+      description: t("plans.descMeal"),
       price: "$149 " + t("plans.month"),
       accentColor: planColors.Meal,
       features: [
@@ -125,7 +125,7 @@ export default function Plans() {
     {
       id: 3,
       title: "Pro",
-      description: "Acceso completo + nutriólogo",
+      description: t("plans.descPro"),
       price: "$229 " + t("plans.month"),
       accentColor: planColors.Pro,
       recommended: true,
@@ -159,13 +159,13 @@ export default function Plans() {
           style={[styles.tabBtn, activeTab === "plans" && styles.tabBtnActive]}
           onPress={() => setActiveTab("plans")}
         >
-          <Text style={[styles.tabBtnText, activeTab === "plans" && styles.tabBtnTextActive]}>Planes</Text>
+          <Text style={[styles.tabBtnText, activeTab === "plans" && styles.tabBtnTextActive]}>{t("plans.tabPlans")}</Text>
         </HapticButton>
         <HapticButton
           style={[styles.tabBtn, activeTab === "compare" && styles.tabBtnActive]}
           onPress={() => setActiveTab("compare")}
         >
-          <Text style={[styles.tabBtnText, activeTab === "compare" && styles.tabBtnTextActive]}>Comparar</Text>
+          <Text style={[styles.tabBtnText, activeTab === "compare" && styles.tabBtnTextActive]}>{t("plans.tabCompare")}</Text>
         </HapticButton>
       </View>
 
@@ -197,7 +197,7 @@ export default function Plans() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.compareContent}>
 
           {/* Subtítulo */}
-          <Text style={styles.compareSubtitle}>Elige el plan que mejor se adapta a ti</Text>
+          <Text style={styles.compareSubtitle}>{t("plans.compareSubtitle")}</Text>
 
           {/* Tabla fija — sin scroll horizontal */}
           <View style={styles.table}>
@@ -219,7 +219,7 @@ export default function Plans() {
                   <Text style={styles.planHeaderPrice}>{p.price}</Text>
                   {currentPlan?.name === p.key && (
                     <View style={[styles.currentBadge, { borderColor: p.color }]}>
-                      <Text style={[styles.currentBadgeText, { color: p.color }]}>Actual</Text>
+                      <Text style={[styles.currentBadgeText, { color: p.color }]}>{t("plans.current")}</Text>
                     </View>
                   )}
                 </View>
@@ -257,7 +257,7 @@ export default function Plans() {
                         });
                       }}
                     >
-                      <Text style={styles.selectBtnText}>Elegir</Text>
+                      <Text style={styles.selectBtnText}>{t("plans.select")}</Text>
                     </HapticButton>
                   ) : (
                     <View style={styles.freeBadge}>

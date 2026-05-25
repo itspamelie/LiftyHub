@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { colors, spacing } from "@/src/styles/globalstyles";
 import * as Storage from "@/src/utils/storage";
 import { getStorageUrl, createDietRequest, getDietRequestByUser } from "@/src/services/api";
+import { useLanguage } from "@/src/context/LanguageContext";
 import HapticButton from "@/src/components/buttons/HapticButton";
 
 const apiFetch = async (path: string, token: string) => {
@@ -42,6 +43,7 @@ type Profile = {
 };
 
 export default function NutritionistProfileScreen() {
+  const { t } = useLanguage();
   const { profileId } = useLocalSearchParams<{ profileId: string }>();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,7 +86,7 @@ export default function NutritionistProfileScreen() {
     return (
       <View style={styles.center}>
         <Ionicons name="person-outline" size={48} color={colors.textSecondary} />
-        <Text style={{ color: colors.textSecondary, marginTop: 12 }}>Perfil no encontrado</Text>
+        <Text style={{ color: colors.textSecondary, marginTop: 12 }}>{t("nutritionistProfile.notFound")}</Text>
       </View>
     );
   }
@@ -146,7 +148,7 @@ export default function NutritionistProfileScreen() {
           )}
         </View>
 
-        <Text style={styles.name}>{profile.user?.name ?? "Nutriólogo"}</Text>
+        <Text style={styles.name}>{profile.user?.name ?? t("nutritionistProfile.fallbackName")}</Text>
         <Text style={styles.specialty}>{profile.specialty}</Text>
 
         {profile.location ? (
@@ -159,7 +161,7 @@ export default function NutritionistProfileScreen() {
         {profile.license_number ? (
           <View style={styles.inlineRow}>
             <Ionicons name="ribbon-outline" size={13} color={colors.textSecondary} />
-            <Text style={styles.meta}>Cédula: {profile.license_number}</Text>
+            <Text style={styles.meta}>{t("nutritionistProfile.license")}: {profile.license_number}</Text>
           </View>
         ) : null}
 
@@ -174,7 +176,7 @@ export default function NutritionistProfileScreen() {
             />
           ))}
           <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
-          <Text style={styles.reviewsText}>· {profile.reviews_count} reseñas</Text>
+          <Text style={styles.reviewsText}>· {t("nutritionistProfile.reviewsCount", { count: profile.reviews_count })}</Text>
         </View>
 
         {/* ESPECIALIDADES CHIPS */}
@@ -191,14 +193,14 @@ export default function NutritionistProfileScreen() {
 
       {/* BIO */}
       {profile.bio ? (
-        <Section title="Acerca de">
+        <Section title={t("nutritionistProfile.about")}>
           <Text style={styles.bioText}>{profile.bio}</Text>
         </Section>
       ) : null}
 
       {/* EDUCACIÓN */}
       {profile.education?.length > 0 && (
-        <Section title="Educación">
+        <Section title={t("nutritionistProfile.education")}>
           {profile.education.map((e) => (
             <View key={e.id} style={styles.itemRow}>
               <View style={styles.itemIcon}>
@@ -216,7 +218,7 @@ export default function NutritionistProfileScreen() {
 
       {/* EXPERIENCIA */}
       {profile.experience?.length > 0 && (
-        <Section title="Experiencia">
+        <Section title={t("nutritionistProfile.experience")}>
           {profile.experience.map((e) => (
             <View key={e.id} style={styles.itemRow}>
               <View style={styles.itemIcon}>
@@ -226,7 +228,7 @@ export default function NutritionistProfileScreen() {
                 <Text style={styles.itemTitle}>{e.title}</Text>
                 <Text style={styles.itemSub}>{e.company}</Text>
                 <Text style={styles.itemMeta}>
-                  {e.start_year} — {e.end_year ?? "Presente"}
+                  {e.start_year} — {e.end_year ?? t("nutritionistProfile.present")}
                 </Text>
               </View>
             </View>
@@ -236,7 +238,7 @@ export default function NutritionistProfileScreen() {
 
       {/* RESEÑAS */}
       {profile.reviews?.length > 0 && (
-        <Section title="Reseñas">
+        <Section title={t("nutritionistProfile.reviews")}>
           {profile.reviews.map((r) => (
             <View key={r.id} style={styles.reviewCard}>
               <View style={styles.reviewHeader}>
@@ -244,7 +246,7 @@ export default function NutritionistProfileScreen() {
                   <Text style={styles.reviewAvatarText}>{r.user?.name?.[0] ?? "?"}</Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.reviewName}>{r.user?.name ?? "Usuario"}</Text>
+                  <Text style={styles.reviewName}>{r.user?.name ?? t("nutritionistProfile.fallbackName")}</Text>
                   <View style={styles.reviewStars}>
                     {[1, 2, 3, 4, 5].map((s) => (
                       <Ionicons
@@ -280,7 +282,7 @@ export default function NutritionistProfileScreen() {
           />
         )}
         <Text style={[styles.requestBtnText, hasActiveRequest && styles.requestBtnTextSent]}>
-          {requesting ? "Enviando..." : hasActiveRequest ? "Solicitud enviada" : "Solicitar este nutriólogo"}
+          {requesting ? t("nutritionistProfile.requesting") : hasActiveRequest ? t("nutritionistProfile.requestSent") : t("nutritionistProfile.requestBtn")}
         </Text>
       </TouchableOpacity>
 
@@ -291,16 +293,17 @@ export default function NutritionistProfileScreen() {
             <View style={styles.modalIconBox}>
               <Ionicons name="send-outline" size={28} color={colors.primary} />
             </View>
-            <Text style={styles.modalTitle}>Solicitar nutriólogo</Text>
+            <Text style={styles.modalTitle}>{t("nutritionistProfile.confirmTitle")}</Text>
             <Text style={styles.modalBody}>
-              ¿Quieres enviar una solicitud a{"\n"}
-              <Text style={{ color: "white", fontWeight: "700" }}>{profile.user?.name ?? "este nutriólogo"}</Text>?
+              {t("nutritionistProfile.confirmBody")}{"\n"}
+              <Text style={{ color: "white", fontWeight: "700" }}>{profile.user?.name ?? t("nutritionistProfile.fallbackName")}</Text>
+              {t("nutritionistProfile.confirmBodyEnd")}
             </Text>
             <TouchableOpacity style={styles.modalConfirmBtn} onPress={handleConfirmRequest}>
-              <Text style={styles.modalConfirmText}>Sí, solicitar</Text>
+              <Text style={styles.modalConfirmText}>{t("nutritionistProfile.confirmYes")}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setShowConfirm(false)}>
-              <Text style={styles.modalCancelText}>Cancelar</Text>
+              <Text style={styles.modalCancelText}>{t("nutritionistProfile.confirmCancel")}</Text>
             </TouchableOpacity>
           </View>
         </View>

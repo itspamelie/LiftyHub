@@ -12,6 +12,7 @@ import { UnitsProvider } from '@/src/context/UnitsContext';
 import { WorkoutProvider } from '@/src/context/WorkoutContext';
 import { syncPendingWorkouts } from '@/src/utils/pendingSync';
 import * as Storage from '@/src/utils/storage';
+import ErrorBoundary from '@/src/components/ErrorBoundary';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -42,6 +43,7 @@ export default function RootLayout() {
   }, []);
 
   return (
+    <ErrorBoundary>
     <LanguageProvider>
     <UnitsProvider>
     <SubscriptionProvider>
@@ -77,5 +79,6 @@ export default function RootLayout() {
     </SubscriptionProvider>
     </UnitsProvider>
     </LanguageProvider>
+    </ErrorBoundary>
   );
 }

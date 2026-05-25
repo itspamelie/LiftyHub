@@ -26,7 +26,10 @@ export default function Settings() {
 
   // Notificaciones
   const NOTIF_KEY = "@liftyhub_reminder_config";
-  const DAYS_ES = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+  const locale = language === "en" ? "en-US" : "es-MX";
+  const DAYS_SHORT = Array.from({ length: 7 }, (_, i) =>
+    new Date(2025, 0, 6 + i).toLocaleDateString(locale, { weekday: "short" }).replace(".", "").slice(0, 3)
+  );
   const [notifications, setNotifications] = useState(false);
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [reminderDays, setReminderDays] = useState<number[]>([1, 2, 3, 4, 5]);
@@ -104,7 +107,7 @@ export default function Settings() {
     );
   };
 
-  // Dev mode
+  // Dev mode — cambiar plan para demo (5 taps en versión)
   const versionTaps = useRef(0);
   const [showDevModal, setShowDevModal] = useState(false);
   const [devActivePlan, setDevActivePlan] = useState<string | null>(null);
@@ -194,7 +197,6 @@ export default function Settings() {
 
       await Storage.removeItem("token");
       await Storage.removeItem("user");
-      await AsyncStorage.removeItem("@liftyhub_dev_plan");
       await AsyncStorage.removeItem("@liftyhub_calendar_plan");
       router.replace("/auth/login");
     } catch {
@@ -208,7 +210,6 @@ export default function Settings() {
     try {
       await Storage.removeItem("token");
       await Storage.removeItem("user");
-      await AsyncStorage.removeItem("@liftyhub_dev_plan");
       await AsyncStorage.removeItem("@liftyhub_calendar_plan");
       router.replace("/auth/login");
     } catch {
@@ -459,13 +460,13 @@ export default function Settings() {
             <TouchableWithoutFeedback onPress={() => {}}>
               <View style={styles.modalContent}>
 
-                <Text style={styles.modalTitle}>⏰ Recordatorios</Text>
-                <Text style={styles.modalSubtitle}>Elige los días y hora en que quieres entrenar</Text>
+                <Text style={styles.modalTitle}>{t("settings.reminderTitle")}</Text>
+                <Text style={styles.modalSubtitle}>{t("settings.reminderSubtitle")}</Text>
 
                 {/* Días */}
-                <Text style={[styles.modalSubtitle, { color: "white", marginBottom: 10 }]}>Días</Text>
+                <Text style={[styles.modalSubtitle, { color: "white", marginBottom: 10 }]}>{t("settings.daysLabel")}</Text>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }}>
-                  {DAYS_ES.map((day, i) => {
+                  {DAYS_SHORT.map((day, i) => {
                     const dayNum = i + 1;
                     const active = reminderDays.includes(dayNum);
                     return (
@@ -485,7 +486,7 @@ export default function Settings() {
                 </View>
 
                 {/* Hora */}
-                <Text style={[styles.modalSubtitle, { color: "white", marginBottom: 10 }]}>Hora</Text>
+                <Text style={[styles.modalSubtitle, { color: "white", marginBottom: 10 }]}>{t("settings.timeLabel")}</Text>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 24 }}>
                   {/* Horas */}
                   <View style={{ alignItems: "center" }}>
@@ -521,7 +522,7 @@ export default function Settings() {
                 </View>
 
                 <HapticButton style={styles.modalButton} onPress={handleSaveReminder}>
-                  <Text style={styles.modalButtonText}>Activar recordatorios</Text>
+                  <Text style={styles.modalButtonText}>{t("settings.activateReminders")}</Text>
                 </HapticButton>
                 <HapticButton style={styles.modalCancel} onPress={() => setShowReminderModal(false)}>
                   <Text style={styles.modalCancelText}>{t("settings.cancel")}</Text>
@@ -533,11 +534,11 @@ export default function Settings() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* MODAL DEV — plan override */}
+      {/* MODAL DEV — cambiar plan (demo) */}
       <Modal visible={showDevModal} transparent animationType="fade">
         <HapticButton style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowDevModal(false)}>
           <HapticButton activeOpacity={1} style={styles.modalContent} onPress={() => {}}>
-            <Text style={styles.modalTitle}>🛠 Dev — Cambiar plan</Text>
+            <Text style={styles.modalTitle}>🛠 Demo — Cambiar plan</Text>
             <Text style={styles.modalSubtitle}>
               Plan activo: <Text style={{ color: "white", fontWeight: "700" }}>{devActivePlan ?? plan?.name ?? "Free"}</Text>
             </Text>
@@ -558,7 +559,7 @@ export default function Settings() {
             ))}
             {devActivePlan && (
               <HapticButton style={[styles.modalCancel, { marginTop: 4 }]} onPress={handleClearDevPlan}>
-                <Text style={styles.modalCancelText}>Usar plan real del servidor</Text>
+                <Text style={styles.modalCancelText}>{t("settings.useServerPlan")}</Text>
               </HapticButton>
             )}
           </HapticButton>

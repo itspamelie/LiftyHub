@@ -157,7 +157,7 @@ const Topbar: React.FC = () => {
         {pendingRequests.length === 0 ? (
           <Box py={4} textAlign="center">
             <InboxIcon sx={{ color: "#1e293b", fontSize: 36, mb: 1 }} />
-            <Typography fontSize={13} color="#475569">Sin solicitudes pendientes</Typography>
+            <Typography fontSize={13} color="#94a3b8">Sin solicitudes pendientes</Typography>
           </Box>
         ) : (
           <Box sx={{ maxHeight: 300, overflowY: "auto" }}>
@@ -187,7 +187,7 @@ const Topbar: React.FC = () => {
                     <Typography fontSize={13} color="#ddd" fontWeight={500} noWrap>
                       {req.user?.name ?? `Solicitud #${req.id}`}
                     </Typography>
-                    <Typography fontSize={11} color="#475569" noWrap>
+                    <Typography fontSize={11} color="#94a3b8" noWrap>
                       {req.user?.email ?? ""}
                     </Typography>
                   </Box>

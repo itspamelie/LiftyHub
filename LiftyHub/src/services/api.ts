@@ -19,15 +19,21 @@ const fetchWithTimeout = async (url: string, options: RequestInit = {}): Promise
   }
 };
 
+let isRedirectingToLogin = false;
+
 // Función centralizada — si el token es inválido, limpia y manda al login
 const apiFetch = async (url: string, options: RequestInit = {}) => {
   const res = await fetchWithTimeout(url, options);
   const data = await res.json();
 
   if (data.error === "Unauthorized" || res.status === 401) {
-    await Storage.removeItem("token");
-    await Storage.removeItem("user");
-    router.replace("/auth/login");
+    if (!isRedirectingToLogin) {
+      isRedirectingToLogin = true;
+      await Storage.removeItem("token");
+      await Storage.removeItem("user");
+      router.replace("/auth/login");
+      setTimeout(() => { isRedirectingToLogin = false; }, 3000);
+    }
     return null;
   }
 
@@ -424,6 +430,12 @@ export const getNutritionistProfiles = async (token: string) => {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
+  });
+};
+
+export const getPlanDaysByPlan = async (planId: number, token: string) => {
+  return apiFetch(`${API_URL}/planDays/byPlan/${planId}`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
   });
 };
 

@@ -489,8 +489,8 @@ export default function CalendarScreen() {
         {/* ── Mode toggle ── */}
         <View style={styles.modeToggleRow}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.modeToggleLabel}>Días individuales</Text>
-            <Text style={styles.modeToggleSub}>Asigna rutinas por fecha específica</Text>
+            <Text style={styles.modeToggleLabel}>{t("calendar.individualDays")}</Text>
+            <Text style={styles.modeToggleSub}>{t("calendar.individualDaysSub")}</Text>
           </View>
           <Switch
             value={individualMode}
@@ -577,7 +577,7 @@ export default function CalendarScreen() {
             <Text style={styles.recurringHint}>
               <Ionicons name={individualMode ? "calendar-outline" : "repeat"} size={13} color={colors.primary} />
               {"  "}{individualMode
-                ? "Solo aplica para este día específico"
+                ? t("calendar.individualHint")
                 : t("calendar.recurringHint", {
                     day: selectedDayIdx !== null ? dayFullNames[selectedDayIdx] : "",
                   })
@@ -623,7 +623,7 @@ export default function CalendarScreen() {
                     </View>
                     {!item.isUserRoutine && (
                       <View style={styles.appBadge}>
-                        <Text style={styles.appBadgeText}>App</Text>
+                        <Text style={styles.appBadgeText}>{t("calendar.appBadge")}</Text>
                       </View>
                     )}
                   </HapticButton>

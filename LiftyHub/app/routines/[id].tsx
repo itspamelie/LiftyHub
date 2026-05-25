@@ -437,24 +437,24 @@ export default function RoutineDetail() {
             <View style={{ alignItems: "center", marginBottom: 12 }}>
               <Ionicons name="qr-code" size={32} color={colors.primary} />
             </View>
-            <Text style={styles.qrTitle}>Compartir rutina</Text>
+            <Text style={styles.qrTitle}>{t("routines.shareTitle")}</Text>
             <Text style={[styles.qrHint, { textAlign: "center", marginBottom: 20 }]}>
-              Con el plan Free puedes compartir{"\n"}
-              <Text style={{ color: "white", fontWeight: "700" }}>1 rutina por mes</Text>
-              {"\n"}Este será tu compartido del mes.
+              {t("routines.shareFreeLimitInfo")}{"\n"}
+              <Text style={{ color: "white", fontWeight: "700" }}>{t("routines.shareFreeLimitCount")}</Text>
+              {"\n"}{t("routines.shareFreeLimitConfirm")}
             </Text>
             <View style={{ flexDirection: "row", gap: 10, marginTop: 4 }}>
               <HapticButton
                 style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 13, borderRadius: spacing.borderRadius, borderWidth: 1, borderColor: "#3A3A3A" }}
                 onPress={() => setShowShareWarning(false)}
               >
-                <Text style={{ color: colors.textSecondary, fontSize: 15, fontWeight: "600" }}>Cancelar</Text>
+                <Text style={{ color: colors.textSecondary, fontSize: 15, fontWeight: "600" }}>{t("settings.cancel")}</Text>
               </HapticButton>
               <HapticButton
                 style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 13, borderRadius: spacing.borderRadius, backgroundColor: colors.primary }}
                 onPress={handleShareWarningConfirm}
               >
-                <Text style={{ color: "white", fontSize: 15, fontWeight: "600" }}>Compartir</Text>
+                <Text style={{ color: "white", fontSize: 15, fontWeight: "600" }}>{t("routines.shareBtn")}</Text>
               </HapticButton>
             </View>
           </HapticButton>
@@ -468,20 +468,20 @@ export default function RoutineDetail() {
             <View style={{ alignItems: "center", marginBottom: 12 }}>
               <Ionicons name="alert-circle" size={32} color="#F59E0B" />
             </View>
-            <Text style={styles.qrTitle}>Límite alcanzado</Text>
+            <Text style={styles.qrTitle}>{t("routines.shareLimitTitle")}</Text>
             <Text style={[styles.qrHint, { textAlign: "center", marginBottom: 20 }]}>
-              Alcanzaste los{" "}
-              <Text style={{ color: "white", fontWeight: "700" }}>{getShareLimit()} compartidos del mes</Text>
-              {"\n"}Actualiza a Pro para compartir sin límite.
+              {t("routines.shareLimitInfo")}{" "}
+              <Text style={{ color: "white", fontWeight: "700" }}>{getShareLimit()} {t("routines.shareLimitMonth")}</Text>
+              {"\n"}{t("routines.shareLimitUpgrade")}
             </Text>
             <HapticButton
               style={[styles.qrShareButton, { backgroundColor: "#F59E0B" }]}
               onPress={() => { setShowShareLimit(false); router.push("/settings/plans" as any); }}
             >
-              <Text style={styles.qrShareText}>Ver plan Pro</Text>
+              <Text style={styles.qrShareText}>{t("routines.viewProPlan")}</Text>
             </HapticButton>
             <HapticButton style={styles.qrCloseButton} onPress={() => setShowShareLimit(false)}>
-              <Text style={styles.qrCloseText}>Cerrar</Text>
+              <Text style={styles.qrCloseText}>{t("routines.close")}</Text>
             </HapticButton>
           </HapticButton>
         </HapticButton>
@@ -494,19 +494,18 @@ export default function RoutineDetail() {
             <View style={{ alignItems: "center", marginBottom: 12 }}>
               <Ionicons name="lock-closed" size={32} color={colors.primary} />
             </View>
-            <Text style={styles.qrTitle}>Compartir rutinas</Text>
+            <Text style={styles.qrTitle}>{t("routines.upgradeShareTitle")}</Text>
             <Text style={[styles.qrHint, { textAlign: "center", marginBottom: 20 }]}>
-              Ya usaste tu compartido gratuito este mes.{"\n"}
-              Actualiza tu plan para compartir más rutinas.
+              {t("routines.upgradeShareText")}
             </Text>
             <HapticButton
               style={styles.qrShareButton}
               onPress={() => { setShowUpgradeModal(false); router.push("/settings/plans" as any); }}
             >
-              <Text style={styles.qrShareText}>Ver planes</Text>
+              <Text style={styles.qrShareText}>{t("routines.viewAllPlans")}</Text>
             </HapticButton>
             <HapticButton style={styles.qrCloseButton} onPress={() => setShowUpgradeModal(false)}>
-              <Text style={styles.qrCloseText}>Cerrar</Text>
+              <Text style={styles.qrCloseText}>{t("routines.close")}</Text>
             </HapticButton>
           </HapticButton>
         </HapticButton>

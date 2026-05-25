@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/src/styles/globalstyles";
 import { useState } from "react";
 import HapticButton from "@/src/components/buttons/HapticButton";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 type Props = {
   visible: boolean;
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export default function BodyAvatarModal({ visible, onClose, gender }: Props) {
+  const { t } = useLanguage();
   const [side, setSide] = useState<"front" | "back">("front");
 
   return (
@@ -23,7 +25,7 @@ export default function BodyAvatarModal({ visible, onClose, gender }: Props) {
             <Ionicons name="close" size={20} color={colors.textSecondary} />
           </HapticButton>
 
-          <Text style={styles.title}>Mi cuerpo</Text>
+          <Text style={styles.title}>{t("bodyAvatar.modalTitle")}</Text>
 
           {/* Toggle frente / espalda */}
           <View style={styles.toggle}>
@@ -31,13 +33,13 @@ export default function BodyAvatarModal({ visible, onClose, gender }: Props) {
               style={[styles.toggleBtn, side === "front" && styles.toggleBtnActive]}
               onPress={() => setSide("front")}
             >
-              <Text style={[styles.toggleText, side === "front" && styles.toggleTextActive]}>Frente</Text>
+              <Text style={[styles.toggleText, side === "front" && styles.toggleTextActive]}>{t("bodyAvatar.front")}</Text>
             </HapticButton>
             <HapticButton
               style={[styles.toggleBtn, side === "back" && styles.toggleBtnActive]}
               onPress={() => setSide("back")}
             >
-              <Text style={[styles.toggleText, side === "back" && styles.toggleTextActive]}>Espalda</Text>
+              <Text style={[styles.toggleText, side === "back" && styles.toggleTextActive]}>{t("bodyAvatar.back")}</Text>
             </HapticButton>
           </View>
 
@@ -53,7 +55,7 @@ export default function BodyAvatarModal({ visible, onClose, gender }: Props) {
             />
           </View>
 
-          <Text style={styles.hint}>Próximamente verás los músculos que más entrenas</Text>
+          <Text style={styles.hint}>{t("bodyAvatar.hint")}</Text>
 
         </View>
       </View>

@@ -16,20 +16,18 @@ import DietTipCard from "@/src/components/diet/DietTipCard";
 import BackButton from "@/src/components/buttons/backButton";
 import { colors } from "@/src/styles/globalstyles";
 
-const DAY_LABELS: Record<string, string> = {
-  monday:    "Lunes",
-  tuesday:   "Martes",
-  wednesday: "Miércoles",
-  thursday:  "Jueves",
-  friday:    "Viernes",
-  saturday:  "Sábado",
-  sunday:    "Domingo",
-};
-
 const DAY_ORDER = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
 export default function DietPlanScreen() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const locale = language === "en" ? "en-US" : "es-MX";
+  const DAY_LABELS: Record<string, string> = Object.fromEntries(
+    DAY_ORDER.map((key, i) => [
+      key,
+      new Date(2025, 0, 6 + i).toLocaleDateString(locale, { weekday: "long" })
+        .replace(/^\w/, c => c.toUpperCase()),
+    ])
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [plan, setPlan] = useState<any>(null);
@@ -109,7 +107,7 @@ export default function DietPlanScreen() {
         {/* NUTRIÓLOGO */}
         {nutritionist && (
           <NutritionistCard
-            name={nutritionist.user?.name ?? "Nutriólogo"}
+            name={nutritionist.user?.name ?? t("dietPlan.nutritionistFallback")}
             specialty={nutritionist.specialty}
             imageUrl={nutritionist.profile_pic}
             status="active"
@@ -170,7 +168,7 @@ export default function DietPlanScreen() {
                       {DAY_LABELS[day.day] ?? day.day}
                     </Text>
                     <View style={styles.mealCountBadge}>
-                      <Text style={styles.mealCountText}>{meals.length} comidas</Text>
+                      <Text style={styles.mealCountText}>{t("dietPlan.mealsCount", { count: meals.length })}</Text>
                     </View>
                   </View>
                   <View style={styles.dayRight}>
@@ -192,7 +190,7 @@ export default function DietPlanScreen() {
                       <>
                         <View style={styles.subHeader}>
                           <Ionicons name="restaurant" size={12} color={colors.primary} />
-                          <Text style={styles.subHeaderText}>COMIDAS</Text>
+                          <Text style={styles.subHeaderText}>{t("dietPlan.mealsLabel")}</Text>
                         </View>
                         {meals.map((meal: any, idx: number) => (
                           <View key={meal.id ?? idx} style={styles.mealItem}>
@@ -220,7 +218,7 @@ export default function DietPlanScreen() {
                       <>
                         <View style={[styles.subHeader, { marginTop: meals.length > 0 ? 10 : 0 }]}>
                           <Ionicons name="flask" size={12} color="#8B5CF6" />
-                          <Text style={[styles.subHeaderText, { color: "#8B5CF6" }]}>SUPLEMENTOS</Text>
+                          <Text style={[styles.subHeaderText, { color: "#8B5CF6" }]}>{t("dietPlan.supplementsLabel")}</Text>
                         </View>
                         {[...(day.supplements ?? [])].sort((a: any, b: any) => a.order - b.order).map((s: any, idx: number) => (
                           <View key={s.id ?? idx} style={styles.suppItem}>

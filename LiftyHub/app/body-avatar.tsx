@@ -137,20 +137,19 @@ export default function BodyAvatarScreen() {
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 32 }}>
           <Ionicons name="lock-closed" size={48} color={colors.primary} style={{ marginBottom: 20 }} />
           <Text style={{ color: "white", fontSize: 20, fontWeight: "700", textAlign: "center", marginBottom: 12 }}>
-            Función Premium
+            {t("bodyAvatar.premiumTitle")}
           </Text>
           <Text style={{ color: colors.textSecondary, fontSize: 14, textAlign: "center", lineHeight: 21, marginBottom: 32 }}>
-            Tu semana de prueba gratuita terminó.{"\n"}
-            Actualiza tu plan para seguir viendo los músculos trabajados.
+            {t("bodyAvatar.premiumDesc")}
           </Text>
           <HapticButton
             style={{ backgroundColor: colors.primary, borderRadius: spacing.borderRadius, paddingVertical: 14, paddingHorizontal: 32, width: "100%", alignItems: "center" }}
             onPress={() => router.push("/settings/plans" as any)}
           >
-            <Text style={{ color: "white", fontSize: 15, fontWeight: "700" }}>Ver planes</Text>
+            <Text style={{ color: "white", fontSize: 15, fontWeight: "700" }}>{t("bodyAvatar.viewPlans")}</Text>
           </HapticButton>
           <HapticButton style={{ marginTop: 14 }} onPress={() => router.back()}>
-            <Text style={{ color: colors.textSecondary, fontSize: 14 }}>Volver</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t("bodyAvatar.goBack")}</Text>
           </HapticButton>
         </View>
       </SafeAreaView>
@@ -228,17 +227,16 @@ export default function BodyAvatarScreen() {
           <View style={{ backgroundColor: "#1C1C1E", borderRadius: 20, padding: 24, width: "100%", alignItems: "center" }}>
             <Ionicons name="time-outline" size={40} color={colors.primary} style={{ marginBottom: 16 }} />
             <Text style={{ color: "white", fontSize: 18, fontWeight: "700", textAlign: "center", marginBottom: 10 }}>
-              7 días gratis
+              {t("bodyAvatar.trialTitle")}
             </Text>
             <Text style={{ color: colors.textSecondary, fontSize: 14, textAlign: "center", lineHeight: 21, marginBottom: 24 }}>
-              Tienes <Text style={{ color: "white", fontWeight: "700" }}>7 días</Text> para explorar los músculos trabajados gratuitamente.{"\n"}
-              Después necesitarás un plan de pago para seguir accediendo.
+              {t("bodyAvatar.trialDesc", { days: t("bodyAvatar.trialDays") })}
             </Text>
             <HapticButton
               style={{ backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 13, width: "100%", alignItems: "center" }}
               onPress={() => setShowTrialModal(false)}
             >
-              <Text style={{ color: "white", fontSize: 15, fontWeight: "700" }}>Entendido</Text>
+              <Text style={{ color: "white", fontSize: 15, fontWeight: "700" }}>{t("bodyAvatar.understood")}</Text>
             </HapticButton>
           </View>
         </View>

@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Storage from "@/src/utils/storage";
 import { saveNutritionProfile, getUserProperties } from "@/src/services/api";
 import { colors, spacing } from "@/src/styles/globalstyles";
+import { useLanguage } from "@/src/context/LanguageContext";
 import HapticButton from "@/src/components/buttons/HapticButton";
 import BackButton from "@/src/components/buttons/backButton";
 
@@ -102,6 +103,7 @@ function StepProgress({ current }: { current: number }) {
 
 // ── Pantalla principal ────────────────────────────────────────────────────────
 export default function QuestionnaireScreen() {
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -197,13 +199,13 @@ export default function QuestionnaireScreen() {
   const goSkip = () => step === TOTAL_STEPS - 1 ? handleSubmit() : setStep((x) => x + 1);
 
   const STEP_META = [
-    { q: "¿Cuáles son tus tiempos de comida?",   hint: "Activa cada comida y ajusta su hora.",              icon: "time-outline"        },
-    { q: "¿Cuáles son tus alimentos favoritos?",  hint: "Escribe uno y toca + para agregarlo.",             icon: "heart-outline"       },
-    { q: "¿Qué alimentos no te gustan?",          hint: "Los evitaremos o los adaptaremos en tu plan.",     icon: "thumbs-down-outline" },
-    { q: "¿Cuál es tu comida favorita?",          hint: "Sin importar si es saludable. ¡Sin juicios!",      icon: "restaurant-outline"  },
-    { q: "¿Tienes alguna alergia alimentaria?",   hint: "Selecciona todas las que apliquen.",               icon: "warning-outline"     },
-    { q: "¿Tu médico te ha prohibido algo?",      hint: "Indícanos si tienes alguna condición médica.",     icon: "medkit-outline"      },
-    { q: "¿Puedes cocinar los domingos?",         hint: "Cocinar un día para toda la semana facilita mucho el plan.", icon: "calendar-outline" },
+    { q: t("questionnaire.step1Q"), hint: t("questionnaire.step1Hint"), icon: "time-outline"        },
+    { q: t("questionnaire.step2Q"), hint: t("questionnaire.step2Hint"), icon: "heart-outline"       },
+    { q: t("questionnaire.step3Q"), hint: t("questionnaire.step3Hint"), icon: "thumbs-down-outline" },
+    { q: t("questionnaire.step4Q"), hint: t("questionnaire.step4Hint"), icon: "restaurant-outline"  },
+    { q: t("questionnaire.step5Q"), hint: t("questionnaire.step5Hint"), icon: "warning-outline"     },
+    { q: t("questionnaire.step6Q"), hint: t("questionnaire.step6Hint"), icon: "medkit-outline"      },
+    { q: t("questionnaire.step7Q"), hint: t("questionnaire.step7Hint"), icon: "calendar-outline"    },
   ];
   const meta = STEP_META[step];
   const isLast = step === TOTAL_STEPS - 1;
@@ -218,12 +220,10 @@ export default function QuestionnaireScreen() {
           <View style={s.successCircle}>
             <Ionicons name="checkmark-circle" size={72} color={ACCENT} />
           </View>
-          <Text style={s.successTitle}>¡Listo!</Text>
-          <Text style={s.successSub}>
-            Tu nutriólogo ya puede ver tu información y comenzará a preparar tu plan personalizado.
-          </Text>
+          <Text style={s.successTitle}>{t("questionnaire.successTitle")}</Text>
+          <Text style={s.successSub}>{t("questionnaire.successSubtitle")}</Text>
           <HapticButton style={s.successBtn} onPress={() => router.replace("/(tabs)/diet" as any)}>
-            <Text style={s.successBtnText}>Volver a Dieta</Text>
+            <Text style={s.successBtnText}>{t("questionnaire.successBtn")}</Text>
           </HapticButton>
         </View>
       </View>
@@ -302,7 +302,7 @@ export default function QuestionnaireScreen() {
               <View style={s.tagRow}>
                 <TextInput
                   style={s.tagInput}
-                  placeholder="Escribe un alimento..."
+                  placeholder={t("questionnaire.foodInputPlaceholder")}
                   placeholderTextColor="#444"
                   value={input}
                   onChangeText={setIn}
@@ -319,7 +319,7 @@ export default function QuestionnaireScreen() {
               </View>
               <View style={s.chipWrap}>
                 {list.length === 0
-                  ? <Text style={s.emptyChip}>Aún no hay nada — agrega el primero</Text>
+                  ? <Text style={s.emptyChip}>{t("questionnaire.emptyChip")}</Text>
                   : list.map((t) => (
                     <View key={t} style={s.chip}>
                       <Text style={s.chipTxt}>{t}</Text>
@@ -339,7 +339,7 @@ export default function QuestionnaireScreen() {
           <View style={s.card}>
             <TextInput
               style={s.input}
-              placeholder="Ej: tacos, pizza, caldo de res..."
+              placeholder={t("questionnaire.favMealPlaceholder")}
               placeholderTextColor="#444"
               value={favMeal}
               onChangeText={setFavMeal}
@@ -368,7 +368,7 @@ export default function QuestionnaireScreen() {
             <View style={[s.tagRow, { marginTop: 14 }]}>
               <TextInput
                 style={s.tagInput}
-                placeholder="Otra alergia..."
+                placeholder={t("questionnaire.otherAllergyPlaceholder")}
                 placeholderTextColor="#444"
                 value={allergyInput}
                 onChangeText={setAllergyInput}
@@ -411,7 +411,7 @@ export default function QuestionnaireScreen() {
           <View style={s.card}>
             <TextInput
               style={[s.input, s.inputMulti]}
-              placeholder={"Ej: restricción de sodio por hipertensión,\nsin azúcar por diabetes...\n(escribe 'ninguna' si no aplica)"}
+              placeholder={t("questionnaire.medRestrictionsPlaceholder")}
               placeholderTextColor="#444"
               multiline
               numberOfLines={4}
@@ -431,14 +431,14 @@ export default function QuestionnaireScreen() {
               onPress={() => setCookSunday(true)}
             >
               <Ionicons name="checkmark-circle-outline" size={32} color={cookSunday === true ? ACCENT : colors.textSecondary} />
-              <Text style={[s.boolLabel, cookSunday === true && { color: ACCENT }]}>Sí, puedo</Text>
+              <Text style={[s.boolLabel, cookSunday === true && { color: ACCENT }]}>{t("questionnaire.canCookYes")}</Text>
             </HapticButton>
             <HapticButton
               style={[s.boolCard, cookSunday === false && s.boolCardNo]}
               onPress={() => setCookSunday(false)}
             >
               <Ionicons name="close-circle-outline" size={32} color={cookSunday === false ? "#f87171" : colors.textSecondary} />
-              <Text style={[s.boolLabel, cookSunday === false && { color: "#f87171" }]}>No por ahora</Text>
+              <Text style={[s.boolLabel, cookSunday === false && { color: "#f87171" }]}>{t("questionnaire.canCookNo")}</Text>
             </HapticButton>
           </View>
         )}
@@ -448,7 +448,7 @@ export default function QuestionnaireScreen() {
           {step > 0 && (
             <HapticButton style={s.prevBtn} onPress={() => setStep((x) => x - 1)}>
               <Ionicons name="arrow-back" size={17} color={colors.textSecondary} />
-              <Text style={s.prevTxt}>Anterior</Text>
+              <Text style={s.prevTxt}>{t("questionnaire.prevBtn")}</Text>
             </HapticButton>
           )}
           <HapticButton
@@ -459,7 +459,7 @@ export default function QuestionnaireScreen() {
             {saving
               ? <ActivityIndicator size="small" color="white" />
               : <>
-                  <Text style={s.nextTxt}>{isLast ? "Enviar" : "Siguiente"}</Text>
+                  <Text style={s.nextTxt}>{isLast ? t("questionnaire.submitBtn") : t("questionnaire.nextBtn")}</Text>
                   <Ionicons name={isLast ? "send-outline" : "arrow-forward"} size={17} color="white" />
                 </>
             }
@@ -468,7 +468,7 @@ export default function QuestionnaireScreen() {
 
         {isOptional && (
           <TouchableOpacity style={s.skipBtn} onPress={goSkip}>
-            <Text style={s.skipTxt}>Omitir esta pregunta</Text>
+            <Text style={s.skipTxt}>{t("questionnaire.skipBtn")}</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -478,7 +478,7 @@ export default function QuestionnaireScreen() {
         <TouchableOpacity style={s.overlay} activeOpacity={1} onPress={() => setPickerMeal(null)}>
           <TouchableOpacity activeOpacity={1} style={s.pickerCard}>
             <Text style={s.pickerTitle}>
-              Hora de {pickerMeal ? MEAL_CONFIG.find((m) => m.key === pickerMeal)?.label : ""}
+              {t("questionnaire.timeModalTitle", { meal: pickerMeal ? MEAL_CONFIG.find((m) => m.key === pickerMeal)?.label ?? "" : "" })}
             </Text>
             <View style={s.formatToggle}>
               <TouchableOpacity
@@ -509,7 +509,7 @@ export default function QuestionnaireScreen() {
                 setPickerMeal(null);
               }}
             >
-              <Text style={s.pickerConfirmTxt}>Confirmar</Text>
+              <Text style={s.pickerConfirmTxt}>{t("questionnaire.timeModalConfirm")}</Text>
             </HapticButton>
           </TouchableOpacity>
         </TouchableOpacity>

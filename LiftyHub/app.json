@@ -43,11 +43,21 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-community/datetimepicker",
+      "expo-localization",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0b31692d-b517-40e0-b1e8-3c457037856f"
+      }
+    },
+    "owner": "davidhv_0110"
   }
 }

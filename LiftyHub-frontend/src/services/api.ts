@@ -30,6 +30,7 @@ return data
 
 export const getImageUrl = (path: string, folder: string = "users") => {
   if (!path) return "";
+  if (path.startsWith("http")) return path;
   const base = (API_URL ?? "").replace(/\/api\/?$/, "");
   return `${base}/${folder}/${path}`;
 }

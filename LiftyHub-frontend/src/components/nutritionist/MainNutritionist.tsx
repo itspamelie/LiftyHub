@@ -1,5 +1,5 @@
 import { Box, Typography, CircularProgress } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Unstable_Grid2";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../services/api";
 import MetricCard from "../dashboard-nutritionists/metricCard";
@@ -74,7 +74,7 @@ export default function MainNutritionist() {
 
       {/* METRICS */}
       <Grid container spacing={2} mb={4}>
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid xs={12} md={4}>
           <MetricCard
             title="Planes totales"
             value={String(diets.length)}
@@ -83,7 +83,7 @@ export default function MainNutritionist() {
             color="#3B82F6"
           />
         </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid xs={12} md={4}>
           <MetricCard
             title="Pacientes atendidos"
             value={String(uniquePatients)}
@@ -92,7 +92,7 @@ export default function MainNutritionist() {
             color="#22c55e"
           />
         </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid xs={12} md={4}>
           <MetricCard
             title="Calificación"
             value={profile?.rating ? Number(profile.rating).toFixed(1) : "—"}
@@ -105,7 +105,7 @@ export default function MainNutritionist() {
 
       {/* CHART + ACTIVITY */}
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, md: 7 }}>
+        <Grid xs={12} md={7}>
           <Box
             sx={{
               height: 280,
@@ -160,7 +160,7 @@ export default function MainNutritionist() {
           </Box>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 5 }}>
+        <Grid xs={12} md={5}>
           <Box
             sx={{
               height: 280,

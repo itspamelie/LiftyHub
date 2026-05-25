@@ -423,11 +423,11 @@ export default function ProfileScreen() {
                       <>
                         <Text style={styles.challengeTitle} numberOfLines={1}>{activeChallenge.goal}</Text>
                         <Text style={styles.challengeSub}>
-                          {Math.max(0, Math.ceil((new Date(activeChallenge.endDate).getTime() - Date.now()) / 86400000))} días restantes
+                          {t("profile.daysRemaining", { count: Math.max(0, Math.ceil((new Date(activeChallenge.endDate).getTime() - Date.now()) / 86400000)) })}
                         </Text>
                       </>
                     ) : (
-                      <Text style={styles.challengeTitle}>Iniciar reto personal</Text>
+                      <Text style={styles.challengeTitle}>{t("profile.startChallenge")}</Text>
                     )}
                   </View>
                 </View>

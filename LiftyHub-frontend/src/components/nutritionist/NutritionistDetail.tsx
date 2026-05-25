@@ -9,7 +9,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { apiFetch, getImageUrl } from "../../services/api";
 import { useNavigate } from "react-router-dom";
-import Grid from "@mui/material/Grid"; 
+import Grid from "@mui/material/Unstable_Grid2"; 
 import StarIcon from "@mui/icons-material/Star";
 export default function NutritionistDetail() {
   const { id } = useParams();
